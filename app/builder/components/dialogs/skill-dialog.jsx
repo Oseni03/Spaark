@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
+import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { BadgeInput } from "@/components/ui/badge-input";
 import {
 	Dialog,
 	DialogContent,
@@ -10,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { addSkill, updateSkill } from "@/redux/features/skillSlice";
+import { AnimatePresence, motion } from "framer-motion";
 
 export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
@@ -24,6 +29,8 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 		setIsOpen(false);
 		reset();
 	};
+
+	const [pendingKeyword, setPendingKeyword] = useState("");
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -58,20 +65,66 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 							name="keywords"
 							control={control}
 							render={({ field, fieldState }) => (
-								<div>
-									<label>Keywords</label>
-									<Input
-										placeholder="Enter keywords separated by commas"
-										value={field.value.join(", ")} // Display as a string
-										onChange={(e) => {
-											const keywordsArray = e.target.value
-												.split(",")
-												.map((kw) => kw.trim());
-											field.onChange(keywordsArray); // Update the array
-										}}
-										error={fieldState.error?.message}
-									/>
-								</div>
+								<>
+									<div>
+										<label>Keywords</label>
+										<BadgeInput
+											value={field.value} // Bind keywords value
+											onChange={(newKeywords) =>
+												field.onChange(newKeywords)
+											} // Update keywords dynamically
+											setPendingKeyword={
+												setPendingKeyword
+											} // Handler for pending keywords
+										/>
+									</div>
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+										<AnimatePresence>
+											{field.value.map((item, index) => (
+												<motion.div
+													key={item}
+													layout
+													initial={{
+														opacity: 0,
+														y: -50,
+													}}
+													animate={{
+														opacity: 1,
+														y: 0,
+														transition: {
+															delay: index * 0.1,
+														},
+													}}
+													exit={{
+														opacity: 0,
+														x: -50,
+													}}
+												>
+													<Badge
+														className="cursor-pointer"
+														onClick={() => {
+															field.onChange(
+																field.value.filter(
+																	(v) =>
+																		v !==
+																		item
+																)
+															);
+														}}
+													>
+														<span className="mr-1">
+															{item}
+														</span>
+														<X
+															size={12}
+															weight="bold"
+														/>
+													</Badge>
+												</motion.div>
+											))}
+										</AnimatePresence>
+									</div>
+								</>
 							)}
 						/>
 
