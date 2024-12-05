@@ -78,7 +78,7 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 											} // Handler for pending keywords
 										/>
 									</div>
-									<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+									<div className="grid md:grid-cols-2 md:space-x-2 space-y-4 md:space-y-0 w-full justify-center items-center">
 										<AnimatePresence>
 											{field.value.map((item, index) => (
 												<motion.div

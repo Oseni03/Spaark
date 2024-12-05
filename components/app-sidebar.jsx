@@ -17,6 +17,7 @@ import { Education } from "@/app/builder/components/sections/education";
 import { Skill } from "@/app/builder/components/sections/skill";
 import { Certification } from "@/app/builder/components/sections/certification";
 import { Project } from "@/app/builder/components/sections/project";
+import { Hackathon } from "@/app/builder/components/sections/hackathon";
 
 export function AppSidebar({ ...props }) {
 	return (
@@ -40,6 +41,8 @@ export function AppSidebar({ ...props }) {
 					<Certification />
 					<Separator />
 					<Project />
+					<Separator />
+					<Hackathon />
 				</div>
 			</SidebarContent>
 			<SidebarRail />

@@ -40,7 +40,7 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-					<div className="grid md:grid-cols-2 md:space-x-2 space-y-4 md:space-y-0 w-full justify-center items-center">
+					<div className="grid md:grid-cols-2 gap-2 space-y-4 md:space-y-0">
 						<Controller
 							name="name"
 							control={control}
@@ -69,8 +69,6 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 								</div>
 							)}
 						/>
-					</div>
-					<div className="grid md:grid-cols-2 md:space-x-2 space-y-4 md:space-y-0 w-full justify-center items-center">
 						<Controller
 							name="date"
 							control={control}

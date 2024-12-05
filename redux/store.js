@@ -8,6 +8,7 @@ import educationReducer from "./features/educationSlice";
 import skillReducer from "./features/skillSlice";
 import certificationReducer from "./features/certificationSlice";
 import projectReducer from "./features/projectSlice";
+import hackathonReducer from "./features/hackathonSlice";
 
 // Persist Configuration
 const persistConfig = {
@@ -29,6 +30,7 @@ export const store = configureStore({
 		skill: skillReducer,
 		certification: certificationReducer,
 		project: projectReducer,
+		hackathon: hackathonReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

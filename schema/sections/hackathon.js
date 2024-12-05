@@ -8,13 +8,15 @@ export const hackathonSchema = itemSchema.extend({
 	location: z.string(),
 	description: z.string(),
 	date: z.string(),
+	url: z.literal("").or(z.string().url()),
 });
 
 // Defaults
-export const defaultInterest = {
+export const defaultHackathon = {
 	...defaultItem,
 	name: "",
 	location: "",
 	description: "",
 	date: "",
+	url: "",
 };
