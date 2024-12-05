@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import profileReducer from "./features/profileSlice";
 import portfolioReducer from "./features/portfolioSlice";
+import experienceReducer from "./features/experienceSlice";
 
 // Persist Configuration
 const persistConfig = {
@@ -19,6 +20,7 @@ export const store = configureStore({
 	reducer: {
 		portfolio: persistedReducer,
 		profile: profileReducer,
+		experience: experienceReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { defaultItem, itemSchema } from "../shared/items";
-import { defaultUrl, urlSchema } from "../shared/url";
 
 // Schema
 export const certificationSchema = itemSchema.extend({
@@ -9,7 +8,7 @@ export const certificationSchema = itemSchema.extend({
 	issuer: z.string(),
 	date: z.string(),
 	summary: z.string(),
-	url: urlSchema,
+	url: z.literal("").or(z.string().url()),
 });
 
 // Defaults
@@ -19,5 +18,5 @@ export const defaultCertification = {
 	issuer: "",
 	date: "",
 	summary: "",
-	url: defaultUrl,
+	url: "",
 };

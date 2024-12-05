@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { defaultItem, itemSchema } from "../shared/items";
-import { defaultUrl, urlSchema } from "../shared/url";
 
 // Schema
 export const experienceSchema = itemSchema.extend({
@@ -10,7 +9,7 @@ export const experienceSchema = itemSchema.extend({
 	location: z.string().optional(),
 	date: z.string(),
 	summary: z.string(),
-	url: urlSchema,
+	url: z.literal("").or(z.string().url()),
 });
 
 // Defaults
@@ -21,5 +20,5 @@ export const defaultExperience = {
 	location: "",
 	date: "",
 	summary: "",
-	url: defaultUrl,
+	url: "",
 };

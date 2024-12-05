@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { defaultItem, itemSchema } from "../shared/items";
-import { defaultUrl, urlSchema } from "../shared/url";
 
 // Schema
 export const projectSchema = itemSchema.extend({
@@ -9,8 +8,8 @@ export const projectSchema = itemSchema.extend({
 	description: z.string(),
 	date: z.string(),
 	keywords: z.array(z.string()).default([]),
-	url: urlSchema,
-	source: urlSchema,
+	url: z.literal("").or(z.string().url()),
+	source: z.literal("").or(z.string().url()),
 });
 
 // Defaults
@@ -20,6 +19,6 @@ export const defaultProject = {
 	description: "",
 	date: "",
 	keywords: [],
-	url: defaultUrl,
-	source: defaultUrl,
+	url: "",
+	source: "",
 };
