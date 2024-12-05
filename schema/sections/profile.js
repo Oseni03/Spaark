@@ -1,7 +1,5 @@
 import { z } from "zod";
-
 import { defaultItem, itemSchema } from "../shared/items";
-import { defaultUrl, urlSchema } from "../shared/url";
 
 // Schema
 export const profileSchema = itemSchema.extend({
@@ -12,7 +10,7 @@ export const profileSchema = itemSchema.extend({
 		.describe(
 			'Slug for the icon from https://simpleicons.org. For example, "github", "linkedin", etc.'
 		),
-	url: urlSchema,
+	url: z.literal("").or(z.string().url()),
 });
 
 // Defaults
@@ -21,5 +19,5 @@ export const defaultProfile = {
 	network: "",
 	username: "",
 	icon: "",
-	url: defaultUrl,
+	url: "",
 };

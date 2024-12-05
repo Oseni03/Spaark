@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { idSchema } from "./id";
+import { createId } from "@paralleldrive/cuid2";
 
 // Schema
 export const itemSchema = z.object({
@@ -10,6 +11,6 @@ export const itemSchema = z.object({
 
 // Defaults
 export const defaultItem = {
-	id: "",
+	id: createId(),
 	visible: true,
 };

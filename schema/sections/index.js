@@ -28,7 +28,7 @@ export const sectionsSchema = z.object({
 		content: z.string().default(""),
 	}),
 	certifications: sectionSchema.extend({
-		id: z.literal("certifications"),
+		id: z.literal("certification"),
 		items: z.array(certificationSchema),
 	}),
 	education: sectionSchema.extend({
@@ -44,19 +44,19 @@ export const sectionsSchema = z.object({
 		items: z.array(hackathonSchema),
 	}),
 	languages: sectionSchema.extend({
-		id: z.literal("languages"),
+		id: z.literal("language"),
 		items: z.array(languageSchema),
 	}),
 	profiles: sectionSchema.extend({
-		id: z.literal("profiles"),
+		id: z.literal("profile"),
 		items: z.array(profileSchema),
 	}),
 	projects: sectionSchema.extend({
-		id: z.literal("projects"),
+		id: z.literal("project"),
 		items: z.array(projectSchema),
 	}),
 	skills: sectionSchema.extend({
-		id: z.literal("skills"),
+		id: z.literal("skill"),
 		items: z.array(skillSchema),
 	}),
 });
