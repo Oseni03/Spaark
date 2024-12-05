@@ -24,16 +24,13 @@ const educationSlice = createSlice({
 			}
 		},
 		updateEducation(state, action) {
-			const { id, data } = action.payload;
-			const education = state.items.find((item) => item.id === id);
-			if (education) {
-				// Validate the update with the schema
-				const result = educationSchema.safeParse({
-					...education,
-					...data,
-				});
+			const index = state.items.findIndex(
+				(item) => item.id === action.payload.id
+			);
+			if (index !== -1) {
+				const result = educationSchema.safeParse(action.payload);
 				if (result.success) {
-					Object.assign(education, result.data);
+					state.items[index] = result.data;
 				} else {
 					console.error("Invalid update data:", result.error);
 				}
@@ -44,8 +41,13 @@ const educationSlice = createSlice({
 				(item) => item.id !== action.payload
 			);
 		},
-		toggleVisibility(state) {
-			state.visible = !state.visible;
+		toggleVisibility(state, action) {
+			const education = state.items.find(
+				(item) => item.id === action.payload
+			);
+			if (education) {
+				education.visible = !education.visible;
+			}
 		},
 	},
 });

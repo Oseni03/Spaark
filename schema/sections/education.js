@@ -13,7 +13,6 @@ export const educationSchema = itemSchema.extend({
 // Defaults
 export const defaultEducation = {
 	...defaultItem,
-	id: "",
 	institution: "",
 	studyType: "",
 	date: "",
