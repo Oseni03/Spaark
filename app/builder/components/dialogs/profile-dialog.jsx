@@ -1,15 +1,7 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Assuming you have these defined in your schema/types
-import { profileSchema, defaultProfile } from "@/schema/sections/profile";
-import {
-	addProfile,
-	updateProfile,
-	removeProfile,
-} from "@/redux/features/profileSlice";
+import React, { useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { Controller } from "react-hook-form";
+import { addProfile, updateProfile } from "@/redux/features/profileSlice";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,31 +10,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 
-export const ProfilesDialog = () => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [currentProfile, setCurrentProfile] = useState(null);
+export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
-
-	const {
-		control,
-		handleSubmit,
-		reset,
-		setValue,
-		formState: { errors, defaultValues },
-	} = useForm({
-		resolver: zodResolver(profileSchema),
-		defaultValues: defaultProfile,
-	});
-
-	// Log validation errors
-	useEffect(() => {
-		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
-			console.log("Form Default values:", defaultValues);
-		}
-	}, [errors, defaultValues]);
+	const { setValue, reset, handleSubmit, control } = form;
 
 	const handleIconChange = useCallback(
 		(event) => {
@@ -63,29 +34,8 @@ export const ProfilesDialog = () => {
 		reset();
 	};
 
-	const openCreateDialog = () => {
-		reset(defaultProfile);
-		setCurrentProfile(null);
-		setIsOpen(true);
-	};
-
-	const openEditDialog = (profile) => {
-		reset(profile);
-		setCurrentProfile(profile);
-		setIsOpen(true);
-	};
-
 	return (
 		<>
-			<Button
-				onClick={openCreateDialog}
-				variant="outline"
-				className="gap-x-2 border-dashed py-6 leading-relaxed hover:bg-secondary-accent"
-			>
-				<Plus size={14} />
-				<span className="font-medium">Add a new item</span>
-			</Button>
-
 			<Dialog open={isOpen} onOpenChange={setIsOpen}>
 				<DialogContent>
 					<DialogHeader>
