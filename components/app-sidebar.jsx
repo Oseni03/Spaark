@@ -15,6 +15,7 @@ import { Profile } from "@/app/builder/components/sections/profile";
 import { Experience } from "@/app/builder/components/sections/experience";
 import { Education } from "@/app/builder/components/sections/education";
 import { Skill } from "@/app/builder/components/sections/skill";
+import { Certification } from "@/app/builder/components/sections/certification";
 
 export function AppSidebar({ ...props }) {
 	return (
@@ -34,6 +35,8 @@ export function AppSidebar({ ...props }) {
 					<Education />
 					<Separator />
 					<Skill />
+					<Separator />
+					<Certification />
 				</div>
 			</SidebarContent>
 			<SidebarRail />

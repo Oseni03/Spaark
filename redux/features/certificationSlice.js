@@ -24,16 +24,13 @@ const certificationSlice = createSlice({
 			}
 		},
 		updateCertification(state, action) {
-			const { id, data } = action.payload;
-			const certification = state.items.find((item) => item.id === id);
-			if (certification) {
-				// Validate the update with the schema
-				const result = certificationSchema.safeParse({
-					...certification,
-					...data,
-				});
+			const index = state.items.findIndex(
+				(item) => item.id === action.payload.id
+			);
+			if (index !== -1) {
+				const result = certificationSchema.safeParse(action.payload);
 				if (result.success) {
-					Object.assign(certification, result.data);
+					state.items[index] = result.data;
 				} else {
 					console.error("Invalid update data:", result.error);
 				}
@@ -44,8 +41,13 @@ const certificationSlice = createSlice({
 				(item) => item.id !== action.payload
 			);
 		},
-		toggleVisibility(state) {
-			state.visible = !state.visible;
+		toggleVisibility(state, action) {
+			const certification = state.items.find(
+				(item) => item.id === action.payload
+			);
+			if (certification) {
+				certification.visible = !certification.visible;
+			}
 		},
 	},
 });

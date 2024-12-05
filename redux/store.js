@@ -6,6 +6,7 @@ import portfolioReducer from "./features/portfolioSlice";
 import experienceReducer from "./features/experienceSlice";
 import educationReducer from "./features/educationSlice";
 import skillReducer from "./features/skillSlice";
+import certificationReducer from "./features/certificationSlice";
 
 // Persist Configuration
 const persistConfig = {
@@ -25,6 +26,7 @@ export const store = configureStore({
 		experience: experienceReducer,
 		education: educationReducer,
 		skill: skillReducer,
+		certification: certificationReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
