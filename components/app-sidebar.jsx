@@ -9,8 +9,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "./ui/separator";
 import { BasicsSection } from "@/app/builder/components/sections/basics";
-import { SummarySection } from "@/app/builder/components/sections/summary";
-import { ABoutSection } from "@/app/builder/components/sections/about";
 import { Profile } from "@/app/builder/components/sections/profile";
 import { Experience } from "@/app/builder/components/sections/experience";
 import { Education } from "@/app/builder/components/sections/education";
@@ -25,10 +23,6 @@ export function AppSidebar({ ...props }) {
 			<SidebarContent>
 				<div className="grid gap-y-6 p-6 @container/left">
 					<BasicsSection />
-					<Separator />
-					<SummarySection />
-					<Separator />
-					<ABoutSection />
 					<Separator />
 					<Profile />
 					<Separator />

@@ -11,6 +11,8 @@ export const basicsSchema = z.object({
 		.url("Invalid personal or professional website URL")
 		.optional(),
 	picture: z.string().url("Invalid image URL").optional(),
+	summary: z.string().default(""),
+	about: z.string().default(""),
 });
 
 // Defaults
@@ -22,4 +24,6 @@ export const defaultBasics = {
 	location: "",
 	url: "",
 	picture: "",
+	summary: "",
+	about: "",
 };

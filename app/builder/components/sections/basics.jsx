@@ -7,6 +7,7 @@ import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { updateBasics } from "@/redux/features/basicSlice"; // Ensure this import is correct
 import { useEffect } from "react";
+import { RichInput } from "@/components/ui/rich-input";
 
 export const BasicsSection = () => {
 	const dispatch = useDispatch();
@@ -163,6 +164,36 @@ export const BasicsSection = () => {
 							)}
 						/>
 					</div>
+					<Controller
+						name="summary"
+						control={control}
+						render={({ field, fieldState }) => (
+							<div>
+								<label>Summary</label>
+								<RichInput
+									{...field}
+									content={field.value}
+									onChange={(value) => field.onChange(value)}
+									error={fieldState.error?.message}
+								/>
+							</div>
+						)}
+					/>
+					<Controller
+						name="about"
+						control={control}
+						render={({ field, fieldState }) => (
+							<div>
+								<label>About</label>
+								<RichInput
+									{...field}
+									content={field.value}
+									onChange={(value) => field.onChange(value)}
+									error={fieldState.error?.message}
+								/>
+							</div>
+						)}
+					/>
 
 					<Button type="submit" className="w-full">
 						Save

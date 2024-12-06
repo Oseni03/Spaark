@@ -12,8 +12,6 @@ const basicSlice = createSlice({
 	reducers: {
 		// Update the basics data
 		updateBasics: (state, action) => {
-			console.log("State: ", state);
-			console.log("Action: ", action);
 			state = { ...state, ...action.payload };
 		},
 
