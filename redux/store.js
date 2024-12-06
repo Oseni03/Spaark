@@ -10,6 +10,7 @@ import certificationReducer from "./features/certificationSlice";
 import projectReducer from "./features/projectSlice";
 import hackathonReducer from "./features/hackathonSlice";
 import basicsReducer from "./features/basicSlice";
+import summaryReducer from "./features/summarySlice";
 
 // Persist Configuration
 const persistConfig = {
@@ -25,6 +26,7 @@ const persistedReducer = persistReducer(persistConfig, portfolioReducer);
 export const store = configureStore({
 	reducer: {
 		basics: basicsReducer,
+		summary: summaryReducer,
 		portfolio: persistedReducer,
 		profile: profileReducer,
 		experience: experienceReducer,
