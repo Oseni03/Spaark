@@ -9,6 +9,7 @@ import skillReducer from "./features/skillSlice";
 import certificationReducer from "./features/certificationSlice";
 import projectReducer from "./features/projectSlice";
 import hackathonReducer from "./features/hackathonSlice";
+import basicsReducer from "./features/basicSlice";
 
 // Persist Configuration
 const persistConfig = {
@@ -23,6 +24,7 @@ const persistedReducer = persistReducer(persistConfig, portfolioReducer);
 // Store Configuration
 export const store = configureStore({
 	reducer: {
+		basics: basicsReducer,
 		portfolio: persistedReducer,
 		profile: profileReducer,
 		experience: experienceReducer,

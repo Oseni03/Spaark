@@ -1,20 +1,31 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import { defaultBasics } from "@/schema/basics";
 
 const initialState = {
-	name: "Basics",
-	content: "",
 	visible: true,
+	...defaultBasics, // Default values from the schema
 };
 
 const basicSlice = createSlice({
 	name: "basics",
 	initialState,
 	reducers: {
-		updateBasics(state, action) {
-			Object.assign(state, action.payload);
+		// Update the basics data
+		updateBasics: (state, action) => {
+			console.log("State: ", state);
+			console.log("Action: ", action);
+			state = { ...state, ...action.payload };
+		},
+
+		// Reset the basics data to defaults
+		resetBasics: (state) => {
+			state = { ...initialState };
 		},
 	},
 });
 
-export const { updateBasics } = basicSlice.actions;
+// Export actions
+export const { updateBasics, resetBasics } = basicSlice.actions;
+
+// Export reducer
 export default basicSlice.reducer;
