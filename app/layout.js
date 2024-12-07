@@ -7,6 +7,8 @@ import {
 import localFont from "next/font/local";
 import "./globals.css";
 import CustomProvider from "@/redux/provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -31,7 +33,17 @@ export default function RootLayout({ children }) {
 				<body
 					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 				>
-					<CustomProvider>{children}</CustomProvider>
+					<CustomProvider>
+						<ThemeProvider
+							attribute="class"
+							defaultTheme="system"
+							enableSystem
+							disableTransitionOnChange
+						>
+							<Toaster />
+							{children}
+						</ThemeProvider>
+					</CustomProvider>
 				</body>
 			</html>
 		</ClerkProvider>

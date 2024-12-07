@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
 
 // Server-side validation and error handling wrapper
-async function withErrorHandling(action) {
+export async function withErrorHandling(action) {
 	try {
 		const result = await action();
 		return { success: true, data: result };
