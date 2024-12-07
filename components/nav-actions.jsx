@@ -34,6 +34,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { UserButton } from "@clerk/nextjs";
 
 const data = [
 	[
@@ -106,9 +107,7 @@ export function NavActions() {
 			<div className="hidden font-medium text-muted-foreground md:inline-block">
 				Edit Oct 08
 			</div>
-			<Button variant="ghost" size="icon" className="h-7 w-7">
-				<Star />
-			</Button>
+			<UserButton />
 			<Popover open={isOpen} onOpenChange={setIsOpen}>
 				<PopoverTrigger asChild>
 					<Button

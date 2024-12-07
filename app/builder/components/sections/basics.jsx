@@ -5,7 +5,10 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
-import { updateBasics } from "@/redux/features/basicSlice"; // Ensure this import is correct
+import {
+	updateBasics,
+	updateBasicsInDatabase,
+} from "@/redux/features/basicSlice"; // Ensure this import is correct
 import { useEffect } from "react";
 import { RichInput } from "@/components/ui/rich-input";
 
@@ -30,6 +33,7 @@ export const BasicsSection = () => {
 
 	const onSubmit = (data) => {
 		dispatch(updateBasics(data));
+		dispatch(updateBasicsInDatabase(data));
 		console.log("Form Submitted:", data);
 	};
 
