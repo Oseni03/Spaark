@@ -1,11 +1,12 @@
+import FormWrapper from "@/components/wrapper/form-wrapper";
 import { SignIn } from "@clerk/nextjs";
 import React from "react";
 
 function Page() {
 	return (
-		<div className="flex justify-center self-center">
+		<FormWrapper>
 			<SignIn signUpUrl="/sign-up" />
-		</div>
+		</FormWrapper>
 	);
 }
 
