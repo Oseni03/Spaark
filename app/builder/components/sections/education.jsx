@@ -10,7 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	removeEducation,
-	toggleVisibility,
+	removeEducationFromDatabase,
+	toggleEducationVisibility,
+	updateEducationInDatabase,
 } from "@/redux/features/educationSlice";
 import { EducationDialog } from "../dialogs/education-dialog";
 
@@ -51,8 +53,14 @@ export const Education = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeEducation(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeEducation(item.id));
+		dispatch(removeEducationFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleEducationVisibility(item.id));
+		dispatch(updateEducationInDatabase({ ...item, visible: false }));
+	};
 
 	return (
 		<motion.section

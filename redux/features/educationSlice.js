@@ -1,14 +1,82 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
 	Education,
 	defaultEducation,
 	educationSchema,
 } from "@/schema/sections";
+import {
+	createEducation,
+	deleteEducation,
+	editEducation,
+} from "@/services/education";
 
 const initialState = {
 	items: [],
-	visible: true,
+	loading: false,
+	error: null,
 };
+
+// Async Thunks with improved type safety
+export const addEducationInDatabase = createAsyncThunk(
+	"education/addEducationInDatabase",
+	async (data, { rejectWithValue }) => {
+		try {
+			// Validate input before sending to service
+			const validatedData = educationSchema.safeParse(data);
+			if (validatedData.success) {
+				return await createEducation(validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const updateEducationInDatabase = createAsyncThunk(
+	"education/updateEducationInDatabase",
+	async (data, { rejectWithValue }) => {
+		console.log("Update data: ", data);
+		try {
+			// Validate input before sending to service
+			const validatedData = educationSchema.safeParse(data);
+			if (validatedData.success) {
+				return await editEducation(data.id, validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const removeEducationFromDatabase = createAsyncThunk(
+	"education/removeEducationFromDatabase",
+	async (educationId, { rejectWithValue }) => {
+		try {
+			await deleteEducation(educationId);
+			return { id: educationId };
+		} catch (error) {
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
 
 const educationSlice = createSlice({
 	name: "education",
@@ -41,7 +109,7 @@ const educationSlice = createSlice({
 				(item) => item.id !== action.payload
 			);
 		},
-		toggleVisibility(state, action) {
+		toggleEducationVisibility(state, action) {
 			const education = state.items.find(
 				(item) => item.id === action.payload
 			);
@@ -50,13 +118,54 @@ const educationSlice = createSlice({
 			}
 		},
 	},
+	extraReducers: (builder) => {
+		// Add Education
+		builder
+			.addCase(addEducationInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(addEducationInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(addEducationInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to add education";
+			})
+
+			// Update Experience
+			.addCase(updateEducationInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(updateEducationInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(updateEducationInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to update education";
+			})
+
+			// Remove Education
+			.addCase(removeEducationFromDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(removeEducationFromDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(removeEducationFromDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to remove education";
+			});
+	},
 });
 
 export const {
 	addEducation,
 	updateEducation,
 	removeEducation,
-	toggleVisibility,
+	toggleEducationVisibility,
 } = educationSlice.actions;
 
 export default educationSlice.reducer;

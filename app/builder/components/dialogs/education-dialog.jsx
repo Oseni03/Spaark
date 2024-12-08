@@ -10,7 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
-import { addEducation, updateEducation } from "@/redux/features/educationSlice";
+import {
+	addEducation,
+	addEducationInDatabase,
+	updateEducation,
+	updateEducationInDatabase,
+} from "@/redux/features/educationSlice";
 
 export const EducationDialog = ({
 	form,
@@ -24,8 +29,12 @@ export const EducationDialog = ({
 	const onSubmit = (data) => {
 		if (currentEducation) {
 			dispatch(updateEducation({ id: currentEducation.id, ...data }));
+			dispatch(
+				updateEducationInDatabase({ id: currentEducation.id, ...data })
+			);
 		} else {
 			dispatch(addEducation(data));
+			dispatch(addEducationInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();
