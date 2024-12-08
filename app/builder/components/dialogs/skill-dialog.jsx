@@ -13,7 +13,12 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { addSkill, updateSkill } from "@/redux/features/skillSlice";
+import {
+	addSkill,
+	addSkillInDatabase,
+	updateSkill,
+	updateSkillnInDatabase,
+} from "@/redux/features/skillSlice";
 import { AnimatePresence, motion } from "framer-motion";
 
 export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
@@ -23,8 +28,10 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 	const onSubmit = (data) => {
 		if (currentSkill) {
 			dispatch(updateSkill({ id: currentSkill.id, ...data }));
+			dispatch(updateSkillnInDatabase({ id: currentSkill.id, ...data }));
 		} else {
 			dispatch(addSkill(data));
+			dispatch(addSkillInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();

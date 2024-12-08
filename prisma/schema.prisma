@@ -67,3 +67,13 @@ model Education {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Skill {
+  id        String      @id @default(uuid())
+  userId    String
+  visible   Boolean  @default(true) // Visibility status of the profile
+  name      String   
+  keywords  String[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

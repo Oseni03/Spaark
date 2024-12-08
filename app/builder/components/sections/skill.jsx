@@ -8,7 +8,12 @@ import { useForm } from "react-hook-form";
 import { defaultSkill, skillSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { removeSkill, toggleVisibility } from "@/redux/features/skillSlice";
+import {
+	removeSkill,
+	removeSkillFromDatabase,
+	toggleSkillVisibility,
+	updateSkillnInDatabase,
+} from "@/redux/features/skillSlice";
 import { SkillDialog } from "../dialogs/skill-dialog";
 
 export const Skill = () => {
@@ -49,8 +54,14 @@ export const Skill = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeSkill(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeSkill(item.id));
+		dispatch(removeSkillFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleSkillVisibility(item.id));
+		dispatch(updateSkillnInDatabase({ ...item, visible: false }));
+	};
 
 	return (
 		<motion.section
