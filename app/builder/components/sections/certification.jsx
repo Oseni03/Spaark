@@ -10,7 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	removeCertification,
-	toggleVisibility,
+	removeCertificationFromDatabase,
+	toggleCertificationVisibility,
+	updateCertificationnInDatabase,
 } from "@/redux/features/certificationSlice";
 import { CertificationDialog } from "../dialogs/certification-dialog";
 
@@ -52,8 +54,16 @@ export const Certification = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeCertification(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeCertification(item.id));
+		dispatch(removeCertificationFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleCertificationVisibility(item.id));
+		dispatch(
+			updateCertificationnInDatabase({ ...item, visible: !item.visible })
+		);
+	};
 
 	return (
 		<motion.section

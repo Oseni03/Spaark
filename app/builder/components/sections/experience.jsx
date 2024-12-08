@@ -60,7 +60,9 @@ export const Experience = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(toggleExperienceVisibility(item.id));
-		dispatch(updateExperienceInDatabase({ ...item, visible: false }));
+		dispatch(
+			updateExperienceInDatabase({ ...item, visible: !item.visible })
+		);
 	};
 
 	return (

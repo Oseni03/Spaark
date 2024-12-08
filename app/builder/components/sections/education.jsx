@@ -59,7 +59,9 @@ export const Education = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(toggleEducationVisibility(item.id));
-		dispatch(updateEducationInDatabase({ ...item, visible: false }));
+		dispatch(
+			updateEducationInDatabase({ ...item, visible: !item.visible })
+		);
 	};
 
 	return (

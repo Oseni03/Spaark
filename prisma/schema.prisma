@@ -77,3 +77,16 @@ model Skill {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Certification {
+  id        String      @id @default(uuid())
+  userId    String
+  visible   Boolean  @default(true)
+  name      String   
+  issuer    String   
+  date      String   
+  summary   String   
+  url       String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

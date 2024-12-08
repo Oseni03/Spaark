@@ -60,7 +60,7 @@ export const Profile = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(toggleProfileVisibility(item.id));
-		dispatch(updateProfileInDatabase(item.id, { visible: false }));
+		dispatch(updateProfileInDatabase(item.id, { visible: !item.visible }));
 	};
 
 	return (

@@ -60,7 +60,7 @@ export const Skill = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(toggleSkillVisibility(item.id));
-		dispatch(updateSkillnInDatabase({ ...item, visible: false }));
+		dispatch(updateSkillnInDatabase({ ...item, visible: !item.visible }));
 	};
 
 	return (

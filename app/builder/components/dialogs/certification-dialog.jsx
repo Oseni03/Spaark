@@ -12,7 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
 	addCertification,
+	addCertificationInDatabase,
 	updateCertification,
+	updateCertificationnInDatabase,
 } from "@/redux/features/certificationSlice";
 
 export const CertificationDialog = ({
@@ -29,8 +31,15 @@ export const CertificationDialog = ({
 			dispatch(
 				updateCertification({ id: currentCertification.id, ...data })
 			);
+			dispatch(
+				updateCertificationnInDatabase({
+					id: currentCertification.id,
+					...data,
+				})
+			);
 		} else {
 			dispatch(addCertification(data));
+			dispatch(addCertificationInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();
