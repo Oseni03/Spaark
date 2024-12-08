@@ -11,7 +11,9 @@ import { useEffect, useState } from "react";
 import { ExperienceDialog } from "../dialogs/experience-dialog";
 import {
 	removeExperience,
-	toggleVisibility,
+	removeExperienceFromDatabase,
+	toggleExperienceVisibility,
+	updateExperienceInDatabase,
 } from "@/redux/features/experienceSlice";
 
 export const Experience = () => {
@@ -52,8 +54,14 @@ export const Experience = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeExperience(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeExperience(item.id));
+		dispatch(removeExperienceFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleExperienceVisibility(item.id));
+		dispatch(updateExperienceInDatabase({ ...item, visible: false }));
+	};
 
 	return (
 		<motion.section

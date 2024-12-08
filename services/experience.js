@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 
-export async function createProfile(data) {
+export async function createExperience(data) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -13,8 +13,8 @@ export async function createProfile(data) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create profile with additional metadata
-		const profile = await prisma.profile.create({
+		// Create experience with additional metadata
+		const exp = await prisma.experience.create({
 			data: {
 				...data,
 				userId,
@@ -23,11 +23,11 @@ export async function createProfile(data) {
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return profile;
+		return exp;
 	});
 }
 
-export async function editProfile(profileId, data) {
+export async function editExperience(experienceId, data) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -35,18 +35,18 @@ export async function editProfile(profileId, data) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
+		const existingExperience = await prisma.experience.findUnique({
+			where: { id: experienceId, userId },
 		});
 
-		if (!existingProfile) {
+		if (!existingExperience) {
 			throw new Error(
-				"Profile not found or you do not have permission to update"
+				"Experience not found or you do not have permission to update"
 			);
 		}
 
-		const updatedProfile = await prisma.profile.update({
-			where: { id: profileId },
+		const updatedExp = await prisma.experience.update({
+			where: { id: experienceId },
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -56,36 +56,36 @@ export async function editProfile(profileId, data) {
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedProfile;
+		return updatedExp;
 	});
 }
 
-export async function deleteProfile(profileId) {
+export async function deleteExperience(experienceId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
 			throw new Error(
-				"Unauthorized: Must be logged in to delete a profile"
+				"Unauthorized: Must be logged in to delete an experience"
 			);
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
+		const existingExperience = await prisma.experience.findUnique({
+			where: { id: experienceId, userId },
 		});
 
-		if (!existingProfile) {
+		if (!existingExperience) {
 			throw new Error(
-				"Profile not found or you do not have permission to delete"
+				"Experience not found or you do not have permission to delete"
 			);
 		}
 
-		const deletedProfile = await prisma.profile.delete({
-			where: { id: profileId },
+		const deletedExp = await prisma.experience.delete({
+			where: { id: experienceId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedProfile;
+		return deletedExp;
 	});
 }

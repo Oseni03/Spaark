@@ -12,7 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
 	addExperience,
+	addExperienceInDatabase,
 	updateExperience,
+	updateExperienceInDatabase,
 } from "@/redux/features/experienceSlice";
 
 export const ExperienceDialog = ({
@@ -27,8 +29,15 @@ export const ExperienceDialog = ({
 	const onSubmit = (data) => {
 		if (currentExperience) {
 			dispatch(updateExperience({ id: currentExperience.id, ...data }));
+			dispatch(
+				updateExperienceInDatabase({
+					id: currentExperience.id,
+					...data,
+				})
+			);
 		} else {
 			dispatch(addExperience(data));
+			dispatch(addExperienceInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();

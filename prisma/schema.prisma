@@ -40,3 +40,17 @@ model Profile {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }
+
+model Experience {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  visible   Boolean   @default(true) // Visibility status of the profile
+  company   String   
+  position  String   
+  location  String?  
+  date      String   
+  summary   String  
+  url       String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
