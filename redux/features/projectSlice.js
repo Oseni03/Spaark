@@ -10,6 +10,10 @@ const projectSlice = createSlice({
 	name: "project",
 	initialState,
 	reducers: {
+		setProjects(state, action) {
+			console.log("Projects: ", action.payload);
+			state.items = action.payload;
+		},
 		addProject(state, action) {
 			const result = projectSchema.safeParse(action.payload);
 			if (result.success) {
@@ -48,7 +52,12 @@ const projectSlice = createSlice({
 	},
 });
 
-export const { addProject, updateProject, removeProject, toggleVisibility } =
-	projectSlice.actions;
+export const {
+	setProjects,
+	addProject,
+	updateProject,
+	removeProject,
+	toggleVisibility,
+} = projectSlice.actions;
 
 export default projectSlice.reducer;

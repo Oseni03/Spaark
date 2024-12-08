@@ -74,6 +74,10 @@ const skillSlice = createSlice({
 	name: "skill",
 	initialState,
 	reducers: {
+		setSkills(state, action) {
+			console.log("Skills: ", action.payload);
+			state.items = action.payload;
+		},
 		addSkill(state, action) {
 			const result = skillSchema.safeParse(action.payload);
 			if (result.success) {
@@ -153,7 +157,12 @@ const skillSlice = createSlice({
 	},
 });
 
-export const { addSkill, updateSkill, removeSkill, toggleSkillVisibility } =
-	skillSlice.actions;
+export const {
+	setSkills,
+	addSkill,
+	updateSkill,
+	removeSkill,
+	toggleSkillVisibility,
+} = skillSlice.actions;
 
 export default skillSlice.reducer;

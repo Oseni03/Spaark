@@ -1,9 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { createUserBasics, getUserBasics } from "@/services/user";
-import { store } from "@/redux/store";
-import { updateBasics } from "@/redux/features/basicSlice";
-import { clerkClient } from "@clerk/nextjs/server";
+import { createUserBasics } from "@/services/user";
 
 export async function POST(req) {
 	const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -69,15 +66,7 @@ export async function POST(req) {
 		if (status !== "active") return;
 		if (!user_id) return;
 
-		const basics = await getUserBasics(user_id);
-
-		if (basics?.data) {
-			// Dispatch the action to update Redux state
-			store.dispatch(updateBasics(basics.data));
-			console.log("Updated Redux basics state:", basics.data);
-		} else {
-			console.error("No basics data found for user:", user_id);
-		}
+		console.log("User logged in: ", user_id);
 	}
 
 	return new Response("Webhook received", { status: 200 });

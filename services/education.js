@@ -4,6 +4,28 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { educationSchema } from "@/schema/sections";
+
+export async function getUserEducations(userId) {
+	return withErrorHandling(async () => {
+		const educations = await prisma.education.findMany({
+			where: { userId },
+			select: {
+				id: true,
+				visible: true,
+				institution: true,
+				studyType: true,
+				date: true,
+				summary: true,
+				url: true,
+			},
+		});
+		if (educations.length > 0) {
+			return educations.map((item) => educationSchema.parse(item));
+		}
+		return [];
+	});
+}
 
 export async function createEducation(data) {
 	return withErrorHandling(async () => {

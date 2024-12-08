@@ -4,6 +4,27 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { profileSchema } from "@/schema/sections";
+
+export async function getUserProfiles(userId) {
+	return withErrorHandling(async () => {
+		const profiles = await prisma.profile.findMany({
+			where: { userId },
+			select: {
+				id: true,
+				visible: true,
+				network: true,
+				username: true,
+				icon: true,
+				url: true,
+			},
+		});
+		if (profiles.length > 0) {
+			return profiles.map((item) => profileSchema.parse(item));
+		}
+		return [];
+	});
+}
 
 export async function createProfile(data) {
 	return withErrorHandling(async () => {

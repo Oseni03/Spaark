@@ -4,6 +4,25 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { skillSchema } from "@/schema/sections";
+
+export async function getUserSkills(userId) {
+	return withErrorHandling(async () => {
+		const skills = await prisma.skill.findMany({
+			where: { userId },
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				keywords: true,
+			},
+		});
+		if (skills.length > 0) {
+			return skills.map((item) => skillSchema.parse(item));
+		}
+		return [];
+	});
+}
 
 export async function createSkill(data) {
 	return withErrorHandling(async () => {

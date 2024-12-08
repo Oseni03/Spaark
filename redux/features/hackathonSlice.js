@@ -10,6 +10,10 @@ const hackathonSlice = createSlice({
 	name: "hackathon",
 	initialState,
 	reducers: {
+		setHackathons(state, action) {
+			console.log("Hackathons: ", action.payload);
+			state.items = action.payload;
+		},
 		addHackathon(state, action) {
 			const result = hackathonSchema.safeParse(action.payload);
 			if (result.success) {
@@ -48,6 +52,7 @@ const hackathonSlice = createSlice({
 });
 
 export const {
+	setHackathons,
 	addHackathon,
 	updateHackathon,
 	removeHackathon,

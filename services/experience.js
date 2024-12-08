@@ -4,6 +4,29 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { experienceSchema } from "@/schema/sections";
+
+export async function getUserExperiences(userId) {
+	return withErrorHandling(async () => {
+		const experiences = await prisma.experience.findMany({
+			where: { userId },
+			select: {
+				id: true,
+				visible: true,
+				company: true,
+				position: true,
+				location: true,
+				date: true,
+				summary: true,
+				url: true,
+			},
+		});
+		if (experiences.length > 0) {
+			return experiences.map((item) => experienceSchema.parse(item));
+		}
+		return [];
+	});
+}
 
 export async function createExperience(data) {
 	return withErrorHandling(async () => {

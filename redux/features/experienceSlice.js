@@ -79,6 +79,10 @@ const experienceSlice = createSlice({
 	name: "experience",
 	initialState,
 	reducers: {
+		setExperience(state, action) {
+			console.log("Experiences: ", action.payload);
+			state.items = action.payload;
+		},
 		addExperience(state, action) {
 			const result = experienceSchema.safeParse(action.payload);
 			if (result.success) {
@@ -161,6 +165,7 @@ const experienceSlice = createSlice({
 });
 
 export const {
+	setExperience,
 	addExperience,
 	updateExperience,
 	removeExperience,

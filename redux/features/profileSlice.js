@@ -77,6 +77,10 @@ const profileSlice = createSlice({
 	name: "profile",
 	initialState,
 	reducers: {
+		setProfiles(state, action) {
+			console.log("Profiles: ", action.payload);
+			state.items = action.payload;
+		},
 		addProfile(state, action) {
 			const result = profileSchema.safeParse(action.payload);
 			if (result.success) {
@@ -152,6 +156,7 @@ const profileSlice = createSlice({
 });
 
 export const {
+	setProfiles,
 	addProfile,
 	updateProfile,
 	removeProfile,

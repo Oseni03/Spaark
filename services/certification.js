@@ -4,6 +4,30 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { certificationSchema } from "@/schema/sections";
+
+export async function getUserCertifications(userId) {
+	return withErrorHandling(async () => {
+		const certifications = await prisma.certification.findMany({
+			where: { userId },
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				issuer: true,
+				date: true,
+				summary: true,
+				url: true,
+			},
+		});
+		if (certifications.length > 0) {
+			return certifications.map((item) =>
+				certificationSchema.parse(item)
+			);
+		}
+		return [];
+	});
+}
 
 export async function createCertification(data) {
 	return withErrorHandling(async () => {

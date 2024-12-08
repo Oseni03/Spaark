@@ -82,6 +82,10 @@ const certificationSlice = createSlice({
 	name: "certification",
 	initialState,
 	reducers: {
+		setCertifications(state, action) {
+			console.log(action.payload);
+			state.items = action.payload;
+		},
 		addCertification(state, action) {
 			// Validate the new certification with the schema
 			const result = certificationSchema.safeParse(action.payload);
@@ -176,6 +180,7 @@ const certificationSlice = createSlice({
 });
 
 export const {
+	setCertifications,
 	addCertification,
 	updateCertification,
 	removeCertification,

@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import {
 	updateBasics,
 	updateBasicsInDatabase,
@@ -13,6 +14,7 @@ import { useEffect } from "react";
 import { RichInput } from "@/components/ui/rich-input";
 
 export const BasicsSection = () => {
+	const section = useSelector((state) => state.basics);
 	const dispatch = useDispatch();
 	const {
 		handleSubmit,
@@ -21,7 +23,7 @@ export const BasicsSection = () => {
 		formState: { errors, defaultValues },
 	} = useForm({
 		resolver: zodResolver(basicsSchema),
-		defaultValues: defaultBasics,
+		defaultValues: section,
 	});
 
 	useEffect(() => {

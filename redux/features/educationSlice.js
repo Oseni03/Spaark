@@ -82,6 +82,10 @@ const educationSlice = createSlice({
 	name: "education",
 	initialState,
 	reducers: {
+		setEducations(state, action) {
+			console.log("Educations: ", action.payload);
+			state.items = action.payload;
+		},
 		addEducation(state, action) {
 			// Validate the new education entry with the schema
 			const result = educationSchema.safeParse(action.payload);
@@ -162,6 +166,7 @@ const educationSlice = createSlice({
 });
 
 export const {
+	setEducations,
 	addEducation,
 	updateEducation,
 	removeEducation,
