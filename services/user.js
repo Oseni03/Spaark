@@ -5,28 +5,13 @@ import { prisma } from "@/lib/db"; // Assume this is your database connection
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
-
-// Server-side validation and error handling wrapper
-export async function withErrorHandling(action) {
-	try {
-		const result = await action();
-		return { success: true, data: result };
-	} catch (error) {
-		console.log("Server Action Error:", error);
-		return {
-			success: false,
-			error:
-				error instanceof Error
-					? error.message
-					: "An unexpected error occurred",
-		};
-	}
-}
+import { withErrorHandling } from "./shared";
 
 export async function createUserBasics(userId, data = defaultBasics) {
 	return withErrorHandling(async () => {
 		// Create User with Basics
-		const basics = await prisma.basics.create({
+		const basics = await prisma.basics.upsert({
+			where: { userId },
 			data: {
 				...data,
 				userId,
@@ -46,7 +31,7 @@ export async function updateUserBasics(data) {
 		}
 
 		// Update user in database
-		const updatedUser = await prisma.basics.update({
+		const updatedBasics = await prisma.basics.update({
 			where: { userId },
 			data: data,
 		});
@@ -54,7 +39,7 @@ export async function updateUserBasics(data) {
 		// Revalidate the path to update cached data
 		revalidatePath("/builder");
 
-		return updatedUser;
+		return updatedBasics;
 	});
 }
 

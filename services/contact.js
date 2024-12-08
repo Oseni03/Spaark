@@ -1,4 +1,4 @@
-import { withErrorHandling } from "./user";
+import { withErrorHandling } from "./shared";
 import { prisma } from "@/lib/db";
 
 export async function saveContact({ email, full_name, message }) {

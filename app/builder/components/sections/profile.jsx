@@ -4,7 +4,12 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
-import { removeProfile, toggleVisibility } from "@/redux/features/profileSlice";
+import {
+	removeProfile,
+	removeProfileFromDatabase,
+	toggleProfileVisibility,
+	updateProfileInDatabase,
+} from "@/redux/features/profileSlice";
 import { ProfilesDialog } from "../dialogs/profile-dialog";
 import { useForm } from "react-hook-form";
 import { defaultProfile } from "@/schema/sections";
@@ -44,14 +49,19 @@ export const Profile = () => {
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (profile) => {
-		console.log("Update profile: ", profile);
 		reset(profile);
 		setCurrentProfile(profile);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeProfile(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeProfile(item.id));
+		dispatch(removeProfileFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleProfileVisibility(item.id));
+		dispatch(updateProfileInDatabase(item.id, { visible: false }));
+	};
 
 	return (
 		<motion.section

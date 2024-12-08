@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Basics {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   headline  String
   email     String
@@ -24,5 +24,19 @@ model Basics {
   picture   String?
   summary   String
   about     String
-  userId    String   @unique
+  userId    String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Profile {
+  id        String    @id @default(uuid()) // Unique identifier for each profile
+  userId    String
+  visible   Boolean   @default(true) // Visibility status of the profile
+  network   String // Name of the social or professional network
+  username  String // Username for the profile
+  icon      String // Slug for the icon (e.g., from simpleicons.org)
+  url       String? // URL for the profile (optional)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 }

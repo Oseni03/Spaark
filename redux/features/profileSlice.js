@@ -1,11 +1,78 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { defaultProfile, profileSchema } from "@/schema/sections";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { z } from "zod";
+import { createProfile, editProfile, deleteProfile } from "@/services/profile";
+import { profileSchema } from "@/schema/sections";
 
+// Initial state with simplified loading and error handling
 const initialState = {
 	items: [],
-	visible: true,
+	loading: false,
+	error: null,
 };
 
+// Async Thunks with improved type safety
+export const addProfileInDatabase = createAsyncThunk(
+	"profile/addProfileInDatabase",
+	async (profileData, { rejectWithValue }) => {
+		try {
+			// Validate input before sending to service
+			const validatedData = profileSchema.safeParse(profileData);
+			if (validatedData.success) {
+				return await createProfile(validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const updateProfileInDatabase = createAsyncThunk(
+	"profile/updateProfileInDatabase",
+	async (data, { rejectWithValue }) => {
+		console.log("Update data: ", data);
+		try {
+			// Validate input before sending to service
+			const validatedData = profileSchema.safeParse(data);
+			if (validatedData.success) {
+				return await editProfile(data.id, validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const removeProfileFromDatabase = createAsyncThunk(
+	"profile/removeProfileFromDatabase",
+	async (profileId, { rejectWithValue }) => {
+		try {
+			await deleteProfile(profileId);
+			return { id: profileId };
+		} catch (error) {
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+// Create the slice
 const profileSlice = createSlice({
 	name: "profile",
 	initialState,
@@ -13,10 +80,7 @@ const profileSlice = createSlice({
 		addProfile(state, action) {
 			const result = profileSchema.safeParse(action.payload);
 			if (result.success) {
-				console.log("Pushing result: ", result);
 				state.items.push(result.data);
-			} else {
-				console.error("Invalid profile data:", result.error);
 			}
 		},
 		updateProfile(state, action) {
@@ -27,8 +91,6 @@ const profileSlice = createSlice({
 				const result = profileSchema.safeParse(action.payload);
 				if (result.success) {
 					state.items[index] = result.data;
-				} else {
-					console.error("Invalid update data:", result.error);
 				}
 			}
 		},
@@ -37,7 +99,7 @@ const profileSlice = createSlice({
 				(item) => item.id !== action.payload
 			);
 		},
-		toggleVisibility(state, action) {
+		toggleProfileVisibility(state, action) {
 			const profile = state.items.find(
 				(item) => item.id === action.payload
 			);
@@ -46,9 +108,54 @@ const profileSlice = createSlice({
 			}
 		},
 	},
+	extraReducers: (builder) => {
+		// Add Profile
+		builder
+			.addCase(addProfileInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(addProfileInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(addProfileInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to add profile";
+			})
+
+			// Update Profile
+			.addCase(updateProfileInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(updateProfileInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(updateProfileInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to update profile";
+			})
+
+			// Remove Profile
+			.addCase(removeProfileFromDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(removeProfileFromDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(removeProfileFromDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to remove profile";
+			});
+	},
 });
 
-export const { addProfile, updateProfile, removeProfile, toggleVisibility } =
-	profileSlice.actions;
+export const {
+	addProfile,
+	updateProfile,
+	removeProfile,
+	toggleProfileVisibility,
+} = profileSlice.actions;
 
 export default profileSlice.reducer;

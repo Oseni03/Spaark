@@ -1,7 +1,12 @@
 import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
-import { addProfile, updateProfile } from "@/redux/features/profileSlice";
+import {
+	addProfile,
+	addProfileInDatabase,
+	updateProfile,
+	updateProfileInDatabase,
+} from "@/redux/features/profileSlice";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +30,15 @@ export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 
 	const onSubmit = (data) => {
 		if (currentProfile) {
+			console.log("Updated profile: ", data);
 			dispatch(updateProfile({ id: currentProfile.id, ...data }));
+			dispatch(
+				updateProfileInDatabase({ id: currentProfile.id, ...data })
+			);
 		} else {
 			console.log(data);
 			dispatch(addProfile(data));
+			dispatch(addProfileInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();
