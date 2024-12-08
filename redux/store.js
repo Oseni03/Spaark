@@ -1,5 +1,14 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { persistStore, persistReducer } from "redux-persist";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import {
+	persistStore,
+	persistReducer,
+	FLUSH,
+	REHYDRATE,
+	PAUSE,
+	PERSIST,
+	PURGE,
+	REGISTER,
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import profileReducer from "./features/profileSlice";
 import portfolioReducer from "./features/portfolioSlice";
@@ -11,33 +20,45 @@ import projectReducer from "./features/projectSlice";
 import hackathonReducer from "./features/hackathonSlice";
 import basicsReducer from "./features/basicSlice";
 
-// Persist Configuration
+// Persist configuration
 const persistConfig = {
 	key: "root",
+	version: 1,
 	storage,
-	whitelist: ["portfolio"],
+	// Optionally blacklist or whitelist specific reducers
+	blacklist: [], // Add reducers you don't want to persist
 };
 
-// Persisted Reducer
-const persistedReducer = persistReducer(persistConfig, portfolioReducer);
+// Combine reducers
+const rootReducer = combineReducers({
+	basics: basicsReducer,
+	profile: profileReducer,
+	experience: experienceReducer,
+	education: educationReducer,
+	skill: skillReducer,
+	certification: certificationReducer,
+	project: projectReducer,
+	hackathon: hackathonReducer,
+});
+
+// Create persisted reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Store Configuration
 export const store = configureStore({
-	reducer: {
-		basics: basicsReducer,
-		portfolio: persistedReducer,
-		profile: profileReducer,
-		experience: experienceReducer,
-		education: educationReducer,
-		skill: skillReducer,
-		certification: certificationReducer,
-		project: projectReducer,
-		hackathon: hackathonReducer,
-	},
+	reducer: persistedReducer,
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
 			serializableCheck: {
-				ignoredActions: ["persist/PERSIST"],
+				ignoredActions: [
+					FLUSH,
+					REHYDRATE,
+					PAUSE,
+					PERSIST,
+					PURGE,
+					REGISTER,
+					// Add any custom actions you want to ignore
+				],
 			},
 		}),
 });
