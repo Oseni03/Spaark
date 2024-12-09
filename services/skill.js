@@ -14,7 +14,7 @@ export async function getUserSkills(userId) {
 				id: true,
 				visible: true,
 				name: true,
-				keywords: true,
+				description: true,
 			},
 		});
 		if (skills.length > 0) {

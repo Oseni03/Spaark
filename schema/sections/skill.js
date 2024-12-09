@@ -5,12 +5,12 @@ import { defaultItem, itemSchema } from "../shared/items";
 // Schema
 export const skillSchema = itemSchema.extend({
 	name: z.string(),
-	keywords: z.array(z.string()).default([]),
+	description: z.literal("").or(z.string()),
 });
 
 // Defaults
 export const defaultSkill = {
 	...defaultItem,
 	name: "",
-	keywords: [],
+	description: "",
 };
