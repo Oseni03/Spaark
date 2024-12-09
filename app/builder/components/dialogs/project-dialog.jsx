@@ -14,7 +14,12 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
-import { addProject, updateProject } from "@/redux/features/projectSlice";
+import {
+	addProject,
+	addProjectInDatabase,
+	updateProject,
+	updateProjectnInDatabase,
+} from "@/redux/features/projectSlice";
 
 export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
@@ -23,8 +28,12 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const onSubmit = (data) => {
 		if (currentProject) {
 			dispatch(updateProject({ id: currentProject.id, ...data }));
+			dispatch(
+				updateProjectnInDatabase({ id: currentProject.id, ...data })
+			);
 		} else {
 			dispatch(addProject(data));
+			dispatch(addProjectInDatabase(data));
 		}
 		setIsOpen(false);
 		reset();

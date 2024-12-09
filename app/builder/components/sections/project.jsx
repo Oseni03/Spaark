@@ -8,7 +8,12 @@ import { useForm } from "react-hook-form";
 import { defaultProject, projectSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { removeProject, toggleVisibility } from "@/redux/features/projectSlice";
+import {
+	removeProject,
+	removeProjectFromDatabase,
+	toggleProjectVisibility,
+	updateProjectnInDatabase,
+} from "@/redux/features/projectSlice";
 import { ProjectDialog } from "../dialogs/project-dialog";
 
 export const Project = () => {
@@ -49,8 +54,14 @@ export const Project = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeProject(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeProject(item.id));
+		dispatch(removeProjectFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleProjectVisibility(item.id));
+		dispatch(updateProjectnInDatabase({ ...item, visible: !item.visible }));
+	};
 
 	return (
 		<motion.section

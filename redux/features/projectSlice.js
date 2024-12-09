@@ -1,10 +1,74 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { projectSchema, skillSchema } from "@/schema/sections";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { projectSchema } from "@/schema/sections";
+import { createProject, editProject, deleteProject } from "@/services/project";
 
 const initialState = {
 	items: [],
-	visible: true,
+	loading: false,
+	error: null,
 };
+
+// Async Thunks with improved type safety
+export const addProjectInDatabase = createAsyncThunk(
+	"project/addProjectInDatabase",
+	async (data, { rejectWithValue }) => {
+		try {
+			// Validate input before sending to service
+			const validatedData = projectSchema.safeParse(data);
+			if (validatedData.success) {
+				return await createProject(validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const updateProjectnInDatabase = createAsyncThunk(
+	"project/updateProjectInDatabase",
+	async (data, { rejectWithValue }) => {
+		console.log("Update data: ", data);
+		try {
+			// Validate input before sending to service
+			const validatedData = projectSchema.safeParse(data);
+			if (validatedData.success) {
+				return await editProject(data.id, validatedData.data);
+			}
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const removeProjectFromDatabase = createAsyncThunk(
+	"project/removeProjectFromDatabase",
+	async (projectId, { rejectWithValue }) => {
+		try {
+			await deleteProject(projectId);
+			return { id: projectId };
+		} catch (error) {
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
 
 const projectSlice = createSlice({
 	name: "project",
@@ -41,7 +105,7 @@ const projectSlice = createSlice({
 				(item) => item.id !== action.payload
 			);
 		},
-		toggleVisibility(state, action) {
+		toggleProjectVisibility(state, action) {
 			const project = state.items.find(
 				(item) => item.id === action.payload
 			);
@@ -50,6 +114,47 @@ const projectSlice = createSlice({
 			}
 		},
 	},
+	extraReducers: (builder) => {
+		// Add Project
+		builder
+			.addCase(addProjectInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(addProjectInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(addProjectInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to add project";
+			})
+
+			// Update Project
+			.addCase(updateProjectnInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(updateProjectnInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(updateProjectnInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to update project";
+			})
+
+			// Remove Project
+			.addCase(removeProjectFromDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(removeProjectFromDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+			})
+			.addCase(removeProjectFromDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to remove project";
+			});
+	},
 });
 
 export const {
@@ -57,7 +162,7 @@ export const {
 	addProject,
 	updateProject,
 	removeProject,
-	toggleVisibility,
+	toggleProjectVisibility,
 } = projectSlice.actions;
 
 export default projectSlice.reducer;
