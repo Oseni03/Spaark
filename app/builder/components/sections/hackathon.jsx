@@ -10,7 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	removeHackathon,
-	toggleVisibility,
+	removeHackathonFromDatabase,
+	toggleHackathonVisibility,
+	updateHackathon,
 } from "@/redux/features/hackathonSlice";
 import { HackathonDialog } from "../dialogs/hackathon-dialog";
 
@@ -52,8 +54,14 @@ export const Hackathon = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => console.log("Duplicate", item);
-	const onDelete = (item) => dispatch(removeHackathon(item.id));
-	const onToggleVisibility = (item) => dispatch(toggleVisibility(item.id));
+	const onDelete = (item) => {
+		dispatch(removeHackathon(item.id));
+		dispatch(removeHackathonFromDatabase(item.id));
+	};
+	const onToggleVisibility = (item) => {
+		dispatch(toggleHackathonVisibility(item.id));
+		dispatch(updateHackathon({ ...item, visible: !item.visible }));
+	};
 
 	return (
 		<motion.section

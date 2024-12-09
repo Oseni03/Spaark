@@ -7,6 +7,7 @@ import { getUserProfiles } from "@/services/profile";
 import { getUserSkills } from "@/services/skill";
 import { auth } from "@clerk/nextjs/server";
 import { getUserProjects } from "@/services/project";
+import { getUserHackathons } from "@/services/hackathon";
 
 // Handle GET requests to fetch user data
 export async function GET(req) {
@@ -29,6 +30,7 @@ export async function GET(req) {
 			certifications,
 			skills,
 			projects,
+			hackathons,
 		] = await Promise.all([
 			getUserBasics(userId),
 			getUserProfiles(userId),
@@ -37,6 +39,7 @@ export async function GET(req) {
 			getUserCertifications(userId),
 			getUserSkills(userId),
 			getUserProjects(userId),
+			getUserHackathons(userId),
 		]);
 
 		// Structure the response
@@ -48,6 +51,7 @@ export async function GET(req) {
 			certifications,
 			skills,
 			projects,
+			hackathons,
 		};
 
 		return NextResponse.json(responseData, { status: 200 });

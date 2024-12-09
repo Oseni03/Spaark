@@ -8,6 +8,7 @@ import { setExperience } from "@/redux/features/experienceSlice";
 import { setProfiles } from "@/redux/features/profileSlice";
 import { setSkills } from "@/redux/features/skillSlice";
 import { updateBasics } from "@/redux/features/basicSlice";
+import { setProjects } from "@/redux/features/projectSlice";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
@@ -34,6 +35,10 @@ const BuilderLayout = ({ children }) => {
 				if (data.skills.success) dispatch(setSkills(data.skills.data));
 				if (data.basics.success)
 					dispatch(updateBasics(data.basics.data));
+				if (data.projects.success)
+					dispatch(setProjects(data.projects.data));
+				if (data.hackathons.success)
+					dispatch(setProjects(data.hackathons.data));
 			} catch (error) {
 				console.log("Error fetching or updating user data:", error);
 			}
