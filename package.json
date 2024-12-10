@@ -50,6 +50,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.13.1",
+    "html-react-parser": "^5.2.0",
     "lucide-react": "^0.464.0",
     "next": "15.0.3",
     "next-theme": "^0.1.5",

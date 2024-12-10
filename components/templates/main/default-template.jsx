@@ -1,4 +1,4 @@
-import { HackathonCard } from "@/components/hackathon-card";
+import { HackathonCard } from "./_components/hackathon-card";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { ProjectCard } from "./_components/project-card";
@@ -6,9 +6,9 @@ import { ResumeCard } from "./_components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import Markdown from "react-markdown";
 import { getInitials } from "@/lib/utils";
-import { Globe } from "@phosphor-icons/react";
+import { Globe } from "lucide-react";
+import HTMLReactParser from "html-react-parser";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -23,7 +23,7 @@ export default function DefaultTemplate({
 	return (
 		<main className="flex flex-col min-h-[100dvh] space-y-10">
 			<section id="hero">
-				<div className="mx-auto w-full max-w-2xl space-y-8">
+				<div className="w-full max-w-2xl space-y-8">
 					<div className="gap-2 flex justify-between">
 						<div className="flex-col flex flex-1 space-y-1.5">
 							<BlurFadeText
@@ -35,7 +35,7 @@ export default function DefaultTemplate({
 							<BlurFadeText
 								className="max-w-[600px] md:text-xl"
 								delay={BLUR_FADE_DELAY}
-								text={basics.summary}
+								text={HTMLReactParser(basics.summary)}
 							/>
 						</div>
 						<BlurFade delay={BLUR_FADE_DELAY}>
@@ -57,9 +57,7 @@ export default function DefaultTemplate({
 					<h2 className="text-xl font-bold">About</h2>
 				</BlurFade>
 				<BlurFade delay={BLUR_FADE_DELAY * 4}>
-					<Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-						{basics.about}
-					</Markdown>
+					{HTMLReactParser(basics.about)}
 				</BlurFade>
 			</section>
 			<section id="work">
@@ -80,11 +78,8 @@ export default function DefaultTemplate({
 								subtitle={work.position}
 								href={work.url}
 								badges={work.badges}
-								// period={`${work.start} - ${
-								// 	work.end ?? "Present"
-								// }`}
 								period={work.date}
-								description={work.summary}
+								description={HTMLReactParser(work.summary)}
 							/>
 						</BlurFade>
 					))}
@@ -161,13 +156,15 @@ export default function DefaultTemplate({
 									href={project.url}
 									key={project.name}
 									title={project.name}
-									description={project.description}
+									description={HTMLReactParser(
+										project.description
+									)}
 									dates={project.date}
-									tags={project.keywords}
+									tags={project.technologies}
 									// image={project.image}
 									links={[
 										{
-											icon: <Globe />,
+											icon: <Globe size={12} />,
 											type: "Website",
 											href: project.url || "",
 										},

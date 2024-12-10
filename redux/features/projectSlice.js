@@ -75,10 +75,10 @@ const projectSlice = createSlice({
 	initialState,
 	reducers: {
 		setProjects(state, action) {
-			console.log("Projects: ", action.payload);
 			state.items = action.payload;
 		},
 		addProject(state, action) {
+			console.log("Project: ", action.payload);
 			const result = projectSchema.safeParse(action.payload);
 			if (result.success) {
 				console.log("Pushing result: ", result);

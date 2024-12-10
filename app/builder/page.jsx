@@ -1,3 +1,5 @@
+"use client";
+
 import DefaultTemplate from "@/components/templates/main/default-template";
 import { useSelector } from "react-redux";
 

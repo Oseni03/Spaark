@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,11 @@ import {
 	updateProject,
 	updateProjectnInDatabase,
 } from "@/redux/features/projectSlice";
+import { CustomLink } from "@/components/custom-link";
 
 export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
+	const links = useSelector((state) => state.project.links);
 	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
@@ -109,12 +111,12 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 					</div>
 
 					<Controller
-						name="keywords"
+						name="technologies"
 						control={control}
 						render={({ field, fieldState }) => (
 							<>
 								<div>
-									<label>Keywords</label>
+									<label>Technologies</label>
 									<BadgeInput
 										value={field.value} // Bind keywords value
 										onChange={(newKeywords) =>
@@ -184,6 +186,20 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 									content={field.value}
 									onChange={(value) => field.onChange(value)}
 									error={fieldState.error?.message}
+								/>
+							</div>
+						)}
+					/>
+
+					<Controller
+						name="links"
+						control={control}
+						render={({ field, fieldState }) => (
+							<div>
+								<label>Links</label>
+								<CustomLink
+									links={links}
+									setValue={(value) => field.onChange(value)}
 								/>
 							</div>
 						)}
