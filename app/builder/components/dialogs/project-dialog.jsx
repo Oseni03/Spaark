@@ -24,10 +24,10 @@ import { CustomLink } from "@/components/custom-link";
 
 export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
-	const links = useSelector((state) => state.project.links);
-	const { reset, handleSubmit, control } = form;
+	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
+		console.log("Project data: ", data);
 		if (currentProject) {
 			dispatch(updateProject({ id: currentProject.id, ...data }));
 			dispatch(
@@ -61,8 +61,12 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 									<Input
 										{...field}
 										placeholder="Enter project name"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
@@ -75,8 +79,12 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 									<Input
 										{...field}
 										placeholder="Enter project URL (if applicable)"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
@@ -89,91 +97,81 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 									<Input
 										{...field}
 										placeholder="e.g., March 2023"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
 						<Controller
-							name="source"
+							name="technologies"
 							control={control}
 							render={({ field, fieldState }) => (
-								<div>
-									<label>Source Code URL</label>
-									<Input
-										{...field}
-										placeholder="Enter source code URL (if applicable)"
-										error={fieldState.error?.message}
-									/>
-								</div>
+								<>
+									<div>
+										<label>Technologies</label>
+										<BadgeInput
+											value={field.value} // Bind keywords value
+											onChange={(newKeywords) =>
+												field.onChange(newKeywords)
+											} // Update keywords dynamically
+											placeholder="Enter keywords separated by commas"
+											error={fieldState.error?.message}
+										/>
+									</div>
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+										<AnimatePresence>
+											{field.value.map((item, index) => (
+												<motion.div
+													key={item}
+													layout
+													initial={{
+														opacity: 0,
+														y: -50,
+													}}
+													animate={{
+														opacity: 1,
+														y: 0,
+														transition: {
+															delay: index * 0.1,
+														},
+													}}
+													exit={{
+														opacity: 0,
+														x: -50,
+													}}
+												>
+													<Badge
+														className="cursor-pointer"
+														onClick={() => {
+															field.onChange(
+																field.value.filter(
+																	(v) =>
+																		v !==
+																		item
+																)
+															);
+														}}
+													>
+														<span className="mr-1">
+															{item}
+														</span>
+														<X
+															size={12}
+															weight="bold"
+														/>
+													</Badge>
+												</motion.div>
+											))}
+										</AnimatePresence>
+									</div>
+								</>
 							)}
 						/>
 					</div>
-
-					<Controller
-						name="technologies"
-						control={control}
-						render={({ field, fieldState }) => (
-							<>
-								<div>
-									<label>Technologies</label>
-									<BadgeInput
-										value={field.value} // Bind keywords value
-										onChange={(newKeywords) =>
-											field.onChange(newKeywords)
-										} // Update keywords dynamically
-										placeholder="Enter keywords separated by commas"
-										error={fieldState.error?.message}
-									/>
-								</div>
-								<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
-									<AnimatePresence>
-										{field.value.map((item, index) => (
-											<motion.div
-												key={item}
-												layout
-												initial={{
-													opacity: 0,
-													y: -50,
-												}}
-												animate={{
-													opacity: 1,
-													y: 0,
-													transition: {
-														delay: index * 0.1,
-													},
-												}}
-												exit={{
-													opacity: 0,
-													x: -50,
-												}}
-											>
-												<Badge
-													className="cursor-pointer"
-													onClick={() => {
-														field.onChange(
-															field.value.filter(
-																(v) =>
-																	v !== item
-															)
-														);
-													}}
-												>
-													<span className="mr-1">
-														{item}
-													</span>
-													<X
-														size={12}
-														weight="bold"
-													/>
-												</Badge>
-											</motion.div>
-										))}
-									</AnimatePresence>
-								</div>
-							</>
-						)}
-					/>
 
 					<Controller
 						name="description"
@@ -191,19 +189,10 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 						)}
 					/>
 
-					<Controller
-						name="links"
-						control={control}
-						render={({ field, fieldState }) => (
-							<div>
-								<label>Links</label>
-								<CustomLink
-									links={links}
-									setValue={(value) => field.onChange(value)}
-								/>
-							</div>
-						)}
-					/>
+					<div>
+						<label>Links</label>
+						<CustomLink setValue={setValue} />
+					</div>
 
 					<div className="flex justify-end space-x-2">
 						<Button

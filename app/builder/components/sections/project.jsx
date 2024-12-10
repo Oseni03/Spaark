@@ -15,6 +15,7 @@ import {
 	updateProjectnInDatabase,
 } from "@/redux/features/projectSlice";
 import { ProjectDialog } from "../dialogs/project-dialog";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Project = () => {
 	const dispatch = useDispatch();
@@ -23,7 +24,7 @@ export const Project = () => {
 
 	const form = useForm({
 		resolver: zodResolver(projectSchema),
-		defaultValues: defaultProject,
+		defaultValues: { ...defaultProject, id: createId() },
 	});
 	const {
 		reset,
@@ -43,7 +44,7 @@ export const Project = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultProject);
+		reset({ ...defaultProject, id: createId() });
 		setCurrentProject(null);
 		setIsOpen(true);
 	};

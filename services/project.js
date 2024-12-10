@@ -31,11 +31,22 @@ export async function createProject(data) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create project with additional metadata
+		// Destructure links from the data and exclude it from the project data
+		const { links, ...projectData } = data;
+
+		// Create the project with nested links
 		const project = await prisma.project.create({
 			data: {
-				...data,
+				...projectData,
 				userId,
+				links: {
+					create: links.map((link) => ({
+						id: link.id,
+						label: link.label,
+						url: link.url,
+						icon: link.icon || null,
+					})),
+				},
 			},
 		});
 
@@ -53,7 +64,8 @@ export async function editProject(projectId, data) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingProject = await prisma.project.findUnique({
+		// Check if the project exists and belongs to the authenticated user
+		const existingProject = await prisma.project.findFirst({
 			where: { id: projectId, userId },
 		});
 
@@ -63,11 +75,35 @@ export async function editProject(projectId, data) {
 			);
 		}
 
+		// Destructure links from the data and validate them
+		const { links, ...projectData } = data;
+
+		// Perform the update, including nested operations for links
 		const updatedProject = await prisma.project.update({
 			where: { id: projectId },
 			data: {
-				...data,
+				...projectData,
 				updatedAt: new Date(),
+				links: {
+					// Handle nested updates for links
+					upsert: links.map((link) => ({
+						where: { id: link.id || "" },
+						create: {
+							label: link.label,
+							url: link.url,
+							icon: link.icon || null,
+						},
+						update: {
+							label: link.label,
+							url: link.url,
+							icon: link.icon || null,
+						},
+					})),
+					// Remove links not included in the updated data
+					deleteMany: {
+						id: { notIn: links.map((link) => link.id) },
+					},
+				},
 			},
 		});
 
@@ -80,28 +116,31 @@ export async function editProject(projectId, data) {
 
 export async function deleteProject(projectId) {
 	return withErrorHandling(async () => {
+		// Authenticate user
 		const { userId } = await auth();
 		if (!userId) {
 			throw new Error(
-				"Unauthorized: Must be logged in to delete a project"
+				"Unauthorized: You must be logged in to delete a project."
 			);
 		}
 
-		const existingProject = await prisma.project.findUnique({
+		// Check if the project exists and belongs to the authenticated user
+		const existingProject = await prisma.project.findFirst({
 			where: { id: projectId, userId },
 		});
 
 		if (!existingProject) {
 			throw new Error(
-				"Project not found or you do not have permission to delete"
+				"Project not found or you do not have permission to delete it."
 			);
 		}
 
+		// Delete the project and its associated links
 		const deletedProject = await prisma.project.delete({
 			where: { id: projectId },
 		});
 
-		// Revalidate relevant paths
+		// Revalidate relevant paths to reflect changes
 		revalidatePath("/builder");
 
 		return deletedProject;

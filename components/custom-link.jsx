@@ -1,40 +1,42 @@
-import { DotsSixVertical, Envelope, Plus, X } from "@phosphor-icons/react";
+import { useState, useCallback } from "react";
+import { Plus, X } from "@phosphor-icons/react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Tooltip } from "./ui/tooltip";
 import { cn } from "@/lib/utils";
-import { AnimatePresence } from "framer-motion";
-
+import { AnimatePresence, motion } from "framer-motion";
 import { defaultLink } from "@/schema/shared/links";
 import { URLInput } from "./url-input";
+import { createId } from "@paralleldrive/cuid2";
 
-export const LinkInput = ({ field, onChange, onRemove }) => {
-	const handleChange = (key, value) => {
-		onChange({ ...field, [key]: value });
-	};
+const LinkInput = ({ field, onChange, onRemove }) => {
+	const handleChange = useCallback(
+		(key, value) => {
+			onChange({ ...field, [key]: value });
+		},
+		[field, onChange]
+	);
 
 	return (
-		<div className="grid">
+		<motion.div
+			className="flex space-x-1 items-center"
+			initial={{ opacity: 0, scale: 0.95 }}
+			animate={{ opacity: 1, scale: 1 }}
+			exit={{ opacity: 0, scale: 0.95 }}
+			layout
+		>
 			<div>
-				<label>Icon</label>
-				<div className="flex items-center space-x-2">
-					{field.value && (
+				<div className="flex items-center space-x-1">
+					{field.icon && (
 						<img
-							src={`https://cdn.simpleicons.org/${field.value}`}
+							src={`https://cdn.simpleicons.org/${field.icon}`}
 							alt="Icon"
 							className="w-8 h-8"
 						/>
 					)}
 					<Input
-						{...field}
-						placeholder="github"
-						onChange={(event) => {
-							onChange({
-								...field,
-								icon: event.target.value,
-							});
-						}}
+						value={field.icon || ""}
+						placeholder="Icon name (e.g., github)"
+						onChange={(e) => handleChange("icon", e.target.value)}
 					/>
 				</div>
 				<p className="text-sm text-muted-foreground">
@@ -51,57 +53,63 @@ export const LinkInput = ({ field, onChange, onRemove }) => {
 			</div>
 
 			<URLInput
-				id="link-url"
-				value={field.name}
-				onChange={(event) => {
-					handleChange("url", event.target.value);
-				}}
+				id={`url-input-${field.id}`}
+				field={field}
+				onChange={handleChange}
+				placeholder="Enter URL"
+				aria-label="Link URL"
 			/>
 
 			<Button
 				size="icon"
 				variant="link"
 				className="!ml-0 shrink-0"
-				onClick={() => {
-					onRemove(field.id);
-				}}
+				onClick={() => onRemove(field.id)}
 			>
 				<X />
 			</Button>
-		</div>
+		</motion.div>
 	);
 };
 
-export const CustomLink = ({ setValue, links, className }) => {
-	console.log("Project links: ", links);
-	const onAddCustomField = () => {
-		setValue("links", [...links, defaultLink]);
-	};
+export const CustomLink = ({
+	setValue,
+	links: initialLinks = [],
+	className,
+}) => {
+	const [links, setLinks] = useState(initialLinks);
 
-	const onChangeCustomField = (field) => {
-		const index = links.findIndex((item) => item.id === field.id);
-		const newCustomFields = JSON.parse(JSON.stringify(links));
-		newCustomFields[index] = field;
-		console.log("New link: ", newCustomFields);
+	const onAddCustomField = useCallback(() => {
+		const newLink = { ...defaultLink, id: createId() };
+		const updatedLinks = [...links, newLink];
+		setLinks(updatedLinks);
+		setValue("links", updatedLinks);
+	}, [links, setValue]);
 
-		setValue("links", newCustomFields);
-	};
+	const onChangeCustomField = useCallback(
+		(field) => {
+			const updatedLinks = links.map((item) =>
+				item.id === field.id ? field : item
+			);
+			setLinks(updatedLinks);
+			setValue("links", updatedLinks);
+		},
+		[links, setValue]
+	);
 
-	const onReorderCustomFields = (values) => {
-		setValue("links", values);
-	};
-
-	const onRemoveCustomField = (id) => {
-		setValue(
-			"links",
-			links.filter((field) => field.id !== id)
-		);
-	};
+	const onRemoveCustomField = useCallback(
+		(id) => {
+			const updatedLinks = links.filter((field) => field.id !== id);
+			setLinks(updatedLinks);
+			setValue("links", updatedLinks);
+		},
+		[links, setValue]
+	);
 
 	return (
 		<div className={cn("space-y-4", className)}>
 			<AnimatePresence>
-				{links?.map((field) => (
+				{links.map((field) => (
 					<LinkInput
 						key={field.id}
 						field={field}

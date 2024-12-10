@@ -7,13 +7,13 @@ import { Tooltip } from "./ui/tooltip";
 import React, { forwardRef, useMemo } from "react";
 
 export const URLInput = forwardRef(function URLInput(
-	{ id, value, placeholder, onChange },
+	{ id, field, placeholder, onChange },
 	ref
 ) {
 	// Validate if the URL is correct
 	const hasError = useMemo(
-		() => !urlSchema.safeParse(value?.href).success,
-		[value?.href]
+		() => !urlSchema.safeParse(field?.url).success,
+		[field?.url]
 	);
 
 	return (
@@ -23,13 +23,10 @@ export const URLInput = forwardRef(function URLInput(
 				<Input
 					ref={ref}
 					id={id}
-					value={value?.href || ""}
+					value={field?.url || ""}
 					className={`flex-1 ${hasError ? "border-red-500" : ""}`}
-					hasError={hasError}
 					placeholder={placeholder || "https://example.com"}
-					onChange={(event) =>
-						onChange({ ...value, href: event.target.value })
-					}
+					onChange={(event) => onChange("url", event.target.value)}
 				/>
 
 				{/* Label Popover */}
@@ -47,13 +44,10 @@ export const URLInput = forwardRef(function URLInput(
 					</Tooltip>
 					<PopoverContent className="p-1.5">
 						<Input
-							value={value?.label || ""}
+							value={field?.label || ""}
 							placeholder="Label (optional)"
 							onChange={(event) =>
-								onChange({
-									...value,
-									label: event.target.value,
-								})
+								onChange("label", event.target.value)
 							}
 						/>
 					</PopoverContent>
