@@ -16,6 +16,7 @@ import {
 	updateEducation,
 	updateEducationInDatabase,
 } from "@/redux/features/educationSlice";
+import { PictureSection } from "../sections/picture/section";
 
 export const EducationDialog = ({
 	form,
@@ -24,7 +25,7 @@ export const EducationDialog = ({
 	setIsOpen,
 }) => {
 	const dispatch = useDispatch();
-	const { reset, handleSubmit, control } = form;
+	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
 		if (currentEducation) {
@@ -56,65 +57,69 @@ export const EducationDialog = ({
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4 pr-3"
 					>
-						<Controller
-							name="institution"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Institution</label>
-									<Input
-										{...field}
-										placeholder="Enter institution name"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<PictureSection control={control} setValue={setValue} />
 
-						<Controller
-							name="studyType"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Type of Study</label>
-									<Input
-										{...field}
-										placeholder="e.g., Bachelor's Degree"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<div className="grid md:grid-cols-2 gap-2 space-y-4 md:space-y-0">
+							<Controller
+								name="institution"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Institution</label>
+										<Input
+											{...field}
+											placeholder="Enter institution name"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="area"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Area of Study</label>
-									<Input
-										{...field}
-										placeholder="e.g., Computer Science"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="studyType"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Type of Study</label>
+										<Input
+											{...field}
+											placeholder="e.g., Bachelor's Degree"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="date"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Date or Date Range</label>
-									<Input
-										{...field}
-										placeholder="e.g., March 2023 - Present"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="area"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Area of Study</label>
+										<Input
+											{...field}
+											placeholder="e.g., Computer Science"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="date"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Date or Date Range</label>
+										<Input
+											{...field}
+											placeholder="e.g., March 2023 - Present"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+						</div>
 
 						<Controller
 							name="url"

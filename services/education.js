@@ -17,6 +17,7 @@ export async function getUserEducations(userId) {
 				studyType: true,
 				date: true,
 				summary: true,
+				logo: true,
 				url: true,
 			},
 		});

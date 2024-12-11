@@ -7,6 +7,7 @@ export const educationSchema = itemSchema.extend({
 	studyType: z.string(),
 	date: z.string(),
 	summary: z.string().optional(),
+	logo: z.literal("").or(z.string().url()),
 	url: z.literal("").or(z.string().url()),
 });
 
@@ -17,5 +18,6 @@ export const defaultEducation = {
 	studyType: "",
 	date: "",
 	summary: "",
+	logo: "",
 	url: "",
 };

@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
-export const PictureSection = ({ control, setValue }) => {
+export const PictureSection = ({ control, setValue, name = "picture" }) => {
 	const [localPictureUrl, setLocalPictureUrl] = useState("");
 
 	const onSelectImage = async (event) => {
@@ -14,14 +14,14 @@ export const PictureSection = ({ control, setValue }) => {
 			// Simulate an upload function (replace with real upload logic).
 			const response = { data: URL.createObjectURL(file) }; // Mock URL for local files.
 			setLocalPictureUrl(response.data);
-			setValue("picture", response.data); // Update form value.
+			setValue(name, response.data); // Update form value.
 		}
 	};
 
 	const onAvatarClick = () => {
 		if (localPictureUrl) {
 			setLocalPictureUrl("");
-			setValue("picture", ""); // Clear the form value.
+			setValue(name, ""); // Clear the form value.
 		} else {
 			document.getElementById("image-upload")?.click();
 		}
@@ -29,7 +29,7 @@ export const PictureSection = ({ control, setValue }) => {
 
 	return (
 		<Controller
-			name="picture"
+			name={name}
 			control={control}
 			render={({ field, fieldState }) => (
 				<div className="flex items-center gap-x-4">
@@ -64,7 +64,7 @@ export const PictureSection = ({ control, setValue }) => {
 								onChange={(e) => {
 									const url = e.target.value;
 									setLocalPictureUrl(url);
-									setValue("picture", url);
+									setValue(name, url);
 								}}
 								className="border rounded px-2 py-1"
 								{...field}
