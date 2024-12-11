@@ -74,8 +74,12 @@ export const ExperienceDialog = ({
 										<Input
 											{...field}
 											placeholder="Enter company name"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -89,8 +93,12 @@ export const ExperienceDialog = ({
 										<Input
 											{...field}
 											placeholder="Enter your position"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -104,8 +112,12 @@ export const ExperienceDialog = ({
 										<Input
 											{...field}
 											placeholder="e.g., March 2023 - Present"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -119,8 +131,12 @@ export const ExperienceDialog = ({
 										<Input
 											{...field}
 											placeholder="Enter location"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -135,8 +151,12 @@ export const ExperienceDialog = ({
 									<Input
 										{...field}
 										placeholder="Enter company website"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
@@ -153,8 +173,12 @@ export const ExperienceDialog = ({
 										onChange={(value) =>
 											field.onChange(value)
 										}
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>

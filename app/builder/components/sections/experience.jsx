@@ -10,11 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { ExperienceDialog } from "../dialogs/experience-dialog";
 import {
+	addExperience,
+	addExperienceInDatabase,
 	removeExperience,
 	removeExperienceFromDatabase,
 	toggleExperienceVisibility,
 	updateExperienceInDatabase,
 } from "@/redux/features/experienceSlice";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Experience = () => {
 	const dispatch = useDispatch();
@@ -53,7 +56,12 @@ export const Experience = () => {
 		setCurrentExperience(experience);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addExperience(newItem));
+		dispatch(addExperienceInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeExperience(item.id));
 		dispatch(removeExperienceFromDatabase(item.id));

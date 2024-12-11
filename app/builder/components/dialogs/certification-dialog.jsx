@@ -61,65 +61,83 @@ export const CertificationDialog = ({
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4 pr-3"
 					>
-						<Controller
-							name="name"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Certification Name</label>
-									<Input
-										{...field}
-										placeholder="Enter certification name"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<div className="grid md:grid-cols-2 space-y-4 md:space-y-0 gap-2">
+							<Controller
+								name="name"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Certification Name</label>
+										<Input
+											{...field}
+											placeholder="Enter certification name"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="issuer"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Issuer</label>
-									<Input
-										{...field}
-										placeholder="Enter issuer name"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="issuer"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Issuer</label>
+										<Input
+											{...field}
+											placeholder="Enter issuer name"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="date"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Date</label>
-									<Input
-										{...field}
-										placeholder="e.g., March 2023"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="date"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Date</label>
+										<Input
+											{...field}
+											placeholder="e.g., March 2023"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>URL</label>
-									<Input
-										{...field}
-										placeholder="Enter URL (if applicable)"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="url"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>URL</label>
+										<Input
+											{...field}
+											placeholder="Enter URL (if applicable)"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+						</div>
 
 						<Controller
 							name="summary"
@@ -133,8 +151,12 @@ export const CertificationDialog = ({
 										onChange={(value) =>
 											field.onChange(value)
 										}
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>

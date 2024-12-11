@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import {
+	addProfile,
+	addProfileInDatabase,
 	removeProfile,
 	removeProfileFromDatabase,
 	toggleProfileVisibility,
@@ -53,7 +55,12 @@ export const Profile = () => {
 		setCurrentProfile(profile);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addProfile(newItem));
+		dispatch(addProfileInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeProfile(item.id));
 		dispatch(removeProfileFromDatabase(item.id));

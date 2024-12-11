@@ -9,6 +9,8 @@ import { defaultEducation, educationSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+	addEducation,
+	addEducationInDatabase,
 	removeEducation,
 	removeEducationFromDatabase,
 	toggleEducationVisibility,
@@ -52,7 +54,12 @@ export const Education = () => {
 		setCurrentEducation(education);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addEducation(newItem));
+		dispatch(addEducationInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeEducation(item.id));
 		dispatch(removeEducationFromDatabase(item.id));

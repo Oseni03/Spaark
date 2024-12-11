@@ -9,6 +9,8 @@ import { certificationSchema, defaultCertification } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+	addCertification,
+	addCertificationInDatabase,
 	removeCertification,
 	removeCertificationFromDatabase,
 	toggleCertificationVisibility,
@@ -53,7 +55,12 @@ export const Certification = () => {
 		setCurrentCertification(certification);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addCertification(newItem));
+		dispatch(addCertificationInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeCertification(item.id));
 		dispatch(removeCertificationFromDatabase(item.id));

@@ -9,12 +9,15 @@ import { defaultHackathon, hackathonSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+	addHackathon,
+	addHackathonInDatabase,
 	removeHackathon,
 	removeHackathonFromDatabase,
 	toggleHackathonVisibility,
 	updateHackathon,
 } from "@/redux/features/hackathonSlice";
 import { HackathonDialog } from "../dialogs/hackathon-dialog";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Hackathon = () => {
 	const dispatch = useDispatch();
@@ -53,7 +56,13 @@ export const Hackathon = () => {
 		setCurrentHackathon(hackathon);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		console.log("Duplicate", item);
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addHackathon(newItem));
+		dispatch(addHackathonInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeHackathon(item.id));
 		dispatch(removeHackathonFromDatabase(item.id));

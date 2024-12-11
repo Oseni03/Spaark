@@ -55,8 +55,12 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 									<Input
 										{...field}
 										placeholder="Enter skill name"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
@@ -73,8 +77,12 @@ export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 										onChange={(value) =>
 											field.onChange(value)
 										}
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>

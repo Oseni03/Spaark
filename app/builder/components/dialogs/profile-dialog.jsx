@@ -60,89 +60,107 @@ export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4"
 					>
-						<Controller
-							name="network"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Network</label>
-									<Input
-										{...field}
-										placeholder="LinkedIn"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
-
-						<Controller
-							name="username"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Username</label>
-									<Input
-										{...field}
-										placeholder="john.doe"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
-
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Website</label>
-									<Input
-										{...field}
-										placeholder="https://linkedin.com/in/johndoe"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
-
-						<Controller
-							name="icon"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Icon</label>
-									<div className="flex items-center space-x-2">
+						<div className="grid md:grid-cols-2 space-y-4 md:space-y-0 gap-2">
+							<Controller
+								name="network"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Network</label>
 										<Input
 											{...field}
-											placeholder="linkedin"
-											onChange={(e) => {
-												field.onChange(e);
-												handleIconChange(e);
-											}}
-											error={fieldState.error?.message}
+											placeholder="LinkedIn"
 										/>
-										{field.value && (
-											<img
-												src={`https://cdn.simpleicons.org/${field.value}`}
-												alt="Icon"
-												className="w-8 h-8"
-											/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
 										)}
 									</div>
-									<p className="text-sm text-muted-foreground">
-										Powered by{" "}
-										<a
-											href="https://simpleicons.org/"
-											target="_blank"
-											rel="noopener noreferrer nofollow"
-											className="font-medium"
-										>
-											Simple Icons
-										</a>
-									</p>
-								</div>
-							)}
-						/>
+								)}
+							/>
+
+							<Controller
+								name="username"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Username</label>
+										<Input
+											{...field}
+											placeholder="john.doe"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="url"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Website</label>
+										<Input
+											{...field}
+											placeholder="https://linkedin.com/in/johndoe"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="icon"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Icon</label>
+										<div className="flex items-center space-x-2">
+											<Input
+												{...field}
+												placeholder="linkedin"
+												onChange={(e) => {
+													field.onChange(e);
+													handleIconChange(e);
+												}}
+											/>
+											{field.value && (
+												<img
+													src={`https://cdn.simpleicons.org/${field.value}`}
+													alt="Icon"
+													className="w-8 h-8"
+												/>
+											)}
+										</div>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+										<p className="text-sm text-muted-foreground">
+											Powered by{" "}
+											<a
+												href="https://simpleicons.org/"
+												target="_blank"
+												rel="noopener noreferrer nofollow"
+												className="font-medium"
+											>
+												Simple Icons
+											</a>
+										</p>
+									</div>
+								)}
+							/>
+						</div>
 
 						<div className="flex justify-end space-x-2">
 							<Button

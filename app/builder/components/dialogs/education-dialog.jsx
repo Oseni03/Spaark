@@ -69,8 +69,12 @@ export const EducationDialog = ({
 										<Input
 											{...field}
 											placeholder="Enter institution name"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -84,8 +88,12 @@ export const EducationDialog = ({
 										<Input
 											{...field}
 											placeholder="e.g., Bachelor's Degree"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -99,8 +107,12 @@ export const EducationDialog = ({
 										<Input
 											{...field}
 											placeholder="e.g., Computer Science"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -114,8 +126,12 @@ export const EducationDialog = ({
 										<Input
 											{...field}
 											placeholder="e.g., March 2023 - Present"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -130,8 +146,12 @@ export const EducationDialog = ({
 									<Input
 										{...field}
 										placeholder="Enter institution website"
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>
@@ -148,8 +168,12 @@ export const EducationDialog = ({
 										onChange={(value) =>
 											field.onChange(value)
 										}
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>

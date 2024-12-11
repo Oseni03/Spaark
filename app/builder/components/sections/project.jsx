@@ -9,6 +9,8 @@ import { defaultProject, projectSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+	addProject,
+	addProjectInDatabase,
 	removeProject,
 	removeProjectFromDatabase,
 	toggleProjectVisibility,
@@ -55,7 +57,12 @@ export const Project = () => {
 		setCurrentProject(project);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addProject(newItem));
+		dispatch(addProjectInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeProject(item.id));
 		dispatch(removeProjectFromDatabase(item.id));

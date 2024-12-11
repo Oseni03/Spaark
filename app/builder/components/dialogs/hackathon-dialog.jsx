@@ -103,8 +103,12 @@ export const HackathonDialog = ({
 										<Input
 											{...field}
 											placeholder="e.g., 2024-03-15"
-											error={fieldState.error?.message}
 										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
 									</div>
 								)}
 							/>
@@ -122,8 +126,12 @@ export const HackathonDialog = ({
 										onChange={(value) =>
 											field.onChange(value)
 										}
-										error={fieldState.error?.message}
 									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
 								</div>
 							)}
 						/>

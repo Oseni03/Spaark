@@ -9,6 +9,8 @@ import { defaultSkill, skillSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
+	addSkill,
+	addSkillInDatabase,
 	removeSkill,
 	removeSkillFromDatabase,
 	toggleSkillVisibility,
@@ -53,7 +55,13 @@ export const Skill = () => {
 		setCurrentSkill(skill);
 		setIsOpen(true);
 	};
-	const onDuplicate = (item) => console.log("Duplicate", item);
+	const onDuplicate = (item) => {
+		console.log("Duplicate", item);
+		const newItem = { ...item, id: createId() };
+
+		dispatch(addSkill(newItem));
+		dispatch(addSkillInDatabase(newItem));
+	};
 	const onDelete = (item) => {
 		dispatch(removeSkill(item.id));
 		dispatch(removeSkillFromDatabase(item.id));

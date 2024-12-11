@@ -35,13 +35,20 @@ export const BadgeInput = forwardRef(
 		};
 
 		return (
-			<Input
-				{...props}
-				ref={ref}
-				value={label}
-				onKeyDown={onKeyDown}
-				onChange={(event) => setLabel(event.target.value)}
-			/>
+			<>
+				<Input
+					{...props}
+					ref={ref}
+					value={label}
+					onKeyDown={onKeyDown}
+					onChange={(event) => setLabel(event.target.value)}
+				/>
+				{props.error && (
+					<small className="text-red-500 opacity-75">
+						{props.error}
+					</small>
+				)}
+			</>
 		);
 	}
 );
