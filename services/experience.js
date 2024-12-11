@@ -18,6 +18,7 @@ export async function getUserExperiences(userId) {
 				location: true,
 				date: true,
 				summary: true,
+				picture: true,
 				url: true,
 			},
 		});

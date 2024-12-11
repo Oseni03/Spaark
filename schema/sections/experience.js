@@ -9,6 +9,7 @@ export const experienceSchema = itemSchema.extend({
 	location: z.string().optional(),
 	date: z.string(),
 	summary: z.string(),
+	picture: z.literal("").or(z.string().url("Invalid image URL")),
 	url: z.literal("").or(z.string().url()),
 });
 
@@ -20,5 +21,6 @@ export const defaultExperience = {
 	location: "",
 	date: "",
 	summary: "",
+	picture: "",
 	url: "",
 };

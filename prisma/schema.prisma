@@ -50,6 +50,7 @@ model Experience {
   location  String?  
   date      String   
   summary   String  
+  picture   String?  
   url       String?  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

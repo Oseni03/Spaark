@@ -16,6 +16,7 @@ import {
 	updateExperience,
 	updateExperienceInDatabase,
 } from "@/redux/features/experienceSlice";
+import { PictureSection } from "../sections/picture/section";
 
 export const ExperienceDialog = ({
 	form,
@@ -24,7 +25,7 @@ export const ExperienceDialog = ({
 	setIsOpen,
 }) => {
 	const dispatch = useDispatch();
-	const { reset, handleSubmit, control } = form;
+	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
 		if (currentExperience) {
@@ -61,65 +62,69 @@ export const ExperienceDialog = ({
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4 pr-3"
 					>
-						<Controller
-							name="company"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Company</label>
-									<Input
-										{...field}
-										placeholder="Enter company name"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<PictureSection control={control} setValue={setValue} />
 
-						<Controller
-							name="position"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Position</label>
-									<Input
-										{...field}
-										placeholder="Enter your position"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<div className="grid md:grid-cols-2 gap-2 space-y-4 md:space-y-0">
+							<Controller
+								name="company"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Company</label>
+										<Input
+											{...field}
+											placeholder="Enter company name"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="date"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Date or Date Range</label>
-									<Input
-										{...field}
-										placeholder="e.g., March 2023 - Present"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="position"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Position</label>
+										<Input
+											{...field}
+											placeholder="Enter your position"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
 
-						<Controller
-							name="location"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Location</label>
-									<Input
-										{...field}
-										placeholder="Enter location"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+							<Controller
+								name="date"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Date or Date Range</label>
+										<Input
+											{...field}
+											placeholder="e.g., March 2023 - Present"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="location"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Location</label>
+										<Input
+											{...field}
+											placeholder="Enter location"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+						</div>
 
 						<Controller
 							name="url"

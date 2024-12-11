@@ -1,16 +1,7 @@
 import { Trash, UploadSimple } from "@phosphor-icons/react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { Controller } from "react-hook-form";
-import { Aperture } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -58,7 +49,7 @@ export const PictureSection = ({ control, setValue }) => {
 						</div>
 					</div>
 					<div className="flex w-full flex-col gap-y-1.5 mb-3">
-						<Label htmlFor="image-upload">{`Picture`}</Label>
+						<Label htmlFor="image-upload">{`Picture/Logo`}</Label>
 						<div className="flex items-center gap-x-2">
 							<input
 								id="image-upload"
