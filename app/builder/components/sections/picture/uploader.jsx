@@ -4,13 +4,11 @@ import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function Uploader({ defaultValue, name }) {
+export default function Uploader({ defaultValue, setValue, name }) {
 	const aspectRatio = name === "image" ? "aspect-video" : "aspect-square";
+	const [image, setImage] = useState(defaultValue || "");
 
-	const inputRef = useRef < HTMLInputElement > null;
-	const [data, setData] = useState({
-		[name]: defaultValue,
-	});
+	const inputRef = useRef(null);
 
 	const [dragActive, setDragActive] = useState(false);
 
@@ -25,14 +23,9 @@ export default function Uploader({ defaultValue, name }) {
 			) {
 				toast.error("Invalid file type (must be .png, .jpg, or .jpeg)");
 			} else {
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					setData((prev) => ({
-						...prev,
-						[name]: e.target?.result,
-					}));
-				};
-				reader.readAsDataURL(file);
+				const url = URL.createObjectURL(file);
+				setImage(url);
+				setValue(name, url);
 			}
 		}
 	};
@@ -82,7 +75,7 @@ export default function Uploader({ defaultValue, name }) {
 					className={`${
 						dragActive ? "border-2 border-black" : ""
 					} absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
-						data[name]
+						image
 							? "bg-white/80 opacity-0 hover:opacity-100 hover:backdrop-blur-md"
 							: "bg-white opacity-100 hover:bg-gray-50"
 					}`}
@@ -113,10 +106,10 @@ export default function Uploader({ defaultValue, name }) {
 					</p>
 					<span className="sr-only">Photo upload</span>
 				</div>
-				{data[name] && (
+				{image && (
 					// eslint-disable-next-line @next/next/no-img-element
 					<img
-						src={data[name]}
+						src={image}
 						alt="Preview"
 						className="h-full w-full rounded-md object-cover"
 					/>
