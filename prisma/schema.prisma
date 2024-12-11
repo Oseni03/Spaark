@@ -42,94 +42,98 @@ model Profile {
 }
 
 model Experience {
-  id        String      @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
-  visible   Boolean   @default(true) // Visibility status of the profile
-  company   String   
-  position  String   
-  location  String?  
-  date      String   
-  summary   String  
-  picture   String?  
-  url       String?  
+  visible   Boolean  @default(true) // Visibility status of the profile
+  company   String
+  position  String
+  location  String?
+  date      String
+  summary   String
+  picture   String?
+  url       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Education {
-  id          String      @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   visible     Boolean  @default(true) // Visibility status of the profile
-  institution String   
-  studyType   String   
-  date        String   
-  summary     String?  
-  logo        String?  
-  url         String?  
+  institution String
+  studyType   String
+  date        String
+  summary     String?
+  logo        String?
+  url         String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Skill {
-  id            String      @id @default(uuid())
-  userId        String
-  visible       Boolean  @default(true) // Visibility status of the profile
-  name          String   
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(uuid())
+  userId      String
+  visible     Boolean  @default(true) // Visibility status of the profile
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Certification {
-  id        String      @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   visible   Boolean  @default(true)
-  name      String   
-  issuer    String   
-  date      String   
-  summary   String   
-  url       String?  
+  name      String
+  issuer    String
+  date      String
+  summary   String
+  url       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Project {
-  id            String      @id @default(uuid())
-  userId        String
-  visible       Boolean  @default(true)
-  name          String
-  description   String
-  date          String
-  technologies  String[]
-  url           String?
-  image         String?
-  video         String?
-  links         Link[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String   @id @default(uuid())
+  userId       String
+  visible      Boolean  @default(true)
+  name         String
+  description  String
+  date         String
+  technologies String[]
+  url          String?
+  image        String?
+  video        String?
+  links        Link[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Link {
-  id        String      @id @default(uuid())
-  projectId String
+  id        String   @id @default(uuid())
   label     String
   url       String
-  icon      String?  // Slug for the icon (e.g., from simpleicons.org)
+  icon      String? // Slug for the icon (e.g., from simpleicons.org)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  projectId   String
+  hackathonId String?
 }
 
 model Hackathon {
-  id            String      @id @default(uuid())
-  userId        String
-  visible       Boolean  @default(true)
-  name          String
-  description   String
-  date          String
-  location      String
-  url           String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(uuid())
+  userId      String
+  visible     Boolean  @default(true)
+  name        String
+  description String
+  date        String
+  location    String
+  url         String?
+  logo        String?
+  links       Link[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

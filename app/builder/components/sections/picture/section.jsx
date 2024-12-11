@@ -4,8 +4,14 @@ import { Label } from "@/components/ui/label";
 import { Controller } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { createId } from "@paralleldrive/cuid2";
 
-export const PictureSection = ({ control, setValue, name = "picture" }) => {
+export const PictureSection = ({
+	control,
+	setValue,
+	name = "picture",
+	id = createId(),
+}) => {
 	const [localPictureUrl, setLocalPictureUrl] = useState("");
 
 	const onSelectImage = async (event) => {
@@ -23,7 +29,7 @@ export const PictureSection = ({ control, setValue, name = "picture" }) => {
 			setLocalPictureUrl("");
 			setValue(name, ""); // Clear the form value.
 		} else {
-			document.getElementById("image-upload")?.click();
+			document.getElementById(id)?.click();
 		}
 	};
 
@@ -49,16 +55,16 @@ export const PictureSection = ({ control, setValue, name = "picture" }) => {
 						</div>
 					</div>
 					<div className="flex w-full flex-col gap-y-1.5 mb-3">
-						<Label htmlFor="image-upload">{`Picture/Logo`}</Label>
+						<Label htmlFor={id}>{`Picture/Logo`}</Label>
 						<div className="flex items-center gap-x-2">
 							<input
-								id="image-upload"
+								id={id}
 								type="file"
 								onChange={onSelectImage}
 								hidden
 							/>
 							<Input
-								id="picture-url"
+								id={`${id}-url`}
 								placeholder="https://..."
 								value={localPictureUrl || field.value}
 								onChange={(e) => {

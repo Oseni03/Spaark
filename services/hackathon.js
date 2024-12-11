@@ -10,14 +10,10 @@ export async function getUserHackathons(userId) {
 	return withErrorHandling(async () => {
 		const hackathons = await prisma.hackathon.findMany({
 			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				location: true,
-				url: true,
+			include: {
+				links: {
+					select: { id: true, label: true, url: true, icon: true },
+				},
 			},
 		});
 		if (hackathons.length > 0) {
@@ -35,13 +31,26 @@ export async function createHackathon(data) {
 			throw new Error("Unauthorized");
 		}
 
+		const { links, ...hackathonData } = data;
+		console.log("Links: ", links);
+		console.log("Hackathon data: ", hackathonData);
+
 		// Create hackathon with additional metadata
 		const hackathon = await prisma.hackathon.create({
 			data: {
-				...data,
+				...hackathonData,
 				userId,
+				links: {
+					create: links.map((link) => ({
+						id: link.id,
+						label: link.label,
+						url: link.url,
+						icon: link.icon || null,
+					})),
+				},
 			},
 		});
+		console.log("Created hackathon: ", hackathon);
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
@@ -67,11 +76,34 @@ export async function editHackathon(hackathonId, data) {
 			);
 		}
 
+		// Destructure links from the data and validate them
+		const { links, ...hackathonData } = data;
+
 		const updatedHackathon = await prisma.hackathon.update({
 			where: { id: hackathonId },
 			data: {
-				...data,
+				...hackathonData,
 				updatedAt: new Date(),
+				links: {
+					// Handle nested updates for links
+					upsert: links.map((link) => ({
+						where: { id: link.id || "" },
+						create: {
+							label: link.label,
+							url: link.url,
+							icon: link.icon || null,
+						},
+						update: {
+							label: link.label,
+							url: link.url,
+							icon: link.icon || null,
+						},
+					})),
+					// Remove links not included in the updated data
+					deleteMany: {
+						id: { notIn: links.map((link) => link.id) },
+					},
+				},
 			},
 		});
 

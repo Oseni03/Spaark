@@ -54,14 +54,18 @@ export function HackathonCard({
 			{links && links.length > 0 && (
 				<div className="mt-2 flex flex-row flex-wrap items-start gap-2">
 					{links?.map((link, idx) => (
-						<Link href={link.href} key={idx}>
+						<Link href={link.url} key={idx}>
 							<Badge
 								key={idx}
-								title={link.title}
+								title={link.label}
 								className="flex gap-2"
 							>
-								{link.icon}
-								{link.title}
+								<img
+									src={`https://cdn.simpleicons.org/${link.icon}`}
+									alt={link.label}
+									className="w-5 h-5"
+								/>
+								{link.label}
 							</Badge>
 						</Link>
 					))}

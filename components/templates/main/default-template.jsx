@@ -207,17 +207,13 @@ export default function DefaultTemplate({
 								>
 									<HackathonCard
 										title={project.name}
-										description={project.description}
+										description={HTMLReactParser(
+											project.description
+										)}
 										location={project.location}
 										dates={project.dates}
-										// image={project.image}
-										links={[
-											{
-												icon: <Globe size={3} />,
-												type: "Website",
-												href: project.url || "",
-											},
-										]}
+										image={project.logo || null}
+										links={project.links}
 									/>
 								</BlurFade>
 							))}

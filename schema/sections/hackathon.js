@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { defaultItem, itemSchema } from "../shared/items";
+import { linkSchema } from "../shared/links";
 
 // Schema
 export const hackathonSchema = itemSchema.extend({
@@ -8,7 +9,8 @@ export const hackathonSchema = itemSchema.extend({
 	location: z.string(),
 	description: z.string(),
 	date: z.string(),
-	url: z.literal("").or(z.string().url()),
+	logo: z.literal("").or(z.string().url("Invalid image URL")).nullable(),
+	links: z.array(linkSchema).default([]),
 });
 
 // Defaults
@@ -18,5 +20,6 @@ export const defaultHackathon = {
 	location: "",
 	description: "",
 	date: "",
-	url: "",
+	logo: "",
+	links: [],
 };

@@ -16,6 +16,8 @@ import {
 	updateHackathon,
 	updateHackathonnInDatabase,
 } from "@/redux/features/hackathonSlice";
+import { PictureSection } from "../sections/picture/section";
+import { CustomLink } from "@/components/custom-link";
 
 export const HackathonDialog = ({
 	form,
@@ -24,7 +26,7 @@ export const HackathonDialog = ({
 	setIsOpen,
 }) => {
 	const dispatch = useDispatch();
-	const { reset, handleSubmit, control } = form;
+	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
 		if (currentHackathon) {
@@ -51,102 +53,105 @@ export const HackathonDialog = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<form
-					onSubmit={handleSubmit(onSubmit)}
-					className="space-y-4 pr-3"
-				>
-					<div className="grid md:grid-cols-2 space-y-4 md:space-y-0 gap-2">
+				<ScrollArea className="max-h-[70vh]">
+					<form
+						onSubmit={handleSubmit(onSubmit)}
+						className="space-y-4 pr-3"
+					>
+						<PictureSection
+							control={control}
+							setValue={setValue}
+							name={"logo"}
+						/>
+						<div className="grid md:grid-cols-2 space-y-4 md:space-y-0 gap-2">
+							<Controller
+								name="name"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Hackathon Name</label>
+										<Input
+											{...field}
+											placeholder="Enter hackathon name"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="location"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Location</label>
+										<Input
+											{...field}
+											placeholder="Enter location"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="date"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Date</label>
+										<Input
+											{...field}
+											placeholder="e.g., 2024-03-15"
+											error={fieldState.error?.message}
+										/>
+									</div>
+								)}
+							/>
+						</div>
+
 						<Controller
-							name="name"
+							name="description"
 							control={control}
 							render={({ field, fieldState }) => (
 								<div>
-									<label>Hackathon Name</label>
-									<Input
+									<label>Description</label>
+									<RichInput
 										{...field}
-										placeholder="Enter hackathon name"
+										content={field.value}
+										onChange={(value) =>
+											field.onChange(value)
+										}
 										error={fieldState.error?.message}
 									/>
 								</div>
 							)}
 						/>
 
-						<Controller
-							name="location"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Location</label>
-									<Input
-										{...field}
-										placeholder="Enter location"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
+						<div>
+							<label>Links</label>
+							<CustomLink
+								setValue={setValue}
+								links={currentHackathon?.links || []}
+							/>
+						</div>
 
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Website</label>
-									<Input
-										{...field}
-										placeholder="Enter hackathon website"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
-						<Controller
-							name="date"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Date</label>
-									<Input
-										{...field}
-										placeholder="e.g., 2024-03-15"
-										error={fieldState.error?.message}
-									/>
-								</div>
-							)}
-						/>
-					</div>
-
-					<Controller
-						name="description"
-						control={control}
-						render={({ field, fieldState }) => (
-							<div>
-								<label>Description</label>
-								<RichInput
-									{...field}
-									content={field.value}
-									onChange={(value) => field.onChange(value)}
-									error={fieldState.error?.message}
-								/>
-							</div>
-						)}
-					/>
-
-					<div className="flex justify-end space-x-2">
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => setIsOpen(false)}
-						>
-							Cancel
-						</Button>
-						<Button type="submit">
-							{currentHackathon
-								? "Update Hackathon"
-								: "Add Hackathon"}
-						</Button>
-					</div>
-				</form>
+						<div className="flex justify-end space-x-2">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setIsOpen(false)}
+							>
+								Cancel
+							</Button>
+							<Button type="submit">
+								{currentHackathon
+									? "Update Hackathon"
+									: "Add Hackathon"}
+							</Button>
+						</div>
+					</form>
+				</ScrollArea>
 			</DialogContent>
 		</Dialog>
 	);
