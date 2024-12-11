@@ -117,9 +117,9 @@ model Link {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
-  projectId   String
+  projectId   String?
   hackathonId String?
 }
 

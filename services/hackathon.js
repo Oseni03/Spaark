@@ -24,25 +24,51 @@ export async function getUserHackathons(userId) {
 }
 
 export async function createHackathon(data) {
+	console.log("createHackathon called with data:", data);
+
+	// Validate input data
+	if (data === null || data === undefined) {
+		console.error("createHackathon received null or undefined data");
+		throw new Error("No hackathon data provided");
+	}
+
 	return withErrorHandling(async () => {
+		// Defensive checks
+		if (!data) {
+			console.error("Data is falsy inside withErrorHandling");
+			throw new Error("Invalid hackathon data");
+		}
+
 		// Get the authenticated user
 		const { userId } = await auth();
 		if (!userId) {
+			console.error("No authenticated user found");
 			throw new Error("Unauthorized");
 		}
 
-		const { links, ...hackathonData } = data;
-		console.log("Links: ", links);
-		console.log("Hackathon data: ", hackathonData);
+		// Ensure links is an array
+		const links = Array.isArray(data.links) ? data.links : [];
+
+		// Create a safe copy of data
+		const safeHackathonData = {
+			id: data.id,
+			name: data.name,
+			description: data.description,
+			date: data.date,
+			location: data.location,
+			visible: data.visible ?? true,
+			url: data.url || null,
+			logo: data.logo || null,
+		};
 
 		// Create hackathon with additional metadata
 		const hackathon = await prisma.hackathon.create({
 			data: {
-				...hackathonData,
+				...safeHackathonData,
 				userId,
 				links: {
 					create: links.map((link) => ({
-						id: link.id,
+						id: link.id || undefined, // Let Prisma generate if not provided
 						label: link.label,
 						url: link.url,
 						icon: link.icon || null,
@@ -50,7 +76,8 @@ export async function createHackathon(data) {
 				},
 			},
 		});
-		console.log("Created hackathon: ", hackathon);
+
+		console.log("Created hackathon:", hackathon);
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
