@@ -191,7 +191,10 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 
 					<div>
 						<label>Links</label>
-						<CustomLink setValue={setValue} />
+						<CustomLink
+							setValue={setValue}
+							links={currentProject?.links || []}
+						/>
 					</div>
 
 					<div className="flex justify-end space-x-2">

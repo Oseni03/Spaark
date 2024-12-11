@@ -34,7 +34,6 @@ export const addProjectInDatabase = createAsyncThunk(
 export const updateProjectnInDatabase = createAsyncThunk(
 	"project/updateProjectInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = projectSchema.safeParse(data);
@@ -75,13 +74,12 @@ const projectSlice = createSlice({
 	initialState,
 	reducers: {
 		setProjects(state, action) {
+			console.log("Project setting data: ", action.payload);
 			state.items = action.payload;
 		},
 		addProject(state, action) {
-			console.log("Project: ", action.payload);
 			const result = projectSchema.safeParse(action.payload);
 			if (result.success) {
-				console.log("Pushing result: ", result);
 				state.items.push(result.data);
 			} else {
 				console.error("Invalid project data:", result.error);

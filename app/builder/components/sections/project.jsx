@@ -41,6 +41,7 @@ export const Project = () => {
 	// Access the specific section from the Redux state
 	const section = useSelector((state) => state.project);
 	if (!section) return null;
+	console.log("Section: ", section);
 
 	// CRUD handlers
 	const openCreateDialog = () => {
