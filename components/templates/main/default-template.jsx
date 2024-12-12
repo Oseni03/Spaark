@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getInitials } from "@/lib/utils";
 import { Globe } from "lucide-react";
 import HTMLReactParser from "html-react-parser";
+import ContactCard from "./_components/contact-card";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -229,19 +230,14 @@ export default function DefaultTemplate({
 								Contact
 							</div>
 							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-								Get in Touch
+								Got a project in mind?
 							</h2>
 							<p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-								Want to chat? Just shoot me a dm{" "}
-								<Link
-									href={"#"}
-									className="text-blue-500 hover:underline"
-								>
-									with a direct question on twitter
-								</Link>{" "}
-								and I&apos;ll respond whenever I can. I will
-								ignore all soliciting.
+								Don&rsquo;t be shy – click the button below and
+								slide into my digital inbox! I promise I&rsquo;m
+								way more responsive than my houseplants.
 							</p>
+							<ContactCard />
 						</div>
 					</BlurFade>
 				</div>
