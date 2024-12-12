@@ -62,6 +62,7 @@
     "react-redux": "^9.1.2",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^3.1.0",
+    "resend": "^4.0.1",
     "sonner": "^1.7.0",
     "svix": "^1.42.0",
     "tailwind-merge": "^2.5.5",

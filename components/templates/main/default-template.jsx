@@ -162,14 +162,8 @@ export default function DefaultTemplate({
 									)}
 									dates={project.date}
 									tags={project.technologies}
-									// image={project.image}
-									links={[
-										{
-											icon: <Globe size={12} />,
-											type: "Website",
-											href: project.url || "",
-										},
-									]}
+									image={project.image}
+									links={project.links}
 								/>
 							</BlurFade>
 						))}

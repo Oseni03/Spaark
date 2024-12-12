@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Spinner } from "@/components/ui/Spinner";
 import ErrorMessage from "@/components/error-message";
+import { useEffect } from "react";
 
 // Reusable form component
 export function ZodForm({
@@ -36,6 +37,14 @@ export function ZodForm({
 		resolver: zodResolver(schema),
 		defaultValues,
 	});
+
+	const { formState, reset } = form;
+
+	useEffect(() => {
+		if (formState.submitted) {
+			reset();
+		}
+	}, [formState, reset]);
 
 	return (
 		<>

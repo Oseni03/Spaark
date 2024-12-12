@@ -1,18 +1,48 @@
 "use client";
 
-import Image from "next/image";
 import React from "react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import Link from "next/link";
 import { ContactForm } from "@/app/contact-us/components/contact-form";
+import { toast } from "sonner";
+import { useParams } from "next/navigation";
+import ContactNotification from "@/emails/templates/contact-notification";
 
 export default function ContactCard() {
-	const handleContact = async ({ email, full_name, message }) => {
-		if (!email || !full_name || !message) {
-			throw new Error("All fields are required.");
-		}
+	const { subdomain } = useParams();
 
-		toast.success("Will get back to you soon.");
+	const onSubmit = async ({ name, email, message }) => {
+		try {
+			const templateMessage = (
+				<ContactNotification
+					name={name}
+					email={email}
+					message={message}
+				/>
+			);
+
+			const response = await fetch("/api/send-email", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					username: subdomain,
+					subject: "New contact message",
+					reactTemplate: templateMessage,
+				}),
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				toast.success("Message sent successfully!");
+			} else {
+				toast.error(result.error || "Failed to send message");
+			}
+		} catch (error) {
+			toast.error("An unexpected error occurred");
+			console.error(error);
+		}
 	};
 	return (
 		<CardContainer className="inter-var">
@@ -29,7 +59,7 @@ export default function ContactCard() {
 				</CardItem>
 				<div className="text-start">
 					<CardItem translateZ="60" className="w-full mt-4">
-						<ContactForm formHandler={handleContact} />
+						<ContactForm formHandler={onSubmit} />
 					</CardItem>
 				</div>
 			</CardBody>

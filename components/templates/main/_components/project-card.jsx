@@ -69,7 +69,7 @@ export function ProjectCard({
 					/>
 				)}
 			</Link>
-			<CardHeader className="px-2">
+			<CardHeader className={image || video ? "px-2" : "px-4"}>
 				<div className="space-y-1">
 					<CardTitle className="mt-1 text-base">{title}</CardTitle>
 					<time className="font-sans text-xs">{dates}</time>
@@ -101,13 +101,17 @@ export function ProjectCard({
 				{links && links.length > 0 && (
 					<div className="flex flex-row flex-wrap items-start gap-1">
 						{links?.map((link, idx) => (
-							<Link href={link?.href} key={idx} target="_blank">
+							<Link href={link?.url} key={idx} target="_blank">
 								<Badge
 									key={idx}
 									className="flex gap-2 px-2 py-1 text-[10px]"
 								>
-									{link.icon}
-									{link.type}
+									<img
+										src={`https://cdn.simpleicons.org/${link.icon}`}
+										alt={link.label}
+										className="w-5 h-5"
+									/>
+									{link.label}
 								</Badge>
 							</Link>
 						))}

@@ -1,6 +1,6 @@
 "use client";
 import { ZodForm } from "@/components/zod-form";
-import { ContactFormSchema } from "@/utils/constants";
+import { ContactFormSchema } from "@/schema/contact";
 
 export const ContactForm = ({ formHandler }) => {
 	return (
