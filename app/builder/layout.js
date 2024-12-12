@@ -24,6 +24,8 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
@@ -87,7 +89,12 @@ const BuilderLayout = ({ children }) => {
 						<NavActions />
 					</div>
 				</header>
-				<div className="flex flex-1 flex-col gap-4 px-4 py-10">
+				<div
+					className={cn(
+						"flex flex-1 flex-col gap-4 px-4 py-10",
+						PORTFOLIO_TAILWIND_CLASS
+					)}
+				>
 					{children}
 				</div>
 			</SidebarInset>
