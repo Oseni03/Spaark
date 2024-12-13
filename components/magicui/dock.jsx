@@ -70,7 +70,7 @@ const DockIcon = ({
 	children,
 	...props
 }) => {
-	const ref = useRef < HTMLDivElement > null;
+	const ref = useRef(null);
 
 	const distanceCalc = useTransform(mousex, (val) => {
 		const bounds = ref.current?.getBoundingClientRect() ?? {

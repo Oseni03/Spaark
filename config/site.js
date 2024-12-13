@@ -1,5 +1,6 @@
 import { Cloud, FileAudio } from "lucide-react";
 import { FaBusinessTime } from "react-icons/fa";
+import { HomeIcon, NotebookIcon } from "lucide-react";
 // import MediaImage from "@/public/illustartions/media.png";
 // import ChannelImage from "@/public/illustartions/channels.png";
 // import CloudImage from "@/public/illustartions/cloud.png";
@@ -36,5 +37,9 @@ export const siteConfig = {
 			// image: CloudImage,
 			id: "cloud-integration",
 		},
+	],
+	navbar: [
+		{ href: "/", icon: HomeIcon, label: "Home" },
+		{ href: "/blog", icon: NotebookIcon, label: "Blog" },
 	],
 };

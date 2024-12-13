@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const fontSans = FontSans({
 	subsets: ["latin"],
@@ -34,8 +35,10 @@ export default function RootLayout({ children }) {
 							enableSystem
 							disableTransitionOnChange
 						>
-							<Toaster />
-							{children}
+							<TooltipProvider delayDuration={0}>
+								<Toaster />
+								{children}
+							</TooltipProvider>
 						</ThemeProvider>
 					</CustomProvider>
 				</body>

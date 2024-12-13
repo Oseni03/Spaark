@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { setHackathons } from "@/redux/features/hackathonSlice";
+import PortfolioNavbar from "@/components/templates/shared/navbar";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
@@ -97,6 +98,7 @@ const BuilderLayout = ({ children }) => {
 					)}
 				>
 					{children}
+					<PortfolioNavbar />
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
