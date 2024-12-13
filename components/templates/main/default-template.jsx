@@ -10,6 +10,7 @@ import { getInitials } from "@/lib/utils";
 import { Globe } from "lucide-react";
 import HTMLReactParser from "html-react-parser";
 import ContactCard from "./_components/contact-card";
+import { CertificationCard } from "./_components/certification-card";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -20,6 +21,7 @@ export default function DefaultTemplate({
 	skills,
 	projects,
 	hackathons,
+	certifications,
 }) {
 	return (
 		<main className="flex flex-col min-h-[100dvh] space-y-10">
@@ -170,6 +172,54 @@ export default function DefaultTemplate({
 					</div>
 				</div>
 			</section>
+			<section id="certifications">
+				<div className="space-y-12 w-full py-12">
+					<BlurFade delay={BLUR_FADE_DELAY * 13}>
+						<div className="flex flex-col items-center justify-center space-y-4 text-center">
+							<div className="space-y-2">
+								<div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
+									Certifications
+								</div>
+								<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+									I value learning
+								</h2>
+								<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+									Explore the professional certifications I
+									have earned throughout my career, showcasing
+									my commitment to continuous learning and
+									expertise in various fields. These
+									certifications reflect my proficiency in key
+									technologies, methodologies, and industry
+									best practices, helping me stay at the
+									forefront of innovation and ensuring that I
+									deliver high-quality solutions.
+								</p>
+							</div>
+						</div>
+					</BlurFade>
+					<BlurFade delay={BLUR_FADE_DELAY * 14}>
+						<ul className="mb-4 ml-4 divide-y divide-dashed border-l">
+							{certifications.items.map((project, id) => (
+								<BlurFade
+									key={project.id}
+									delay={BLUR_FADE_DELAY * 15 + id * 0.05}
+								>
+									<CertificationCard
+										name={project.name}
+										issuer={project.issuer}
+										summary={HTMLReactParser(
+											project.summary
+										)}
+										location={project.location}
+										date={project.date}
+										url={project.url}
+									/>
+								</BlurFade>
+							))}
+						</ul>
+					</BlurFade>
+				</div>
+			</section>
 			<section id="hackathons">
 				<div className="space-y-12 w-full py-12">
 					<BlurFade delay={BLUR_FADE_DELAY * 13}>
@@ -206,7 +256,7 @@ export default function DefaultTemplate({
 											project.description
 										)}
 										location={project.location}
-										dates={project.dates}
+										dates={project.date}
 										image={project.logo || null}
 										links={project.links}
 									/>

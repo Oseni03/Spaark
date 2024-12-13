@@ -17,6 +17,7 @@ import {
 	updateCertificationnInDatabase,
 } from "@/redux/features/certificationSlice";
 import { CertificationDialog } from "../dialogs/certification-dialog";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Certification = () => {
 	const dispatch = useDispatch();
@@ -45,7 +46,7 @@ export const Certification = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultCertification);
+		reset({ ...defaultCertification, id: createId() });
 		setCurrentCertification(null);
 		setIsOpen(true);
 	};

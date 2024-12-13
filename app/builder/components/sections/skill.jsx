@@ -17,6 +17,7 @@ import {
 	updateSkillnInDatabase,
 } from "@/redux/features/skillSlice";
 import { SkillDialog } from "../dialogs/skill-dialog";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Skill = () => {
 	const dispatch = useDispatch();
@@ -45,7 +46,7 @@ export const Skill = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultSkill);
+		reset({ ...defaultSkill, id: createId() });
 		setCurrentSkill(null);
 		setIsOpen(true);
 	};

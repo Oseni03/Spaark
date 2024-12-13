@@ -46,7 +46,7 @@ export const Experience = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultExperience);
+		reset({...defaultExperience, id: createId()});
 		setCurrentExperience(null);
 		setIsOpen(true);
 	};

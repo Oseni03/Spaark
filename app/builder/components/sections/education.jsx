@@ -17,6 +17,7 @@ import {
 	updateEducationInDatabase,
 } from "@/redux/features/educationSlice";
 import { EducationDialog } from "../dialogs/education-dialog";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Education = () => {
 	const dispatch = useDispatch();
@@ -45,7 +46,7 @@ export const Education = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultEducation);
+		reset({ ...defaultEducation, id: createId() });
 		setCurrentEducation(null);
 		setIsOpen(true);
 	};

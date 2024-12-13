@@ -18,6 +18,7 @@ import { defaultProfile } from "@/schema/sections";
 import { profileSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { createId } from "@paralleldrive/cuid2";
 
 export const Profile = () => {
 	const dispatch = useDispatch();
@@ -46,7 +47,7 @@ export const Profile = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultProfile);
+		reset({ ...defaultProfile, id: createId() });
 		setCurrentProfile(null);
 		setIsOpen(true);
 	};

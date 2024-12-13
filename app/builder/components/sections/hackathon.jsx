@@ -46,7 +46,7 @@ export const Hackathon = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset(defaultHackathon);
+		reset({ ...defaultHackathon, id: createId() });
 		setCurrentHackathon(null);
 		setIsOpen(true);
 	};

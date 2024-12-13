@@ -21,6 +21,7 @@ export default function Page() {
 				educations={education}
 				skills={skill}
 				hackathons={hackathon}
+				certifications={certification}
 			/>
 		</div>
 	);
