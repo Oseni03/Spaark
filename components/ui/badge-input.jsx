@@ -1,19 +1,23 @@
-/* eslint-disable react/display-name */
 import { forwardRef, useCallback, useEffect, useState } from "react";
 import { Input } from "./input";
 
 export const BadgeInput = forwardRef(
-	({ value, onChange, setPendingKeyword, ...props }, ref) => {
+	({ value = [], onChange, setPendingKeyword, ...props }, ref) => {
 		const [label, setLabel] = useState("");
 
 		const processInput = useCallback(() => {
+			if (!label.trim()) return;
+
 			const newLabels = label
 				.split(",")
 				.map((str) => str.trim())
 				.filter(Boolean)
 				.filter((str) => !value.includes(str));
-			onChange([...new Set([...value, ...newLabels])]);
-			setLabel("");
+
+			if (newLabels.length > 0) {
+				onChange([...new Set([...value, ...newLabels])]);
+				setLabel("");
+			}
 		}, [label, value, onChange]);
 
 		useEffect(() => {
@@ -23,7 +27,9 @@ export const BadgeInput = forwardRef(
 		}, [label, processInput]);
 
 		useEffect(() => {
-			if (setPendingKeyword) setPendingKeyword(label);
+			if (setPendingKeyword) {
+				setPendingKeyword(label);
+			}
 		}, [label, setPendingKeyword]);
 
 		const onKeyDown = (event) => {
@@ -35,7 +41,7 @@ export const BadgeInput = forwardRef(
 		};
 
 		return (
-			<>
+			<div>
 				<Input
 					{...props}
 					ref={ref}
@@ -48,7 +54,9 @@ export const BadgeInput = forwardRef(
 						{props.error}
 					</small>
 				)}
-			</>
+			</div>
 		);
 	}
 );
+
+BadgeInput.displayName = "BadgeInput";

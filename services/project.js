@@ -10,7 +10,16 @@ export async function getUserProjects(userId) {
 	return withErrorHandling(async () => {
 		const projects = await prisma.project.findMany({
 			where: { userId },
-			include: {
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				date: true,
+				technologies: true,
+				url: true,
+				image: true,
+				video: true,
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
 				},

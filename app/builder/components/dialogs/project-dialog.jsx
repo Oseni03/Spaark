@@ -56,7 +56,12 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4"
 					>
-						<Uploader setValue={setValue} name={"image"} />
+						<Uploader
+							defaultValue={
+								currentProject?.image || currentProject?.video
+							}
+							setValue={setValue}
+						/>
 						<div className="grid md:grid-cols-2 gap-2 space-y-4 md:space-y-0">
 							<Controller
 								name="name"
@@ -132,54 +137,58 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 										</div>
 										<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
 											<AnimatePresence>
-												{field.value.map(
-													(item, index) => (
-														<motion.div
-															key={item}
-															layout
-															initial={{
-																opacity: 0,
-																y: -50,
-															}}
-															animate={{
-																opacity: 1,
-																y: 0,
-																transition: {
-																	delay:
-																		index *
-																		0.1,
-																},
-															}}
-															exit={{
-																opacity: 0,
-																x: -50,
-															}}
-														>
-															<Badge
-																className="cursor-pointer"
-																onClick={() => {
-																	field.onChange(
-																		field.value.filter(
-																			(
-																				v
-																			) =>
-																				v !==
-																				item
-																		)
-																	);
+												{field.value &&
+													field.value.map(
+														(item, index) => (
+															<motion.div
+																key={item}
+																layout
+																initial={{
+																	opacity: 0,
+																	y: -50,
+																}}
+																animate={{
+																	opacity: 1,
+																	y: 0,
+																	transition:
+																		{
+																			delay:
+																				index *
+																				0.1,
+																		},
+																}}
+																exit={{
+																	opacity: 0,
+																	x: -50,
 																}}
 															>
-																<span className="mr-1">
-																	{item}
-																</span>
-																<X
-																	size={12}
-																	weight="bold"
-																/>
-															</Badge>
-														</motion.div>
-													)
-												)}
+																<Badge
+																	className="cursor-pointer"
+																	onClick={() => {
+																		field.onChange(
+																			field.value.filter(
+																				(
+																					v
+																				) =>
+																					v !==
+																					item
+																			)
+																		);
+																	}}
+																>
+																	<span className="mr-1">
+																		{item}
+																	</span>
+																	<X
+																		size={
+																			12
+																		}
+																		weight="bold"
+																	/>
+																</Badge>
+															</motion.div>
+														)
+													)}
 											</AnimatePresence>
 										</div>
 									</>

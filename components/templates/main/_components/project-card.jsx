@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -60,11 +61,11 @@ export function ProjectCard({
 					/>
 				)}
 				{image && (
-					<Image
+					<img
 						src={image}
 						alt={title}
-						width={500}
-						height={300}
+						width="500"
+						height="300"
 						className="h-40 w-full overflow-hidden object-cover object-top"
 					/>
 				)}

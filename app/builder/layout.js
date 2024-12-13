@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
+import { setHackathons } from "@/redux/features/hackathonSlice";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
@@ -55,7 +56,7 @@ const BuilderLayout = ({ children }) => {
 				if (data.projects.success)
 					dispatch(setProjects(data.projects.data));
 				if (data.hackathons.success)
-					dispatch(setProjects(data.hackathons.data));
+					dispatch(setHackathons(data.hackathons.data));
 			} catch (error) {
 				console.log("Error fetching or updating user data:", error);
 			}

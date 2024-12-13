@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function Uploader({ defaultValue, setValue, name }) {
+export default function Uploader({ defaultValue, setValue }) {
+	let name = "image";
 	const [media, setMedia] = useState(defaultValue || "");
 	const inputRef = useRef(null);
 	const [dragActive, setDragActive] = useState(false);
@@ -23,13 +24,16 @@ export default function Uploader({ defaultValue, setValue, name }) {
 				return;
 			}
 
-			const formData = new FormData();
-			formData.append("file", file);
+			if (file.type.startsWith("image/")) {
+				name = "image";
+			} else if (file.type.startsWith("video/")) {
+				name = "video";
+			}
 
 			try {
 				const response = await fetch("/api/file-upload", {
 					method: "POST",
-					body: formData,
+					body: file,
 				});
 
 				if (!response.ok) {
