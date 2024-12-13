@@ -5,6 +5,7 @@ import { Controller } from "react-hook-form";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { createId } from "@paralleldrive/cuid2";
+import { toast } from "sonner";
 
 export const PictureSection = ({
 	control,
@@ -15,12 +16,55 @@ export const PictureSection = ({
 	const [localPictureUrl, setLocalPictureUrl] = useState("");
 
 	const onSelectImage = async (event) => {
-		if (event.target.files && event.target.files.length > 0) {
+		try {
+			// Check if files exist and at least one file is selected
+			if (!event.target.files || event.target.files.length === 0) {
+				throw new Error("No file selected.");
+			}
+
+			// Extract the selected file
 			const file = event.target.files[0];
-			// Simulate an upload function (replace with real upload logic).
-			const response = { data: URL.createObjectURL(file) }; // Mock URL for local files.
-			setLocalPictureUrl(response.data);
-			setValue(name, response.data); // Update form value.
+
+			// Validate file type (optional, add based on your requirements)
+			if (!file.type.startsWith("image/")) {
+				throw new Error("Selected file is not an image.");
+			}
+
+			// Prepare headers and body for the upload request
+			const headers = {
+				"Content-Type": file.type || "application/octet-stream",
+				"x-vercel-filename": file.name || `image-${Date.now()}.png`,
+			};
+
+			// Send the file to the server
+			const response = await fetch("/api/file-upload", {
+				method: "POST",
+				headers,
+				body: file,
+			});
+
+			// Check if the upload was successful
+			if (!response.ok) {
+				throw new Error(`File upload failed: ${response.statusText}`);
+			}
+
+			// Extract the response JSON
+			const { blob } = await response.json();
+
+			// Update local state and form value
+			if (blob?.url) {
+				setLocalPictureUrl(blob.url);
+				setValue(name, blob.url);
+			} else {
+				throw new Error("File URL not returned from the server.");
+			}
+		} catch (error) {
+			// Handle and log any errors
+			console.error("Error during image upload:", error);
+			toast.error(
+				error.message ||
+					"An unexpected error occurred while uploading the image."
+			);
 		}
 	};
 

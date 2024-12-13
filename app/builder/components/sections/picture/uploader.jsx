@@ -1,31 +1,48 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function Uploader({ defaultValue, setValue, name }) {
-	const aspectRatio = name === "image" ? "aspect-video" : "aspect-square";
-	const [image, setImage] = useState(defaultValue || "");
-
+	const [media, setMedia] = useState(defaultValue || "");
 	const inputRef = useRef(null);
-
 	const [dragActive, setDragActive] = useState(false);
 
-	const handleUpload = (file) => {
+	const handleUpload = async (file) => {
 		if (file) {
 			if (file.size / 1024 / 1024 > 50) {
 				toast.error("File size too big (max 50MB)");
-			} else if (
-				!file.type.includes("png") &&
-				!file.type.includes("jpg") &&
-				!file.type.includes("jpeg")
+				return;
+			}
+
+			if (
+				!file.type.startsWith("image/") &&
+				!file.type.startsWith("video/")
 			) {
-				toast.error("Invalid file type (must be .png, .jpg, or .jpeg)");
-			} else {
-				const url = URL.createObjectURL(file);
-				setImage(url);
-				setValue(name, url);
+				toast.error("Invalid file type (must be an image or video)");
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append("file", file);
+
+			try {
+				const response = await fetch("/api/file-upload", {
+					method: "POST",
+					body: formData,
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to upload file");
+				}
+
+				const { blob } = await response.json();
+				setMedia(blob.url);
+				setValue(name, blob.url);
+				toast.success("File uploaded successfully");
+			} catch (error) {
+				console.error("Upload error:", error);
+				toast.error("Failed to upload file");
 			}
 		}
 	};
@@ -34,14 +51,9 @@ export default function Uploader({ defaultValue, setValue, name }) {
 		<div>
 			<label
 				htmlFor={`${name}-upload`}
-				className={cn(
-					"group relative mt-2 flex cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-sm transition-all hover:bg-gray-50",
-					aspectRatio,
-					{
-						"max-w-screen-md": aspectRatio === "aspect-video",
-						"max-w-xs": aspectRatio === "aspect-square",
-					}
-				)}
+				className={
+					"group relative mt-2 flex cursor-pointer flex-col items-center justify-center rounded-md border border-gray-300 bg-white shadow-sm transition-all hover:bg-gray-50 aspect-video max-w-screen-md"
+				}
 			>
 				<div
 					className="absolute z-[5] h-full w-full rounded-md"
@@ -75,7 +87,7 @@ export default function Uploader({ defaultValue, setValue, name }) {
 					className={`${
 						dragActive ? "border-2 border-black" : ""
 					} absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all ${
-						image
+						media
 							? "bg-white/80 opacity-0 hover:opacity-100 hover:backdrop-blur-md"
 							: "bg-white opacity-100 hover:bg-gray-50"
 					}`}
@@ -104,16 +116,22 @@ export default function Uploader({ defaultValue, setValue, name }) {
 					<p className="mt-2 text-center text-sm text-gray-500">
 						Max file size: 50MB
 					</p>
-					<span className="sr-only">Photo upload</span>
+					<span className="sr-only">Media upload</span>
 				</div>
-				{image && (
-					// eslint-disable-next-line @next/next/no-img-element
-					<img
-						src={image}
-						alt="Preview"
-						className="h-full w-full rounded-md object-cover"
-					/>
-				)}
+				{media &&
+					(media.includes("video") ? (
+						<video
+							src={media}
+							controls
+							className="h-full w-full rounded-md object-cover"
+						/>
+					) : (
+						<img
+							src={media}
+							alt="Preview"
+							className="h-full w-full rounded-md object-cover"
+						/>
+					))}
 			</label>
 			<div className="mt-1 flex rounded-md shadow-sm">
 				<input
@@ -121,7 +139,7 @@ export default function Uploader({ defaultValue, setValue, name }) {
 					ref={inputRef}
 					name={name}
 					type="file"
-					accept="image/*"
+					accept="image/*,video/*"
 					className="sr-only"
 					onChange={(e) => {
 						const file =
