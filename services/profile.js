@@ -38,7 +38,7 @@ export async function createProfile(data) {
 		const profile = await prisma.profile.create({
 			data: {
 				...data,
-				userId,
+				user: { connect: { id: userId } },
 			},
 		});
 

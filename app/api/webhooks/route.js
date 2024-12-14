@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { createUserBasics } from "@/services/user";
+import { createUser, updateUser, deleteUser } from "@/services/user";
 
 export async function POST(req) {
 	const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -48,7 +48,7 @@ export async function POST(req) {
 	console.log("webhook evt data: ", evt.data);
 
 	if (evt.type === "user.created") {
-		const { id } = evt.data;
+		const { id, username } = evt.data;
 		if (!id) {
 			return new Response("Error: User ID not found", {
 				status: 400,
@@ -56,10 +56,39 @@ export async function POST(req) {
 		}
 
 		console.log("userId:", id);
-		const basics = await createUserBasics(id);
+		const user = await createUser(
+			id,
+			username,
+			evt.data?.email_addresses[0]?.email_address
+		);
 
-		if (basics.success) {
-			console.log("User basics creation successful: ", basics);
+		if (user.success) {
+			console.log("User creation successsful: ", user.data);
+		}
+	} else if (evt.type === "user.updated") {
+		const { id, username } = evt.data;
+		if (!id) {
+			return new Response("Error: User ID not found", {
+				status: 400,
+			});
+		}
+
+		const user = await updateUser({
+			id,
+			username,
+			email: evt.data?.email_addresses[0]?.email_address,
+		});
+
+		if (user.success) {
+			console.log("User update successsful: ", user.data);
+		}
+	} else if (evt.type === "user.deleted") {
+		const { deleted, id } = evt.data;
+		if (deleted) {
+			const result = await deleteUser(id);
+			if (result.success) {
+				console.log("User deleted");
+			}
 		}
 	} else if (evt.type === "session.created") {
 		const { status, user_id } = evt.data;

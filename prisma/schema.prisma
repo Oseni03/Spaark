@@ -13,12 +13,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  username  String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  // One-to-one relationship with Basics
+  basics         Basics?
+  profiles       Profile[]
+  experiences    Experience[]
+  educations     Education[]
+  skills         Skill[]
+  certifications Certification[]
+  projects       Project[]
+  hackathons     Hackathon[]
+}
+
 model Basics {
   id        String    @id @default(cuid())
   name      String
   headline  String
   email     String
-  phone     String
+  phone     String?
   location  String
   url       String?
   picture   String?
@@ -27,6 +45,9 @@ model Basics {
   userId    String    @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+
+  // Foreign key to User
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Profile {
@@ -39,6 +60,8 @@ model Profile {
   url       String? // URL for the profile (optional)
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Experience {
@@ -54,6 +77,8 @@ model Experience {
   url       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Education {
@@ -68,6 +93,8 @@ model Education {
   url         String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Skill {
@@ -78,6 +105,8 @@ model Skill {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Certification {
@@ -91,6 +120,8 @@ model Certification {
   url       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Project {
@@ -107,6 +138,8 @@ model Project {
   links        Link[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Link {
@@ -136,4 +169,6 @@ model Hackathon {
   links       Link[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

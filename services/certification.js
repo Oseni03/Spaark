@@ -41,7 +41,7 @@ export async function createCertification(data) {
 		const certification = await prisma.certification.create({
 			data: {
 				...data,
-				userId,
+				user: { connect: { id: userId } },
 			},
 		});
 

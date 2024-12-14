@@ -41,7 +41,7 @@ export async function createExperience(data) {
 		const exp = await prisma.experience.create({
 			data: {
 				...data,
-				userId,
+				user: { connect: { id: userId } },
 			},
 		});
 

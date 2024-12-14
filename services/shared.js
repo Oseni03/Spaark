@@ -24,7 +24,6 @@ export async function withErrorHandling(action) {
 		console.error("withErrorHandling caught an error:", {
 			errorName: error.name,
 			errorMessage: error.message,
-			errorStack: error.stack,
 		});
 
 		// Specific error type handling

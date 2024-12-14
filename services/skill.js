@@ -36,7 +36,7 @@ export async function createSkill(data) {
 		const skill = await prisma.skill.create({
 			data: {
 				...data,
-				userId,
+				user: { connect: { id: userId } },
 			},
 		});
 

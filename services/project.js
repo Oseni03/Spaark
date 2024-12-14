@@ -47,7 +47,7 @@ export async function createProject(data) {
 		const project = await prisma.project.create({
 			data: {
 				...projectData,
-				userId,
+				user: { connect: { id: userId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id,

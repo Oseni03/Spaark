@@ -7,12 +7,76 @@ import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
 import { withErrorHandling } from "./shared";
 
+export async function createUser(userId, username, email) {
+	return withErrorHandling(async () => {
+		const user = await prisma.user.create({
+			data: {
+				id: userId,
+				username,
+				email,
+				basics: {
+					create: defaultBasics,
+				},
+			},
+		});
+		return user;
+	});
+}
+
+export async function updateUser(data) {
+	return withErrorHandling(async () => {
+		if (!data.id) {
+			throw new Error("Unauthorized");
+		}
+
+		// Update user in database
+		const updatedUser = await prisma.user.update({
+			where: { id: data.id },
+			data: {
+				...data,
+				updatedAt: new Date(), // Ensure updated timestamp is set
+			},
+		});
+
+		// Revalidate the path to update cached data
+		revalidatePath("/builder");
+
+		return updatedUser;
+	});
+}
+
+export async function deleteUser(userId) {
+	return withErrorHandling(async () => {
+		const user = await prisma.user.delete({
+			data: {
+				id: userId,
+			},
+		});
+		return user;
+	});
+}
+
 export async function createUserBasics(userId, data = defaultBasics) {
 	return withErrorHandling(async () => {
+		if (!userId) {
+			throw new Error("User ID is required");
+		}
+		const userExists = await prisma.user.findUnique({
+			where: { id: userId },
+		});
+
+		if (!userExists) {
+			throw new Error("User does not exist");
+		}
 		// Create User with Basics
+		// Upsert basics with provided or default data
 		const basics = await prisma.basics.upsert({
 			where: { userId },
-			data: {
+			update: {
+				...data,
+				userId,
+			},
+			create: {
 				...data,
 				userId,
 			},
@@ -33,7 +97,10 @@ export async function updateUserBasics(data) {
 		// Update user in database
 		const updatedBasics = await prisma.basics.update({
 			where: { userId },
-			data: data,
+			data: {
+				...data,
+				updatedAt: new Date(), // Ensure updated timestamp is set
+			},
 		});
 
 		// Revalidate the path to update cached data
@@ -73,14 +140,4 @@ export async function getUserBasics(userId) {
 		// Validate the fetched data against the schema
 		return basicsSchema.parse(userData);
 	});
-}
-
-// Utility function for file upload (implement based on your storage solution)
-async function uploadToStorage(file, filename) {
-	// This is a placeholder - replace with actual file upload logic
-	// Could be AWS S3, Google Cloud Storage, local filesystem, etc.
-	return {
-		url: `/uploads/${filename}`,
-		// other metadata
-	};
 }

@@ -65,7 +65,7 @@ export async function createHackathon(data) {
 		const hackathon = await prisma.hackathon.create({
 			data: {
 				...safeHackathonData,
-				userId,
+				user: { connect: { id: userId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id || undefined, // Let Prisma generate if not provided

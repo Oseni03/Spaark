@@ -40,7 +40,7 @@ export async function createEducation(data) {
 		const edu = await prisma.education.create({
 			data: {
 				...data,
-				userId,
+				user: { connect: { id: userId } },
 			},
 		});
 
