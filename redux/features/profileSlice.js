@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { z } from "zod";
 import { createProfile, editProfile, deleteProfile } from "@/services/profile";
 import { profileSchema } from "@/schema/sections";
+import { toast } from "sonner";
 
 // Initial state with simplified loading and error handling
 const initialState = {
@@ -13,13 +14,32 @@ const initialState = {
 // Async Thunks with improved type safety
 export const addProfileInDatabase = createAsyncThunk(
 	"profile/addProfileInDatabase",
-	async (profileData, { rejectWithValue }) => {
+	async (profileData, { getState, rejectWithValue }) => {
 		try {
-			// Validate input before sending to service
+			// Validate input using schema
 			const validatedData = profileSchema.safeParse(profileData);
-			if (validatedData.success) {
-				return await createProfile(validatedData.data);
+			if (!validatedData.success) {
+				throw new z.ZodError(validatedData.error.errors);
 			}
+
+			const newProfile = validatedData.data;
+
+			// Access the current state to check existing profiles
+			const state = getState();
+			const existingProfiles = state.profile?.items || [];
+
+			// Get all profiles with the same network
+			const matchedProfiles = existingProfiles.filter(
+				(profile) => profile.network === newProfile.network
+			);
+
+			if (matchedProfiles.length > 1) {
+				return rejectWithValue(
+					`A profile with the network '${newProfile.network}' already exists.`
+				);
+			}
+			// If validation passes and no conflict, create the profile
+			return await createProfile(newProfile);
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				return rejectWithValue(error.errors[0].message);
@@ -78,13 +98,25 @@ const profileSlice = createSlice({
 	initialState,
 	reducers: {
 		setProfiles(state, action) {
-			console.log("Profiles: ", action.payload);
 			state.items = action.payload;
 		},
 		addProfile(state, action) {
 			const result = profileSchema.safeParse(action.payload);
 			if (result.success) {
-				state.items.push(result.data);
+				const newProfile = result.data;
+
+				// Check if a profile with the same network already exists
+				const existingProfile = state.items.find(
+					(profile) => profile.network === newProfile.network
+				);
+
+				if (existingProfile) {
+					toast.info("Profile with network already exist");
+					return; // Exit without adding duplicate
+				}
+
+				// Add the new profile to the state
+				state.items.push(newProfile);
 			}
 		},
 		updateProfile(state, action) {

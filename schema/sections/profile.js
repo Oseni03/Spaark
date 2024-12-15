@@ -5,12 +5,7 @@ import { defaultItem, itemSchema } from "../shared/items";
 export const profileSchema = itemSchema.extend({
 	network: z.string().min(1),
 	username: z.string().min(1),
-	icon: z
-		.string()
-		.describe(
-			'Slug for the icon from https://simpleicons.org. For example, "github", "linkedin", etc.'
-		),
-	url: z.literal("").or(z.string().url()),
+	url: z.string().url("Invalid profile URL"),
 });
 
 // Defaults
@@ -18,6 +13,5 @@ export const defaultProfile = {
 	...defaultItem,
 	network: "",
 	username: "",
-	icon: "",
 	url: "",
 };

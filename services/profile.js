@@ -15,7 +15,6 @@ export async function getUserProfiles(userId) {
 				visible: true,
 				network: true,
 				username: true,
-				icon: true,
 				url: true,
 			},
 		});

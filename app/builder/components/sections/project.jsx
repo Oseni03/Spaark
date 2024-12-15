@@ -43,7 +43,6 @@ export const Project = () => {
 	// Access the specific section from the Redux state
 	const section = useSelector((state) => state.project);
 	if (!section) return null;
-	console.log("Section: ", section);
 
 	// CRUD handlers
 	const openCreateDialog = () => {
@@ -52,7 +51,6 @@ export const Project = () => {
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (project) => {
-		console.log("Update project: ", project);
 		reset(project);
 		setCurrentProject(project);
 		setIsOpen(true);

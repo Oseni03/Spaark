@@ -115,8 +115,8 @@ export const Profile = () => {
 							key={item.id}
 							id={item.id}
 							visible={item.visible}
-							title={item.username}
-							description={item.network}
+							title={item.network}
+							description={item.username}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}
 							onDuplicate={() => onDuplicate(item)}

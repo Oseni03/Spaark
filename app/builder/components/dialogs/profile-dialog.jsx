@@ -1,4 +1,3 @@
-import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
 import {
@@ -15,28 +14,26 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { socialNetworks } from "@/utils/constants";
 
 export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
-	const { setValue, reset, handleSubmit, control } = form;
-
-	const handleIconChange = useCallback(
-		(event) => {
-			const iconSlug = event.target.value;
-			setValue("icon", iconSlug);
-		},
-		[setValue]
-	);
+	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
 		if (currentProfile) {
-			console.log("Updated profile: ", data);
 			dispatch(updateProfile({ id: currentProfile.id, ...data }));
 			dispatch(
 				updateProfileInDatabase({ id: currentProfile.id, ...data })
 			);
 		} else {
-			console.log(data);
 			dispatch(addProfile(data));
 			dispatch(addProfileInDatabase(data));
 		}
@@ -67,10 +64,28 @@ export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 								render={({ field, fieldState }) => (
 									<div>
 										<label>Network</label>
-										<Input
-											{...field}
-											placeholder="LinkedIn"
-										/>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Select social network" />
+											</SelectTrigger>
+											<SelectContent>
+												{socialNetworks.map(
+													(network, idx) => (
+														<SelectItem
+															key={idx}
+															value={
+																network.value
+															}
+														>
+															{network.label}
+														</SelectItem>
+													)
+												)}
+											</SelectContent>
+										</Select>
 										{fieldState.error && (
 											<small className="text-red-500 opacity-75">
 												{fieldState.error?.message}
@@ -98,69 +113,26 @@ export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 									</div>
 								)}
 							/>
-
-							<Controller
-								name="url"
-								control={control}
-								render={({ field, fieldState }) => (
-									<div>
-										<label>Website</label>
-										<Input
-											{...field}
-											placeholder="https://linkedin.com/in/johndoe"
-										/>
-										{fieldState.error && (
-											<small className="text-red-500 opacity-75">
-												{fieldState.error?.message}
-											</small>
-										)}
-									</div>
-								)}
-							/>
-
-							<Controller
-								name="icon"
-								control={control}
-								render={({ field, fieldState }) => (
-									<div>
-										<label>Icon</label>
-										<div className="flex items-center space-x-2">
-											<Input
-												{...field}
-												placeholder="linkedin"
-												onChange={(e) => {
-													field.onChange(e);
-													handleIconChange(e);
-												}}
-											/>
-											{field.value && (
-												<img
-													src={`https://cdn.simpleicons.org/${field.value}`}
-													alt="Icon"
-													className="w-8 h-8"
-												/>
-											)}
-										</div>
-										{fieldState.error && (
-											<small className="text-red-500 opacity-75">
-												{fieldState.error?.message}
-											</small>
-										)}
-										<p className="text-sm text-muted-foreground">
-											Powered by{" "}
-											<a
-												href="https://simpleicons.org/"
-												target="_blank"
-												rel="noopener noreferrer nofollow"
-												className="font-medium"
-											>
-												Simple Icons
-											</a>
-										</p>
-									</div>
-								)}
-							/>
 						</div>
+
+						<Controller
+							name="url"
+							control={control}
+							render={({ field, fieldState }) => (
+								<div>
+									<label>Website</label>
+									<Input
+										{...field}
+										placeholder="https://linkedin.com/in/johndoe"
+									/>
+									{fieldState.error && (
+										<small className="text-red-500 opacity-75">
+											{fieldState.error?.message}
+										</small>
+									)}
+								</div>
+							)}
+						/>
 
 						<div className="flex justify-end space-x-2">
 							<Button
