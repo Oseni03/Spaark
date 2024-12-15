@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserBasics } from "@/services/user";
+import { getUserBasics, getUserByUsername } from "@/services/user";
 import { getUserCertifications } from "@/services/certification";
 import { getUserEducations } from "@/services/education";
 import { getUserExperiences } from "@/services/experience";
@@ -12,13 +12,35 @@ import { getUserHackathons } from "@/services/hackathon";
 // Handle GET requests to fetch user data
 export async function GET(req) {
 	try {
-		const { userId } = await auth();
+		const { searchParams } = new URL(req.url);
+		const username = searchParams.get("username");
 
-		if (!userId) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 }
-			);
+		let userId;
+
+		if (username) {
+			// Fetch the userId based on the username
+			const user = await getUserByUsername(username);
+
+			if (!user.success) {
+				return NextResponse.json(
+					{ error: user.error || "User not found" },
+					{ status: 404 }
+				);
+			}
+
+			userId = user.data.id;
+		} else {
+			// Authenticate the user if username is not provided
+			const { userId: authenticatedUserId } = await auth();
+
+			if (!authenticatedUserId) {
+				return NextResponse.json(
+					{ error: "Unauthorized" },
+					{ status: 401 }
+				);
+			}
+
+			userId = authenticatedUserId;
 		}
 
 		// Fetch data concurrently

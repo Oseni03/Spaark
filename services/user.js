@@ -7,6 +7,20 @@ import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
 import { withErrorHandling } from "./shared";
 
+export async function getUserByUsername(username) {
+	return withErrorHandling(async () => {
+		// Fetch the userId based on the username
+		const user = await prisma.user.findUnique({
+			where: { username },
+			select: {
+				id: true,
+				basics: true,
+			},
+		});
+		return user;
+	});
+}
+
 export async function createUser(userId, username, email) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.create({
