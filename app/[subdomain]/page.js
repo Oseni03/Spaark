@@ -1,11 +1,11 @@
 "use client";
 
 import DefaultTemplate from "@/components/templates/main/default-template";
+import PortfolioNavbar from "@/components/templates/shared/navbar";
 import { useSelector } from "react-redux";
 
 export default function Page() {
 	const basics = useSelector((state) => state.basics);
-	const profile = useSelector((state) => state.profile);
 	const experience = useSelector((state) => state.experience);
 	const education = useSelector((state) => state.education);
 	const skill = useSelector((state) => state.skill);
@@ -16,13 +16,16 @@ export default function Page() {
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
 			<DefaultTemplate
 				basics={basics}
-				projects={project}
-				experiences={experience}
-				educations={education}
-				skills={skill}
-				hackathons={hackathon}
-				certifications={certification}
+				projects={project.items.filter((item) => item.visible)}
+				experiences={experience.items.filter((item) => item.visible)}
+				educations={education.items.filter((item) => item.visible)}
+				skills={skill.items.filter((item) => item.visible)}
+				hackathons={hackathon.items.filter((item) => item.visible)}
+				certifications={certification.items.filter(
+					(item) => item.visible
+				)}
 			/>
+			<PortfolioNavbar />
 		</div>
 	);
 }

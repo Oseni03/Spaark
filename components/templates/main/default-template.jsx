@@ -63,7 +63,7 @@ export default function DefaultTemplate({
 					{HTMLReactParser(basics.about)}
 				</BlurFade>
 			</section>
-			{experiences.items.length > 0 && (
+			{experiences.length > 0 && (
 				<section id="work">
 					<div className="flex min-h-0 flex-col gap-y-3">
 						<BlurFade delay={BLUR_FADE_DELAY * 5}>
@@ -71,7 +71,7 @@ export default function DefaultTemplate({
 								Work Experience
 							</h2>
 						</BlurFade>
-						{experiences.items.map((work, id) => (
+						{experiences.map((work, id) => (
 							<BlurFade
 								key={work.company}
 								delay={BLUR_FADE_DELAY * 6 + id * 0.05}
@@ -92,13 +92,13 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			)}
-			{educations.items.length > 0 && (
+			{educations.length > 0 && (
 				<section id="education">
 					<div className="flex min-h-0 flex-col gap-y-3">
 						<BlurFade delay={BLUR_FADE_DELAY * 7}>
 							<h2 className="text-xl font-bold">Education</h2>
 						</BlurFade>
-						{educations.items.map((edu, id) => (
+						{educations.map((edu, id) => (
 							<BlurFade
 								key={edu.institution}
 								delay={BLUR_FADE_DELAY * 8 + id * 0.05}
@@ -118,14 +118,14 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			)}
-			{skills.items.length > 0 && (
+			{skills.length > 0 && (
 				<section id="skills">
 					<div className="flex min-h-0 flex-col gap-y-3">
 						<BlurFade delay={BLUR_FADE_DELAY * 9}>
 							<h2 className="text-xl font-bold">Skills</h2>
 						</BlurFade>
 						<div className="flex flex-wrap gap-1">
-							{skills.items.map((skill, id) => (
+							{skills.map((skill, id) => (
 								<BlurFade
 									key={skill.id}
 									delay={BLUR_FADE_DELAY * 10 + id * 0.05}
@@ -137,7 +137,7 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			)}
-			{projects.items.length > 0 && (
+			{projects.length > 0 && (
 				<section id="projects">
 					<div className="space-y-12 w-full py-12">
 						<BlurFade delay={BLUR_FADE_DELAY * 11}>
@@ -159,7 +159,7 @@ export default function DefaultTemplate({
 							</div>
 						</BlurFade>
 						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
-							{projects.items.map((project, id) => (
+							{projects.map((project, id) => (
 								<BlurFade
 									key={project.id}
 									delay={BLUR_FADE_DELAY * 12 + id * 0.05}
@@ -182,7 +182,7 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			)}
-			{certifications.items.length > 0 && (
+			{certifications.length > 0 && (
 				<section id="certifications">
 					<div className="space-y-12 w-full py-12">
 						<BlurFade delay={BLUR_FADE_DELAY * 13}>
@@ -211,7 +211,7 @@ export default function DefaultTemplate({
 						</BlurFade>
 						<BlurFade delay={BLUR_FADE_DELAY * 14}>
 							<ul className="mb-4 ml-4 divide-y divide-dashed border-l">
-								{certifications.items.map((project, id) => (
+								{certifications.map((project, id) => (
 									<BlurFade
 										key={project.id}
 										delay={BLUR_FADE_DELAY * 15 + id * 0.05}
@@ -233,7 +233,7 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			)}
-			{hackathons.items.length > 0 && (
+			{hackathons.length > 0 && (
 				<section id="hackathons">
 					<div className="space-y-12 w-full py-12">
 						<BlurFade delay={BLUR_FADE_DELAY * 13}>
@@ -247,20 +247,20 @@ export default function DefaultTemplate({
 									</h2>
 									<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
 										During my time in university, I attended{" "}
-										{hackathons.items.length}+ hackathons.
-										People from around the country would
-										come together and build incredible
-										things in 2-3 days. It was eye-opening
-										to see the endless possibilities brought
-										to life by a group of motivated and
-										passionate individuals.
+										{hackathons.length}+ hackathons. People
+										from around the country would come
+										together and build incredible things in
+										2-3 days. It was eye-opening to see the
+										endless possibilities brought to life by
+										a group of motivated and passionate
+										individuals.
 									</p>
 								</div>
 							</div>
 						</BlurFade>
 						<BlurFade delay={BLUR_FADE_DELAY * 14}>
 							<ul className="mb-4 ml-4 divide-y divide-dashed border-l">
-								{hackathons.items.map((project, id) => (
+								{hackathons.map((project, id) => (
 									<BlurFade
 										key={project.id}
 										delay={BLUR_FADE_DELAY * 15 + id * 0.05}

@@ -16,12 +16,14 @@ export default function Page() {
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
 			<DefaultTemplate
 				basics={basics}
-				projects={project}
-				experiences={experience}
-				educations={education}
-				skills={skill}
-				hackathons={hackathon}
-				certifications={certification}
+				projects={project.items.filter((item) => item.visible)}
+				experiences={experience.items.filter((item) => item.visible)}
+				educations={education.items.filter((item) => item.visible)}
+				skills={skill.items.filter((item) => item.visible)}
+				hackathons={hackathon.items.filter((item) => item.visible)}
+				certifications={certification.items.filter(
+					(item) => item.visible
+				)}
 			/>
 		</div>
 	);

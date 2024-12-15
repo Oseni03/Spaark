@@ -12,56 +12,16 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import {
-	Envelope,
 	GithubLogo,
 	LinkedinLogo,
 	XLogo,
 	YoutubeLogo,
 } from "@phosphor-icons/react";
 import { Pen } from "lucide-react";
-
-const contact = {
-	email: "hello@example.com",
-	tel: "+123456789",
-	social: {
-		GitHub: {
-			name: "GitHub",
-			url: "https://dub.sh/dillion-github",
-			icon: GithubLogo,
-
-			navbar: true,
-		},
-		LinkedIn: {
-			name: "LinkedIn",
-			url: "https://dub.sh/dillion-linkedin",
-			icon: LinkedinLogo,
-
-			navbar: true,
-		},
-		X: {
-			name: "X",
-			url: "https://dub.sh/dillion-twitter",
-			icon: XLogo,
-
-			navbar: true,
-		},
-		Youtube: {
-			name: "Youtube",
-			url: "https://dub.sh/dillion-youtube",
-			icon: YoutubeLogo,
-			navbar: true,
-		},
-		email: {
-			name: "Send Email",
-			url: "#",
-			icon: Envelope,
-
-			navbar: false,
-		},
-	},
-};
+import { useSelector } from "react-redux";
 
 export default function PortfolioNavbar() {
+	const profile = useSelector((state) => state.profile);
 	const { isSignedIn } = useUser();
 	return (
 		<div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-6 flex origin-bottom h-full max-h-14">
@@ -115,10 +75,10 @@ export default function PortfolioNavbar() {
 				)}
 
 				<Separator orientation="vertical" className="h-full" />
-				{Object.entries(contact.social)
-					.filter(([_, social]) => social.navbar)
-					.map(([name, social]) => (
-						<DockIcon key={name}>
+				{Object.entries(profile.items)
+					.filter(([_, social]) => social.visible)
+					.map(([network, social]) => (
+						<DockIcon key={network}>
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Link
@@ -131,11 +91,27 @@ export default function PortfolioNavbar() {
 											"size-12"
 										)}
 									>
-										<social.icon className="size-4" />
+										{social.network === "github" && (
+											<GithubLogo size={4} />
+										)}
+										{social.network === "linkedin" && (
+											<LinkedinLogo size={4} />
+										)}
+										{social.network === "x" && (
+											<XLogo size={4} />
+										)}
+										{social.network === "youtube" && (
+											<YoutubeLogo size={4} />
+										)}
 									</Link>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>{name}</p>
+									<p>
+										{social.network
+											.charAt(0)
+											.toLocaleUpperCase() +
+											social.network.slice(1)}
+									</p>
 								</TooltipContent>
 							</Tooltip>
 						</DockIcon>
