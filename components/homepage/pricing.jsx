@@ -1,6 +1,5 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	Card,
 	CardContent,
@@ -9,15 +8,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
-import axios from "axios";
 import { toast } from "sonner";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -31,33 +31,18 @@ const PricingHeader = ({ title, subtitle }) => (
 	</section>
 );
 
-const PricingSwitch = ({ onSwitch }) => (
-	<Tabs defaultValue="0" className="w-40 mx-auto" onValueChange={onSwitch}>
-		<TabsList className="py-6 px-2">
-			<TabsTrigger value="0" className="text-base">
-				<p className="text-black dark:text-white">Monthly</p>
-			</TabsTrigger>
-			<TabsTrigger value="1" className="text-base">
-				<p className="text-black dark:text-white">Yearly</p>
-			</TabsTrigger>
-		</TabsList>
-	</Tabs>
-);
-
 const PricingCard = ({
 	user,
 	handleCheckout,
-	isYearly,
 	title,
-	priceIdMonthly,
-	priceIdYearly,
+	priceId,
 	monthlyPrice,
-	yearlyPrice,
 	description,
 	features,
 	actionLabel,
 	popular,
 	exclusive,
+	custom_message,
 }) => {
 	const router = useRouter();
 	return (
@@ -74,42 +59,17 @@ const PricingCard = ({
 		>
 			<div>
 				<CardHeader className="pb-8 pt-4">
-					{isYearly && yearlyPrice && monthlyPrice ? (
-						<div className="flex justify-between">
-							<CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">
-								{title}
-							</CardTitle>
-							<div
-								className={cn(
-									"px-2.5 rounded-xl h-fit text-sm py-1 bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white",
-									{
-										"bg-gradient-to-r from-orange-400 to-rose-400 dark:text-black ":
-											popular,
-									}
-								)}
-							>
-								Save ${monthlyPrice * 12 - yearlyPrice}
-							</div>
-						</div>
-					) : (
+					<div className="flex justify-between">
 						<CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">
 							{title}
 						</CardTitle>
-					)}
+					</div>
 					<div className="flex gap-0.5">
 						<h2 className="text-3xl font-bold">
-							{yearlyPrice && isYearly
-								? "$" + yearlyPrice
-								: monthlyPrice
-								? "$" + monthlyPrice
-								: "Custom"}
+							{monthlyPrice ? "$" + monthlyPrice : "Custom"}
 						</h2>
 						<span className="flex flex-col justify-end text-sm mb-1">
-							{yearlyPrice && isYearly
-								? "/year"
-								: monthlyPrice
-								? "/month"
-								: null}
+							{monthlyPrice ? "/month" : null}
 						</span>
 					</div>
 					<CardDescription className="pt-1.5 h-12">
@@ -122,14 +82,25 @@ const PricingCard = ({
 					))}
 				</CardContent>
 			</div>
-			<CardFooter className="mt-2">
+			<CardFooter className="grid space-y-2 mt-2">
+				{custom_message && (
+					<div
+						className={cn(
+							"px-2.5 rounded-xl h-fit text-sm py-1 bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white",
+							{
+								"bg-gradient-to-r from-orange-400 to-rose-400 dark:text-black ":
+									popular,
+							}
+						)}
+					>
+						{custom_message}
+					</div>
+				)}
+
 				<Button
 					onClick={() => {
 						if (user?.id) {
-							handleCheckout(
-								isYearly ? priceIdYearly : priceIdMonthly,
-								true
-							);
+							handleCheckout(priceId, title, monthlyPrice);
 						} else {
 							toast("Please login or sign up to purchase", {
 								description:
@@ -164,59 +135,87 @@ const CheckItem = ({ text }) => (
 );
 
 export default function Pricing() {
-	const [isYearly, setIsYearly] = useState(false);
-	const togglePricingPeriod = (value) => setIsYearly(parseInt(value) === 1);
 	const { user } = useUser();
+	const [isProcessing, setIsProcessing] = useState(false);
 
-	const handleCheckout = async (priceId, subscription) => {
-		console.log("Checkout");
+	const handleCheckout = async (priceId, title, amount) => {
+		// Prevent multiple simultaneous checkout attempts
+		if (isProcessing) return;
+
+		// Validate user
+		if (!user?.emailAddresses[0]?.emailAddress) {
+			toast.error("Please log in to proceed with checkout");
+			return;
+		}
+
+		setIsProcessing(true);
+
+		try {
+			// Make the checkout request
+			const response = await axios.post("/api/checkout", {
+				userId: user.id,
+				priceId,
+				title,
+				amount,
+				userEmail: user.emailAddresses[0].emailAddress,
+				username: user.username || user.fullName,
+			});
+
+			// Redirect to payment link
+			if (response.data.link) {
+				window.location.href = response.data.link;
+				return;
+			}
+
+			// Fallback error handling
+			toast.error("Unable to initiate checkout");
+		} catch (err) {
+			// Error handling
+			if (axios.isAxiosError(err)) {
+				toast.error(
+					err.response?.data?.message ||
+						"An error occurred during checkout"
+				);
+			} else {
+				toast.error("Unexpected error. Please try again.");
+			}
+			console.error("Checkout error:", err);
+		} finally {
+			setIsProcessing(false);
+		}
 	};
 
 	const plans = [
 		{
-			title: "Basic",
-			monthlyPrice: 10,
-			yearlyPrice: 100,
-			description: "Essential features you need to get started",
-			features: [
-				"Example Feature Number 1",
-				"Example Feature Number 2",
-				"Example Feature Number 3",
-			],
-			priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			actionLabel: "Get Started",
-		},
-		{
-			title: "Pro",
-			monthlyPrice: 25,
-			yearlyPrice: 250,
-			description: "Perfect for owners of small & medium businessess",
-			features: [
-				"Example Feature Number 1",
-				"Example Feature Number 2",
-				"Example Feature Number 3",
-			],
-			actionLabel: "Get Started",
-			priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			popular: true,
-		},
-		{
-			title: "Enterprise",
-			price: "Custom",
+			title: "Essential Dev",
+			monthlyPrice: 5,
 			description:
-				"Dedicated support and infrastructure to fit your needs",
+				"Perfect for beginners or developers looking to create a simple, professional portfolio with essential features.",
 			features: [
-				"Example Feature Number 1",
-				"Example Feature Number 2",
-				"Example Feature Number 3",
-				"Super Exclusive Feature",
+				"Mobile-Responsive Design",
+				"Unlimited Project Display",
+				"Basic shareable link",
+				"Contact Form with Email Notifications",
 			],
-			actionLabel: "Contact Sales",
-			priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
-			exclusive: true,
+			priceId: process.env.NEXT_PUBLIC_ESSENTIAL_PRICE_ID,
+			actionLabel: "Start trial",
+		},
+		{
+			title: "Pro Dev Suite (Coming Soon)",
+			monthlyPrice: 10,
+			description:
+				"Unlock premium features with early access at a discounted price.",
+			features: [
+				"All 'Essential Dev' Features",
+				"Custom Domain Integration",
+				"Blog Integration",
+				"Priority Customer Support",
+			],
+			actionLabel: "Subscribe Now",
+			priceId: process.env.NEXT_PUBLIC_PRO_PRICE_ID,
+			popular: true,
+			custom_message:
+				"💲Early Access Price: $7/month (Regular price: $10/month)",
 		},
 	];
 
@@ -224,9 +223,8 @@ export default function Pricing() {
 		<div>
 			<PricingHeader
 				title="Sample Pricing Plans"
-				subtitle="Use these sample pricing cards in your SAAS"
+				subtitle="Choose a plan to ensure "
 			/>
-			<PricingSwitch onSwitch={togglePricingPeriod} />
 			<section className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-8 mt-8">
 				{plans.map((plan) => {
 					return (
@@ -235,7 +233,6 @@ export default function Pricing() {
 							handleCheckout={handleCheckout}
 							key={plan.title}
 							{...plan}
-							isYearly={isYearly}
 						/>
 					);
 				})}
