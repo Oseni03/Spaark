@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/sidebar";
 import { UserButton } from "@clerk/nextjs";
 import ModeToggle from "./mode-toggle";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
 
 const data = [
 	[
@@ -102,6 +104,63 @@ const data = [
 
 export function NavActions() {
 	const [isOpen, setIsOpen] = React.useState(false);
+	const user = useSelector((state) => state.user);
+	const text = `${user.username}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+
+	function copyToClipboard() {
+		try {
+			// Modern clipboard API
+			if (navigator.clipboard && window.isSecureContext) {
+				navigator.clipboard
+					.writeText(text)
+					.then(() => {
+						toast.success("Copied to clipboard");
+					})
+					.catch((err) => {
+						toast.error("Failed to copy");
+						console.error("Copy failed", err);
+					});
+			} else {
+				// Fallback method
+				const textArea = document.createElement("textarea");
+				textArea.value = text;
+
+				textArea.style.position = "fixed";
+				textArea.style.left = "-999999px";
+				textArea.style.top = "-999999px";
+				document.body.appendChild(textArea);
+
+				textArea.focus();
+				textArea.select();
+
+				try {
+					const successful = document.execCommand("copy");
+					if (successful) {
+						toast.success("Copied to clipboard");
+					} else {
+						toast.error("Copy failed");
+					}
+				} catch (err) {
+					toast.error("Copy failed");
+					console.error("Unable to copy", err);
+				}
+
+				document.body.removeChild(textArea);
+			}
+		} catch (err) {
+			toast.error("Copy failed");
+			console.error("Copy error", err);
+		}
+	}
+
+	// Example usage
+	function handleCopy() {
+		const textToCopy = "Hello, this is the text to be copied!";
+		copyToClipboard(textToCopy);
+
+		// Optional: Show user feedback
+		alert("Text copied to clipboard!");
+	}
 
 	return (
 		<div className="flex items-center gap-2 text-sm">
@@ -123,27 +182,19 @@ export function NavActions() {
 				>
 					<Sidebar collapsible="none" className="bg-transparent">
 						<SidebarContent>
-							{data.map((group, index) => (
-								<SidebarGroup
-									key={index}
-									className="border-b last:border-none"
-								>
-									<SidebarGroupContent className="gap-0">
-										<SidebarMenu>
-											{group.map((item, index) => (
-												<SidebarMenuItem key={index}>
-													<SidebarMenuButton>
-														<item.icon />{" "}
-														<span>
-															{item.label}
-														</span>
-													</SidebarMenuButton>
-												</SidebarMenuItem>
-											))}
-										</SidebarMenu>
-									</SidebarGroupContent>
-								</SidebarGroup>
-							))}
+							<SidebarGroup className="border-b last:border-none">
+								<SidebarGroupContent className="gap-0">
+									<SidebarMenu>
+										<SidebarMenuItem>
+											<SidebarMenuButton
+												onClick={copyToClipboard}
+											>
+												<Link /> <span>Copy Link</span>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									</SidebarMenu>
+								</SidebarGroupContent>
+							</SidebarGroup>
 						</SidebarContent>
 					</Sidebar>
 				</PopoverContent>

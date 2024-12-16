@@ -1,9 +1,11 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
 function PaymentStatusContent() {
+	const router = useRouter();
 	const searchParams = useSearchParams();
 	const status = searchParams.get("status");
 	const tx_ref = searchParams.get("tx_ref");
@@ -44,6 +46,9 @@ function PaymentStatusContent() {
 					? "Payment successful"
 					: "Payment Unsuccessful"}
 			</h1>
+			<Button onClick={() => router.push("/builder")} className="mt-4">
+				Back to dashboard
+			</Button>
 		</div>
 	);
 }

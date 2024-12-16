@@ -9,6 +9,7 @@ import { setProfiles } from "@/redux/features/profileSlice";
 import { setSkills } from "@/redux/features/skillSlice";
 import { updateBasics } from "@/redux/features/basicSlice";
 import { setProjects } from "@/redux/features/projectSlice";
+import { setUser } from "@/redux/features/userSlice";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { NavActions } from "@/components/nav-actions";
@@ -58,6 +59,7 @@ const BuilderLayout = ({ children }) => {
 					dispatch(setProjects(data.projects.data));
 				if (data.hackathons.success)
 					dispatch(setHackathons(data.hackathons.data));
+				if (data.user.success) dispatch(setUser(data.user.data));
 			} catch (error) {
 				console.log("Error fetching or updating user data:", error);
 			}

@@ -21,6 +21,24 @@ export async function getUserByUsername(username) {
 	});
 }
 
+export async function getUser(userId) {
+	return withErrorHandling(async () => {
+		// Fetch the userId based on the username
+		const user = await prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				id: true,
+				email: true,
+				username: true,
+				subscribed: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+		});
+		return user;
+	});
+}
+
 export async function createUser(userId, username, email) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.create({

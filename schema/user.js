@@ -2,29 +2,25 @@ import { idSchema } from "./shared/id";
 import { z } from "zod";
 
 import { secretsSchema } from "./secrets";
-
-export const usernameSchema = z
-	.string()
-	.min(3)
-	.max(255)
-	.regex(/^[\d._a-z-]+$/, {
-		message:
-			"Usernames can only contain lowercase letters, numbers, periods, hyphens, and underscores.",
-	});
+import { createId } from "@paralleldrive/cuid2";
 
 export const userSchema = z.object({
 	id: idSchema,
-	name: z.string().min(1).max(255),
-	picture: z.literal("").or(z.null()).or(z.string().url()),
-	username: usernameSchema,
+	username: z.literal("").or(z.string().min(3).max(255)),
 	email: z.string().email(),
-	locale: z.string().default("en-US"),
-	emailVerified: z.boolean().default(false),
-	twoFactorEnabled: z.boolean().default(false),
-	provider: z.enum(["email", "github", "google"]).default("email"),
+	subscribed: z.boolean().default(false),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+export const defaultUser = {
+	id: createId(),
+	username: "",
+	email: "",
+	subscribed: false,
+	createdAt: "",
+	updatedAt: "",
+};
 
 export const userWithSecretsSchema = userSchema.merge(
 	z.object({ secrets: secretsSchema })

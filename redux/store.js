@@ -19,6 +19,7 @@ import certificationReducer from "./features/certificationSlice";
 import projectReducer from "./features/projectSlice";
 import hackathonReducer from "./features/hackathonSlice";
 import basicsReducer from "./features/basicSlice";
+import userReducer from "./features/userSlice";
 
 // Persist configuration
 const persistConfig = {
@@ -31,6 +32,7 @@ const persistConfig = {
 
 // Combine reducers
 const rootReducer = combineReducers({
+	user: userReducer,
 	basics: basicsReducer,
 	profile: profileReducer,
 	experience: experienceReducer,

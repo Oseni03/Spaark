@@ -13,14 +13,14 @@ const Footer = () => {
 						Home
 					</Link>
 				</li>
-				<li className="mx-2">
+				{/* <li className="mx-2">
 					<Link
 						href="/#features"
 						className="text-gray-500 hover:text-gray-700"
 					>
 						Features
 					</Link>
-				</li>
+				</li> */}
 				<li className="mx-2">
 					<Link
 						href="/#pricing"

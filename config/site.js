@@ -1,4 +1,4 @@
-import { Cloud, FileAudio } from "lucide-react";
+import { FileCode, Share2, Brush } from "lucide-react";
 import { FaBusinessTime } from "react-icons/fa";
 import { HomeIcon, NotebookIcon } from "lucide-react";
 // import MediaImage from "@/public/illustartions/media.png";
@@ -6,34 +6,34 @@ import { HomeIcon, NotebookIcon } from "lucide-react";
 // import CloudImage from "@/public/illustartions/cloud.png";
 
 export const siteConfig = {
-	name: "YouAudio",
-	heroIntro: "Stay Updated with the Latest YouTube Content – In Audio",
+	name: "Spark",
+	heroIntro: "Design Your Professional Narrative",
 	description:
-		"Effortlessly track your favorite YouTube channels and get new video content in audio format. Subscribe, listen, and enjoy – all on your terms.",
+		"More than a portfolio—a powerful platform to visualize your achievements, highlight your skills, and unlock new possibilities.",
 	keywords: ["component library", "react", "vue", "reactjs"],
 	features: [
 		{
-			name: "Instant Audio Extraction from YouTube Videos.",
+			name: "Showcase Your Work Effortlessly",
 			description:
-				"Easily convert any YouTube video into audio with a simple URL input. Enjoy high-quality audio files optimized for your needs, whether it's for offline listening or content creation.",
-			icon: FileAudio,
+				"Easily display your projects, skills, and achievements with beautiful, customizable templates designed specifically for developers. Highlight your best work in a clean, professional layout that makes a lasting impression.",
+			icon: FileCode,
 			// image: MediaImage,
 			id: "instant-audio",
 		},
 		{
-			name: "Automatic Channel Monitoring.",
+			name: "Connect & Engage",
 			description:
-				"Subscribe to your favorite YouTube channels and get notified whenever new videos are uploaded. Instantly access audio versions without manually converting each video.",
-			icon: FaBusinessTime,
+				"Integrate your portfolio with GitHub, LinkedIn, and other social platforms to showcase your online presence. Include a built-in contact form to make it easy for potential clients or employers to get in touch.",
+			icon: Share2,
 			className: "lg:flex-row-reverse",
 			// image: ChannelImage,
 			id: "channel-monitoring",
 		},
 		{
-			name: "Seamless Cloud Integration.",
+			name: "Customization Made Simple",
 			description:
-				"Your extracted audio files are securely uploaded to the cloud, giving you fast access and reliable storage. Share or download audio files effortlessly from anywhere.",
-			icon: Cloud,
+				"No coding required! Personalize your portfolio with an intuitive editor that lets you adjust colors, fonts, and images. Upgrade to advanced customization options to make your portfolio truly unique and stand out in the crowd.",
+			icon: Brush,
 			// image: CloudImage,
 			id: "cloud-integration",
 		},
