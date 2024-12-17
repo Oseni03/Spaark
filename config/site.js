@@ -6,7 +6,7 @@ import { HomeIcon, NotebookIcon } from "lucide-react";
 // import CloudImage from "@/public/illustartions/cloud.png";
 
 export const siteConfig = {
-	name: "Spark",
+	name: "Spaark",
 	heroIntro: "Design Your Professional Narrative",
 	description:
 		"More than a portfolio—a powerful platform to visualize your achievements, highlight your skills, and unlock new possibilities.",
