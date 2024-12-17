@@ -43,18 +43,7 @@ export async function GET(req) {
 			userId = authenticatedUserId;
 		}
 
-		// Fetch data concurrently
-		const [
-			basics,
-			profiles,
-			experiences,
-			educations,
-			certifications,
-			skills,
-			projects,
-			hackathons,
-			user,
-		] = await Promise.all([
+		const results = await Promise.allSettled([
 			getUserBasics(userId),
 			getUserProfiles(userId),
 			getUserExperiences(userId),
@@ -65,6 +54,20 @@ export async function GET(req) {
 			getUserHackathons(userId),
 			getUser(userId),
 		]);
+
+		const [
+			basics,
+			profiles,
+			experiences,
+			educations,
+			certifications,
+			skills,
+			projects,
+			hackathons,
+			user,
+		] = results.map((result) =>
+			result.status === "fulfilled" ? result.value : null
+		);
 
 		// Structure the response
 		const responseData = {
