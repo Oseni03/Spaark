@@ -9,30 +9,31 @@ export const siteConfig = {
 	name: "Spaark",
 	heroIntro: "Design Your Professional Narrative",
 	description:
-		"More than a portfolio—a powerful platform to visualize your achievements, highlight your skills, and unlock new possibilities.",
+		"Build stunning developer portfolio effortlessly with our intuitive portfolio builder. Showcase your projects, connect with potential clients, and personalize your site—all without writing a single line of code. Elevate your online presence today!",
 	keywords: ["component library", "react", "vue", "reactjs"],
+	github: "https://github.com/Oseni03/Spaark",
 	features: [
 		{
-			name: "Showcase Your Work Effortlessly",
+			name: "Showcase Projects",
 			description:
-				"Easily display your projects, skills, and achievements with beautiful, customizable templates designed specifically for developers. Highlight your best work in a clean, professional layout that makes a lasting impression.",
+				"Description: Display your work with customizable, professional templates designed for developers.",
 			icon: FileCode,
 			// image: MediaImage,
 			id: "instant-audio",
 		},
 		{
-			name: "Connect & Engage",
+			name: "Connect Easily",
 			description:
-				"Integrate your portfolio with GitHub, LinkedIn, and other social platforms to showcase your online presence. Include a built-in contact form to make it easy for potential clients or employers to get in touch.",
+				"Description: Link your GitHub, LinkedIn, and more, with a built-in contact form for easy communication.",
 			icon: Share2,
 			className: "lg:flex-row-reverse",
 			// image: ChannelImage,
 			id: "channel-monitoring",
 		},
 		{
-			name: "Customization Made Simple",
+			name: "Simple Customization",
 			description:
-				"No coding required! Personalize your portfolio with an intuitive editor that lets you adjust colors, fonts, and images. Upgrade to advanced customization options to make your portfolio truly unique and stand out in the crowd.",
+				"Description: Personalize colors, fonts, and layouts effortlessly, or unlock advanced customization options.",
 			icon: Brush,
 			// image: CloudImage,
 			id: "cloud-integration",

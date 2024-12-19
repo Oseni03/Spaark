@@ -15,6 +15,8 @@ export async function getUserByUsername(username) {
 			select: {
 				id: true,
 				basics: true,
+				subscribed: true,
+				createdAt: true,
 			},
 		});
 		return user;

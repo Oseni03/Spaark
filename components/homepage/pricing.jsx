@@ -1,23 +1,14 @@
 "use client";
 
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { useState } from "react";
-import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
-import { useRouter } from "next/navigation";
 import axios from "axios";
+import { Spinner } from "../ui/Spinner";
+import { siteConfig } from "@/config/site";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -29,109 +20,6 @@ const PricingHeader = ({ title, subtitle }) => (
 		<p className="text-gray-600 dark:text-gray-400 pt-1">{subtitle}</p>
 		<br />
 	</section>
-);
-
-const PricingCard = ({
-	user,
-	handleCheckout,
-	title,
-	priceId,
-	monthlyPrice,
-	description,
-	features,
-	actionLabel,
-	popular,
-	exclusive,
-	custom_message,
-}) => {
-	const router = useRouter();
-	return (
-		<Card
-			className={cn(
-				`w-72 flex flex-col justify-between py-1 ${
-					popular ? "border-rose-400" : "border-zinc-700"
-				} mx-auto sm:mx-0`,
-				{
-					"animate-background-shine bg-white dark:bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] transition-colors":
-						exclusive,
-				}
-			)}
-		>
-			<div>
-				<CardHeader className="pb-8 pt-4">
-					<div className="flex justify-between">
-						<CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">
-							{title}
-						</CardTitle>
-					</div>
-					<div className="flex gap-0.5">
-						<h2 className="text-3xl font-bold">
-							{monthlyPrice ? "$" + monthlyPrice : "Custom"}
-						</h2>
-						<span className="flex flex-col justify-end text-sm mb-1">
-							{monthlyPrice ? "/month" : null}
-						</span>
-					</div>
-					<CardDescription className="pt-1.5 h-12">
-						{description}
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-2">
-					{features.map((feature) => (
-						<CheckItem key={feature} text={feature} />
-					))}
-				</CardContent>
-			</div>
-			<CardFooter className="grid space-y-2 mt-2">
-				{custom_message && (
-					<div
-						className={cn(
-							"px-2.5 rounded-xl h-fit text-sm py-1 bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white",
-							{
-								"bg-gradient-to-r from-orange-400 to-rose-400 dark:text-black ":
-									popular,
-							}
-						)}
-					>
-						{custom_message}
-					</div>
-				)}
-
-				<Button
-					onClick={() => {
-						if (user?.id) {
-							handleCheckout(priceId, title, monthlyPrice);
-						} else {
-							toast("Please login or sign up to purchase", {
-								description:
-									"You must be logged in to make a purchase",
-								action: {
-									label: "Sign Up",
-									onClick: () => {
-										router.push("/sign-up");
-									},
-								},
-							});
-						}
-					}}
-					className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium dark:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
-					type="button"
-				>
-					<div className="absolute -inset-0.5 -z-10 rounded-lg bg-gradient-to-b fr om-[#c7d2fe] to-[#8678f9] opacity-75 blur" />
-					{actionLabel}
-				</Button>
-			</CardFooter>
-		</Card>
-	);
-};
-
-const CheckItem = ({ text }) => (
-	<div className="flex gap-2">
-		<CheckCircle2 size={18} className="my-auto text-green-400" />
-		<p className="pt-0.5 text-zinc-700 dark:text-zinc-300 text-sm">
-			{text}
-		</p>
-	</div>
 );
 
 export default function Pricing() {
@@ -185,57 +73,183 @@ export default function Pricing() {
 		}
 	};
 
-	const plans = [
-		{
-			title: "Essential Dev",
-			monthlyPrice: 5,
-			description:
-				"Perfect for beginners or developers looking to create a simple, professional portfolio with essential features.",
-			features: [
-				"Mobile-Responsive Design",
-				"Unlimited Project Display",
-				"Basic shareable link",
-				"Contact Form with Email Notifications",
-			],
-			priceId: process.env.NEXT_PUBLIC_ESSENTIAL_PRICE_ID,
-			actionLabel: "Start trial",
-		},
-		{
-			title: "Pro Dev Suite (Coming Soon)",
-			monthlyPrice: 10,
-			description:
-				"Unlock premium features with early access at a discounted price.",
-			features: [
-				"All 'Essential Dev' Features",
-				"Custom Domain Integration",
-				"Blog Integration",
-				"Priority Customer Support",
-			],
-			actionLabel: "Subscribe Now",
-			priceId: process.env.NEXT_PUBLIC_PRO_PRICE_ID,
-			popular: true,
-			custom_message:
-				"💲Early Access Price: $7/month (Regular price: $10/month)",
-		},
-	];
-
 	return (
-		<div>
+		<div className="container">
 			<PricingHeader
-				title="Sample Pricing Plans"
-				subtitle="Choose a plan to ensure "
+				title="Pricing That Works for You"
+				subtitle={`Choose a plan that fits your needs and budget. Whether you're just starting or ready to unlock premium features, ${siteConfig.name} has a plan to help you shine.`}
 			/>
 			<section className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-8 mt-8">
-				{plans.map((plan) => {
-					return (
-						<PricingCard
-							user={user}
-							handleCheckout={handleCheckout}
-							key={plan.title}
-							{...plan}
-						/>
-					);
-				})}
+				<div className="flex flex-col md:flex-row gap-6 justify-center items-center py-12 px-4">
+					{/* Standard Plan Card */}
+					<div className="w-full max-w-md border border-gray-200 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
+						<div className="mb-6">
+							<h2 className="text-2xl font-bold mb-2">
+								Essential Dev
+							</h2>
+							<div className="flex items-baseline">
+								<span className="text-4xl font-extrabold mr-2">
+									$5
+								</span>
+								<span>/month</span>
+							</div>
+							<p className="mt-4">
+								Perfect for beginners or developers looking to
+								create a simple, professional portfolio with
+								essential features.
+							</p>
+						</div>
+
+						<ul className="mb-6 space-y-4">
+							{[
+								"Mobile-Responsive Design",
+								"Unlimited Project Display",
+								"Basic shareable link",
+								"Contact Form with Email Notifications",
+							].map((feature, index) => (
+								<li
+									key={index}
+									className="flex items-center space-x-3"
+								>
+									<svg
+										className="h-5 w-5 text-green-500"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth="2"
+											d="M5 13l4 4L19 7"
+										/>
+									</svg>
+									<span>{feature}</span>
+								</li>
+							))}
+						</ul>
+
+						<Button
+							size="lg"
+							disabled={isProcessing}
+							className="w-full dark:bg-white py-3 rounded-lg dark:hover:bg-gray-700 transition-colors font-semibold"
+							onClick={() => {
+								if (user?.id) {
+									handleCheckout(
+										process.env
+											.NEXT_PUBLIC_ESSENTIAL_PRICE_ID,
+										"Essential Dev",
+										5
+									);
+								} else {
+									toast(
+										"Please login or sign up to purchase",
+										{
+											description:
+												"You must be logged in to make a purchase",
+											action: {
+												label: "Sign Up",
+												onClick: () => {
+													router.push("/sign-up");
+												},
+											},
+										}
+									);
+								}
+							}}
+						>
+							{isProcessing && <Spinner />}
+							Subscribe Now
+						</Button>
+					</div>
+
+					{/* Discounted Plan Card */}
+					<div className="w-full max-w-md bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-xl shadow-xl p-6 relative overflow-hidden transform transition-all duration-300 hover:scale-105">
+						<div className="absolute top-0 right-0 m-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
+							30% OFF
+						</div>
+
+						<div className="mb-6">
+							<h2 className="text-2xl font-bold mb-2">
+								Coming Soon: Pro Dev Suite
+							</h2>
+							<div className="flex items-baseline">
+								<span className="text-4xl font-extrabold mr-2 line-through opacity-50">
+									$60
+								</span>
+								<span className="text-4xl font-extrabold text-white mr-2">
+									$42
+								</span>
+								<span className="text-gray-200">/6 months</span>
+							</div>
+							<p className="mt-4 text-white/80">
+								Pre-order our upcoming pro features and save big
+								on our most comprehensive plan.
+							</p>
+						</div>
+
+						<ul className="mb-6 space-y-4">
+							{[
+								"All 'Essential Dev' Features",
+								"Custom Domain Integration",
+								"Blog Integration",
+								"Priority Customer Support",
+							].map((feature, index) => (
+								<li
+									key={index}
+									className="flex items-center space-x-3"
+								>
+									<svg
+										className="h-5 w-5 text-green-300"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth="2"
+											d="M5 13l4 4L19 7"
+										/>
+									</svg>
+									<span>{feature}</span>
+								</li>
+							))}
+						</ul>
+
+						<Button
+							size="lg"
+							disabled={isProcessing}
+							className="w-full bg-white text-purple-700 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
+							onClick={() => {
+								if (user?.id) {
+									handleCheckout(
+										process.env.NEXT_PUBLIC_PRO_PRICE_ID,
+										"Pro Dev Suite",
+										42
+									);
+								} else {
+									toast(
+										"Please login or sign up to purchase",
+										{
+											description:
+												"You must be logged in to make a purchase",
+											action: {
+												label: "Sign Up",
+												onClick: () => {
+													router.push("/sign-up");
+												},
+											},
+										}
+									);
+								}
+							}}
+						>
+							{isProcessing && <Spinner />}
+							Pre-order Now
+						</Button>
+					</div>
+				</div>
 			</section>
 		</div>
 	);

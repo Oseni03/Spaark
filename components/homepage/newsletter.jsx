@@ -28,7 +28,7 @@ const Newsletter = () => {
 	};
 
 	return (
-		<section className="container px-3 md:px-0 bg-green-100 rounded-md">
+		<section className="container bg-gray-300 rounded-md">
 			<div className="mx-auto my-10">
 				<div className="flex flex-col items-center text-center text-black gap-6">
 					<div>

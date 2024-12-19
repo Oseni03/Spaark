@@ -4,6 +4,7 @@ import { z } from "zod";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import DataWrapper from "@/components/wrapper/data-wrapper";
 import { getUserByUsername } from "@/services/user";
+import { isTrialing } from "@/lib/utils";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -23,7 +24,14 @@ export default async function UserLayout({ params, children }) {
 	try {
 		const userResult = await getUserByUsername(subdomain);
 
-		if (!userResult.success || !userResult.data) {
+		const user = userResult?.data;
+
+		if (
+			!userResult.success ||
+			!user ||
+			!user.subscribed ||
+			!isTrialing(user.createdAt)
+		) {
 			return notFound();
 		}
 

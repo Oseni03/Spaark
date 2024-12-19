@@ -11,6 +11,7 @@ import { Globe } from "lucide-react";
 import HTMLReactParser from "html-react-parser";
 import ContactCard from "./_components/contact-card";
 import { CertificationCard } from "./_components/certification-card";
+import Image from "next/image";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -302,6 +303,20 @@ export default function DefaultTemplate({
 					</BlurFade>
 				</div>
 			</section>
+			<div className="fixed bottom-8 right-8">
+				<Link
+					href={process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+					className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+				>
+					<Image
+						src="/github.svg"
+						alt="Spaark Logo"
+						width={16}
+						height={16}
+					/>
+					Made with Spaark
+				</Link>
+			</div>
 		</main>
 	);
 }
