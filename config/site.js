@@ -10,8 +10,19 @@ export const siteConfig = {
 	heroIntro: "Design Your Professional Narrative",
 	description:
 		"Build stunning developer portfolio effortlessly with our intuitive portfolio builder. Showcase your projects, connect with potential clients, and personalize your site—all without writing a single line of code. Elevate your online presence today!",
-	keywords: ["component library", "react", "vue", "reactjs"],
+	keywords: [
+		"portfolio builder",
+		"developer portfolio",
+		"developer portfolio generator",
+		"portfolio website",
+		"developer showcase",
+		"portfolio template",
+		"personal website",
+	],
 	github: "https://github.com/Oseni03/Spaark",
+	icon: "/spaark.svg",
+	url: `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+	twitterHandle: "@Oseni03",
 	features: [
 		{
 			name: "Showcase Projects",

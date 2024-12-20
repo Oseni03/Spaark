@@ -14,14 +14,11 @@ import { useState } from "react";
 import Link from "next/link";
 import ModeToggle from "../mode-toggle";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { siteConfig } from "@/config/site";
+import Image from "next/image";
 
 export const Header1 = () => {
 	const navigationItems = [
-		{
-			title: "Home",
-			href: "/",
-			description: "",
-		},
 		{
 			title: "Sections",
 			description: "Managing a small business today is already tough.",
@@ -52,7 +49,20 @@ export const Header1 = () => {
 			<div className="container relative mx-auto min-h-14 flex gap-4 flex-row lg:grid lg:grid-cols-2 items-center">
 				<div className="justify-start items-center gap-4 lg:flex flex-row">
 					<NavigationMenu className="flex justify-start items-start">
-						<NavigationMenuList className="flex justify-start gap-4 flex-row">
+						<NavigationMenuList className="flex justify-start items-center gap-4 flex-row">
+							<NavigationMenuItem>
+								<Link href={""}>
+									<Button variant="icon">
+										<Image
+											src={siteConfig.icon}
+											alt={siteConfig.name}
+											width={65}
+											height={65}
+											className="text-black dark:text-white" // This will handle the color switching
+										/>
+									</Button>
+								</Link>
+							</NavigationMenuItem>
 							{navigationItems.map((item) => (
 								<NavigationMenuItem key={item.title}>
 									{item.href ? (
@@ -124,8 +134,12 @@ export const Header1 = () => {
 						</Link>
 					</SignedIn>
 					<SignedOut>
-						<Button variant="outline">Sign in</Button>
-						<Button>Get started</Button>
+						<Link href={"/sign-in"}>
+							<Button variant="outline">Sign in</Button>
+						</Link>
+						<Link href={"/sign-up"}>
+							<Button>Get started</Button>
+						</Link>
 					</SignedOut>
 				</div>
 				<div className="flex w-12 shrink lg:hidden items-end justify-end">

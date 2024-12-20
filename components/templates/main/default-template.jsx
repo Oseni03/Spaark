@@ -309,10 +309,10 @@ export default function DefaultTemplate({
 					className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
 				>
 					<Image
-						src="/github.svg"
+						src="/spaark.svg"
 						alt="Spaark Logo"
-						width={16}
-						height={16}
+						width={32}
+						height={32}
 					/>
 					Made with Spaark
 				</Link>

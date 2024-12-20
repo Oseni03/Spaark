@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { siteConfig } from "@/config/site";
+import Image from "next/image";
 
 export const Features = () => (
 	<div className="w-full py-20 lg:py-40">
@@ -39,7 +40,20 @@ export const Features = () => (
 						))}
 					</div>
 				</div>
-				<div className="bg-muted rounded-md aspect-square"></div>
+				<div className="bg-muted rounded-md aspect-square overflow-hidden relative">
+					<Image
+						src="/portfolio-sample.png" // Replace with your image path
+						alt="Description of the image"
+						fill
+						className="object-cover hidden dark:block"
+					/>
+					<Image
+						src="/portfolio-sample-dark.png" // Replace with your image path
+						alt="Description of the image"
+						fill
+						className="object-cover dark:hidden"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>

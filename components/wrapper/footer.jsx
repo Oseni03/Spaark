@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
 	return (
@@ -46,8 +47,18 @@ const Footer = () => {
 					</Link>
 				</li>
 			</ul>
-			<p className="text-center text-gray-500">
-				© {new Date().getFullYear()} {siteConfig.name}
+			<p className="text-center text-gray-500 flex items-center justify-center gap-2">
+				<Image
+					src={siteConfig.icon}
+					alt={siteConfig.name}
+					width={24}
+					height={24}
+					className="text-black dark:text-white"
+				/>
+				©{" "}
+				<span className="text-sm">
+					{new Date().getFullYear()} {siteConfig.name}
+				</span>
 			</p>
 		</footer>
 	);
