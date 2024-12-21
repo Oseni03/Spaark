@@ -9,6 +9,7 @@ import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import axios from "axios";
 import { Spinner } from "../ui/Spinner";
 import { siteConfig } from "@/config/site";
+import { useRouter } from "next/navigation";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -23,6 +24,7 @@ const PricingHeader = ({ title, subtitle }) => (
 );
 
 export default function Pricing() {
+	const router = useRouter();
 	const { user } = useUser();
 	const [isProcessing, setIsProcessing] = useState(false);
 
