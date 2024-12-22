@@ -4,7 +4,7 @@ The Portfolio Builder is an open-source, web-based application designed specific
 
 ## Features
 
-- **MagicUI Template**: Start with the MagicUI free portfolio template, which is specifically tailored for developers. More templates will be added in future updates.
+- **MagicUI Template**: Start with the [MagicUI free portfolio template](https://magicui.design/docs/templates/portfolio), which is specifically tailored for developers. More templates will be added in future updates.
 - **Responsive Design**: Ensures your portfolio looks great on all devices, from desktops to mobile phones.
 - **Project Showcase**: Highlight your coding projects with detailed descriptions, tech stacks used, images, and links to live demos or repositories.
 - **Skills Section**: Display your technical skills and proficiencies in programming languages, frameworks, and tools.
