@@ -8,7 +8,6 @@ The Portfolio Builder is an open-source, web-based application designed specific
 - **Responsive Design**: Ensures your portfolio looks great on all devices, from desktops to mobile phones.
 - **Project Showcase**: Highlight your coding projects with detailed descriptions, tech stacks used, images, and links to live demos or repositories.
 - **Skills Section**: Display your technical skills and proficiencies in programming languages, frameworks, and tools.
-- **GitHub Integration**: Automatically fetch and display your GitHub repositories, contributions, and activity.
 - **Custom Domain Support**: Use your custom domain to make your portfolio more professional and personalized.
 - **Contact Form**: Allow potential clients or employers to reach out to you directly through your portfolio.
 - **SEO Optimized**: Built with best practices to ensure your portfolio ranks well in search engines.
