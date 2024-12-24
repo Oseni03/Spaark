@@ -41,9 +41,9 @@ export default clerkMiddleware(async (auth, req) => {
 		let newURL;
 
 		if (process.env.NODE_ENV === "production") {
-			newURL = `https://${mainDomain}${url.pathname}`;
+			newURL = `https://${mainDomain}${url.pathname}${searchParams}`;
 		} else {
-			newURL = `http://${mainDomain}${url.pathname}`;
+			newURL = `http://${mainDomain}${url.pathname}${searchParams}`;
 		}
 		return NextResponse.rewrite(new URL(newURL, req.url));
 	}
