@@ -1,50 +1,53 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { getUserByUsername } from "./services/user";
 
 const isProtectedRoute = createRouteMatcher(["/builder(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
+	// Check if the route is protected and enforce authentication if it is
+	if (isProtectedRoute(req)) auth().protect();
+
 	const url = req.nextUrl;
-	const path = url.pathname;
+	const pathname = url.pathname;
 
-	// Exclude Next.js internal assets and specific routes from middleware
-	const excludedPaths = ["/_next", "/api", "/trpc", "/sign-in", "/sign-up"];
+	// Get hostname (e.g., 'mike.com', 'test.mike.com')
+	const hostname = req.headers.get("host");
 
-	if (excludedPaths.some((excludedPath) => path.startsWith(excludedPath))) {
+	let currentHost;
+	if (process.env.NODE_ENV === "production") {
+		// Production logic remains the same
+		const baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+		currentHost = hostname?.replace(`.${baseDomain}`, "");
+	} else {
+		// Updated development logic
+		console.log("Splitted: ", hostname?.split(":")[0]);
+		currentHost = hostname?.split(":")[0].replace(".localhost", "");
+	}
+	// If there's no currentHost, likely accessing the root domain, handle accordingly
+	if (!currentHost || currentHost === "localhost") {
+		// Continue to the next middleware or serve the root content
 		return NextResponse.next();
 	}
 
-	if (isProtectedRoute(req)) {
-		await auth.protect();
-	}
+	// // Fetch tenant-specific data based on the hostname
+	// const response = await getUserByUsername(currentHost);
 
-	// Get the hostname from the request
-	// const hostname = req.headers.get("host") || "";
-	let hostname = req.headers
-		.get("host")
-		.replace(".localhost:3000", `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`);
-	console.log("Hostname: ", hostname);
+	// // Handle the case where no domain data is found
+	// if (!response.success || !response.data) {
+	// 	// Continue to the next middleware or serve the root content
+	// 	return NextResponse.next();
+	// }
 
-	// Only proceed if hostname is not "localhost:3000" (root domain)
-	if (hostname && hostname !== `${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
-		// Extract the subdomain (e.g., 'new-site' from 'new-site.localhost:3000')
-		const subdomain = hostname.split(".")[0];
-		console.log("Subdomain: ", subdomain);
+	// const username = response.data.username;
 
-		// Construct the new path by prepending the subdomain
-		let newPath = `/${subdomain}`;
-		console.log("New path: ", newPath);
+	console.log("Hostname:", hostname);
+	console.log("Current Host:", currentHost);
 
-		return NextResponse.rewrite(new URL(newPath, req.url));
-	}
-
-	// If hostname is "localhost:3000", don't rewrite, continue normal flow
-	return NextResponse.next();
+	return NextResponse.rewrite(new URL(`/${currentHost}${pathname}`, req.url));
 });
 
+// Define which paths the middleware should run for
 export const config = {
-	matcher: [
-		// Run middleware on all routes except specified exclusions
-		"/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-	],
+	matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

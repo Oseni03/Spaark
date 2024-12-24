@@ -29,71 +29,54 @@ export default async function UserLayout({ params, children }) {
 		if (
 			!userResult.success ||
 			!user ||
-			!user.subscribed ||
-			!isTrialing(user.createdAt)
+			(!user.subscribed && !isTrialing(user.createdAt))
 		) {
 			return notFound();
 		}
 
+		const name = user.basics?.name || subdomain;
+		const headline = user.basics?.headline;
+		const picture = user.basics?.picture;
+		const summary = user.basics?.summary;
+
 		return (
-			<div className={PORTFOLIO_TAILWIND_CLASS}>
-				<DataWrapper subdomain={subdomain}>{children}</DataWrapper>
-			</div>
+			<>
+				<head>
+					<title>
+						{name} - {headline}
+					</title>
+					<meta name="site_name" content={name} />
+					<meta name="description" content={summary} />
+					<meta
+						property="og:title"
+						content={`${name} - ${headline}`}
+					/>
+					<meta property="og:description" content={summary} />
+					<meta property="og:type" content="profile" />
+					<meta property="og:username" content={subdomain} />
+					<meta name="twitter:card" content={summary} />
+					<meta
+						name="twitter:title"
+						content={`${name} - ${headline}`}
+					/>
+					<meta name="twitter:description" content={summary} />
+					{picture && <meta name="image" content={picture} />}
+					<meta
+						name="url"
+						content={
+							subdomain +
+							"." +
+							process.env.NEXT_PUBLIC_ROOT_DOMAIN
+						}
+					></meta>
+				</head>
+				<div className={PORTFOLIO_TAILWIND_CLASS}>
+					<DataWrapper subdomain={subdomain}>{children}</DataWrapper>
+				</div>
+			</>
 		);
 	} catch (error) {
 		console.error(`Error loading user layout for ${subdomain}:`, error);
 		return notFound();
 	}
 }
-
-export async function generateMetadata({ params }) {
-	// Validate input using Zod
-	const validationResult = ParamsSchema.safeParse(params);
-
-	if (!validationResult.success) {
-		return {
-			title: "User Not Found",
-			description: "This user profile does not exist",
-		};
-	}
-
-	const { subdomain } = validationResult.data;
-
-	try {
-		const userResult = await getUserByUsername(subdomain);
-
-		if (!userResult.success || !userResult.data) {
-			return {
-				title: "User Not Found",
-				description: "This user profile does not exist",
-			};
-		}
-
-		const name = userResult.data.basics?.name || subdomain;
-
-		return {
-			title: `${name}'s Portfolio`,
-			description: `Portfolio page for ${name}`,
-			openGraph: {
-				title: `${name}'s Portfolio`,
-				description: `Portfolio page for ${name}`,
-				type: "profile",
-			},
-			twitter: {
-				card: "summary",
-				title: `${name}'s Portfolio`,
-				description: `Portfolio page for ${name}`,
-			},
-		};
-	} catch (error) {
-		console.error(`Error generating metadata for ${subdomain}:`, error);
-
-		return {
-			title: "User Not Found",
-			description: "This user profile does not exist",
-		};
-	}
-}
-
-// Optional: Revalidation configuration
-export const revalidate = 3600; // Revalidate every hour
