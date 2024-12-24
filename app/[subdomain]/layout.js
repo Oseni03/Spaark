@@ -12,11 +12,8 @@ const ParamsSchema = z.object({
 });
 
 export default async function UserLayout({ params, children }) {
-	// Ensure params is not a promise
-	const paramsData = await Promise.resolve(params);
-
 	// Validate input using Zod
-	const validationResult = ParamsSchema.safeParse(paramsData);
+	const validationResult = ParamsSchema.safeParse(params);
 
 	if (!validationResult.success) {
 		console.log("Subdomain validation error: ", validationResult.error);
