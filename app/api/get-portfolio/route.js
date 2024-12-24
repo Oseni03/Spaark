@@ -16,6 +16,7 @@ const corsMiddleware = cors({
 		`https://www.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
 		`https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
 		new RegExp(`^https:\/\/.*\.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}$`), // Allows all subdomains
+		new RegExp(`^.*\.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}$`),
 		process.env.NEXT_PUBLIC_ROOT_DOMAIN,
 		"http://localhost:3000",
 		new RegExp(`^http:\/\/.*\.localhost:3000$`), // Allows all localhost subdomains
@@ -47,11 +48,13 @@ export async function GET(req) {
 
 		const { searchParams } = new URL(req.url);
 		const username = searchParams.get("username");
+		console.log("Subdomain/username: ", username);
 
 		let userId;
 
 		if (username) {
 			const user = await getUserByUsername(username);
+			console.log("User response: ", user);
 
 			if (!user.success) {
 				return NextResponse.json(
