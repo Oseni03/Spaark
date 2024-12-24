@@ -9,6 +9,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 	const url = req.nextUrl;
 	const pathname = url.pathname;
+	const searchParams = url.search;
 
 	// Get hostname (e.g., 'mike.com', 'test.mike.com')
 	const hostname = req.headers.get("host");
@@ -41,9 +42,9 @@ export default clerkMiddleware(async (auth, req) => {
 		let newURL;
 
 		if (process.env.NODE_ENV === "production") {
-			newURL = `https://${mainDomain}${url.pathname}`;
+			newURL = `https://${mainDomain}${url.pathname}${searchParams}`;
 		} else {
-			newURL = `http://${mainDomain}${url.pathname}`;
+			newURL = `http://${mainDomain}${url.pathname}${searchParams}`;
 		}
 		return NextResponse.rewrite(new URL(newURL, req.url));
 	}
