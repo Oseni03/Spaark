@@ -16,13 +16,16 @@ export default async function UserLayout({ params, children }) {
 	const validationResult = ParamsSchema.safeParse(params);
 
 	if (!validationResult.success) {
+		console.log("Subdomain validation error: ", validationResult.error);
 		return notFound();
 	}
 
 	const { subdomain } = validationResult.data;
+	console.log("Validated subdomain: ", subdomain);
 
 	try {
 		const userResult = await getUserByUsername(subdomain);
+		console.log("Subdomain profile result: ", userResult);
 
 		const user = userResult?.data;
 
