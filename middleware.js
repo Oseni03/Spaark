@@ -6,7 +6,7 @@ const isProtectedRoute = createRouteMatcher(["/builder(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
 	// Check if the route is protected and enforce authentication if it is
-	if (isProtectedRoute(req)) auth().protect();
+	if (isProtectedRoute(req)) auth.protect();
 
 	const url = req.nextUrl;
 	const pathname = url.pathname;
