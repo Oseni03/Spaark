@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { getUserByUsername } from "./services/user";
 
 const isProtectedRoute = createRouteMatcher(["/builder(.*)"]);
 
@@ -35,19 +34,19 @@ export default clerkMiddleware(async (auth, req) => {
 		return NextResponse.next();
 	}
 
-	// // Fetch tenant-specific data based on the hostname
-	// const response = await getUserByUsername(currentHost);
+	// If it's an API request from a subdomain
+	if (url.pathname.startsWith("/api/")) {
+		// Rewrite to the main domain's API
+		const mainDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+		let newURL;
 
-	// // Handle the case where no domain data is found
-	// if (!response.success || !response.data) {
-	// 	// Continue to the next middleware or serve the root content
-	// 	return NextResponse.next();
-	// }
-
-	// const username = response.data.username;
-
-	console.log("Hostname:", hostname);
-	console.log("Current Host:", currentHost);
+		if (process.env.NODE_ENV === "production") {
+			newURL = `https://${mainDomain}${url.pathname}`;
+		} else {
+			newURL = `http://${mainDomain}${url.pathname}`;
+		}
+		return NextResponse.rewrite(new URL(newURL, req.url));
+	}
 
 	return NextResponse.rewrite(new URL(`/${currentHost}${pathname}`, req.url));
 });
