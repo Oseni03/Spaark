@@ -21,7 +21,7 @@ export async function withErrorHandling(action) {
 
 		return { success: true, data: result };
 	} catch (error) {
-		console.error("withErrorHandling caught an error:", {
+		console.log("withErrorHandling caught an error:", {
 			errorName: error.name,
 			errorMessage: error.message,
 		});
