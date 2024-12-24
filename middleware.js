@@ -18,9 +18,7 @@ export default clerkMiddleware(async (auth, req) => {
 	if (process.env.NODE_ENV === "production") {
 		// Production logic remains the same
 		const baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-		currentHost = hostname
-			?.replace(`.${baseDomain}`, "")
-			?.replace("www", "");
+		currentHost = hostname?.replace(`.${baseDomain}`, "");
 	} else {
 		// Updated development logic
 		console.log("Splitted: ", hostname?.split(":")[0]);
