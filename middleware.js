@@ -25,7 +25,12 @@ export default clerkMiddleware(async (auth, req) => {
 		currentHost = hostname?.split(":")[0].replace(".localhost", "");
 	}
 	// If there's no currentHost, likely accessing the root domain, handle accordingly
-	if (!currentHost || currentHost === "localhost" || currentHost === "www") {
+	if (
+		!currentHost ||
+		currentHost === "localhost" ||
+		currentHost === "www" ||
+		currentHost === process.env.NEXT_PUBLIC_ROOT_DOMAIN
+	) {
 		// Continue to the next middleware or serve the root content
 		return NextResponse.next();
 	}
