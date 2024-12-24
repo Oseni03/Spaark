@@ -18,14 +18,16 @@ export default clerkMiddleware(async (auth, req) => {
 	if (process.env.NODE_ENV === "production") {
 		// Production logic remains the same
 		const baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-		currentHost = hostname?.replace(`.${baseDomain}`, "");
+		currentHost = hostname
+			?.replace(`.${baseDomain}`, "")
+			?.replace("www", "");
 	} else {
 		// Updated development logic
 		console.log("Splitted: ", hostname?.split(":")[0]);
 		currentHost = hostname?.split(":")[0].replace(".localhost", "");
 	}
 	// If there's no currentHost, likely accessing the root domain, handle accordingly
-	if (!currentHost || currentHost === "localhost") {
+	if (!currentHost || currentHost === "localhost" || currentHost === "www") {
 		// Continue to the next middleware or serve the root content
 		return NextResponse.next();
 	}
