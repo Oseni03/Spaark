@@ -54,7 +54,6 @@
 		"axios": "^1.7.8",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"cookies-js": "^1.2.3",
 		"cors": "^2.8.5",
 		"framer-motion": "^11.14.4",
 		"html-react-parser": "^5.2.0",

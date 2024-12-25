@@ -22,14 +22,15 @@ import hackathonReducer from "./features/hackathonSlice";
 import basicsReducer from "./features/basicSlice";
 import userReducer from "./features/userSlice";
 
-// Persist configuration
+// Custom cookie storage configuration
 const persistConfig = {
 	key: "root",
+	version: 1,
 	storage: new CookieStorage(Cookies, {
 		domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, // Notice the dot prefix
 		path: "/",
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "strict",
+		sameSite: "Lax", // Helps prevent CSRF attacks
 	}),
 };
 
