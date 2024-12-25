@@ -35,19 +35,19 @@ export default clerkMiddleware(async (auth, req) => {
 		return NextResponse.next();
 	}
 
-	// // If it's an API request from a subdomain
-	// if (url.pathname.startsWith("/api/")) {
-	// 	// Rewrite to the main domain's API
-	// 	const mainDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-	// 	let newURL;
+	// If it's an API request from a subdomain
+	if (url.pathname.startsWith("/api/")) {
+		// Rewrite to the main domain's API
+		const mainDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+		let newURL;
 
-	// 	if (process.env.NODE_ENV === "production") {
-	// 		newURL = `https://${mainDomain}${url.pathname}${searchParams}`;
-	// 	} else {
-	// 		newURL = `http://${mainDomain}${url.pathname}${searchParams}`;
-	// 	}
-	// 	return NextResponse.rewrite(new URL(newURL, req.url));
-	// }
+		if (process.env.NODE_ENV === "production") {
+			newURL = `https://${mainDomain}${url.pathname}${searchParams}`;
+		} else {
+			newURL = `http://${mainDomain}${url.pathname}${searchParams}`;
+		}
+		return NextResponse.rewrite(new URL(newURL, req.url));
+	}
 
 	return NextResponse.rewrite(new URL(`/${currentHost}${pathname}`, req.url));
 });
