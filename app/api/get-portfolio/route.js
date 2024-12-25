@@ -23,9 +23,17 @@ export async function GET(req) {
 			console.log("User response: ", user);
 
 			if (!user.success) {
-				return NextResponse.json(
-					{ error: user.error || "User not found" },
-					{ status: 404 }
+				return new NextResponse(
+					JSON.stringify({ error: user.error || "User not found" }),
+					{
+						status: 404,
+						headers: {
+							"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+							"Access-Control-Allow-Methods": "GET",
+							"Access-Control-Allow-Headers":
+								"Content-Type, Authorization",
+						},
+					}
 				);
 			}
 
@@ -34,9 +42,17 @@ export async function GET(req) {
 			const { userId: authenticatedUserId } = await auth();
 
 			if (!authenticatedUserId) {
-				return NextResponse.json(
-					{ error: "Unauthorized" },
-					{ status: 401 }
+				return new NextResponse(
+					JSON.stringify({ error: "Unauthorized" }),
+					{
+						status: 401,
+						headers: {
+							"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+							"Access-Control-Allow-Methods": "GET",
+							"Access-Control-Allow-Headers":
+								"Content-Type, Authorization",
+						},
+					}
 				);
 			}
 
@@ -81,12 +97,39 @@ export async function GET(req) {
 			user,
 		};
 
-		return NextResponse.json(responseData, { status: 200 });
+		return new NextResponse(JSON.stringify(responseData), {
+			status: 200,
+			headers: {
+				"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+				"Access-Control-Allow-Methods": "GET",
+				"Access-Control-Allow-Headers": "Content-Type, Authorization",
+			},
+		});
 	} catch (error) {
 		console.log("Error fetching user data:", error);
-		return NextResponse.json(
-			{ error: "Failed to fetch user data" },
-			{ status: 500 }
+		return new NextResponse(
+			JSON.stringify({ error: "Failed to fetch user data" }),
+			{
+				status: 500,
+				headers: {
+					"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+					"Access-Control-Allow-Methods": "GET",
+					"Access-Control-Allow-Headers":
+						"Content-Type, Authorization",
+				},
+			}
 		);
 	}
+}
+
+// Handle OPTIONS requests for CORS preflight
+export async function OPTIONS(req) {
+	return new NextResponse(null, {
+		status: 204,
+		headers: {
+			"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+			"Access-Control-Allow-Methods": "GET",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization",
+		},
+	});
 }
