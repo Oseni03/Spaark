@@ -9,7 +9,8 @@ import {
 	PURGE,
 	REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import { CookieStorage } from "redux-persist-cookie-storage";
+import Cookies from "js-cookie";
 import profileReducer from "./features/profileSlice";
 import portfolioReducer from "./features/portfolioSlice";
 import experienceReducer from "./features/experienceSlice";
@@ -24,10 +25,12 @@ import userReducer from "./features/userSlice";
 // Persist configuration
 const persistConfig = {
 	key: "root",
-	version: 1,
-	storage,
-	// Optionally blacklist or whitelist specific reducers
-	blacklist: [], // Add reducers you don't want to persist
+	storage: new CookieStorage(Cookies, {
+		domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, // Notice the dot prefix
+		path: "/",
+		secure: process.env.NODE_ENV === "production",
+		sameSite: "strict",
+	}),
 };
 
 // Combine reducers
