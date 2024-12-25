@@ -29,7 +29,7 @@ const persistConfig = {
 		domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, // Notice the dot prefix
 		path: "/",
 		secure: process.env.NODE_ENV === "production",
-		sameSite: "lax",
+		sameSite: "strict",
 	}),
 };
 

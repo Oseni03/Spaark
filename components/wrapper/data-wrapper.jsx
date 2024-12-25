@@ -26,7 +26,6 @@ export default function DataWrapper({ subdomain, children }) {
 				}
 
 				const data = await response.json();
-				console.log("Portfolio resp: ", data);
 
 				// Dispatch actions to update Redux state
 				if (data.profiles.success)
