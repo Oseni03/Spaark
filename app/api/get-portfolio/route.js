@@ -9,8 +9,50 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserProjects } from "@/services/project";
 import { getUserHackathons } from "@/services/hackathon";
 
-// Handle GET requests to fetch user data
+// Helper function to get CORS headers
+const getCorsHeaders = (origin) => {
+	const allowedOrigins = [
+		process.env.NEXT_PUBLIC_APP_URL,
+		`https://*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+		// Add any other allowed origins
+	];
+
+	// Check if the origin is allowed
+	const isAllowedOrigin = allowedOrigins.some((allowed) => {
+		if (allowed.includes("*")) {
+			const pattern = allowed.replace("*", ".*");
+			return new RegExp(pattern).test(origin);
+		}
+		return allowed === origin;
+	});
+
+	return {
+		"Access-Control-Allow-Origin": isAllowedOrigin
+			? origin
+			: allowedOrigins[0],
+		"Access-Control-Allow-Methods": "GET, OPTIONS",
+		"Access-Control-Allow-Headers":
+			"Content-Type, Authorization, x-clerk-auth-status, x-clerk-auth-reason",
+		"Access-Control-Allow-Credentials": "true",
+		"Access-Control-Max-Age": "86400", // 24 hours
+		Vary: "Origin",
+	};
+};
+
+// Helper function to create error response
+const createErrorResponse = (status, message, origin) => {
+	return new NextResponse(JSON.stringify({ error: message }), {
+		status,
+		headers: {
+			"Content-Type": "application/json",
+			...getCorsHeaders(origin),
+		},
+	});
+};
+
 export async function GET(req) {
+	const origin = req.headers.get("origin") || "";
+
 	try {
 		const { searchParams } = new URL(req.url);
 		const username = searchParams.get("username");
@@ -23,17 +65,10 @@ export async function GET(req) {
 			console.log("User response: ", user);
 
 			if (!user.success) {
-				return new NextResponse(
-					JSON.stringify({ error: user.error || "User not found" }),
-					{
-						status: 404,
-						headers: {
-							"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-							"Access-Control-Allow-Methods": "GET",
-							"Access-Control-Allow-Headers":
-								"Content-Type, Authorization",
-						},
-					}
+				return createErrorResponse(
+					404,
+					user.error || "User not found",
+					origin
 				);
 			}
 
@@ -42,18 +77,7 @@ export async function GET(req) {
 			const { userId: authenticatedUserId } = await auth();
 
 			if (!authenticatedUserId) {
-				return new NextResponse(
-					JSON.stringify({ error: "Unauthorized" }),
-					{
-						status: 401,
-						headers: {
-							"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-							"Access-Control-Allow-Methods": "GET",
-							"Access-Control-Allow-Headers":
-								"Content-Type, Authorization",
-						},
-					}
-				);
+				return createErrorResponse(401, "Unauthorized", origin);
 			}
 
 			userId = authenticatedUserId;
@@ -100,36 +124,33 @@ export async function GET(req) {
 		return new NextResponse(JSON.stringify(responseData), {
 			status: 200,
 			headers: {
-				"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-				"Access-Control-Allow-Methods": "GET",
-				"Access-Control-Allow-Headers": "Content-Type, Authorization",
+				"Content-Type": "application/json",
+				...getCorsHeaders(origin),
+				"Cache-Control": "private, no-cache, no-store, must-revalidate",
+				Pragma: "no-cache",
+				Expires: "0",
 			},
 		});
 	} catch (error) {
-		console.log("Error fetching user data:", error);
-		return new NextResponse(
-			JSON.stringify({ error: "Failed to fetch user data" }),
-			{
-				status: 500,
-				headers: {
-					"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-					"Access-Control-Allow-Methods": "GET",
-					"Access-Control-Allow-Headers":
-						"Content-Type, Authorization",
-				},
-			}
-		);
+		console.error("Error fetching user data:", error);
+		return createErrorResponse(500, "Failed to fetch user data", origin);
 	}
 }
 
-// Handle OPTIONS requests for CORS preflight
 export async function OPTIONS(req) {
+	const origin = req.headers.get("origin") || "";
+
+	// Handle preflight requests
 	return new NextResponse(null, {
 		status: 204,
-		headers: {
-			"Access-Control-Allow-Origin": `*.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-			"Access-Control-Allow-Methods": "GET",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization",
-		},
+		headers: getCorsHeaders(origin),
 	});
 }
+
+// Configure the API route
+export const config = {
+	api: {
+		bodyParser: false, // Disable body parsing, consume as stream
+		externalResolver: true, // Enable external resolving for Clerk auth
+	},
+};
