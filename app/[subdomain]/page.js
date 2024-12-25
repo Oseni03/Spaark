@@ -7,14 +7,14 @@ import { useState, useEffect } from "react";
 export default function Page({ params }) {
 	const { subdomain } = params;
 
-	const [basics, setBasics] = useState(null);
-	const [experience, setExperience] = useState(null);
-	const [education, setEducation] = useState(null);
-	const [skill, setSkill] = useState(null);
-	const [certification, setCertification] = useState(null);
-	const [project, setProject] = useState(null);
-	const [hackathon, setHackathon] = useState(null);
-	const [profile, setProfile] = useState(null);
+	const [basics, setBasics] = useState({});
+	const [experience, setExperience] = useState([]);
+	const [education, setEducation] = useState([]);
+	const [skill, setSkill] = useState([]);
+	const [certification, setCertification] = useState([]);
+	const [project, setProject] = useState([]);
+	const [hackathon, setHackathon] = useState([]);
+	const [profile, setProfile] = useState([]);
 
 	useEffect(() => {
 		const fetchData = async () => {

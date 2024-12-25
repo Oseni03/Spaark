@@ -34,22 +34,22 @@ export default function DefaultTemplate({
 								delay={BLUR_FADE_DELAY}
 								className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
 								yOffset={8}
-								text={`Hi, I'm ${basics.name.split(" ")[0]} 👋`}
+								text={`Hi, I'm ${basics?.name.split(" ")[0]} 👋`}
 							/>
 							<BlurFadeText
 								className="max-w-[600px] md:text-xl"
 								delay={BLUR_FADE_DELAY}
-								text={HTMLReactParser(basics.summary)}
+								text={HTMLReactParser(basics?.summary)}
 							/>
 						</div>
 						<BlurFade delay={BLUR_FADE_DELAY}>
 							<Avatar className="size-28 border">
 								<AvatarImage
-									alt={basics.name}
-									src={basics.picture}
+									alt={basics?.name}
+									src={basics?.picture}
 								/>
 								<AvatarFallback>
-									{getInitials(basics.name)}
+									{getInitials(basics?.name)}
 								</AvatarFallback>
 							</Avatar>
 						</BlurFade>
@@ -61,7 +61,7 @@ export default function DefaultTemplate({
 					<h2 className="text-xl font-bold">About</h2>
 				</BlurFade>
 				<BlurFade delay={BLUR_FADE_DELAY * 4}>
-					{HTMLReactParser(basics.about)}
+					{HTMLReactParser(basics?.about)}
 				</BlurFade>
 			</section>
 			{experiences.length > 0 && (

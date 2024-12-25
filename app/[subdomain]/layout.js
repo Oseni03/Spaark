@@ -75,7 +75,7 @@ export default async function UserLayout({ params, children }) {
 						}
 					></meta>
 				</head>
-				<div className={PORTFOLIO_TAILWIND_CLASS}>{children}</div>
+				<body className={PORTFOLIO_TAILWIND_CLASS}>{children}</body>
 			</>
 		);
 	} catch (error) {
