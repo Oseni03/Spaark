@@ -18,10 +18,8 @@ import {
 	YoutubeLogo,
 } from "@phosphor-icons/react";
 import { Pen } from "lucide-react";
-import { useSelector } from "react-redux";
 
-export default function PortfolioNavbar() {
-	const profile = useSelector((state) => state.profile);
+export default function PortfolioNavbar({ profile }) {
 	const { isSignedIn } = useUser();
 	return (
 		<div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-6 flex origin-bottom h-full max-h-14">

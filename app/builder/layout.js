@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCertifications } from "@/redux/features/certificationSlice";
 import { setEducations } from "@/redux/features/educationSlice";
 import { setExperience } from "@/redux/features/experienceSlice";
@@ -32,6 +32,7 @@ import PortfolioNavbar from "@/components/templates/shared/navbar";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
+	const profile = useSelector((state) => state.profile);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -100,7 +101,7 @@ const BuilderLayout = ({ children }) => {
 					)}
 				>
 					{children}
-					<PortfolioNavbar />
+					<PortfolioNavbar profile={profile} />
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

@@ -2,30 +2,63 @@
 
 import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
 
-export default function Page() {
-	const basics = useSelector((state) => state.basics);
-	const experience = useSelector((state) => state.experience);
-	const education = useSelector((state) => state.education);
-	const skill = useSelector((state) => state.skill);
-	const certification = useSelector((state) => state.certification);
-	const project = useSelector((state) => state.project);
-	const hackathon = useSelector((state) => state.hackathon);
+export default function Page({ params }) {
+	const { subdomain } = params;
+
+	const [basics, setBasics] = useState(null);
+	const [experience, setExperience] = useState(null);
+	const [education, setEducation] = useState(null);
+	const [skill, setSkill] = useState(null);
+	const [certification, setCertification] = useState(null);
+	const [project, setProject] = useState(null);
+	const [hackathon, setHackathon] = useState(null);
+	const [profile, setProfile] = useState(null);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch(
+					`/api/get-portfolio?username=${subdomain}`
+				);
+				if (!response.ok) {
+					throw new Error("Failed to fetch user data");
+				}
+
+				const data = await response.json();
+
+				// Dispatch actions to update Redux state
+				if (data.profiles.success) setProfile(data.profiles.data);
+				if (data.experiences.success)
+					setExperience(data.experiences.data);
+				if (data.educations.success) setEducation(data.educations.data);
+				if (data.certifications.success)
+					setCertification(data.certifications.data);
+				if (data.skills.success) setSkill(data.skills.data);
+				if (data.basics.success) setBasics(data.basics.data);
+				if (data.projects.success) setProject(data.projects.data);
+				if (data.hackathons.success) setHackathon(data.hackathons.data);
+			} catch (error) {
+				console.log("Error fetching or updating user data:", error);
+			}
+		};
+
+		fetchData();
+	}, [subdomain]);
+
 	return (
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
 			<DefaultTemplate
 				basics={basics}
-				projects={project.items.filter((item) => item.visible)}
-				experiences={experience.items.filter((item) => item.visible)}
-				educations={education.items.filter((item) => item.visible)}
-				skills={skill.items.filter((item) => item.visible)}
-				hackathons={hackathon.items.filter((item) => item.visible)}
-				certifications={certification.items.filter(
-					(item) => item.visible
-				)}
+				projects={project?.filter((item) => item.visible)}
+				experiences={experience?.filter((item) => item.visible)}
+				educations={education?.filter((item) => item.visible)}
+				skills={skill?.filter((item) => item.visible)}
+				hackathons={hackathon?.filter((item) => item.visible)}
+				certifications={certification?.filter((item) => item.visible)}
 			/>
-			<PortfolioNavbar />
+			<PortfolioNavbar profile={profile} />
 		</div>
 	);
 }

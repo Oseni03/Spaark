@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
-import DataWrapper from "@/components/wrapper/data-wrapper";
 import { getUserByUsername } from "@/services/user";
 import { isTrialing } from "@/lib/utils";
 
@@ -76,9 +75,7 @@ export default async function UserLayout({ params, children }) {
 						}
 					></meta>
 				</head>
-				<div className={PORTFOLIO_TAILWIND_CLASS}>
-					<DataWrapper subdomain={subdomain}>{children}</DataWrapper>
-				</div>
+				<div className={PORTFOLIO_TAILWIND_CLASS}>{children}</div>
 			</>
 		);
 	} catch (error) {
