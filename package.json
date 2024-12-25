@@ -58,6 +58,7 @@
 		"cors": "^2.8.5",
 		"framer-motion": "^11.14.4",
 		"html-react-parser": "^5.2.0",
+		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.464.0",
 		"next": "15.0.3",
 		"next-theme": "^0.1.5",
