@@ -65,6 +65,7 @@ export default function Page({ params }) {
 	}, [subdomain]);
 
 	if (isLoading) return <PortfolioSkeleton />;
+	logger.info("Portfolio data: ", portfolioData);
 
 	const filterVisible = (items) => items.filter((item) => item?.visible);
 
