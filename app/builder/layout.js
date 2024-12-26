@@ -101,7 +101,7 @@ const BuilderLayout = ({ children }) => {
 					)}
 				>
 					{children}
-					<PortfolioNavbar profile={profile} />
+					<PortfolioNavbar profile={profile.items || []} />
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

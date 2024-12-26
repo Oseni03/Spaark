@@ -73,7 +73,7 @@ export default function PortfolioNavbar({ profile }) {
 				)}
 
 				<Separator orientation="vertical" className="h-full" />
-				{Object.entries(profile.items)
+				{Object.entries(profile)
 					.filter(([_, social]) => social.visible)
 					.map(([network, social]) => (
 						<DockIcon key={network}>
