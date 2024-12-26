@@ -1,4 +1,27 @@
 {
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "*"
+				}
+			]
+		}
+	],
+	"rewrites": [
+		{
+			"source": "/:path*",
+			"has": [
+				{
+					"type": "host",
+					"value": "(?<subdomain>[^.]+).spaark.dev"
+				}
+			],
+			"destination": "/:subdomain/:path*"
+		}
+	],
 	"builds": [
 		{
 			"src": "package.json",
