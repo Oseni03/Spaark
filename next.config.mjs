@@ -1,21 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	async rewrites() {
-		return {
-			beforeFiles: [
-				{
-					source: "/:path*",
-					has: [
-						{
-							type: "host",
-							value: `(?<subdomain>[^.]+).${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-						},
-					],
-					destination: "/:subdomain/:path*",
-				},
-			],
-		};
-	},
 	async headers() {
 		return [
 			{
