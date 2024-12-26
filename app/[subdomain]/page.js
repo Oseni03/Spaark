@@ -74,7 +74,10 @@ export default function Page({ params }) {
 		fetchData();
 	}, [subdomain]);
 
+	console.log("Subdomain/username portfolio data: ", portfolioData);
+
 	if (error) {
+		console.log("Subdomain error: ", error);
 		return (
 			<div className="flex h-screen items-center justify-center">
 				<div className="rounded-lg bg-red-50 p-4 text-center">
