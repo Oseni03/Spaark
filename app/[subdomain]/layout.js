@@ -45,7 +45,7 @@ export default async function UserLayout({ params, children }) {
 		const summary = user.basics?.summary;
 
 		const childrenWithProps = React.cloneElement(children, {
-			userId: user.id,
+			user: user,
 		});
 
 		return (

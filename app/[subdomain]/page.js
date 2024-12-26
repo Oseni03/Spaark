@@ -22,8 +22,8 @@ const logger = {
 	error: (...args) => console.error("[Portfolio Error]", ...args),
 };
 
-export default function Page({ params, userId }) {
-	logger.info("UserId: ", userId);
+export default function Page({ params, user }) {
+	logger.info("UserId: ", user);
 	logger.info("params: ", params);
 	const { subdomain } = params;
 	const [isLoading, setIsLoading] = useState(true);
@@ -32,13 +32,13 @@ export default function Page({ params, userId }) {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				if (!userId) {
-					return notFound();
+				if (!user) {
+					notFound();
 				}
 
 				logger.info(`Fetching portfolio data for ${subdomain}`);
 				const response = await fetch(
-					`/api/get-portfolio?userId=${userId}`
+					`/api/get-portfolio?userId=${user.id}`
 				);
 
 				if (!response.ok) throw new Error("Failed to fetch portfolio");
@@ -61,12 +61,12 @@ export default function Page({ params, userId }) {
 				setIsLoading(false);
 			} catch (error) {
 				logger.error(error);
-				return notFound();
+				notFound();
 			}
 		};
 
 		fetchData();
-	}, [subdomain, userId]);
+	}, [subdomain, user]);
 
 	if (isLoading) return <PortfolioSkeleton />;
 	logger.info("Portfolio data: ", portfolioData);

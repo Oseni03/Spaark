@@ -305,7 +305,8 @@ export default function DefaultTemplate({
 			</section>
 			<div className="fixed bottom-8 right-8">
 				<Link
-					href={process.env.NEXT_PUBLIC_ROOT_DOMAIN}
+					href={process.env.NEXT_PUBLIC_APP_URL}
+					target="blank"
 					className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
 				>
 					<Image
