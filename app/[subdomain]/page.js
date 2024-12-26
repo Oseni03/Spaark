@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
-import { LayoutContext } from "./layout";
 
 const INITIAL_STATE = {
 	basics: {},
@@ -23,22 +22,21 @@ const logger = {
 	error: (...args) => console.error("[Portfolio Error]", ...args),
 };
 
-export default function Page({ params }) {
+export default function Page({ params, userId }) {
 	const { subdomain } = params;
-	const { user } = useContext(LayoutContext);
 	const [isLoading, setIsLoading] = useState(true);
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				if (!user) {
+				if (!userId) {
 					return notFound();
 				}
 
 				logger.info(`Fetching portfolio data for ${subdomain}`);
 				const response = await fetch(
-					`/api/get-portfolio?userId=${user.id}`
+					`/api/get-portfolio?userId=${userId}`
 				);
 
 				if (!response.ok) throw new Error("Failed to fetch portfolio");
@@ -66,7 +64,7 @@ export default function Page({ params }) {
 		};
 
 		fetchData();
-	}, [subdomain, user]);
+	}, [subdomain, userId]);
 
 	if (isLoading) return <PortfolioSkeleton />;
 	logger.info("Portfolio data: ", portfolioData);

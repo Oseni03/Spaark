@@ -1,17 +1,14 @@
+import React from "react";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { getUserByUsername } from "@/services/user";
 import { isTrialing } from "@/lib/utils";
-import { createContext } from "react";
 
 // Input validation schema
 const ParamsSchema = z.object({
 	subdomain: z.string().min(1, "Subdomain is required"),
 });
-
-export const LayoutContext = createContext();
 
 export default async function UserLayout({ params, children }) {
 	// Ensure params is not a promise
@@ -47,8 +44,12 @@ export default async function UserLayout({ params, children }) {
 		const picture = user.basics?.picture;
 		const summary = user.basics?.summary;
 
+		const childrenWithProps = React.cloneElement(children, {
+			userId: user.id,
+		});
+
 		return (
-			<LayoutContext.Provider value={{ user }}>
+			<>
 				<head>
 					<title>
 						{name} - {headline}
@@ -78,8 +79,10 @@ export default async function UserLayout({ params, children }) {
 						}
 					></meta>
 				</head>
-				<body className={PORTFOLIO_TAILWIND_CLASS}>{children}</body>
-			</LayoutContext.Provider>
+				<body className={PORTFOLIO_TAILWIND_CLASS}>
+					{childrenWithProps}
+				</body>
+			</>
 		);
 	} catch (error) {
 		console.error(`Error loading user layout for ${subdomain}:`, error);
