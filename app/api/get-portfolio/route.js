@@ -55,25 +55,9 @@ export async function GET(req) {
 
 	try {
 		const { searchParams } = new URL(req.url);
-		const username = searchParams.get("username");
-		console.log("Subdomain/username: ", username);
+		let userId = searchParams.get("userId");
 
-		let userId;
-
-		if (username) {
-			const user = await getUserByUsername(username);
-			console.log("User response: ", user);
-
-			if (!user.success) {
-				return createErrorResponse(
-					404,
-					user.error || "User not found",
-					origin
-				);
-			}
-
-			userId = user.data.id;
-		} else {
+		if (!userId) {
 			const { userId: authenticatedUserId } = await auth();
 
 			if (!authenticatedUserId) {
