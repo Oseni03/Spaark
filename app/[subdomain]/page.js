@@ -7,8 +7,9 @@ import PortfolioSkeleton from "./components/portfolio-skeleton";
 import { useRouter } from "next/navigation";
 
 export default function Page({ params }) {
-	const router = useRouter();
 	const { subdomain } = params;
+	console.log("At subdomain page: ", subdomain);
+	const router = useRouter();
 
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -68,11 +69,13 @@ export default function Page({ params }) {
 				setError(error.message);
 			} finally {
 				setIsLoading(false);
+				console.log("Portfolio data set completely: ", portfolioData);
 			}
 		};
 
 		fetchData();
 	}, [subdomain]);
+	console.log("Loading page");
 
 	if (error) {
 		return (
