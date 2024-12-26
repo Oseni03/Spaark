@@ -23,6 +23,8 @@ const logger = {
 };
 
 export default function Page({ params, userId }) {
+	logger.info("UserId: ", userId);
+	logger.info("params: ", params);
 	const { subdomain } = params;
 	const [isLoading, setIsLoading] = useState(true);
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
@@ -72,7 +74,7 @@ export default function Page({ params, userId }) {
 	const filterVisible = (items) => items.filter((item) => item?.visible);
 
 	return (
-		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
+		<div>
 			<DefaultTemplate
 				{...portfolioData}
 				projects={filterVisible(portfolioData.project)}

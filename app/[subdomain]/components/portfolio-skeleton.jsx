@@ -9,10 +9,10 @@ const PortfolioSkeleton = () => {
 					{/* Name skeleton */}
 					<Skeleton className="h-12 w-48" />
 					{/* Bio text skeleton */}
-					<Skeleton className="h-4 w-96" />
+					<Skeleton className="h-4 w-60 md:w-96" />
 				</div>
 				{/* Profile picture skeleton - enhanced circular styling */}
-				<Skeleton className="h-24 w-24 rounded-full ring-2 ring-offset-2 ring-gray-100" />
+				<Skeleton className="h-24 w-24 rounded-full ring-2 ring-offset-2" />
 			</div>
 
 			{/* About section */}
@@ -26,7 +26,7 @@ const PortfolioSkeleton = () => {
 			</div>
 
 			{/* Work Experience section */}
-			<div className="space-y-6">
+			<div className="space-y-6 mt-6">
 				<Skeleton className="h-8 w-48" />{" "}
 				{/* "Work Experience" header */}
 				{/* Work items - repeating 4 times for each company */}
@@ -46,7 +46,7 @@ const PortfolioSkeleton = () => {
 				))}
 			</div>
 			{/* Education section */}
-			<div className="space-y-6">
+			<div className="space-y-6 mt-6">
 				<Skeleton className="h-8 w-48" />{" "}
 				{/* "Work Experience" header */}
 				{/* Work items - repeating 4 times for each company */}
