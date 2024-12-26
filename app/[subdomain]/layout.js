@@ -4,6 +4,7 @@ import { z } from "zod";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { getUserByUsername } from "@/services/user";
 import { isTrialing } from "@/lib/utils";
+import { UserProvider } from "@/context/UserContext";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -18,7 +19,7 @@ export default async function UserLayout({ params, children }) {
 	const validationResult = ParamsSchema.safeParse(paramsData);
 
 	if (!validationResult.success) {
-		console.log("Subdomain validation error: ", validationResult.error);
+		console.error("Subdomain validation error: ", validationResult.error);
 		return notFound();
 	}
 
@@ -26,11 +27,13 @@ export default async function UserLayout({ params, children }) {
 	console.log("Validated subdomain: ", subdomain);
 
 	try {
+		// Fetch user by subdomain
 		const userResult = await getUserByUsername(subdomain);
 		console.log("Subdomain profile result: ", userResult);
 
 		const user = userResult?.data;
 
+		// Check for invalid user, subscription, or trialing status
 		if (
 			!userResult.success ||
 			!user ||
@@ -39,28 +42,30 @@ export default async function UserLayout({ params, children }) {
 			return notFound();
 		}
 
+		// Extract user details
 		const name = user.basics?.name || subdomain;
 		const headline = user.basics?.headline;
-		const picture = user.basics?.picture;
-		const summary = user.basics?.summary;
+		const picture = user.basics?.picture || null;
+		const summary = user.basics?.summary || "Welcome to my profile!";
 
-		const childrenWithProps = React.cloneElement(children, {
-			user: user,
-		});
+		// Meta tags
+		const metaTags = {
+			title: `${name} - ${headline}`,
+			description: summary,
+			image: picture,
+			url: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+		};
 
 		return (
 			<>
 				<head>
-					<title>
-						{name} - {headline}
-					</title>
-					<meta name="site_name" content={name} />
-					<meta name="description" content={summary} />
+					<title>{metaTags.title}</title>
+					<meta name="description" content={metaTags.description} />
+					<meta property="og:title" content={metaTags.title} />
 					<meta
-						property="og:title"
-						content={`${name} - ${headline}`}
+						property="og:description"
+						content={metaTags.description}
 					/>
-					<meta property="og:description" content={summary} />
 					<meta property="og:type" content="profile" />
 					<meta property="og:username" content={subdomain} />
 					<meta name="twitter:card" content={summary} />
@@ -69,18 +74,16 @@ export default async function UserLayout({ params, children }) {
 						content={`${name} - ${headline}`}
 					/>
 					<meta name="twitter:description" content={summary} />
-					{picture && <meta name="image" content={picture} />}
-					<meta
-						name="url"
-						content={
-							subdomain +
-							"." +
-							process.env.NEXT_PUBLIC_ROOT_DOMAIN
-						}
-					></meta>
+
+					{metaTags.image && (
+						<meta property="og:image" content={metaTags.image} />
+					)}
+					<meta name="url" content={metaTags.url} />
 				</head>
 				<body className={PORTFOLIO_TAILWIND_CLASS}>
-					{childrenWithProps}
+					<UserProvider user={user} metaTags={metaTags}>
+						{children}
+					</UserProvider>
 				</body>
 			</>
 		);

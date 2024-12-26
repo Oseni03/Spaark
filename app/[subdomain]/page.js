@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
+import { useUser } from "@/context/UserContext";
 
 const INITIAL_STATE = {
 	basics: {},
@@ -22,12 +23,13 @@ const logger = {
 	error: (...args) => console.error("[Portfolio Error]", ...args),
 };
 
-export default function Page({ params, user }) {
-	logger.info("UserId: ", user);
-	logger.info("params: ", params);
+export default function Page({ params }) {
+	const { user } = useUser();
 	const { subdomain } = params;
 	const [isLoading, setIsLoading] = useState(true);
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
+	logger.info("User: ", user);
+	logger.info("params: ", params);
 
 	useEffect(() => {
 		const fetchData = async () => {
