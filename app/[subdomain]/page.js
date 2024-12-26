@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import NotFound from "../not-found";
+import { notFound } from "next/navigation";
 import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
@@ -28,28 +28,21 @@ export default function Page({ params }) {
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
 
 	useEffect(() => {
-		if (!subdomain) {
-			logger.error("No subdomain provided");
-			NotFound();
-		}
-
 		const fetchData = async () => {
 			try {
+				if (!subdomain) throw new Error("No subdomain");
+
 				logger.info(`Fetching portfolio data for ${subdomain}`);
 				const response = await fetch(
 					`/api/get-portfolio?username=${subdomain}`
 				);
+
+				if (!response.ok) throw new Error("Failed to fetch portfolio");
+
 				const data = await response.json();
 
-				logger.info(`Data received for ${subdomain}`, {
-					hasBasics: !!data.basics?.data,
-					itemCounts: {
-						experiences: data.experiences?.data?.length || 0,
-						projects: data.projects?.data?.length || 0,
-						skills: data.skills?.data?.length || 0,
-						profiles: data.profiles?.data?.length || 0,
-					},
-				});
+				if (!data.basics?.data)
+					throw new Error("No portfolio data found");
 
 				setPortfolioData({
 					basics: data.basics?.data || {},
@@ -61,14 +54,10 @@ export default function Page({ params }) {
 					hackathon: data.hackathons?.data || [],
 					profile: data.profiles?.data || [],
 				});
-			} catch (error) {
-				logger.error(
-					`Failed to fetch portfolio for ${subdomain}`,
-					error
-				);
-				NotFound();
-			} finally {
 				setIsLoading(false);
+			} catch (error) {
+				logger.error(error);
+				return notFound();
 			}
 		};
 
