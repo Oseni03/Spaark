@@ -36,32 +36,29 @@ export default function Page({ params }) {
 				const response = await fetch(
 					`/api/get-portfolio?username=${subdomain}`
 				);
-
-				if (!response.ok) {
-					throw new Error(
-						`Failed to fetch user data: ${response.status} ${response.statusText}`
-					);
-				}
-
 				const data = await response.json();
 
 				setPortfolioData({
-					basics: data.basics?.success ? data.basics.data : {},
+					basics: data.basics?.success ? data.basics.data || {} : {},
 					experience: data.experiences?.success
-						? data.experiences.data
+						? data.experiences.data || []
 						: [],
 					education: data.educations?.success
-						? data.educations.data
+						? data.educations.data || []
 						: [],
-					skill: data.skills?.success ? data.skills.data : [],
+					skill: data.skills?.success ? data.skills.data || [] : [],
 					certification: data.certifications?.success
-						? data.certifications.data
+						? data.certifications.data || []
 						: [],
-					project: data.projects?.success ? data.projects.data : [],
+					project: data.projects?.success
+						? data.projects.data || []
+						: [],
 					hackathon: data.hackathons?.success
-						? data.hackathons.data
+						? data.hackathons.data || []
 						: [],
-					profile: data.profiles?.success ? data.profiles.data : [],
+					profile: data.profiles?.success
+						? data.profiles.data || []
+						: [],
 				});
 			} catch (error) {
 				console.error("Error fetching portfolio data:", error);
@@ -101,7 +98,7 @@ export default function Page({ params }) {
 	}
 
 	const filterVisible = (items) =>
-		items?.filter((item) => item?.visible) ?? [];
+		Array.isArray(items) ? items.filter((item) => item?.visible) : [];
 
 	return (
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
