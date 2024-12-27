@@ -1,27 +1,25 @@
 "use server";
 import { z } from "zod";
+import { logger } from "@/lib/utils";
 
 // Comprehensive error handling utility
 export async function withErrorHandling(action) {
 	try {
-		console.log("Entering withErrorHandling");
+		logger.info("Entering withErrorHandling");
 
 		// Add a check to ensure action is a function
 		if (typeof action !== "function") {
-			console.error(
-				"withErrorHandling: action is not a function",
-				action
-			);
+			logger.error("withErrorHandling: action is not a function", action);
 			throw new Error("Invalid action provided to withErrorHandling");
 		}
 
 		const result = await action();
 
-		console.log("withErrorHandling action completed successfully", result);
+		logger.info("withErrorHandling action completed successfully", result);
 
 		return { success: true, data: result };
 	} catch (error) {
-		console.log("withErrorHandling caught an error:", {
+		logger.error("withErrorHandling caught an error:", {
 			errorName: error.name,
 			errorMessage: error.message,
 		});

@@ -5,12 +5,16 @@ import { toast } from "sonner";
 import ContactNotification from "@/emails/templates/contact-notification";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { logger } from "@/lib/utils";
 
 export const UserContactForm = () => {
 	const { subdomain } = useParams();
 	const [isLoading, setLoading] = useState(false);
 
+	logger.info("User contact form subdomain: ", subdomain);
+
 	const onSubmit = async ({ name, email, message }) => {
+		logger.info("Submitting user contact message");
 		setLoading(true);
 		try {
 			const templateMessage = (
@@ -44,7 +48,7 @@ export const UserContactForm = () => {
 		} catch (error) {
 			setLoading(false);
 			toast.error("An unexpected error occurred");
-			console.error(error);
+			logger.error("User contact form error: ", error);
 		}
 	};
 

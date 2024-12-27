@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { setHackathons } from "@/redux/features/hackathonSlice";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
+import { logger } from "@/lib/utils";
 
 const BuilderLayout = ({ children }) => {
 	const dispatch = useDispatch();
@@ -62,7 +63,7 @@ const BuilderLayout = ({ children }) => {
 					dispatch(setHackathons(data.hackathons.data));
 				if (data.user.success) dispatch(setUser(data.user.data));
 			} catch (error) {
-				console.log("Error fetching or updating user data:", error);
+				logger.error("Error fetching or updating user data:", error);
 			}
 		};
 

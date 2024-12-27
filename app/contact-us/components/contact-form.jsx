@@ -2,20 +2,21 @@
 import { ZodForm } from "@/components/zod-form";
 import { ContactFormSchema } from "@/schema/contact";
 import { saveContact } from "@/services/contact";
+import { logger } from "@/lib/utils";
 
 export const ContactForm = () => {
 	const handleContact = async ({ email, full_name, message }) => {
 		if (!email || !full_name || !message) {
 			throw new Error("All fields are required.");
 		}
-		console.log("Saving contact message: ", message);
+		logger.info("Saving contact message: ", message);
 
 		const response = await saveContact({ email, full_name, message });
 
 		if (response.success) {
 			toast.success(response.message);
 		} else {
-			console.log(response);
+			logger.error("Contact-us form error: ", response);
 			toast.error("Error sending message. Try again later");
 		}
 	};

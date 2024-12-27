@@ -9,6 +9,7 @@ import {
 	editCertification,
 	deleteCertification,
 } from "@/services/certification";
+import { logger } from "@/lib/utils";
 
 const initialState = {
 	items: [],
@@ -42,7 +43,7 @@ export const addCertificationInDatabase = createAsyncThunk(
 export const updateCertificationnInDatabase = createAsyncThunk(
 	"certification/updateCertificationInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
+		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = certificationSchema.safeParse(data);
@@ -83,7 +84,7 @@ const certificationSlice = createSlice({
 	initialState,
 	reducers: {
 		setCertifications(state, action) {
-			console.log(action.payload);
+			logger.info(action.payload);
 			state.items = action.payload;
 		},
 		addCertification(state, action) {
@@ -92,7 +93,7 @@ const certificationSlice = createSlice({
 			if (result.success) {
 				state.items.push({ ...defaultCertification, ...result.data });
 			} else {
-				console.error("Invalid certification data:", result.error);
+				logger.error("Invalid certification data:", result.error);
 			}
 		},
 		updateCertification(state, action) {
@@ -104,7 +105,7 @@ const certificationSlice = createSlice({
 				if (result.success) {
 					state.items[index] = result.data;
 				} else {
-					console.error("Invalid update data:", result.error);
+					logger.error("Invalid update data:", result.error);
 				}
 			}
 		},

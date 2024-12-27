@@ -18,6 +18,7 @@ import {
 } from "@/redux/features/skillSlice";
 import { SkillDialog } from "../dialogs/skill-dialog";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Skill = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Skill = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 
@@ -51,13 +52,13 @@ export const Skill = () => {
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (skill) => {
-		console.log("Update skill: ", skill);
+		logger.info("Update skill: ", skill);
 		reset(skill);
 		setCurrentSkill(skill);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		console.log("Duplicate", item);
+		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
 		dispatch(addSkill(newItem));

@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
+import { logger } from "@/lib/utils";
 
 export async function getUserHackathons(userId) {
 	return withErrorHandling(async () => {
@@ -24,25 +25,25 @@ export async function getUserHackathons(userId) {
 }
 
 export async function createHackathon(data) {
-	console.log("createHackathon called with data:", data);
+	logger.info("createHackathon called with data:", data);
 
 	// Validate input data
 	if (data === null || data === undefined) {
-		console.error("createHackathon received null or undefined data");
+		logger.error("createHackathon received null or undefined data");
 		throw new Error("No hackathon data provided");
 	}
 
 	return withErrorHandling(async () => {
 		// Defensive checks
 		if (!data) {
-			console.error("Data is falsy inside withErrorHandling");
+			logger.error("Data is falsy inside withErrorHandling");
 			throw new Error("Invalid hackathon data");
 		}
 
 		// Get the authenticated user
 		const { userId } = await auth();
 		if (!userId) {
-			console.error("No authenticated user found");
+			logger.error("No authenticated user found");
 			throw new Error("Unauthorized");
 		}
 
@@ -77,7 +78,7 @@ export async function createHackathon(data) {
 			},
 		});
 
-		console.log("Created hackathon:", hackathon);
+		logger.info("Created hackathon:", hackathon);
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");

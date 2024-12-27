@@ -12,6 +12,7 @@ import {
 } from "@/redux/features/basicSlice"; // Ensure this import is correct
 import { useEffect } from "react";
 import { RichInput } from "@/components/ui/rich-input";
+import { logger } from "@/lib/utils";
 
 export const BasicsSection = () => {
 	const section = useSelector((state) => state.basics);
@@ -28,15 +29,15 @@ export const BasicsSection = () => {
 
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
-			console.log("Form default values:", defaultValues);
+			logger.error("Form Validation Errors:", errors);
+			logger.info("Form default values:", defaultValues);
 		}
 	}, [errors, defaultValues]);
 
 	const onSubmit = (data) => {
 		dispatch(updateBasics(data));
 		dispatch(updateBasicsInDatabase(data));
-		console.log("Form Submitted:", data);
+		logger.info("Form Submitted:", data);
 	};
 
 	return (

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
+import { logger } from "@/lib/utils";
 
 function PaymentStatusContent() {
 	const router = useRouter();
@@ -22,7 +23,7 @@ function PaymentStatusContent() {
 				});
 
 				if (!response.ok) {
-					console.error(
+					logger.error(
 						"Failed to update transaction:",
 						await response.text()
 					);
@@ -30,9 +31,9 @@ function PaymentStatusContent() {
 				}
 
 				const data = await response.json();
-				console.log("Transaction updated successfully:", data);
+				logger.info("Transaction updated successfully:", data);
 			} catch (error) {
-				console.error("Error updating transaction:", error);
+				logger.error("Error updating transaction:", error);
 			}
 		};
 

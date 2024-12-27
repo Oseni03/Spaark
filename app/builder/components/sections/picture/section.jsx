@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { createId } from "@paralleldrive/cuid2";
 import { toast } from "sonner";
+import { logger } from "@/lib/utils";
 
 export const PictureSection = ({
 	control,
@@ -60,7 +61,7 @@ export const PictureSection = ({
 			}
 		} catch (error) {
 			// Handle and log any errors
-			console.error("Error during image upload:", error);
+			logger.error("Error during image upload:", error);
 			toast.error(
 				error.message ||
 					"An unexpected error occurred while uploading the image."

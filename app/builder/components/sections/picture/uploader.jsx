@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { logger } from "@/lib/utils";
 
 export default function Uploader({ defaultValue, setValue }) {
 	let name = "image";
@@ -45,7 +46,7 @@ export default function Uploader({ defaultValue, setValue }) {
 				setValue(name, blob.url);
 				toast.success("File uploaded successfully");
 			} catch (error) {
-				console.error("Upload error:", error);
+				logger.error("Upload error:", error);
 				toast.error("Failed to upload file");
 			}
 		}

@@ -18,6 +18,7 @@ import {
 } from "@/redux/features/projectSlice";
 import { ProjectDialog } from "../dialogs/project-dialog";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Project = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Project = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 

@@ -5,6 +5,7 @@ import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { getUserByUsername } from "@/services/user";
 import { isTrialing } from "@/lib/utils";
 import { UserProvider } from "@/context/UserContext";
+import { logger } from "@/lib/utils";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -19,17 +20,17 @@ export default async function UserLayout({ params, children }) {
 	const validationResult = ParamsSchema.safeParse(paramsData);
 
 	if (!validationResult.success) {
-		console.error("Subdomain validation error: ", validationResult.error);
+		logger.error("Subdomain validation error: ", validationResult.error);
 		return notFound();
 	}
 
 	const { subdomain } = validationResult.data;
-	console.log("Validated subdomain: ", subdomain);
+	logger.info("Validated subdomain: ", subdomain);
 
 	try {
 		// Fetch user by subdomain
 		const userResult = await getUserByUsername(subdomain);
-		console.log("Subdomain profile result: ", userResult);
+		logger.info("Subdomain profile result: ", userResult);
 
 		const user = userResult?.data;
 
@@ -88,7 +89,7 @@ export default async function UserLayout({ params, children }) {
 			</>
 		);
 	} catch (error) {
-		console.error(`Error loading user layout for ${subdomain}:`, error);
+		logger.error(`Error loading user layout for ${subdomain}:`, error);
 		return notFound();
 	}
 }

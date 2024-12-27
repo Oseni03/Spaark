@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { updateSubscription, updateTransaction } from "@/services/subscription";
+import { logger } from "@/lib/utils";
 
 export async function POST(req) {
 	const body = await req.json();
@@ -28,7 +29,7 @@ export async function POST(req) {
 
 		return NextResponse.json({ success: true, transaction });
 	} catch (error) {
-		console.error("Error updating transaction:", error);
+		logger.error("Error updating transaction:", error);
 		return NextResponse.json({ error: "Internal server error" });
 	}
 }

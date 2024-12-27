@@ -18,6 +18,7 @@ import {
 } from "@/redux/features/certificationSlice";
 import { CertificationDialog } from "../dialogs/certification-dialog";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Certification = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Certification = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 
@@ -51,7 +52,7 @@ export const Certification = () => {
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (certification) => {
-		console.log("Update certification: ", certification);
+		logger.info("Update certification: ", certification);
 		reset(certification);
 		setCurrentCertification(certification);
 		setIsOpen(true);

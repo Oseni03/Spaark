@@ -18,6 +18,7 @@ import {
 } from "@/redux/features/hackathonSlice";
 import { HackathonDialog } from "../dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Hackathon = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Hackathon = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 
@@ -51,13 +52,13 @@ export const Hackathon = () => {
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (hackathon) => {
-		console.log("Update hackathon: ", hackathon);
+		logger.info("Update hackathon: ", hackathon);
 		reset(hackathon);
 		setCurrentHackathon(hackathon);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		console.log("Duplicate", item);
+		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
 		dispatch(addHackathon(newItem));

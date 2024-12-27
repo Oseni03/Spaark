@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getUserByUsername } from "@/services/user";
 import { siteConfig } from "@/config/site";
+import { logger } from "@/lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -48,7 +49,7 @@ export async function POST(request) {
 
 		return NextResponse.json({ data, success: true }, { status: 200 });
 	} catch (error) {
-		console.error("API route error:", error);
+		logger.error("API route error:", error);
 
 		return NextResponse.json(
 			{

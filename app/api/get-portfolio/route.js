@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser, getUserBasics, getUserByUsername } from "@/services/user";
+import { getUser, getUserBasics } from "@/services/user";
 import { getUserCertifications } from "@/services/certification";
 import { getUserEducations } from "@/services/education";
 import { getUserExperiences } from "@/services/experience";
@@ -8,6 +8,7 @@ import { getUserSkills } from "@/services/skill";
 import { auth } from "@clerk/nextjs/server";
 import { getUserProjects } from "@/services/project";
 import { getUserHackathons } from "@/services/hackathon";
+import { logger } from "@/lib/utils";
 
 // Helper function to get CORS headers
 const getCorsHeaders = (origin) => {
@@ -116,7 +117,7 @@ export async function GET(req) {
 			},
 		});
 	} catch (error) {
-		console.error("Error fetching user data:", error);
+		logger.error("Error fetching user data:", error);
 		return createErrorResponse(500, "Failed to fetch user data", origin);
 	}
 }

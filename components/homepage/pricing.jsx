@@ -10,6 +10,7 @@ import axios from "axios";
 import { Spinner } from "../ui/Spinner";
 import { siteConfig } from "@/config/site";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/utils";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -69,7 +70,7 @@ export default function Pricing() {
 			} else {
 				toast.error("Unexpected error. Please try again.");
 			}
-			console.error("Checkout error:", err);
+			logger.error("Checkout error:", err);
 		} finally {
 			setIsProcessing(false);
 		}

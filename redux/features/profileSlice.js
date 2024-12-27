@@ -56,7 +56,6 @@ export const addProfileInDatabase = createAsyncThunk(
 export const updateProfileInDatabase = createAsyncThunk(
 	"profile/updateProfileInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = profileSchema.safeParse(data);

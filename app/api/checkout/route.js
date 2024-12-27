@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import { createTransaction } from "@/services/subscription";
+import { logger } from "@/lib/utils";
 
 export async function POST(request) {
 	try {
@@ -64,7 +65,7 @@ export async function POST(request) {
 		);
 	} catch (error) {
 		// Comprehensive error handling
-		console.error("Checkout API Error:", error);
+		logger.error("Checkout API Error:", error);
 
 		if (axios.isAxiosError(error)) {
 			// Handle Axios-specific errors

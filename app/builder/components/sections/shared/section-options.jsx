@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux"; // Import from react-redux
-import { RootState, AppDispatch } from "@/redux/store"; // Path to your store
+import { logger } from "@/lib/utils";
 
 export const SectionOptions = ({ id }) => {
 	const dispatch = useDispatch(); // Get dispatch from Redux store
@@ -43,28 +43,28 @@ export const SectionOptions = ({ id }) => {
 	};
 
 	const toggleSeperateLinks = (checked) => {
-		console.log("Separate link");
+		logger.info("Separate link");
 	};
 
 	const toggleVisibility = () => {
-		console.log("Toggle visibility");
+		logger.info("Toggle visibility");
 	};
 
 	const onResetName = () => {
-		console.log("Reset name");
+		logger.info("Reset name");
 	};
 
 	const onChangeColumns = (value) => {
-		console.log("Change column");
-		console.log(value);
+		logger.info("Change column");
+		logger.info(value);
 	};
 
 	const onResetItems = () => {
-		console.log("Reset");
+		logger.info("Reset");
 	};
 
 	const onRemove = () => {
-		console.log("Remove section Item");
+		logger.info("Remove section Item");
 	};
 
 	return (
@@ -109,7 +109,7 @@ export const SectionOptions = ({ id }) => {
 									id={`sections.${id}.name`}
 									value={section.name}
 									onChange={(event) => {
-										console.log(event);
+										logger.info(event);
 									}}
 								/>
 								<Button

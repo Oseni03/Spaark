@@ -1,6 +1,7 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { createUser, updateUser, deleteUser } from "@/services/user";
+import { logger } from "@/lib/utils";
 
 export async function POST(req) {
 	const SIGNING_SECRET = process.env.SIGNING_SECRET;
@@ -39,13 +40,13 @@ export async function POST(req) {
 			"svix-signature": svix_signature,
 		});
 	} catch (err) {
-		console.error("Error: Could not verify webhook:", err);
+		logger.error("Error: Could not verify webhook:", err);
 		return new Response("Error: Verification error", {
 			status: 400,
 		});
 	}
-	console.log("webhook body: ", body);
-	console.log("webhook evt data: ", evt.data);
+	logger.info("webhook body: ", body);
+	logger.info("webhook evt data: ", evt.data);
 
 	if (evt.type === "user.created") {
 		const { id, username } = evt.data;
@@ -55,7 +56,7 @@ export async function POST(req) {
 			});
 		}
 
-		console.log("userId:", id);
+		logger.info("userId:", id);
 		const user = await createUser(
 			id,
 			username,
@@ -63,7 +64,7 @@ export async function POST(req) {
 		);
 
 		if (user.success) {
-			console.log("User creation successsful: ", user.data);
+			logger.info("User creation successsful: ", user.data);
 		}
 	} else if (evt.type === "user.updated") {
 		const { id, username } = evt.data;
@@ -80,14 +81,14 @@ export async function POST(req) {
 		});
 
 		if (user.success) {
-			console.log("User update successsful: ", user.data);
+			logger.info("User update successsful: ", user.data);
 		}
 	} else if (evt.type === "user.deleted") {
 		const { deleted, id } = evt.data;
 		if (deleted) {
 			const result = await deleteUser(id);
 			if (result.success) {
-				console.log("User deleted");
+				logger.info("User deleted");
 			}
 		}
 	} else if (evt.type === "session.created") {
@@ -95,7 +96,7 @@ export async function POST(req) {
 		if (status !== "active") return;
 		if (!user_id) return;
 
-		console.log("User logged in: ", user_id);
+		logger.info("User logged in: ", user_id);
 	}
 
 	return new Response("Webhook received", { status: 200 });

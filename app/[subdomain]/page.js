@@ -6,6 +6,7 @@ import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
 import { useUser } from "@/context/UserContext";
+import { logger } from "@/lib/utils";
 
 const INITIAL_STATE = {
 	basics: {},
@@ -16,11 +17,6 @@ const INITIAL_STATE = {
 	project: [],
 	hackathon: [],
 	profile: [],
-};
-
-const logger = {
-	info: (...args) => console.log("[Portfolio]", ...args),
-	error: (...args) => console.error("[Portfolio Error]", ...args),
 };
 
 export default function Page({ params }) {

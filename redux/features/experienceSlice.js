@@ -6,6 +6,7 @@ import {
 	editExperience,
 } from "@/services/experience";
 import { z } from "zod";
+import { logger } from "@/lib/utils";
 
 const initialState = {
 	items: [],
@@ -39,7 +40,7 @@ export const addExperienceInDatabase = createAsyncThunk(
 export const updateExperienceInDatabase = createAsyncThunk(
 	"experience/updateExperienceInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
+		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = experienceSchema.safeParse(data);
@@ -80,7 +81,7 @@ const experienceSlice = createSlice({
 	initialState,
 	reducers: {
 		setExperience(state, action) {
-			console.log("Experiences: ", action.payload);
+			logger.info("Experiences: ", action.payload);
 			state.items = action.payload;
 		},
 		addExperience(state, action) {
@@ -88,7 +89,7 @@ const experienceSlice = createSlice({
 			if (result.success) {
 				state.items.push(result.data);
 			} else {
-				console.error("Invalid experience data:", result.error);
+				logger.error("Invalid experience data:", result.error);
 			}
 		},
 		updateExperience(state, action) {
@@ -100,7 +101,7 @@ const experienceSlice = createSlice({
 				if (result.success) {
 					state.items[index] = result.data;
 				} else {
-					console.error("Invalid update data:", result.error);
+					logger.error("Invalid update data:", result.error);
 				}
 			}
 		},

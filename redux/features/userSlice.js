@@ -1,5 +1,6 @@
 import { defaultUser } from "@/schema/user";
 import { createSlice } from "@reduxjs/toolkit";
+import { logger } from "@/lib/utils";
 
 const initialState = defaultUser;
 
@@ -8,8 +9,11 @@ const userSlice = createSlice({
 	initialState,
 	reducers: {
 		setUser(state, action) {
-			console.log("User: ", action.payload);
-			state = action.payload;
+			logger.info("redux user data: ", action.payload);
+			return {
+				...state,
+				...action.payload,
+			};
 		},
 	},
 });

@@ -18,6 +18,7 @@ import {
 } from "@/redux/features/educationSlice";
 import { EducationDialog } from "../dialogs/education-dialog";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Education = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Education = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 

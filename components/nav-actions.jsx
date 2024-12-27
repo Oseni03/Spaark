@@ -38,6 +38,7 @@ import { UserButton } from "@clerk/nextjs";
 import ModeToggle from "./mode-toggle";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import { logger } from "@/lib/utils";
 
 const data = [
 	[
@@ -105,9 +106,14 @@ const data = [
 export function NavActions() {
 	const [isOpen, setIsOpen] = React.useState(false);
 	const user = useSelector((state) => state.user);
-	const text = `${user.username}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
 
 	function copyToClipboard() {
+		if (!user.username) {
+			toast.error("User username not found");
+			return;
+		}
+		const text = `${user.username}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+
 		try {
 			// Modern clipboard API
 			if (navigator.clipboard && window.isSecureContext) {
@@ -118,7 +124,7 @@ export function NavActions() {
 					})
 					.catch((err) => {
 						toast.error("Failed to copy");
-						console.error("Copy failed", err);
+						logger.error("Copy failed", err);
 					});
 			} else {
 				// Fallback method
@@ -142,14 +148,14 @@ export function NavActions() {
 					}
 				} catch (err) {
 					toast.error("Copy failed");
-					console.error("Unable to copy", err);
+					logger.error("Unable to copy", err);
 				}
 
 				document.body.removeChild(textArea);
 			}
 		} catch (err) {
 			toast.error("Copy failed");
-			console.error("Copy error", err);
+			logger.error("Copy error", err);
 		}
 	}
 

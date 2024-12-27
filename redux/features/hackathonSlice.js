@@ -5,6 +5,7 @@ import {
 	editHackathon,
 	deleteHackathon,
 } from "@/services/hackathon";
+import { logger } from "@/lib/utils";
 
 const initialState = {
 	items: [],
@@ -38,7 +39,7 @@ export const addHackathonInDatabase = createAsyncThunk(
 export const updateHackathonnInDatabase = createAsyncThunk(
 	"hackathon/updateHackathonInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
+		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = hackathonSchema.safeParse(data);
@@ -79,7 +80,7 @@ const hackathonSlice = createSlice({
 	initialState,
 	reducers: {
 		setHackathons(state, action) {
-			console.log("Hackathons: ", action.payload);
+			logger.info("Hackathons: ", action.payload);
 			state.items = action.payload;
 		},
 		addHackathon(state, action) {
@@ -87,7 +88,7 @@ const hackathonSlice = createSlice({
 			if (result.success) {
 				state.items.push(result.data);
 			} else {
-				console.error("Invalid hackathon data:", result.error);
+				logger.error("Invalid hackathon data:", result.error);
 			}
 		},
 		updateHackathon(state, action) {
@@ -99,7 +100,7 @@ const hackathonSlice = createSlice({
 				if (result.success) {
 					state.items[index] = result.data;
 				} else {
-					console.error("Invalid update data:", result.error);
+					logger.error("Invalid update data:", result.error);
 				}
 			}
 		},

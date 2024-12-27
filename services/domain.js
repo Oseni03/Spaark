@@ -3,6 +3,7 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { withErrorHandling } from "./shared";
+import { logger } from "@/lib/utils";
 
 // Input validation schema
 const DomainSchema = z
@@ -27,7 +28,7 @@ export async function readPortfolioDomain(domain) {
 		});
 
 		// Log and return users
-		console.log("Domain users: ", users);
+		logger.info("Domain users: ", users);
 		return users.data;
 	});
 }
@@ -50,7 +51,7 @@ export async function addPortfolioDomain(domain) {
 			},
 		});
 
-		console.log("Updated user: ", updatedUser);
+		logger.info("Updated user: ", updatedUser);
 		return updatedUser;
 	});
 }

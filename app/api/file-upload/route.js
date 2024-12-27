@@ -1,6 +1,7 @@
 import { put } from "@vercel/blob";
 import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils";
 
 export const runtime = "edge";
 
@@ -57,7 +58,7 @@ export async function POST(req) {
 
 		return NextResponse.json({ blob });
 	} catch (error) {
-		console.error("Upload error:", error);
+		logger.error("Upload error:", error);
 		return new Response("Internal server error", { status: 500 });
 	}
 }

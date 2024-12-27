@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { handleCancelledSubscription } from "@/services/flutterwave";
+import { logger } from "@/lib/utils";
 
 export async function POST(req) {
 	const secretHash = process.env.FLW_SECRET_HASH;
@@ -14,7 +15,7 @@ export async function POST(req) {
 		const payload = await req.json(); // Parse the JSON payload
 
 		// Log the received payload for debugging purposes
-		console.log("Webhook payload:", payload);
+		logger.info("Webhook payload:", payload);
 
 		if (
 			payload.event === "subscription.cancelled" &&
@@ -26,7 +27,7 @@ export async function POST(req) {
 		// Respond quickly to confirm receipt
 		return NextResponse.json({ success: true }, { status: 200 });
 	} catch (error) {
-		console.error("Error handling webhook:", error);
+		logger.error("Error handling webhook:", error);
 		return NextResponse.json(
 			{ error: "Internal Server Error" },
 			{ status: 500 }

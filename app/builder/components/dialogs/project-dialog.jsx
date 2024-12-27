@@ -28,7 +28,6 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
-		console.log("Project data: ", data);
 		if (currentProject) {
 			dispatch(updateProject({ id: currentProject.id, ...data }));
 			dispatch(

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { skillSchema } from "@/schema/sections";
 import { createSkill, deleteSkill, editSkill } from "@/services/skill";
+import { logger } from "@/lib/utils";
 
 const initialState = {
 	items: [],
@@ -34,7 +35,7 @@ export const addSkillInDatabase = createAsyncThunk(
 export const updateSkillnInDatabase = createAsyncThunk(
 	"skill/updateSkillInDatabase",
 	async (data, { rejectWithValue }) => {
-		console.log("Update data: ", data);
+		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = skillSchema.safeParse(data);
@@ -75,16 +76,16 @@ const skillSlice = createSlice({
 	initialState,
 	reducers: {
 		setSkills(state, action) {
-			console.log("Skills: ", action.payload);
+			logger.info("Skills: ", action.payload);
 			state.items = action.payload;
 		},
 		addSkill(state, action) {
 			const result = skillSchema.safeParse(action.payload);
 			if (result.success) {
-				console.log("Pushing result: ", result);
+				logger.info("Pushing result: ", result);
 				state.items.push(result.data);
 			} else {
-				console.error("Invalid skill data:", result.error);
+				logger.error("Invalid skill data:", result.error);
 			}
 		},
 		updateSkill(state, action) {
@@ -96,7 +97,7 @@ const skillSlice = createSlice({
 				if (result.success) {
 					state.items[index] = result.data;
 				} else {
-					console.error("Invalid update data:", result.error);
+					logger.error("Invalid update data:", result.error);
 				}
 			}
 		},

@@ -18,6 +18,7 @@ import {
 	updateExperienceInDatabase,
 } from "@/redux/features/experienceSlice";
 import { createId } from "@paralleldrive/cuid2";
+import { logger } from "@/lib/utils";
 
 export const Experience = () => {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export const Experience = () => {
 	// Log validation errors
 	useEffect(() => {
 		if (Object.keys(errors).length > 0) {
-			console.log("Form Validation Errors:", errors);
+			logger.error("Form Validation Errors:", errors);
 		}
 	}, [errors, defaultValues]);
 
@@ -46,12 +47,12 @@ export const Experience = () => {
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({...defaultExperience, id: createId()});
+		reset({ ...defaultExperience, id: createId() });
 		setCurrentExperience(null);
 		setIsOpen(true);
 	};
 	const openUpdateDialog = (experience) => {
-		console.log("Update experience: ", experience);
+		logger.info("Update experience: ", experience);
 		reset(experience);
 		setCurrentExperience(experience);
 		setIsOpen(true);
