@@ -70,7 +70,12 @@ export default function Page({ params }) {
 		fetchData();
 	}, [subdomain, user]);
 
-	if (isLoading) return <PortfolioSkeleton />;
+	if (isLoading)
+		return (
+			<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
+				<PortfolioSkeleton />
+			</div>
+		);
 	logger.info("Portfolio data: ", portfolioData);
 
 	const filterVisible = (items) => items.filter((item) => item?.visible);

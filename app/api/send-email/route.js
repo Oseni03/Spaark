@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { clerkClient } from "@clerk/nextjs/server";
+import { getUserByUsername } from "@/services/user";
+import { siteConfig } from "@/config/site";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -17,17 +18,15 @@ export async function POST(request) {
 			);
 		}
 
-		const users = await clerkClient.users.getUserList({
-			username: [username],
-		});
+		const resp = await getUserByUsername(username);
 
 		// Check if user exists
-		if (users.length === 0) {
+		if (!resp.success) {
 			return NextResponse({ error: "User not found" }, { status: 400 });
 		}
 
 		// Get the user's primary email address
-		const userEmail = users[0].primaryEmailAddress?.emailAddress;
+		const userEmail = resp?.data?.email;
 
 		if (!userEmail) {
 			return NextResponse(
@@ -37,8 +36,8 @@ export async function POST(request) {
 		}
 
 		const { data, error } = await resend.emails.send({
-			from: "onboarding@resend.dev",
-			to: userEmail,
+			from: `${siteConfig.name} <onboarding@resend.dev>`,
+			to: [userEmail],
 			subject,
 			react: reactTemplate,
 		});

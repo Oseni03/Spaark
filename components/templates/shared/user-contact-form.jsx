@@ -4,11 +4,14 @@ import { ContactFormSchema } from "@/schema/contact";
 import { toast } from "sonner";
 import ContactNotification from "@/emails/templates/contact-notification";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 export const UserContactForm = () => {
 	const { subdomain } = useParams();
+	const [isLoading, setLoading] = useState(false);
 
 	const onSubmit = async ({ name, email, message }) => {
+		setLoading(true);
 		try {
 			const templateMessage = (
 				<ContactNotification
@@ -31,6 +34,7 @@ export const UserContactForm = () => {
 			});
 
 			const result = await response.json();
+			setLoading(false);
 
 			if (result.success) {
 				toast.success("Message sent successfully!");
@@ -38,6 +42,7 @@ export const UserContactForm = () => {
 				toast.error(result.error || "Failed to send message");
 			}
 		} catch (error) {
+			setLoading(false);
 			toast.error("An unexpected error occurred");
 			console.error(error);
 		}
@@ -76,6 +81,7 @@ export const UserContactForm = () => {
 			]}
 			submitLabel="Send"
 			onSubmit={onSubmit}
+			isLoading={isLoading}
 		/>
 	);
 };
