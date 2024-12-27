@@ -303,21 +303,6 @@ export default function DefaultTemplate({
 					</BlurFade>
 				</div>
 			</section>
-			<div className="fixed bottom-8 right-8">
-				<Link
-					href={process.env.NEXT_PUBLIC_APP_URL}
-					target="blank"
-					className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
-				>
-					<Image
-						src="/spaark.svg"
-						alt="Spaark Logo"
-						width={32}
-						height={32}
-					/>
-					Made with Spaark
-				</Link>
-			</div>
 		</main>
 	);
 }

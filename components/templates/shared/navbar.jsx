@@ -18,6 +18,7 @@ import {
 	YoutubeLogo,
 } from "@phosphor-icons/react";
 import { Pen } from "lucide-react";
+import Image from "next/image";
 
 export default function PortfolioNavbar({ profile }) {
 	const { isSignedIn } = useUser();
@@ -126,6 +127,20 @@ export default function PortfolioNavbar({ profile }) {
 					</Tooltip>
 				</DockIcon>
 			</Dock>
+			<Link
+				href={process.env.NEXT_PUBLIC_APP_URL}
+				target="_blank" // Corrected here
+				rel="noopener noreferrer" // Added for security best practices
+				className="flex items-center gap-2 text-xs text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white transition-colors"
+			>
+				<Image
+					src="/spaark.svg"
+					alt="Spaark Logo"
+					width={32}
+					height={32}
+				/>
+				Made with Spaark
+			</Link>
 		</div>
 	);
 }
