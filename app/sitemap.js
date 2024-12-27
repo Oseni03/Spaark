@@ -4,7 +4,6 @@ import { getUsers } from "@/services/user";
 export default async function sitemap() {
 	const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 	const users = await getUsers();
-	logger.info("Users: ", users);
 
 	const userSitemapEntries = users?.data.map((user) => ({
 		url: `https://${user.username}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,

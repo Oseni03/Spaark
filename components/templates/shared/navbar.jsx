@@ -82,6 +82,7 @@ export default function PortfolioNavbar({ profile }) {
 								<TooltipTrigger asChild>
 									<Link
 										href={social.url}
+										target="_blank"
 										className={cn(
 											buttonVariants({
 												variant: "ghost",

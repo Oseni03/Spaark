@@ -41,10 +41,10 @@ export function ZodForm({
 	const { formState, reset } = form;
 
 	useEffect(() => {
-		if (formState.submitted) {
+		if (formState.isSubmitSuccessful) {
 			reset();
 		}
-	}, [formState, reset]);
+	}, [formState.isSubmitSuccessful, reset]);
 
 	return (
 		<>
