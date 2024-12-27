@@ -76,7 +76,7 @@ export default function Page({ params }) {
 	const filterVisible = (items) => items.filter((item) => item?.visible);
 
 	return (
-		<div>
+		<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
 			<DefaultTemplate
 				{...portfolioData}
 				projects={filterVisible(portfolioData.project)}
