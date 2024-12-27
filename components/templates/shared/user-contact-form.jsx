@@ -57,18 +57,21 @@ export const UserContactForm = () => {
 					type: "text",
 					label: "Full Name",
 					placeholder: "Enter your full name",
+					className: "text-black dark:text-white",
 				},
 				{
 					name: "email",
 					type: "email",
 					label: "Email",
 					placeholder: "Enter your email address",
+					className: "text-black dark:text-white",
 				},
 				{
 					name: "message",
 					type: "textarea",
 					label: "Message",
 					placeholder: "Write to us",
+					className: "text-black dark:text-white",
 				},
 			]}
 			submitLabel="Send"

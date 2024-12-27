@@ -107,7 +107,7 @@ export default function DefaultTemplate({
 								<ResumeCard
 									key={edu.institution}
 									href={edu.url}
-									// logoUrl={education.logoUrl}
+									logoUrl={education.logo}
 									altText={edu.institution}
 									title={edu.institution}
 									subtitle={edu.studyType}
@@ -294,9 +294,9 @@ export default function DefaultTemplate({
 								Got a project in mind?
 							</h2>
 							<p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-								Don&rsquo;t be shy – click the button below and
-								slide into my digital inbox! I promise I&rsquo;m
-								way more responsive than my houseplants.
+								Don&rsquo;t be shy – send a message and slide
+								into my digital inbox! I promise I&rsquo;m way
+								more responsive than my houseplants.
 							</p>
 							<ContactCard />
 						</div>

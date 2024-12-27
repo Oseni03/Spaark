@@ -63,6 +63,7 @@ export function ZodForm({
 							placeholder,
 							options,
 							autoComplete = "off",
+							className,
 						}) => (
 							<FormField
 								key={name}
@@ -78,6 +79,7 @@ export function ZodForm({
 												options={options}
 												autoComplete={autoComplete}
 												field={field}
+												className={className}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -102,7 +104,14 @@ export function ZodForm({
 	);
 }
 
-const FormInput = ({ type, placeholder, options, autoComplete, field }) => {
+const FormInput = ({
+	type,
+	placeholder,
+	options,
+	autoComplete,
+	field,
+	className,
+}) => {
 	if (type === "text") {
 		return (
 			<Input
@@ -110,6 +119,7 @@ const FormInput = ({ type, placeholder, options, autoComplete, field }) => {
 				placeholder={placeholder}
 				autoComplete={autoComplete}
 				{...field}
+				className={className}
 			/>
 		);
 	} else if (type === "email") {
@@ -119,6 +129,7 @@ const FormInput = ({ type, placeholder, options, autoComplete, field }) => {
 				placeholder={placeholder}
 				autoComplete={autoComplete}
 				{...field}
+				className={className}
 			/>
 		);
 	} else if (type === "password") {
@@ -128,10 +139,17 @@ const FormInput = ({ type, placeholder, options, autoComplete, field }) => {
 				placeholder={placeholder}
 				autoComplete={autoComplete}
 				{...field}
+				className={className}
 			/>
 		);
 	} else if (type === "textarea") {
-		return <Textarea placeholder={placeholder} {...field} />;
+		return (
+			<Textarea
+				placeholder={placeholder}
+				{...field}
+				className={className}
+			/>
+		);
 	} else if (type === "select") {
 		return (
 			<Select {...field}>
