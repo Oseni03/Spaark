@@ -6,6 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
 import { withErrorHandling } from "./shared";
+import { PrismaClient } from "@prisma/client";
 
 export async function getUserByUsername(username) {
 	return withErrorHandling(async () => {
@@ -21,6 +22,27 @@ export async function getUserByUsername(username) {
 			},
 		});
 		return user;
+	});
+}
+
+export async function getUsers() {
+	return withErrorHandling(async () => {
+		const users = await prisma.user.findMany({
+			select: {
+				id: true,
+				email: true,
+				username: true,
+				subscribed: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+			where: {
+				username: {
+					not: null,
+				},
+			},
+		});
+		return users;
 	});
 }
 
