@@ -17,27 +17,18 @@ const fontSans = FontSans({
 export const metadata = {
 	title: {
 		default: siteConfig.name,
-		template: `%s | ${siteConfig.name}`, // For nested pages: "Page Name | Spaark"
+		template: `%s | ${siteConfig.name}`,
 	},
 	description: siteConfig.description,
 	keywords: siteConfig.keywords,
-	authors: [
-		{
-			name: siteConfig.name,
-			url: siteConfig.url,
-		},
-	],
-	creator: siteConfig.name,
 	openGraph: {
 		type: "website",
-		locale: "en_US",
 		url: siteConfig.url,
 		title: siteConfig.name,
 		description: siteConfig.description,
-		siteName: siteConfig.name,
 		images: [
 			{
-				url: `${siteConfig.url}/og-image.jpg`,
+				url: `${siteConfig.url}/api/og`,
 				width: 1200,
 				height: 630,
 				alt: siteConfig.name,
@@ -48,30 +39,14 @@ export const metadata = {
 		card: "summary_large_image",
 		title: siteConfig.name,
 		description: siteConfig.description,
-		images: [`${siteConfig.url}/og-image.jpg`],
+		images: [`${siteConfig.url}/api/og`],
 		creator: siteConfig.twitterHandle,
 	},
 	icons: {
-		icon: [{ url: "/favicon.ico" }],
-		apple: { url: "/apple-touch-icon.png" },
+		icon: "/favicon.ico",
+		apple: "/apple-touch-icon.png",
 	},
-	// manifest: "/site.webmanifest",
 	metadataBase: new URL(siteConfig.url),
-	robots: {
-		index: true,
-		follow: true,
-		googleBot: {
-			index: true,
-			follow: true,
-			"max-video-preview": -1,
-			"max-image-preview": "large",
-			"max-snippet": -1,
-		},
-	},
-	verification: {
-		google: "your-google-site-verification",
-		yandex: "your-yandex-verification",
-	},
 };
 
 export default function RootLayout({ children }) {
