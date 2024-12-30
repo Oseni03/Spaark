@@ -107,11 +107,10 @@ export default function DefaultTemplate({
 								<ResumeCard
 									key={edu.institution}
 									href={edu.url}
-									logoUrl={education.logo}
+									logoUrl={edu.logo}
 									altText={edu.institution}
 									title={edu.institution}
 									subtitle={edu.studyType}
-									// period={`${education.start} - ${education.end}`}
 									period={edu.date}
 								/>
 							</BlurFade>

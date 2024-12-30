@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
 import DefaultTemplate from "@/components/templates/main/default-template";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
@@ -21,7 +21,8 @@ const INITIAL_STATE = {
 
 export default function Page({ params }) {
 	const { user } = useUser();
-	const { subdomain } = params;
+	const resolvedParams = use(params);
+	const { subdomain } = resolvedParams;
 	const [isLoading, setIsLoading] = useState(true);
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
 	logger.info("User: ", user);

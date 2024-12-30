@@ -1,11 +1,11 @@
 import React from "react";
-import { notFound } from "next/navigation";
 import { z } from "zod";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import { getUserByUsername } from "@/services/user";
 import { isTrialing } from "@/lib/utils";
 import { UserProvider } from "@/context/UserContext";
 import { logger } from "@/lib/utils";
+import NotFound from "../not-found";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -21,7 +21,7 @@ export default async function UserLayout({ params, children }) {
 
 	if (!validationResult.success) {
 		logger.error("Subdomain validation error: ", validationResult.error);
-		return notFound();
+		return NotFound();
 	}
 
 	const { subdomain } = validationResult.data;
@@ -37,10 +37,10 @@ export default async function UserLayout({ params, children }) {
 		// Check for invalid user, subscription, or trialing status
 		if (
 			!userResult.success ||
-			!user ||
-			(!user.subscribed && !isTrialing(user.createdAt))
+			!user
+			//|| (!user.subscribed && !isTrialing(user.createdAt))
 		) {
-			return notFound();
+			return NotFound();
 		}
 
 		// Extract user details
@@ -90,6 +90,6 @@ export default async function UserLayout({ params, children }) {
 		);
 	} catch (error) {
 		logger.error(`Error loading user layout for ${subdomain}:`, error);
-		return notFound();
+		return NotFound();
 	}
 }
