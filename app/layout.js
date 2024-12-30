@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import localFont from "next/font/local";
 import CustomProvider from "@/redux/provider";
@@ -9,6 +8,8 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const fontSans = FontSans({
 	subsets: ["latin"],
@@ -70,6 +71,8 @@ export default function RootLayout({ children }) {
 							<TooltipProvider delayDuration={0}>
 								<Toaster />
 								{children}
+								<Analytics />
+								<SpeedInsights />
 							</TooltipProvider>
 						</ThemeProvider>
 					</CustomProvider>
