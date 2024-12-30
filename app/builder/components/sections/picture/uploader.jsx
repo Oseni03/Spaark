@@ -4,8 +4,12 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 
-export default function Uploader({ defaultValue, setValue }) {
-	let name = "image";
+export default function Uploader({
+	defaultValue,
+	defaultName = "image",
+	setValue,
+}) {
+	const [name, setName] = useState(defaultName);
 	const [media, setMedia] = useState(defaultValue || "");
 	const inputRef = useRef(null);
 	const [dragActive, setDragActive] = useState(false);
@@ -26,9 +30,9 @@ export default function Uploader({ defaultValue, setValue }) {
 			}
 
 			if (file.type.startsWith("image/")) {
-				name = "image";
+				setName("image");
 			} else if (file.type.startsWith("video/")) {
-				name = "video";
+				setName("video");
 			}
 
 			try {
@@ -124,7 +128,7 @@ export default function Uploader({ defaultValue, setValue }) {
 					<span className="sr-only">Media upload</span>
 				</div>
 				{media &&
-					(media.includes("video") ? (
+					(name === "video" ? (
 						<video
 							src={media}
 							controls

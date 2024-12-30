@@ -59,6 +59,9 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 							defaultValue={
 								currentProject?.image || currentProject?.video
 							}
+							defaultName={
+								currentProject?.image ? "image" : "video"
+							}
 							setValue={setValue}
 						/>
 						<div className="grid md:grid-cols-2 gap-2 space-y-4 md:space-y-0">
