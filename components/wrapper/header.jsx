@@ -53,13 +53,9 @@ export const Header1 = () => {
 							<NavigationMenuItem>
 								<Link href={""}>
 									<Button variant="icon">
-										<Image
-											src={siteConfig.icon}
-											alt={siteConfig.name}
-											width={65}
-											height={65}
-											className="text-black dark:text-white" // This will handle the color switching
-										/>
+										<span className="text-2xl font-bold">
+											{siteConfig.name}
+										</span>
 									</Button>
 								</Link>
 							</NavigationMenuItem>

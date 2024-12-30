@@ -24,7 +24,8 @@ export const siteConfig = {
 	],
 	author: "github.com/Oseni03",
 	github: "https://github.com/Oseni03/Spaark",
-	icon: "/spaark.svg",
+	icon: "/icon.png",
+	logo: "/logo.png",
 	url: `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
 	twitterHandle: "@Oseni03",
 	features: [
@@ -56,6 +57,6 @@ export const siteConfig = {
 	],
 	navbar: [
 		{ href: "/", icon: HomeIcon, label: "Home" },
-		{ href: "/blog", icon: NotebookIcon, label: "Blog" },
+		// { href: "/blog", icon: NotebookIcon, label: "Blog" },
 	],
 };
