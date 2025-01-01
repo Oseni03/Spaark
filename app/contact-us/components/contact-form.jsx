@@ -1,56 +1,63 @@
-"use client";
-import { ZodForm } from "@/components/zod-form";
-import { ContactFormSchema } from "@/schema/contact";
-import { saveContact } from "@/services/contact";
-import { logger } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-export const ContactForm = () => {
-	const handleContact = async ({ email, full_name, message }) => {
-		if (!email || !full_name || !message) {
-			throw new Error("All fields are required.");
-		}
-		logger.info("Saving contact message: ", message);
-
-		const response = await saveContact({ email, full_name, message });
-
-		if (response.success) {
-			toast.success(response.message);
-		} else {
-			logger.error("Contact-us form error: ", response);
-			toast.error("Error sending message. Try again later");
-		}
-	};
-
+export const ContactForm = ({
+	formData,
+	errors,
+	isSubmitting,
+	handleChange,
+	handleSubmit,
+}) => {
 	return (
-		<ZodForm
-			schema={ContactFormSchema}
-			defaultValues={{
-				full_name: "",
-				email: "",
-				message: "",
-			}}
-			fields={[
-				{
-					name: "full_name",
-					type: "text",
-					label: "Full Name",
-					placeholder: "Enter your full name",
-				},
-				{
-					name: "email",
-					type: "email",
-					label: "Email",
-					placeholder: "Enter your email address",
-				},
-				{
-					name: "message",
-					type: "textarea",
-					label: "Message",
-					placeholder: "Write to us",
-				},
-			]}
-			submitLabel="Send"
-			onSubmit={handleContact}
-		/>
+		<form onSubmit={handleSubmit} className="grid space-y-3">
+			<div className="space-y-2">
+				<Label>Email</Label>
+				<Input
+					type="email"
+					name="email"
+					value={formData.email}
+					onChange={handleChange}
+					className={errors.email ? "border-red-500" : ""}
+				/>
+				{errors.email && <p className="text-red-500">{errors.email}</p>}
+			</div>
+
+			<div className="space-y-2">
+				<Label>Full Name</Label>
+				<Input
+					type="text"
+					name="full_name"
+					value={formData.full_name}
+					onChange={handleChange}
+					className={errors.full_name ? "border-red-500" : ""}
+				/>
+				{errors.full_name && (
+					<p className="text-red-500">{errors.full_name}</p>
+				)}
+			</div>
+
+			<div className="space-y-2">
+				<Label>Your Message</Label>
+				<Textarea
+					name="message"
+					value={formData.message}
+					onChange={handleChange}
+					placeholder="Your message"
+					className={errors.message ? "border-red-500" : ""}
+					rows={4}
+				/>
+				{errors.message && (
+					<p className="text-red-500">{errors.message}</p>
+				)}
+			</div>
+
+			<Button type="submit" disabled={isSubmitting} className="w-full">
+				{isSubmitting && <Spinner />}
+				{isSubmitting ? "Sending..." : "Send Message"}
+			</Button>
+		</form>
 	);
 };

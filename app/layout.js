@@ -30,7 +30,7 @@ export const metadata = {
 		description: siteConfig.description,
 		images: [
 			{
-				url: `${siteConfig.url}/api/og`,
+				url: `/og.png`,
 				width: 1200,
 				height: 630,
 				alt: siteConfig.name,
@@ -41,7 +41,7 @@ export const metadata = {
 		card: "summary_large_image",
 		title: siteConfig.name,
 		description: siteConfig.description,
-		images: [`${siteConfig.url}/api/og`],
+		images: [`/og.png`],
 		creator: siteConfig.twitterHandle,
 	},
 	icons: {

@@ -8,10 +8,11 @@ import {
 	Text,
 	Link,
 } from "@react-email/components";
+import { siteConfig } from "@/config/site";
 
 const ContactNotification = ({ name, email, message }) => {
 	return (
-		<Html>
+		<Html lang="en">
 			<Head />
 			<Body
 				style={{
@@ -119,7 +120,7 @@ const ContactNotification = ({ name, email, message }) => {
 							marginBottom: "15px",
 						}}
 					>
-						Your Team
+						{siteConfig.name}
 					</Text>
 				</Container>
 			</Body>

@@ -186,3 +186,12 @@ model Transaction {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Contact {
+  id        String   @id @default(uuid())
+  email     String
+  full_name String
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { getUserByUsername } from "@/services/user";
 import { siteConfig } from "@/config/site";
 import { logger } from "@/lib/utils";
+import ContactNotification from "@/emails/templates/contact-notification";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -10,27 +11,32 @@ export async function POST(request) {
 	try {
 		// Parse and validate the request body
 		const reqData = await request.json();
-		const { username, subject, reactTemplate } = reqData;
+		const { username, subject, props } = reqData;
 
-		if (!username || !subject || !reactTemplate) {
-			return NextResponse(
+		if (!username || !subject || !props) {
+			return new NextResponse(
 				{ error: "All field required" },
 				{ status: 400 }
 			);
 		}
+		logger.info("Request data: ", reqData);
 
 		const resp = await getUserByUsername(username);
 
 		// Check if user exists
 		if (!resp.success) {
-			return NextResponse({ error: "User not found" }, { status: 400 });
+			return new NextResponse(
+				{ error: "User not found" },
+				{ status: 400 }
+			);
 		}
+		logger.info("User resp: ", resp);
 
 		// Get the user's primary email address
 		const userEmail = resp?.data?.email;
 
 		if (!userEmail) {
-			return NextResponse(
+			return new NextResponse(
 				{ error: "User email not found" },
 				{ status: 400 }
 			);
@@ -40,11 +46,18 @@ export async function POST(request) {
 			from: `${siteConfig.name} <onboarding@resend.dev>`,
 			to: [userEmail],
 			subject,
-			react: reactTemplate,
+			react: (
+				<ContactNotification
+					name={props.name}
+					email={props.email}
+					message={props.message}
+				/>
+			),
 		});
 
 		if (error) {
-			return NextResponse.json({ error }, { status: 400 });
+			logger.error(error);
+			return NextResponse.json({ error: error.message }, { status: 400 });
 		}
 
 		return NextResponse.json({ data, success: true }, { status: 200 });
