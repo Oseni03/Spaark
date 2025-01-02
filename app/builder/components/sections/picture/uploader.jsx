@@ -28,6 +28,7 @@ export default function Uploader({
 				toast.error("Invalid file type (must be an image or video)");
 				return;
 			}
+			logger.info("File type:", file.type);
 
 			if (file.type.startsWith("image/")) {
 				setName("image");
@@ -49,6 +50,7 @@ export default function Uploader({
 				setMedia(blob.url);
 				setValue(name, blob.url);
 				toast.success("File uploaded successfully");
+				logger.info("File uploaded: ", name, blob.url)
 			} catch (error) {
 				logger.error("Upload error:", error);
 				toast.error("Failed to upload file");
