@@ -22,12 +22,14 @@ import {
 } from "@/redux/features/projectSlice";
 import { CustomLink } from "@/components/custom-link";
 import Uploader from "../sections/picture/uploader";
+import { logger } from "@/lib/utils";
 
 export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
+		logger.info("Project data:", data);
 		if (currentProject) {
 			dispatch(updateProject({ id: currentProject.id, ...data }));
 			dispatch(
