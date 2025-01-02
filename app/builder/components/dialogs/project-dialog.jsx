@@ -60,7 +60,11 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 								currentProject?.image || currentProject?.video
 							}
 							defaultName={
-								currentProject?.image ? "image" : "video"
+								currentProject?.image
+									? "image"
+									: currentProject?.video
+										? "video"
+										: null
 							}
 							setValue={setValue}
 						/>
