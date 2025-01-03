@@ -42,6 +42,24 @@ export const HeroSection = () => (
 						</Button>
 					</Link>
 				</div>
+				<a
+					href="https://www.producthunt.com/products/spaark-2?utm_source=badge-follow&utm_medium=badge&utm_souce=badge-spaark&#0045;2"
+					target="_blank"
+					style={{
+						position: "fixed",
+						bottom: "40px", // Adjusted from 20px to 40px
+						right: "20px",
+						zIndex: 1000,
+					}}
+				>
+					<img
+						src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=859386&theme=light"
+						alt="Spaark - Create&#0032;your&#0032;professional&#0032;portfolio&#0032;in&#0032;minutes | Product Hunt"
+						style={{ width: "250px", height: "54px" }}
+						width="250"
+						height="54"
+					/>
+				</a>
 			</div>
 		</div>
 	</div>
