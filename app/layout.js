@@ -1,15 +1,13 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import localFont from "next/font/local";
 import CustomProvider from "@/redux/provider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider, CSPostHogProvider } from "./providers";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const fontSans = FontSans({
 	subsets: ["latin"],
@@ -55,28 +53,28 @@ export default function RootLayout({ children }) {
 	return (
 		<ClerkProvider>
 			<html lang="en" suppressHydrationWarning>
-				<body
-					className={cn(
-						"min-h-screen bg-background font-sans antialiased",
-						fontSans.variable
-					)}
-				>
-					<CustomProvider>
-						<ThemeProvider
-							attribute="class"
-							defaultTheme="system"
-							enableSystem
-							disableTransitionOnChange
-						>
-							<TooltipProvider delayDuration={0}>
-								<Toaster />
-								{children}
-								<Analytics />
-								<SpeedInsights />
-							</TooltipProvider>
-						</ThemeProvider>
-					</CustomProvider>
-				</body>
+				<CSPostHogProvider>
+					<body
+						className={cn(
+							"min-h-screen bg-background font-sans antialiased",
+							fontSans.variable
+						)}
+					>
+						<CustomProvider>
+							<ThemeProvider
+								attribute="class"
+								defaultTheme="system"
+								enableSystem
+								disableTransitionOnChange
+							>
+								<TooltipProvider delayDuration={0}>
+									<Toaster />
+									{children}
+								</TooltipProvider>
+							</ThemeProvider>
+						</CustomProvider>
+					</body>
+				</CSPostHogProvider>
 			</html>
 		</ClerkProvider>
 	);
