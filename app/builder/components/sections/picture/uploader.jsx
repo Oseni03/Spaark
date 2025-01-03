@@ -4,12 +4,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 
-export default function Uploader({
-	defaultValue,
-	defaultName = "image",
-	setValue,
-}) {
-	const [name, setName] = useState(defaultName);
+export default function Uploader({ defaultValue, defaultName, setValue }) {
+	let name = defaultName || "image";
 	const [media, setMedia] = useState(defaultValue || "");
 	const inputRef = useRef(null);
 	const [dragActive, setDragActive] = useState(false);
@@ -31,9 +27,9 @@ export default function Uploader({
 			logger.info("File type:", file.type);
 
 			if (file.type.startsWith("image/")) {
-				setName("image");
+				name = "image";
 			} else if (file.type.startsWith("video/")) {
-				setName("video");
+				name = "video";
 			}
 
 			try {
@@ -50,7 +46,7 @@ export default function Uploader({
 				setMedia(blob.url);
 				setValue(name, blob.url);
 				toast.success("File uploaded successfully");
-				logger.info("File uploaded: ", name, blob.url)
+				logger.info("File uploaded: ", name, blob.url);
 			} catch (error) {
 				logger.error("Upload error:", error);
 				toast.error("Failed to upload file");
