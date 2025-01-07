@@ -181,8 +181,12 @@ export const BasicsSection = () => {
 									{...field}
 									content={field.value}
 									onChange={(value) => field.onChange(value)}
-									error={fieldState.error?.message}
 								/>
+								{fieldState.error && (
+									<small className="text-red-500 opacity-75">
+										{fieldState.error?.message}
+									</small>
+								)}
 							</div>
 						)}
 					/>
@@ -196,8 +200,12 @@ export const BasicsSection = () => {
 									{...field}
 									content={field.value}
 									onChange={(value) => field.onChange(value)}
-									error={fieldState.error?.message}
 								/>
+								{fieldState.error && (
+									<small className="text-red-500 opacity-75">
+										{fieldState.error?.message}
+									</small>
+								)}
 							</div>
 						)}
 					/>
