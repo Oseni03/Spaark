@@ -9,7 +9,8 @@
 		"lint": "next lint",
 		"postinstall": "prisma generate",
 		"vercel-build": "prisma generate && next build",
-		"prisma:generate": "prisma generate"
+		"prisma:generate": "prisma generate",
+		"generate-codes": "node generateCodes.js"
 	},
 	"dependencies": {
 		"@clerk/nextjs": "^6.9.3",
@@ -77,10 +78,11 @@
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7",
 		"usehooks-ts": "^3.1.0",
+		"uuid": "^11.0.4",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@prisma/client": "^6.0.1",
+		"@prisma/client": "^6.1.0",
 		"eslint": "^8",
 		"eslint-config-next": "15.0.3",
 		"postcss": "^8",

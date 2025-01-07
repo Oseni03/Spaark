@@ -6,13 +6,31 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { defaultBasics } from "@/schema/basics";
 import { withErrorHandling } from "./shared";
-import { PrismaClient } from "@prisma/client";
 
 export async function getUserByUsername(username) {
 	return withErrorHandling(async () => {
 		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { username },
+			select: {
+				id: true,
+				username: true,
+				email: true,
+				subscribed: true,
+				basics: true,
+				subscribed: true,
+				createdAt: true,
+			},
+		});
+		return user;
+	});
+}
+
+export async function getUserByEmail(email) {
+	return withErrorHandling(async () => {
+		// Fetch the userId based on the username
+		const user = await prisma.user.findUnique({
+			where: { email },
 			select: {
 				id: true,
 				username: true,
