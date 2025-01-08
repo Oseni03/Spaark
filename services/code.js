@@ -17,6 +17,15 @@ export async function activateUserCode(userCode, userId) {
 				updatedAt: new Date(), // Ensure updated timestamp is set
 			},
 		});
+
+		const user = await prisma.user.update({
+			where: { id: userId },
+			data: {
+				codeId: code.id,
+				subscribed: true,
+				updatedAt: new Date(), // Ensure updated timestamp is set
+			},
+		});
 		return code;
 	});
 }
