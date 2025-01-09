@@ -8,3 +8,13 @@ export const socialNetworks = [
 	{ value: "x", label: `X` },
 	{ value: "youtube", label: `Youtube` },
 ];
+
+export const defaultTiltProps = {
+	scale: 1.05,
+	tiltMaxAngleX: 8,
+	tiltMaxAngleY: 8,
+	perspective: 1400,
+	glareEnable: true,
+	glareMaxOpacity: 0.1,
+	glareColor: "#fafafa",
+};
