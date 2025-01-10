@@ -15,9 +15,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useSelectedLayoutSegments } from "next/navigation";
 import { siteConfig } from "@/config/site";
 
 export default function DashboardLayout({ children }) {
+	const segments = useSelectedLayoutSegments();
+
 	const links = [
 		{
 			label: "Builder",
@@ -28,7 +31,7 @@ export default function DashboardLayout({ children }) {
 		},
 		{
 			label: "Blogs",
-			href: "#",
+			href: "/dashboard/blogs",
 			icon: (
 				<IconBook className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
 			),
@@ -49,11 +52,14 @@ export default function DashboardLayout({ children }) {
 		},
 	];
 	const [open, setOpen] = useState(false);
+
+	const isSelected = (href) => {
+		return segments.includes(href.split("/").pop());
+	};
 	return (
 		<div
 			className={cn(
 				"rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 border border-neutral-200 dark:border-neutral-700 overflow-hidden",
-				// for your use case, use `h-screen` instead of `h-[60vh]`
 				"h-screen"
 			)}
 		>
@@ -63,7 +69,15 @@ export default function DashboardLayout({ children }) {
 						{open ? <Logo /> : <LogoIcon />}
 						<div className="mt-8 flex flex-col gap-2">
 							{links.map((link, idx) => (
-								<SidebarLink key={idx} link={link} />
+								<SidebarLink
+									key={idx}
+									link={link}
+									className={cn(
+										"sidebar-link",
+										isSelected(link.href) &&
+											"bg-gray-100 dark:bg-neutral-800"
+									)}
+								/>
 							))}
 						</div>
 					</div>
@@ -86,14 +100,18 @@ export default function DashboardLayout({ children }) {
 					</div>
 				</SidebarBody>
 			</Sidebar>
-			{children}
+			<div className="flex flex-1">
+				<div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
+					{children}
+				</div>
+			</div>
 		</div>
 	);
 }
 export const Logo = () => {
 	return (
 		<Link
-			href={siteConfig.url}
+			href="/"
 			className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
 		>
 			<Image
@@ -101,7 +119,7 @@ export const Logo = () => {
 				className="h-7 w-7 flex-shrink-0 rounded-full"
 				width={50}
 				height={50}
-				alt="Avatar"
+				alt={siteConfig.name}
 			/>
 			<motion.span
 				initial={{ opacity: 0 }}
@@ -116,7 +134,7 @@ export const Logo = () => {
 export const LogoIcon = () => {
 	return (
 		<Link
-			href="#"
+			href="/"
 			className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
 		>
 			<Image
@@ -124,7 +142,7 @@ export const LogoIcon = () => {
 				className="h-7 w-7 flex-shrink-0 rounded-full"
 				width={50}
 				height={50}
-				alt="Avatar"
+				alt={siteConfig.name}
 			/>
 		</Link>
 	);
