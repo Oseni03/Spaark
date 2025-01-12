@@ -65,6 +65,7 @@
 		"next": "15.0.3",
 		"next-theme": "^0.1.5",
 		"next-themes": "^0.4.4",
+		"novel": "^0.5.0",
 		"posthog-js": "^1.203.2",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
@@ -80,6 +81,7 @@
 		"svix": "^1.42.0",
 		"tailwind-merge": "^2.6.0",
 		"tailwindcss-animate": "^1.0.7",
+		"tiptap": "^1.32.2",
 		"usehooks-ts": "^3.1.0",
 		"uuid": "^11.0.4",
 		"zod": "^3.23.8"
