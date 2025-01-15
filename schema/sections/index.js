@@ -8,44 +8,35 @@ import { profileSchema } from "./profile";
 import { projectSchema } from "./project";
 import { skillSchema } from "./skill";
 import { hackathonSchema } from "./hackathon";
+import { basicsSchema, defaultBasics } from "./basics";
+import { idSchema } from "../shared/id";
+import { createId } from "@paralleldrive/cuid2";
 
 // Schema
 export const sectionSchema = z.object({
 	name: z.string(),
-	columns: z.number().min(1).max(5).default(1),
-	separateLinks: z.boolean().default(true),
 	visible: z.boolean().default(true),
 });
 
 // Schema
 export const sectionsSchema = z.object({
-	summary: sectionSchema.extend({
-		id: z.literal("summary"),
-		content: z.string().default(""),
-	}),
-	about: sectionSchema.extend({
-		id: z.literal("about"),
-		content: z.string().default(""),
-	}),
+	id: idSchema,
+	basics: sectionSchema.extend(basicsSchema),
 	certifications: sectionSchema.extend({
 		id: z.literal("certification"),
 		items: z.array(certificationSchema),
 	}),
-	education: sectionSchema.extend({
+	educations: sectionSchema.extend({
 		id: z.literal("education"),
 		items: z.array(educationSchema),
 	}),
-	experience: sectionSchema.extend({
+	experiences: sectionSchema.extend({
 		id: z.literal("experience"),
 		items: z.array(experienceSchema),
 	}),
-	hackathon: sectionSchema.extend({
+	hackathons: sectionSchema.extend({
 		id: z.literal("hackathon"),
 		items: z.array(hackathonSchema),
-	}),
-	languages: sectionSchema.extend({
-		id: z.literal("language"),
-		items: z.array(languageSchema),
 	}),
 	profiles: sectionSchema.extend({
 		id: z.literal("profile"),
@@ -64,42 +55,40 @@ export const sectionsSchema = z.object({
 // Defaults
 export const defaultSection = {
 	name: "",
-	columns: 1,
-	separateLinks: true,
 	visible: true,
+	status: "idle", // Added to track async operation status
+	error: null,
 };
 
 export const defaultSections = {
-	summary: { ...defaultSection, id: "summary", name: "Summary", content: "" },
-	about: { ...defaultSection, id: "about", name: "About", content: "" },
-	hackathon: {
+	id: createId(),
+	basics: {
+		...defaultSection,
+		...defaultBasics,
+		id: "basics",
+	},
+	hackathons: {
 		...defaultSection,
 		id: "hackathon",
-		name: "Hackathon",
+		name: "Hackathons",
 		items: [],
 	},
 	certifications: {
 		...defaultSection,
-		id: "certifications",
+		id: "certification",
 		name: "Certifications",
 		items: [],
 	},
-	education: {
+	educations: {
 		...defaultSection,
 		id: "education",
 		name: "Education",
 		items: [],
 	},
-	experience: {
+	experiences: {
 		...defaultSection,
 		id: "experience",
-		name: "Experience",
-		items: [],
-	},
-	languages: {
-		...defaultSection,
-		id: "languages",
-		name: "Languages",
+		name: "Experiences",
 		items: [],
 	},
 	profiles: {

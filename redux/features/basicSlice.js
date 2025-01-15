@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { defaultBasics } from "@/schema/basics";
+import { defaultBasics } from "@/schema/sections/basics";
 import { updateUserBasics } from "@/services/user"; // Assume this service exists
 
 // Async thunk for updating basics in the database

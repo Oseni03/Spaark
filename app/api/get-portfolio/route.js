@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getUser, getUserBasics } from "@/services/user";
+import { getUserPortfolios } from "@/services/portfolio";
+import { getUserBasics } from "@/services/basics";
 import { getUserCertifications } from "@/services/certification";
 import { getUserEducations } from "@/services/education";
 import { getUserExperiences } from "@/services/experience";
@@ -68,45 +69,51 @@ export async function GET(req) {
 			userId = authenticatedUserId;
 		}
 
-		const results = await Promise.allSettled([
-			getUserBasics(userId),
-			getUserProfiles(userId),
-			getUserExperiences(userId),
-			getUserEducations(userId),
-			getUserCertifications(userId),
-			getUserSkills(userId),
-			getUserProjects(userId),
-			getUserHackathons(userId),
-			getUser(userId),
-		]);
+		const portfolios = await getUserPortfolios(userId);
 
-		const [
-			basics,
-			profiles,
-			experiences,
-			educations,
-			certifications,
-			skills,
-			projects,
-			hackathons,
-			user,
-		] = results.map((result) =>
-			result.status === "fulfilled" ? result.value : null
-		);
+		const portfolioDataPromises = portfolios.map(async (portfolio) => {
+			const portfolioId = portfolio.id;
 
-		const responseData = {
-			basics,
-			profiles,
-			experiences,
-			educations,
-			certifications,
-			skills,
-			projects,
-			hackathons,
-			user,
-		};
+			const results = await Promise.allSettled([
+				getUserBasics(portfolioId),
+				getUserProfiles(portfolioId),
+				getUserExperiences(portfolioId),
+				getUserEducations(portfolioId),
+				getUserCertifications(portfolioId),
+				getUserSkills(portfolioId),
+				getUserProjects(portfolioId),
+				getUserHackathons(portfolioId),
+			]);
 
-		return new NextResponse(JSON.stringify(responseData), {
+			const [
+				basics,
+				profiles,
+				experiences,
+				educations,
+				certifications,
+				skills,
+				projects,
+				hackathons,
+			] = results.map((result) =>
+				result.status === "fulfilled" ? result.value : null
+			);
+
+			return {
+				portfolio,
+				basics,
+				profiles,
+				experiences,
+				educations,
+				certifications,
+				skills,
+				projects,
+				hackathons,
+			};
+		});
+
+		const portfolioData = await Promise.all(portfolioDataPromises);
+
+		return new NextResponse(JSON.stringify({ portfolios: portfolioData }), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",

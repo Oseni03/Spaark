@@ -9,6 +9,7 @@ export const userSchema = z.object({
 	username: z.literal("").or(z.string().min(3).max(255)),
 	email: z.string().email(),
 	subscribed: z.boolean().default(false),
+	userType: z.literal("").or(z.string().min(3).max(255)),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -18,6 +19,7 @@ export const defaultUser = {
 	username: "",
 	email: "",
 	subscribed: false,
+	userType: "",
 	createdAt: "",
 	updatedAt: "",
 };

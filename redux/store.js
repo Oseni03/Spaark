@@ -11,15 +11,7 @@ import {
 } from "redux-persist";
 import { CookieStorage } from "redux-persist-cookie-storage";
 import Cookies from "js-cookie";
-import profileReducer from "./features/profileSlice";
 import portfolioReducer from "./features/portfolioSlice";
-import experienceReducer from "./features/experienceSlice";
-import educationReducer from "./features/educationSlice";
-import skillReducer from "./features/skillSlice";
-import certificationReducer from "./features/certificationSlice";
-import projectReducer from "./features/projectSlice";
-import hackathonReducer from "./features/hackathonSlice";
-import basicsReducer from "./features/basicSlice";
 import userReducer from "./features/userSlice";
 
 // Custom cookie storage configuration
@@ -37,14 +29,7 @@ const persistConfig = {
 // Combine reducers
 const rootReducer = combineReducers({
 	user: userReducer,
-	basics: basicsReducer,
-	profile: profileReducer,
-	experience: experienceReducer,
-	education: educationReducer,
-	skill: skillReducer,
-	certification: certificationReducer,
-	project: projectReducer,
-	hackathon: hackathonReducer,
+	portfolios: portfolioReducer,
 });
 
 // Create persisted reducer

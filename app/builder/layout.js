@@ -2,15 +2,16 @@
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCertifications } from "@/redux/features/certificationSlice";
-import { setEducations } from "@/redux/features/educationSlice";
-import { setExperience } from "@/redux/features/experienceSlice";
-import { setProfiles } from "@/redux/features/profileSlice";
-import { setSkills } from "@/redux/features/skillSlice";
-import { updateBasics } from "@/redux/features/basicSlice";
-import { setProjects } from "@/redux/features/projectSlice";
+import {
+	setCertifications,
+	setEducations,
+	setProfiles,
+	setSkills,
+	updateBasics,
+	setProjects,
+	setExperience,
+} from "@/redux/features/portfolioSlice";
 import { setUser } from "@/redux/features/userSlice";
-
 import { AppSidebar } from "@/components/app-sidebar";
 import { NavActions } from "@/components/nav-actions";
 import {
@@ -46,22 +47,66 @@ const BuilderLayout = ({ children }) => {
 				const data = await response.json();
 
 				// Dispatch actions to update Redux state
-				if (data.profiles.success)
-					dispatch(setProfiles(data.profiles.data));
-				if (data.experiences.success)
-					dispatch(setExperience(data.experiences.data));
-				if (data.educations.success)
-					dispatch(setEducations(data.educations.data));
-				if (data.certifications.success)
-					dispatch(setCertifications(data.certifications.data));
-				if (data.skills.success) dispatch(setSkills(data.skills.data));
-				if (data.basics.success)
-					dispatch(updateBasics(data.basics.data));
-				if (data.projects.success)
-					dispatch(setProjects(data.projects.data));
-				if (data.hackathons.success)
-					dispatch(setHackathons(data.hackathons.data));
-				if (data.user.success) dispatch(setUser(data.user.data));
+				data.portfolios.forEach((portfolioData) => {
+					const {
+						portfolio,
+						basics,
+						profiles,
+						experiences,
+						educations,
+						certifications,
+						skills,
+						projects,
+						hackathons,
+					} = portfolioData;
+
+					if (basics)
+						dispatch(
+							updateBasics({ portfolioId: portfolio.id, basics })
+						);
+					if (profiles)
+						dispatch(
+							setProfiles({ portfolioId: portfolio.id, profiles })
+						);
+					if (experiences)
+						dispatch(
+							setExperience({
+								portfolioId: portfolio.id,
+								experiences,
+							})
+						);
+					if (educations)
+						dispatch(
+							setEducations({
+								portfolioId: portfolio.id,
+								educations,
+							})
+						);
+					if (certifications)
+						dispatch(
+							setCertifications({
+								portfolioId: portfolio.id,
+								certifications,
+							})
+						);
+					if (skills)
+						dispatch(
+							setSkills({ portfolioId: portfolio.id, skills })
+						);
+					if (projects)
+						dispatch(
+							setProjects({ portfolioId: portfolio.id, projects })
+						);
+					if (hackathons)
+						dispatch(
+							setHackathons({
+								portfolioId: portfolio.id,
+								hackathons,
+							})
+						);
+				});
+
+				if (data.user) dispatch(setUser(data.user));
 			} catch (error) {
 				logger.error("Error fetching or updating user data:", error);
 			}

@@ -2,7 +2,11 @@ import { defaultUser } from "@/schema/user";
 import { createSlice } from "@reduxjs/toolkit";
 import { logger } from "@/lib/utils";
 
-const initialState = defaultUser;
+const initialState = {
+	data: defaultUser,
+	loading: false,
+	error: null,
+};
 
 const userSlice = createSlice({
 	name: "user",
@@ -10,14 +14,14 @@ const userSlice = createSlice({
 	reducers: {
 		setUser(state, action) {
 			logger.info("redux user data: ", action.payload);
-			return {
-				...state,
-				...action.payload,
-			};
+			state.data = { ...defaultUser, ...action.payload };
+		},
+		clearUser: (state) => {
+			state.data = null;
 		},
 	},
 });
 
-export const { setUser } = userSlice.actions;
+export const { setUser, clearUser } = userSlice.actions;
 
 export default userSlice.reducer;

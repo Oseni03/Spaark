@@ -1,4 +1,4 @@
-import { basicsSchema, defaultBasics } from "@/schema/basics";
+import { basicsSchema, defaultBasics } from "@/schema/sections/basics";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm, Controller } from "react-hook-form";
