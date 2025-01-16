@@ -7,15 +7,22 @@ import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 
-export default function Page() {
-	const basics = useSelector((state) => state.basics);
+export default function Page({ params }) {
+	const { portfolioId } = params;
+
+	const portfolio = useSelector((state) =>
+		state.portfolios.items.find((item) => item.id === portfolioId)
+	);
+
+	const basics = portfolio?.basics || {};
+	const experience = portfolio?.experiences?.items || [];
+	const education = portfolio?.educations?.items || [];
+	const skill = portfolio?.skills?.items || [];
+	const certification = portfolio?.certifications?.items || [];
+	const project = portfolio?.projects?.items || [];
+	const hackathon = portfolio?.hackathons?.items || [];
 	const user = useSelector((state) => state.user);
-	const experience = useSelector((state) => state.experience);
-	const education = useSelector((state) => state.education);
-	const skill = useSelector((state) => state.skill);
-	const certification = useSelector((state) => state.certification);
-	const project = useSelector((state) => state.project);
-	const hackathon = useSelector((state) => state.hackathon);
+
 	return (
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">
 			{!user.subscribed && (
@@ -35,14 +42,12 @@ export default function Page() {
 
 			<DefaultTemplate
 				basics={basics}
-				projects={project.items.filter((item) => item.visible)}
-				experiences={experience.items.filter((item) => item.visible)}
-				educations={education.items.filter((item) => item.visible)}
-				skills={skill.items.filter((item) => item.visible)}
-				hackathons={hackathon.items.filter((item) => item.visible)}
-				certifications={certification.items.filter(
-					(item) => item.visible
-				)}
+				projects={project.filter((item) => item.visible)}
+				experiences={experience.filter((item) => item.visible)}
+				educations={education.filter((item) => item.visible)}
+				skills={skill.filter((item) => item.visible)}
+				hackathons={hackathon.filter((item) => item.visible)}
+				certifications={certification.filter((item) => item.visible)}
 			/>
 		</div>
 	);

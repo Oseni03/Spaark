@@ -4,30 +4,31 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
+import {
+	addProfile,
+	addProfileInDatabase,
+	removeProfile,
+	removeProfileFromDatabase,
+	toggleProfileVisibility,
+	updateProfileInDatabase,
+} from "@/redux/features/profileSlice";
+import { ProfilesDialog } from "@/components/dialogs/profile-dialog";
 import { useForm } from "react-hook-form";
-import { defaultHackathon, hackathonSchema } from "@/schema/sections";
+import { defaultProfile } from "@/schema/sections";
+import { profileSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import {
-	addHackathon,
-	addHackathonInDatabase,
-	removeHackathon,
-	removeHackathonFromDatabase,
-	toggleHackathonVisibility,
-	updateHackathon,
-} from "@/redux/features/hackathonSlice";
-import { HackathonDialog } from "../dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Hackathon = () => {
+export const Profile = () => {
 	const dispatch = useDispatch();
-	const [currentHackathon, setCurrentHackathon] = useState(null);
+	const [currentProfile, setCurrentProfile] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(hackathonSchema),
-		defaultValues: defaultHackathon,
+		resolver: zodResolver(profileSchema),
+		defaultValues: defaultProfile,
 	});
 	const {
 		reset,
@@ -42,40 +43,38 @@ export const Hackathon = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.hackathon);
+	const section = useSelector((state) => state.profile);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultHackathon, id: createId() });
-		setCurrentHackathon(null);
+		reset({ ...defaultProfile, id: createId() });
+		setCurrentProfile(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (hackathon) => {
-		logger.info("Update hackathon: ", hackathon);
-		reset(hackathon);
-		setCurrentHackathon(hackathon);
+	const openUpdateDialog = (profile) => {
+		reset(profile);
+		setCurrentProfile(profile);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addHackathon(newItem));
-		dispatch(addHackathonInDatabase(newItem));
+		dispatch(addProfile(newItem));
+		dispatch(addProfileInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeHackathon(item.id));
-		dispatch(removeHackathonFromDatabase(item.id));
+		dispatch(removeProfile(item.id));
+		dispatch(removeProfileFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleHackathonVisibility(item.id));
-		dispatch(updateHackathon({ ...item, visible: !item.visible }));
+		dispatch(toggleProfileVisibility(item.id));
+		dispatch(updateProfileInDatabase(item.id, { visible: !item.visible }));
 	};
 
 	return (
 		<motion.section
-			id={"hackathon"}
+			id={"profile"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -83,9 +82,7 @@ export const Hackathon = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">
-						Hackathon
-					</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">Profile</h2>
 				</div>
 			</header>
 
@@ -95,9 +92,9 @@ export const Hackathon = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<HackathonDialog
+				<ProfilesDialog
 					form={form}
-					currentHackathon={currentHackathon}
+					currentProfile={currentProfile}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>
@@ -119,8 +116,8 @@ export const Hackathon = () => {
 							key={item.id}
 							id={item.id}
 							visible={item.visible}
-							title={item.name}
-							description={item.date}
+							title={item.network}
+							description={item.username}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}
 							onDuplicate={() => onDuplicate(item)}

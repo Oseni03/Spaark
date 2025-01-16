@@ -4,31 +4,30 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
-import {
-	addProfile,
-	addProfileInDatabase,
-	removeProfile,
-	removeProfileFromDatabase,
-	toggleProfileVisibility,
-	updateProfileInDatabase,
-} from "@/redux/features/profileSlice";
-import { ProfilesDialog } from "../dialogs/profile-dialog";
 import { useForm } from "react-hook-form";
-import { defaultProfile } from "@/schema/sections";
-import { profileSchema } from "@/schema/sections";
+import { defaultExperience, experienceSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { ExperienceDialog } from "@/components/dialogs/experience-dialog";
+import {
+	addExperience,
+	addExperienceInDatabase,
+	removeExperience,
+	removeExperienceFromDatabase,
+	toggleExperienceVisibility,
+	updateExperienceInDatabase,
+} from "@/redux/features/experienceSlice";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Profile = () => {
+export const Experience = () => {
 	const dispatch = useDispatch();
-	const [currentProfile, setCurrentProfile] = useState(null);
+	const [currentExperience, setCurrentExperience] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(profileSchema),
-		defaultValues: defaultProfile,
+		resolver: zodResolver(experienceSchema),
+		defaultValues: defaultExperience,
 	});
 	const {
 		reset,
@@ -43,38 +42,41 @@ export const Profile = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.profile);
+	const section = useSelector((state) => state.experience);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultProfile, id: createId() });
-		setCurrentProfile(null);
+		reset({ ...defaultExperience, id: createId() });
+		setCurrentExperience(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (profile) => {
-		reset(profile);
-		setCurrentProfile(profile);
+	const openUpdateDialog = (experience) => {
+		logger.info("Update experience: ", experience);
+		reset(experience);
+		setCurrentExperience(experience);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProfile(newItem));
-		dispatch(addProfileInDatabase(newItem));
+		dispatch(addExperience(newItem));
+		dispatch(addExperienceInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProfile(item.id));
-		dispatch(removeProfileFromDatabase(item.id));
+		dispatch(removeExperience(item.id));
+		dispatch(removeExperienceFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProfileVisibility(item.id));
-		dispatch(updateProfileInDatabase(item.id, { visible: !item.visible }));
+		dispatch(toggleExperienceVisibility(item.id));
+		dispatch(
+			updateExperienceInDatabase({ ...item, visible: !item.visible })
+		);
 	};
 
 	return (
 		<motion.section
-			id={"profile"}
+			id={"experience"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -82,7 +84,9 @@ export const Profile = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">Profile</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">
+						Experience
+					</h2>
 				</div>
 			</header>
 
@@ -92,9 +96,9 @@ export const Profile = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<ProfilesDialog
+				<ExperienceDialog
 					form={form}
-					currentProfile={currentProfile}
+					currentExperience={currentExperience}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>
@@ -116,8 +120,8 @@ export const Profile = () => {
 							key={item.id}
 							id={item.id}
 							visible={item.visible}
-							title={item.network}
-							description={item.username}
+							title={item.company}
+							description={item.date}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}
 							onDuplicate={() => onDuplicate(item)}

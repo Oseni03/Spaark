@@ -5,29 +5,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import { useForm } from "react-hook-form";
-import { certificationSchema, defaultCertification } from "@/schema/sections";
+import { defaultSkill, skillSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addCertification,
-	addCertificationInDatabase,
-	removeCertification,
-	removeCertificationFromDatabase,
-	toggleCertificationVisibility,
-	updateCertificationnInDatabase,
-} from "@/redux/features/certificationSlice";
-import { CertificationDialog } from "../dialogs/certification-dialog";
+	addSkill,
+	addSkillInDatabase,
+	removeSkill,
+	removeSkillFromDatabase,
+	toggleSkillVisibility,
+	updateSkillnInDatabase,
+} from "@/redux/features/skillSlice";
+import { SkillDialog } from "@/components/dialogs/skill-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Certification = () => {
+export const Skill = () => {
 	const dispatch = useDispatch();
-	const [currentCertification, setCurrentCertification] = useState(null);
+	const [currentSkill, setCurrentSkill] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(certificationSchema),
-		defaultValues: defaultCertification,
+		resolver: zodResolver(skillSchema),
+		defaultValues: defaultSkill,
 	});
 	const {
 		reset,
@@ -42,41 +42,40 @@ export const Certification = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.certification);
+	const section = useSelector((state) => state.skill);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultCertification, id: createId() });
-		setCurrentCertification(null);
+		reset({ ...defaultSkill, id: createId() });
+		setCurrentSkill(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (certification) => {
-		logger.info("Update certification: ", certification);
-		reset(certification);
-		setCurrentCertification(certification);
+	const openUpdateDialog = (skill) => {
+		logger.info("Update skill: ", skill);
+		reset(skill);
+		setCurrentSkill(skill);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
+		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addCertification(newItem));
-		dispatch(addCertificationInDatabase(newItem));
+		dispatch(addSkill(newItem));
+		dispatch(addSkillInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeCertification(item.id));
-		dispatch(removeCertificationFromDatabase(item.id));
+		dispatch(removeSkill(item.id));
+		dispatch(removeSkillFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleCertificationVisibility(item.id));
-		dispatch(
-			updateCertificationnInDatabase({ ...item, visible: !item.visible })
-		);
+		dispatch(toggleSkillVisibility(item.id));
+		dispatch(updateSkillnInDatabase({ ...item, visible: !item.visible }));
 	};
 
 	return (
 		<motion.section
-			id={"certification"}
+			id={"skill"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -84,9 +83,7 @@ export const Certification = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">
-						Certification
-					</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">Skill</h2>
 				</div>
 			</header>
 
@@ -96,9 +93,9 @@ export const Certification = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<CertificationDialog
+				<SkillDialog
 					form={form}
-					currentCertification={currentCertification}
+					currentSkill={currentSkill}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>
@@ -121,7 +118,6 @@ export const Certification = () => {
 							id={item.id}
 							visible={item.visible}
 							title={item.name}
-							description={item.date}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}
 							onDuplicate={() => onDuplicate(item)}

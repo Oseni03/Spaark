@@ -5,29 +5,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import { useForm } from "react-hook-form";
-import { defaultSkill, skillSchema } from "@/schema/sections";
+import { defaultProject, projectSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addSkill,
-	addSkillInDatabase,
-	removeSkill,
-	removeSkillFromDatabase,
-	toggleSkillVisibility,
-	updateSkillnInDatabase,
-} from "@/redux/features/skillSlice";
-import { SkillDialog } from "../dialogs/skill-dialog";
+	addProject,
+	addProjectInDatabase,
+	removeProject,
+	removeProjectFromDatabase,
+	toggleProjectVisibility,
+	updateProjectnInDatabase,
+} from "@/redux/features/projectSlice";
+import { ProjectDialog } from "@/components/dialogs/project-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Skill = () => {
+export const Project = () => {
 	const dispatch = useDispatch();
-	const [currentSkill, setCurrentSkill] = useState(null);
+	const [currentProject, setCurrentProject] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(skillSchema),
-		defaultValues: defaultSkill,
+		resolver: zodResolver(projectSchema),
+		defaultValues: { ...defaultProject, id: createId() },
 	});
 	const {
 		reset,
@@ -42,40 +42,38 @@ export const Skill = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.skill);
+	const section = useSelector((state) => state.project);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultSkill, id: createId() });
-		setCurrentSkill(null);
+		reset({ ...defaultProject, id: createId() });
+		setCurrentProject(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (skill) => {
-		logger.info("Update skill: ", skill);
-		reset(skill);
-		setCurrentSkill(skill);
+	const openUpdateDialog = (project) => {
+		reset(project);
+		setCurrentProject(project);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addSkill(newItem));
-		dispatch(addSkillInDatabase(newItem));
+		dispatch(addProject(newItem));
+		dispatch(addProjectInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeSkill(item.id));
-		dispatch(removeSkillFromDatabase(item.id));
+		dispatch(removeProject(item.id));
+		dispatch(removeProjectFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleSkillVisibility(item.id));
-		dispatch(updateSkillnInDatabase({ ...item, visible: !item.visible }));
+		dispatch(toggleProjectVisibility(item.id));
+		dispatch(updateProjectnInDatabase({ ...item, visible: !item.visible }));
 	};
 
 	return (
 		<motion.section
-			id={"skill"}
+			id={"project"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -83,7 +81,7 @@ export const Skill = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">Skill</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">Project</h2>
 				</div>
 			</header>
 
@@ -93,9 +91,9 @@ export const Skill = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<SkillDialog
+				<ProjectDialog
 					form={form}
-					currentSkill={currentSkill}
+					currentProject={currentProject}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>
@@ -118,6 +116,7 @@ export const Skill = () => {
 							id={item.id}
 							visible={item.visible}
 							title={item.name}
+							description={item.date}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}
 							onDuplicate={() => onDuplicate(item)}

@@ -16,7 +16,7 @@ import {
 	toggleEducationVisibility,
 	updateEducationInDatabase,
 } from "@/redux/features/educationSlice";
-import { EducationDialog } from "../dialogs/education-dialog";
+import { EducationDialog } from "@/components/dialogs/education-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 

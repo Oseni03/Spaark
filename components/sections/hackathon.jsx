@@ -5,29 +5,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import { useForm } from "react-hook-form";
-import { defaultProject, projectSchema } from "@/schema/sections";
+import { defaultHackathon, hackathonSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addProject,
-	addProjectInDatabase,
-	removeProject,
-	removeProjectFromDatabase,
-	toggleProjectVisibility,
-	updateProjectnInDatabase,
-} from "@/redux/features/projectSlice";
-import { ProjectDialog } from "../dialogs/project-dialog";
+	addHackathon,
+	addHackathonInDatabase,
+	removeHackathon,
+	removeHackathonFromDatabase,
+	toggleHackathonVisibility,
+	updateHackathon,
+} from "@/redux/features/hackathonSlice";
+import { HackathonDialog } from "@/components/dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Project = () => {
+export const Hackathon = () => {
 	const dispatch = useDispatch();
-	const [currentProject, setCurrentProject] = useState(null);
+	const [currentHackathon, setCurrentHackathon] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(projectSchema),
-		defaultValues: { ...defaultProject, id: createId() },
+		resolver: zodResolver(hackathonSchema),
+		defaultValues: defaultHackathon,
 	});
 	const {
 		reset,
@@ -42,38 +42,40 @@ export const Project = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.project);
+	const section = useSelector((state) => state.hackathon);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultProject, id: createId() });
-		setCurrentProject(null);
+		reset({ ...defaultHackathon, id: createId() });
+		setCurrentHackathon(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (project) => {
-		reset(project);
-		setCurrentProject(project);
+	const openUpdateDialog = (hackathon) => {
+		logger.info("Update hackathon: ", hackathon);
+		reset(hackathon);
+		setCurrentHackathon(hackathon);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
+		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProject(newItem));
-		dispatch(addProjectInDatabase(newItem));
+		dispatch(addHackathon(newItem));
+		dispatch(addHackathonInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProject(item.id));
-		dispatch(removeProjectFromDatabase(item.id));
+		dispatch(removeHackathon(item.id));
+		dispatch(removeHackathonFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProjectVisibility(item.id));
-		dispatch(updateProjectnInDatabase({ ...item, visible: !item.visible }));
+		dispatch(toggleHackathonVisibility(item.id));
+		dispatch(updateHackathon({ ...item, visible: !item.visible }));
 	};
 
 	return (
 		<motion.section
-			id={"project"}
+			id={"hackathon"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -81,7 +83,9 @@ export const Project = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">Project</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">
+						Hackathon
+					</h2>
 				</div>
 			</header>
 
@@ -91,9 +95,9 @@ export const Project = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<ProjectDialog
+				<HackathonDialog
 					form={form}
-					currentProject={currentProject}
+					currentHackathon={currentHackathon}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>

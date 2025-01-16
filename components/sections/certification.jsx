@@ -5,29 +5,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import { useForm } from "react-hook-form";
-import { defaultExperience, experienceSchema } from "@/schema/sections";
+import { certificationSchema, defaultCertification } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { ExperienceDialog } from "../dialogs/experience-dialog";
 import {
-	addExperience,
-	addExperienceInDatabase,
-	removeExperience,
-	removeExperienceFromDatabase,
-	toggleExperienceVisibility,
-	updateExperienceInDatabase,
-} from "@/redux/features/experienceSlice";
+	addCertification,
+	addCertificationInDatabase,
+	removeCertification,
+	removeCertificationFromDatabase,
+	toggleCertificationVisibility,
+	updateCertificationnInDatabase,
+} from "@/redux/features/certificationSlice";
+import { CertificationDialog } from "@/components/dialogs/certification-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 
-export const Experience = () => {
+export const Certification = () => {
 	const dispatch = useDispatch();
-	const [currentExperience, setCurrentExperience] = useState(null);
+	const [currentCertification, setCurrentCertification] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(experienceSchema),
-		defaultValues: defaultExperience,
+		resolver: zodResolver(certificationSchema),
+		defaultValues: defaultCertification,
 	});
 	const {
 		reset,
@@ -42,41 +42,41 @@ export const Experience = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.experience);
+	const section = useSelector((state) => state.certification);
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultExperience, id: createId() });
-		setCurrentExperience(null);
+		reset({ ...defaultCertification, id: createId() });
+		setCurrentCertification(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (experience) => {
-		logger.info("Update experience: ", experience);
-		reset(experience);
-		setCurrentExperience(experience);
+	const openUpdateDialog = (certification) => {
+		logger.info("Update certification: ", certification);
+		reset(certification);
+		setCurrentCertification(certification);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addExperience(newItem));
-		dispatch(addExperienceInDatabase(newItem));
+		dispatch(addCertification(newItem));
+		dispatch(addCertificationInDatabase(newItem));
 	};
 	const onDelete = (item) => {
-		dispatch(removeExperience(item.id));
-		dispatch(removeExperienceFromDatabase(item.id));
+		dispatch(removeCertification(item.id));
+		dispatch(removeCertificationFromDatabase(item.id));
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleExperienceVisibility(item.id));
+		dispatch(toggleCertificationVisibility(item.id));
 		dispatch(
-			updateExperienceInDatabase({ ...item, visible: !item.visible })
+			updateCertificationnInDatabase({ ...item, visible: !item.visible })
 		);
 	};
 
 	return (
 		<motion.section
-			id={"experience"}
+			id={"certification"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -85,7 +85,7 @@ export const Experience = () => {
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
 					<h2 className="line-clamp-1 text-3xl font-bold">
-						Experience
+						Certification
 					</h2>
 				</div>
 			</header>
@@ -96,9 +96,9 @@ export const Experience = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<ExperienceDialog
+				<CertificationDialog
 					form={form}
-					currentExperience={currentExperience}
+					currentCertification={currentCertification}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>
@@ -120,7 +120,7 @@ export const Experience = () => {
 							key={item.id}
 							id={item.id}
 							visible={item.visible}
-							title={item.company}
+							title={item.name}
 							description={item.date}
 							onUpdate={() => openUpdateDialog(item)}
 							onDelete={() => onDelete(item)}

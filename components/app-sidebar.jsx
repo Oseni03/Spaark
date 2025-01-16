@@ -8,14 +8,14 @@ import {
 	SidebarRail,
 } from "@/components/ui/sidebar";
 import { Separator } from "./ui/separator";
-import { BasicsSection } from "@/app/builder/components/sections/basics";
-import { Profile } from "@/app/builder/components/sections/profile";
-import { Experience } from "@/app/builder/components/sections/experience";
-import { Education } from "@/app/builder/components/sections/education";
-import { Skill } from "@/app/builder/components/sections/skill";
-import { Certification } from "@/app/builder/components/sections/certification";
-import { Project } from "@/app/builder/components/sections/project";
-import { Hackathon } from "@/app/builder/components/sections/hackathon";
+import { BasicsSection } from "@/components/sections/basics";
+import { Profile } from "@/components/sections/profile";
+import { Experience } from "@/components/sections/experience";
+import { Education } from "@/components/sections/education";
+import { Skill } from "@/components/sections/skill";
+import { Certification } from "@/components/sections/certification";
+import { Project } from "@/components/sections/project";
+import { Hackathon } from "@/components/sections/hackathon";
 
 export function AppSidebar({ ...props }) {
 	return (

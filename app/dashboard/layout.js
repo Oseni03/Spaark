@@ -1,5 +1,5 @@
 "use client";
-import React, { Children, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Sidebar,
 	SidebarBody,
@@ -17,9 +17,23 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { siteConfig } from "@/config/site";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	setCertifications,
+	setEducations,
+	setProfiles,
+	setSkills,
+	updateBasics,
+	setProjects,
+	setExperience,
+} from "@/redux/features/portfolioSlice";
+import { setHackathons } from "@/redux/features/hackathonSlice";
+import { logger } from "@/lib/utils";
+import { setUser } from "@/redux/features/userSlice";
 
 export default function DashboardLayout({ children }) {
 	const segments = useSelectedLayoutSegments();
+	const dispatch = useDispatch();
 
 	const links = [
 		{
@@ -52,6 +66,85 @@ export default function DashboardLayout({ children }) {
 		},
 	];
 	const [open, setOpen] = useState(false);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const response = await fetch(`/api/get-portfolio`);
+				if (!response.ok) {
+					throw new Error("Failed to fetch user data");
+				}
+
+				const data = await response.json();
+
+				// Dispatch actions to update Redux state
+				data.portfolios.forEach((portfolioData) => {
+					const {
+						portfolio,
+						basics,
+						profiles,
+						experiences,
+						educations,
+						certifications,
+						skills,
+						projects,
+						hackathons,
+					} = portfolioData;
+
+					if (basics)
+						dispatch(
+							updateBasics({ portfolioId: portfolio.id, basics })
+						);
+					if (profiles)
+						dispatch(
+							setProfiles({ portfolioId: portfolio.id, profiles })
+						);
+					if (experiences)
+						dispatch(
+							setExperience({
+								portfolioId: portfolio.id,
+								experiences,
+							})
+						);
+					if (educations)
+						dispatch(
+							setEducations({
+								portfolioId: portfolio.id,
+								educations,
+							})
+						);
+					if (certifications)
+						dispatch(
+							setCertifications({
+								portfolioId: portfolio.id,
+								certifications,
+							})
+						);
+					if (skills)
+						dispatch(
+							setSkills({ portfolioId: portfolio.id, skills })
+						);
+					if (projects)
+						dispatch(
+							setProjects({ portfolioId: portfolio.id, projects })
+						);
+					if (hackathons)
+						dispatch(
+							setHackathons({
+								portfolioId: portfolio.id,
+								hackathons,
+							})
+						);
+				});
+
+				if (data.user) dispatch(setUser(data.user));
+			} catch (error) {
+				logger.error("Error fetching or updating user data:", error);
+			}
+		};
+
+		fetchData();
+	}, [dispatch]);
 
 	const isSelected = (href) => {
 		return segments.includes(href.split("/").pop());
