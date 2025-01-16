@@ -7,7 +7,7 @@ import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import {
-	updateBasics,
+	updatePortfolioBasics,
 	updateBasicsInDatabase,
 } from "@/redux/features/basicSlice"; // Ensure this import is correct
 import { useEffect } from "react";
@@ -35,7 +35,7 @@ export const BasicsSection = () => {
 	}, [errors, defaultValues]);
 
 	const onSubmit = (data) => {
-		dispatch(updateBasics(data));
+		dispatch(updatePortfolioBasics(data));
 		dispatch(updateBasicsInDatabase(data));
 		logger.info("Form Submitted:", data);
 	};

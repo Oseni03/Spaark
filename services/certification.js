@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { certificationSchema } from "@/schema/sections";
 
-export async function getUserCertifications(userId) {
+export async function getCertifications(portfolioId) {
 	return withErrorHandling(async () => {
 		const certifications = await prisma.certification.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -41,7 +41,7 @@ export async function createCertification(data) {
 		const certification = await prisma.certification.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 			},
 		});
 
@@ -54,13 +54,12 @@ export async function createCertification(data) {
 export async function editCertification(certificationId, data) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
+		if (!certificationId) {
+			throw new Error("Certification Id required");
 		}
 
 		const existingCertification = await prisma.certification.findUnique({
-			where: { id: certificationId, userId },
+			where: { id: certificationId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingCertification) {
@@ -84,17 +83,14 @@ export async function editCertification(certificationId, data) {
 	});
 }
 
-export async function deleteCertification(certificationId) {
+export async function deleteCertification(certificationId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a certification"
-			);
+		if (!certificationId) {
+			throw new Error("Certification Id required");
 		}
 
 		const existingCertification = await prisma.certification.findUnique({
-			where: { id: certificationId, userId },
+			where: { id: certificationId, portfolioId },
 		});
 
 		if (!existingCertification) {

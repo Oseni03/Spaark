@@ -1,13 +1,13 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { defaultBasics } from "@/schema/sections/basics";
-import { updateUserBasics } from "@/services/user"; // Assume this service exists
+import { updatePortfolioBasics } from "@/services/basics";
 
 // Async thunk for updating basics in the database
 export const updateBasicsInDatabase = createAsyncThunk(
 	"basics/updateBasicsInDatabase",
 	async (basicData, { rejectWithValue }) => {
 		try {
-			const response = await updateUserBasics(basicData);
+			const response = await updatePortfolioBasics(basicData);
 			return response;
 		} catch (error) {
 			return rejectWithValue(error.response.data);

@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { experienceSchema } from "@/schema/sections";
 
-export async function getUserExperiences(userId) {
+export async function getExperiences(portfolioId) {
 	return withErrorHandling(async () => {
 		const experiences = await prisma.experience.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -41,7 +41,7 @@ export async function createExperience(data) {
 		const exp = await prisma.experience.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 			},
 		});
 
@@ -60,7 +60,7 @@ export async function editExperience(experienceId, data) {
 		}
 
 		const existingExperience = await prisma.experience.findUnique({
-			where: { id: experienceId, userId },
+			where: { id: experienceId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingExperience) {
@@ -84,7 +84,7 @@ export async function editExperience(experienceId, data) {
 	});
 }
 
-export async function deleteExperience(experienceId) {
+export async function deleteExperience(experienceId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -94,7 +94,7 @@ export async function deleteExperience(experienceId) {
 		}
 
 		const existingExperience = await prisma.experience.findUnique({
-			where: { id: experienceId, userId },
+			where: { id: experienceId, portfolioId },
 		});
 
 		if (!existingExperience) {

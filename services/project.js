@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { projectSchema } from "@/schema/sections";
 
-export async function getUserProjects(userId) {
+export async function getProjects(portfolioId) {
 	return withErrorHandling(async () => {
 		const projects = await prisma.project.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -47,7 +47,7 @@ export async function createProject(data) {
 		const project = await prisma.project.create({
 			data: {
 				...projectData,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id,
@@ -75,7 +75,7 @@ export async function editProject(projectId, data) {
 
 		// Check if the project exists and belongs to the authenticated user
 		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, userId },
+			where: { id: projectId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingProject) {
@@ -123,7 +123,7 @@ export async function editProject(projectId, data) {
 	});
 }
 
-export async function deleteProject(projectId) {
+export async function deleteProject(projectId, portfolioId) {
 	return withErrorHandling(async () => {
 		// Authenticate user
 		const { userId } = await auth();
@@ -135,7 +135,7 @@ export async function deleteProject(projectId) {
 
 		// Check if the project exists and belongs to the authenticated user
 		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, userId },
+			where: { id: projectId, portfolioId },
 		});
 
 		if (!existingProject) {

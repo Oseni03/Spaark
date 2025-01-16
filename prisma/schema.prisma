@@ -100,6 +100,7 @@ model OrganizationMember {
 
 model Portfolio {
   id          String    @id @default(cuid())
+  name        String
   slug        String    @unique
   isPublic    Boolean   @default(true)
   isPrimary   Boolean   @default(false)

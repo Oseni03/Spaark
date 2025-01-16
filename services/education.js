@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { educationSchema } from "@/schema/sections";
 
-export async function getUserEducations(userId) {
+export async function getEducations(portfolioId) {
 	return withErrorHandling(async () => {
 		const educations = await prisma.education.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -40,7 +40,7 @@ export async function createEducation(data) {
 		const edu = await prisma.education.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 			},
 		});
 
@@ -59,7 +59,7 @@ export async function editEducation(educationId, data) {
 		}
 
 		const existingEdu = await prisma.education.findUnique({
-			where: { id: educationId, userId },
+			where: { id: educationId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingEdu) {
@@ -83,7 +83,7 @@ export async function editEducation(educationId, data) {
 	});
 }
 
-export async function deleteEducation(educationId) {
+export async function deleteEducation(educationId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -93,7 +93,7 @@ export async function deleteEducation(educationId) {
 		}
 
 		const existingEdu = await prisma.education.findUnique({
-			where: { id: educationId, userId },
+			where: { id: educationId, portfolioId },
 		});
 
 		if (!existingEdu) {

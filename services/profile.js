@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { profileSchema } from "@/schema/sections";
 
-export async function getUserProfiles(userId) {
+export async function getProfiles(portfolioId) {
 	return withErrorHandling(async () => {
 		const profiles = await prisma.profile.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -37,7 +37,7 @@ export async function createProfile(data) {
 		const profile = await prisma.profile.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 			},
 		});
 
@@ -56,7 +56,7 @@ export async function editProfile(profileId, data) {
 		}
 
 		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
+			where: { id: profileId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingProfile) {
@@ -80,7 +80,7 @@ export async function editProfile(profileId, data) {
 	});
 }
 
-export async function deleteProfile(profileId) {
+export async function deleteProfile(profileId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -90,7 +90,7 @@ export async function deleteProfile(profileId) {
 		}
 
 		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
+			where: { id: profileId, portfolioId },
 		});
 
 		if (!existingProfile) {

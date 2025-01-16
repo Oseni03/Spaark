@@ -7,10 +7,10 @@ import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 
-export async function getUserHackathons(userId) {
+export async function getHackathons(portfolioId) {
 	return withErrorHandling(async () => {
 		const hackathons = await prisma.hackathon.findMany({
-			where: { userId },
+			where: { portfolioId },
 			include: {
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
@@ -66,7 +66,7 @@ export async function createHackathon(data) {
 		const hackathon = await prisma.hackathon.create({
 			data: {
 				...safeHackathonData,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id || undefined, // Let Prisma generate if not provided
@@ -95,7 +95,7 @@ export async function editHackathon(hackathonId, data) {
 		}
 
 		const existingHackathon = await prisma.hackathon.findUnique({
-			where: { id: hackathonId, userId },
+			where: { id: hackathonId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingHackathon) {
@@ -142,7 +142,7 @@ export async function editHackathon(hackathonId, data) {
 	});
 }
 
-export async function deleteHackathon(hackathonId) {
+export async function deleteHackathon(hackathonId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -152,7 +152,7 @@ export async function deleteHackathon(hackathonId) {
 		}
 
 		const existingHackathon = await prisma.hackathon.findUnique({
-			where: { id: hackathonId, userId },
+			where: { id: hackathonId, portfolioId },
 		});
 
 		if (!existingHackathon) {

@@ -6,10 +6,10 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { skillSchema } from "@/schema/sections";
 
-export async function getUserSkills(userId) {
+export async function getSkills(portfolioId) {
 	return withErrorHandling(async () => {
 		const skills = await prisma.skill.findMany({
-			where: { userId },
+			where: { portfolioId },
 			select: {
 				id: true,
 				visible: true,
@@ -36,7 +36,7 @@ export async function createSkill(data) {
 		const skill = await prisma.skill.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: data.portfolioId } },
 			},
 		});
 
@@ -55,7 +55,7 @@ export async function editSkill(skillId, data) {
 		}
 
 		const existingSkill = await prisma.skill.findUnique({
-			where: { id: skillId, userId },
+			where: { id: skillId, portfolioId: data.portfolioId },
 		});
 
 		if (!existingSkill) {
@@ -79,7 +79,7 @@ export async function editSkill(skillId, data) {
 	});
 }
 
-export async function deleteSkill(skillId) {
+export async function deleteSkill(skillId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -89,7 +89,7 @@ export async function deleteSkill(skillId) {
 		}
 
 		const existingSkill = await prisma.skill.findUnique({
-			where: { id: skillId, userId },
+			where: { id: skillId, portfolioId },
 		});
 
 		if (!existingSkill) {

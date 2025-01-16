@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { getUserPortfolios } from "@/services/portfolio";
-import { getUserBasics } from "@/services/basics";
-import { getUserCertifications } from "@/services/certification";
-import { getUserEducations } from "@/services/education";
-import { getUserExperiences } from "@/services/experience";
-import { getUserProfiles } from "@/services/profile";
-import { getUserSkills } from "@/services/skill";
+import { getPortfolios } from "@/services/portfolio";
+import { getBasics } from "@/services/basics";
+import { getCertifications } from "@/services/certification";
+import { getEducations } from "@/services/education";
+import { getExperiences } from "@/services/experience";
+import { getProfiles } from "@/services/profile";
+import { getSkills } from "@/services/skill";
 import { auth } from "@clerk/nextjs/server";
-import { getUserProjects } from "@/services/project";
-import { getUserHackathons } from "@/services/hackathon";
+import { getProjects } from "@/services/project";
+import { getHackathons } from "@/services/hackathon";
 import { logger } from "@/lib/utils";
 
 // Helper function to get CORS headers
@@ -69,20 +69,27 @@ export async function GET(req) {
 			userId = authenticatedUserId;
 		}
 
-		const portfolios = await getUserPortfolios(userId);
+		const portfolios = await getPortfolios(userId);
+		if (!portfolios.success) {
+			return createErrorResponse(
+				400,
+				portfolios.error || "Error getting user portfolios",
+				origin
+			);
+		}
 
-		const portfolioDataPromises = portfolios.map(async (portfolio) => {
+		const portfolioDataPromises = portfolios.data.map(async (portfolio) => {
 			const portfolioId = portfolio.id;
 
 			const results = await Promise.allSettled([
-				getUserBasics(portfolioId),
-				getUserProfiles(portfolioId),
-				getUserExperiences(portfolioId),
-				getUserEducations(portfolioId),
-				getUserCertifications(portfolioId),
-				getUserSkills(portfolioId),
-				getUserProjects(portfolioId),
-				getUserHackathons(portfolioId),
+				getBasics(portfolioId),
+				getProfiles(portfolioId),
+				getExperiences(portfolioId),
+				getEducations(portfolioId),
+				getCertifications(portfolioId),
+				getSkills(portfolioId),
+				getProjects(portfolioId),
+				getHackathons(portfolioId),
 			]);
 
 			const [
