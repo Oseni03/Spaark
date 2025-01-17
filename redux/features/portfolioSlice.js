@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import {
 	defaultExperience,
 	defaultHackathon,
@@ -14,7 +14,7 @@ import {
 	skillSchema,
 	defaultSkill,
 } from "@/schema/sections";
-import { defaultBasics } from "@/schema/basics";
+import { defaultBasics } from "@/schema/sections/basics";
 import { updateBasicsInDatabase } from "../thunks/basics";
 import {
 	addCertificationInDatabase,
@@ -46,6 +46,11 @@ import {
 	updateSkillnInDatabase,
 	removeSkillFromDatabase,
 } from "../thunks/skill";
+import {
+	addProfileInDatabase,
+	updateProfileInDatabase,
+	removeProfileFromDatabase,
+} from "../thunks/profile";
 import { logger } from "@/lib/utils";
 
 // Initial State

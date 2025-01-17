@@ -25,7 +25,7 @@ import { useParams } from "react-router-dom";
 export const Skill = () => {
 	const { portfolioId } = useParams();
 	const portfolio = useSelector((state) =>
-		state.portfolio.items.find((item) => item.id === portfolioId)
+		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 	const dispatch = useDispatch();
 	const [currentSkill, setCurrentSkill] = useState(null);

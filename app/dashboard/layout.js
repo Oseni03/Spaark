@@ -37,8 +37,8 @@ export default function DashboardLayout({ children }) {
 
 	const links = [
 		{
-			label: "Builder",
-			href: "/builder",
+			label: "Portfolios",
+			href: "/dashboard/portfolios",
 			icon: (
 				<IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
 			),

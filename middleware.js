@@ -11,6 +11,11 @@ export default clerkMiddleware(async (auth, req) => {
 	const pathname = url.pathname;
 	const searchParams = url.search;
 
+	// Redirect "/dashboard" and "/builder" to "/dashboard/portfolios"
+	if (pathname === "/dashboard" || pathname === "/builder") {
+		return NextResponse.redirect(new URL("/dashboard/portfolios", req.url));
+	}
+
 	// Get hostname (e.g., 'mike.com', 'test.mike.com')
 	const hostname = req.headers.get("host");
 

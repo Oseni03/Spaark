@@ -1,3 +1,4 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import { hackathonSchema } from "@/schema/sections";
 import {
 	createHackathon,

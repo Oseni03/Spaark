@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import { skillSchema } from "@/schema/sections";
 import { createSkill, deleteSkill, editSkill } from "@/services/skill";
 import { z } from "zod";

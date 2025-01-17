@@ -16,7 +16,7 @@ import { logger } from "@/lib/utils";
 export const BasicsSection = () => {
 	const { portfolioId } = useParams();
 	const portfolio = useSelector((state) =>
-		state.portfolio.items.find((item) => item.id === portfolioId)
+		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 	const dispatch = useDispatch();
 	const {
