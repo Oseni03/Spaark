@@ -16,11 +16,11 @@ import {
 import {
 	addHackathonInDatabase,
 	removeHackathonFromDatabase,
-	updateHackathonnInDatabase,
+	updateHackathonInDatabase,
 } from "@/redux/thunks/hackathon";
 import { HackathonDialog } from "@/components/dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Hackathon = () => {
 	const { portfolioId } = useParams();
@@ -88,7 +88,7 @@ export const Hackathon = () => {
 			toggleHackathonVisibility({ portfolioId, hackathonId: item.id })
 		);
 		dispatch(
-			updateHackathonnInDatabase({
+			updateHackathonInDatabase({
 				...item,
 				visible: !item.visible,
 				portfolioId,

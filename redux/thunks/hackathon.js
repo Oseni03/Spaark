@@ -30,7 +30,7 @@ export const addHackathonInDatabase = createAsyncThunk(
 	}
 );
 
-export const updateHackathonnInDatabase = createAsyncThunk(
+export const updateHackathonInDatabase = createAsyncThunk(
 	"hackathon/updateHackathonInDatabase",
 	async (data, { rejectWithValue }) => {
 		logger.info("Update data: ", data);

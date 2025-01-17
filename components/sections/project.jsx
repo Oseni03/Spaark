@@ -20,7 +20,7 @@ import {
 } from "@/redux/thunks/project";
 import { ProjectDialog } from "@/components/dialogs/project-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Project = () => {
 	const { portfolioId } = useParams();

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { NavActions } from "@/components/nav-actions";
 import {
@@ -20,8 +21,8 @@ import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
 
-const BuilderLayout = ({ children, params }) => {
-	const { portfolioId } = params;
+function BuilderLayout({ children }) {
+	const { portfolioId } = useParams();
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
@@ -65,6 +66,6 @@ const BuilderLayout = ({ children, params }) => {
 			</SidebarInset>
 		</SidebarProvider>
 	);
-};
+}
 
 export default BuilderLayout;

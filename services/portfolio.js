@@ -42,7 +42,9 @@ export async function createPortfolio(data) {
 			data: {
 				...data,
 				user: { connect: { id: userId } },
-				basics: defaultBasics,
+				basics: {
+					create: defaultBasics,
+				},
 			},
 		});
 
@@ -52,7 +54,7 @@ export async function createPortfolio(data) {
 	});
 }
 
-export async function editPortfolio(portfolioId, data) {
+export async function editPortfolio(id, data) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -60,18 +62,8 @@ export async function editPortfolio(portfolioId, data) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingPortfolio = await prisma.portfolio.findUnique({
-			where: { id: portfolioId, userId },
-		});
-
-		if (!existingPortfolio) {
-			throw new Error(
-				"Portfolio not found or you do not have permission to update"
-			);
-		}
-
 		const updatedPortfolio = await prisma.portfolio.update({
-			where: { id: portfolioId },
+			where: { id, userId },
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -85,7 +77,7 @@ export async function editPortfolio(portfolioId, data) {
 	});
 }
 
-export async function deletePortfolio(portfolioId) {
+export async function deletePortfolio(id) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
 		if (!userId) {
@@ -94,18 +86,8 @@ export async function deletePortfolio(portfolioId) {
 			);
 		}
 
-		const existingPortfolio = await prisma.portfolio.findUnique({
-			where: { id: portfolioId, userId },
-		});
-
-		if (!existingPortfolio) {
-			throw new Error(
-				"Portfolio not found or you do not have permission to delete"
-			);
-		}
-
 		const deletedPortfolio = await prisma.portfolio.delete({
-			where: { id: portfolioId },
+			where: { id, userId },
 		});
 
 		// Revalidate relevant paths

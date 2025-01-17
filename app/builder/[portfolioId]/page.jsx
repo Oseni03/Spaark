@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
 
-export default function Page({ params }) {
-	const { portfolioId } = params;
+export default function Page() {
+	const { portfolioId } = useParams();
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)

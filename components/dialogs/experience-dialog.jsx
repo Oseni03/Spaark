@@ -12,10 +12,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
 	addExperience,
-	addExperienceInDatabase,
 	updateExperience,
+} from "@/redux/features/portfolioSlice";
+import {
+	addExperienceInDatabase,
 	updateExperienceInDatabase,
-} from "@/redux/features/experienceSlice";
+} from "@/redux/thunks/experience";
 import { PictureSection } from "../sections/picture/section";
 
 export const ExperienceDialog = ({

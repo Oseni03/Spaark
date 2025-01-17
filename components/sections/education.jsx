@@ -20,7 +20,7 @@ import {
 } from "@/redux/thunks/educations";
 import { EducationDialog } from "@/components/dialogs/education-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Education = () => {
 	const { portfolioId } = useParams();

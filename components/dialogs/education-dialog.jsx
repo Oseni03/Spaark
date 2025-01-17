@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
+import { addEducation, updateEducation } from "@/redux/features/portfolioSlice";
 import {
-	addEducation,
 	addEducationInDatabase,
-	updateEducation,
 	updateEducationInDatabase,
-} from "@/redux/features/educationSlice";
+} from "@/redux/thunks/educations";
 import { PictureSection } from "../sections/picture/section";
 
 export const EducationDialog = ({

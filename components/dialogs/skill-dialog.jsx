@@ -10,12 +10,11 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { addSkill, updateSkill } from "@/redux/features/portfolioSlice";
 import {
-	addSkill,
 	addSkillInDatabase,
-	updateSkill,
 	updateSkillnInDatabase,
-} from "@/redux/features/skillSlice";
+} from "@/redux/thunks/skill";
 
 export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
 	const dispatch = useDispatch();

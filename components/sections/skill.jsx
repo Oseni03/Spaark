@@ -20,7 +20,7 @@ import {
 } from "@/redux/thunks/skill";
 import { SkillDialog } from "@/components/dialogs/skill-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Skill = () => {
 	const { portfolioId } = useParams();

@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
+import { addHackathon, updateHackathon } from "@/redux/features/portfolioSlice";
 import {
-	addHackathon,
 	addHackathonInDatabase,
-	updateHackathon,
-	updateHackathonnInDatabase,
-} from "@/redux/features/hackathonSlice";
+	updateHackathonInDatabase,
+} from "@/redux/thunks/hackathon";
 import { PictureSection } from "../sections/picture/section";
 import { CustomLink } from "@/components/custom-link";
 

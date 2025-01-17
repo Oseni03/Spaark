@@ -1,11 +1,10 @@
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
+import { addProfile, updateProfile } from "@/redux/features/portfolioSlice";
 import {
-	addProfile,
 	addProfileInDatabase,
-	updateProfile,
 	updateProfileInDatabase,
-} from "@/redux/features/profileSlice";
+} from "@/redux/thunks/profile";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {

@@ -20,7 +20,7 @@ import {
 } from "@/redux/thunks/certifications";
 import { CertificationDialog } from "@/components/dialogs/certification-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Certification = () => {
 	const { portfolioId } = useParams();

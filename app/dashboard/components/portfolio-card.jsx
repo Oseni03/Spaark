@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "framer-motion";
-
 import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
 
@@ -26,7 +25,7 @@ export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
 	// Create a state management for open dialogs and portfolio management (Update, lock, delete, duplicate)
 
-	const lastUpdated = dayjs().to(portfolio.updatedAt);
+	const lastUpdated = dayjs(portfolio.updatedAt);
 
 	const onOpen = () => {
 		router.push(`/builder/${portfolio.id}`);

@@ -1,3 +1,5 @@
+"use client";
+
 import { basicsSchema, defaultBasics } from "@/schema/sections/basics";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 import { updateBasics } from "@/redux/features/portfolioSlice"; // Ensure this import is correct
 import { updateBasicsInDatabase } from "@/redux/thunks/basics";
 import { useEffect } from "react";

@@ -20,7 +20,7 @@ import {
 	updateExperienceInDatabase,
 } from "@/redux/thunks/experience";
 import { createId } from "@paralleldrive/cuid2";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Experience = () => {
 	const { portfolioId } = useParams();

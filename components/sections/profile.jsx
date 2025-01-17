@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 
 export const Profile = () => {
 	const { portfolioId } = useParams();

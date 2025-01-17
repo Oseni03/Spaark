@@ -12,10 +12,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
 	addCertification,
-	addCertificationInDatabase,
 	updateCertification,
+} from "@/redux/features/portfolioSlice";
+import {
+	addCertificationInDatabase,
 	updateCertificationnInDatabase,
-} from "@/redux/features/certificationSlice";
+} from "@/redux/thunks/certifications";
 
 export const CertificationDialog = ({
 	form,

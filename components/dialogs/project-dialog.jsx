@@ -14,12 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
+import { addProject, updateProject } from "@/redux/features/portfolioSlice";
 import {
-	addProject,
 	addProjectInDatabase,
-	updateProject,
-	updateProjectnInDatabase,
-} from "@/redux/features/projectSlice";
+	updateProjectInDatabase,
+} from "@/redux/thunks/project";
 import { CustomLink } from "@/components/custom-link";
 import Uploader from "../sections/picture/uploader";
 import { logger } from "@/lib/utils";

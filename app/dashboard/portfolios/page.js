@@ -34,7 +34,7 @@ function Page() {
 				))}
 
 			{portfolios && (
-				<AnimatePresence>
+				<AnimatePresence key={"portfolios"}>
 					{portfolios
 						.sort(
 							(a, b) =>
@@ -42,7 +42,7 @@ function Page() {
 						)
 						.map((portfolio, index) => (
 							<motion.div
-								key={portfolio.id}
+								key={index}
 								layout
 								initial={{ opacity: 0, x: -50 }}
 								animate={{

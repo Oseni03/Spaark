@@ -14,7 +14,13 @@ import {
 	skillSchema,
 	defaultSkill,
 } from "@/schema/sections";
+import { portfolioSchema, defaultPortfolio } from "@/schema/portfolio";
 import { defaultBasics } from "@/schema/sections/basics";
+import {
+	addPortfolioInDatabase,
+	updatePortfolioInDatabase,
+	removePortfolioFromDatabase,
+} from "../thunks/portfolio";
 import { updateBasicsInDatabase } from "../thunks/basics";
 import {
 	addCertificationInDatabase,
@@ -33,7 +39,7 @@ import {
 } from "../thunks/experience";
 import {
 	addHackathonInDatabase,
-	updateHackathonnInDatabase,
+	updateHackathonInDatabase,
 	removeHackathonFromDatabase,
 } from "../thunks/hackathon";
 import {
@@ -65,6 +71,56 @@ const portfolioSlice = createSlice({
 	name: "portfolio",
 	initialState,
 	reducers: {
+		setPortfolios(state, action) {
+			state.items = action.payload;
+		},
+		addPortfolio(state, action) {
+			const portfolio = action.payload;
+			const result = portfolioSchema.safeParse(portfolio);
+			if (result.success) {
+				state.items.push({ ...defaultPortfolio, ...result.data });
+			} else {
+				logger.error("Invalid portfolio data:", result.error);
+			}
+		},
+		updatePortfolio(state, action) {
+			const { id, data } = action.payload;
+			const portfolio = state.items.find(
+				(portfolio) => portfolio.id === id
+			);
+			if (portfolio) {
+				const result = portfolioSchema.safeParse(data);
+				if (result.success) {
+					Object.assign(portfolio, result.data);
+				} else {
+					logger.error("Invalid update data:", result.error);
+				}
+			}
+		},
+		removePortfolio(state, action) {
+			const { id } = action.payload;
+			state.items = state.items.filter(
+				(portfolio) => portfolio.id !== id
+			);
+		},
+		togglePortfolioIsPublic(state, action) {
+			const { id } = action.payload;
+			const portfolio = state.items.find(
+				(portfolio) => portfolio.id === id
+			);
+			if (portfolio) {
+				portfolio.isPublic = !portfolio.isPublic;
+			}
+		},
+		togglePortfolioIsPrimary(state, action) {
+			const { id } = action.payload;
+			const portfolio = state.items.find(
+				(portfolio) => portfolio.id === id
+			);
+			if (portfolio) {
+				portfolio.isPrimary = !portfolio.isPrimary;
+			}
+		},
 		updateBasics(state, action) {
 			const { portfolioId, basics } = action.payload;
 			const portfolio = state.items.find(
@@ -592,6 +648,54 @@ const portfolioSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
+		// Portfolio Extra Reducers
+		builder
+			.addCase(addPortfolioInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(addPortfolioInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+				state.items.push(action.payload);
+			})
+			.addCase(addPortfolioInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to create portfolio";
+			})
+			.addCase(updatePortfolioInDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+				const { id, data } = action.payload;
+				const portfolio = state.items.find(
+					(portfolio) => portfolio.id === id
+				);
+				if (portfolio) {
+					Object.assign(portfolio, data);
+				}
+			})
+			.addCase(updatePortfolioInDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to update portfolio";
+			})
+			.addCase(removePortfolioFromDatabase.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(removePortfolioFromDatabase.fulfilled, (state, action) => {
+				state.loading = false;
+				const { id } = action.payload;
+				state.items = state.items.filter(
+					(portfolio) => portfolio.id !== id
+				);
+			})
+			.addCase(removePortfolioFromDatabase.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload || "Failed to delete portfolio";
+			});
+
 		// Basics Extra Reducers
 		builder
 			.addCase(updateBasicsInDatabase.pending, (state, action) => {
@@ -947,7 +1051,7 @@ const portfolioSlice = createSlice({
 						action.payload || "Failed to add hackathon";
 				}
 			})
-			.addCase(updateHackathonnInDatabase.pending, (state, action) => {
+			.addCase(updateHackathonInDatabase.pending, (state, action) => {
 				const { portfolioId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -957,7 +1061,7 @@ const portfolioSlice = createSlice({
 					portfolio.error = null;
 				}
 			})
-			.addCase(updateHackathonnInDatabase.fulfilled, (state, action) => {
+			.addCase(updateHackathonInDatabase.fulfilled, (state, action) => {
 				const { portfolioId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -966,7 +1070,7 @@ const portfolioSlice = createSlice({
 					portfolio.loading = false;
 				}
 			})
-			.addCase(updateHackathonnInDatabase.rejected, (state, action) => {
+			.addCase(updateHackathonInDatabase.rejected, (state, action) => {
 				const { portfolioId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -1287,6 +1391,12 @@ const portfolioSlice = createSlice({
 });
 
 export const {
+	setPortfolios,
+	addPortfolio,
+	updatePortfolio,
+	removePortfolio,
+	togglePortfolioIsPublic,
+	togglePortfolioIsPrimary,
 	updateBasics,
 	resetBasics,
 	setCertifications,
