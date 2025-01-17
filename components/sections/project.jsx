@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -10,17 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	addProject,
-	addProjectInDatabase,
 	removeProject,
-	removeProjectFromDatabase,
 	toggleProjectVisibility,
-	updateProjectnInDatabase,
-} from "@/redux/features/projectSlice";
+} from "@/redux/features/portfolioSlice";
+import {
+	addProjectInDatabase,
+	removeProjectFromDatabase,
+	updateProjectInDatabase,
+} from "@/redux/thunks/project";
 import { ProjectDialog } from "@/components/dialogs/project-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Project = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentProject, setCurrentProject] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Project = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.project);
+	const section = portfolio?.projects;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -59,16 +65,32 @@ export const Project = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProject(newItem));
-		dispatch(addProjectInDatabase(newItem));
+		dispatch(addProject({ portfolioId, project: newItem }));
+		dispatch(addProjectInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProject(item.id));
-		dispatch(removeProjectFromDatabase(item.id));
+		dispatch(
+			removeProject({
+				projectId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeProjectFromDatabase({
+				projectId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProjectVisibility(item.id));
-		dispatch(updateProjectnInDatabase({ ...item, visible: !item.visible }));
+		dispatch(toggleProjectVisibility({ portfolioId, projectId: item.id }));
+		dispatch(
+			updateProjectInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
+		);
 	};
 
 	return (

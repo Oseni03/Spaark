@@ -68,9 +68,9 @@ export const updateProfileInDatabase = createAsyncThunk(
 
 export const removeProfileFromDatabase = createAsyncThunk(
 	"profile/removeProfileFromDatabase",
-	async (profileId, { rejectWithValue }) => {
+	async ({ profileId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteProfile(profileId);
+			await deleteProfile(profileId, portfolioId);
 			return { id: profileId };
 		} catch (error) {
 			return rejectWithValue(

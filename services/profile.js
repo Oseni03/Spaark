@@ -25,11 +25,11 @@ export async function getProfiles(portfolioId) {
 	});
 }
 
-export async function createProfile(data) {
+export async function createProfile({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -37,7 +37,7 @@ export async function createProfile(data) {
 		const profile = await prisma.profile.create({
 			data: {
 				...data,
-				portfolio: { connect: { id: data.portfolioId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
 		});
 

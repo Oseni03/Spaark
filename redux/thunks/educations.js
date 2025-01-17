@@ -54,9 +54,9 @@ export const updateEducationInDatabase = createAsyncThunk(
 
 export const removeEducationFromDatabase = createAsyncThunk(
 	"education/removeEducationFromDatabase",
-	async (educationId, { rejectWithValue }) => {
+	async ({ educationId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteEducation(educationId);
+			await deleteEducation(educationId, portfolioId);
 			return { id: educationId };
 		} catch (error) {
 			return rejectWithValue(

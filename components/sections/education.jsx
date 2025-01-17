@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -10,17 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	addEducation,
-	addEducationInDatabase,
 	removeEducation,
-	removeEducationFromDatabase,
 	toggleEducationVisibility,
+} from "@/redux/features/portfolioSlice";
+import {
+	addEducationInDatabase,
+	removeEducationFromDatabase,
 	updateEducationInDatabase,
-} from "@/redux/features/educationSlice";
+} from "@/redux/thunks/educations";
 import { EducationDialog } from "@/components/dialogs/education-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Education = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentEducation, setCurrentEducation] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Education = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.education);
+	const section = portfolio?.educations;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -59,17 +65,33 @@ export const Education = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addEducation(newItem));
-		dispatch(addEducationInDatabase(newItem));
+		dispatch(addEducation({ portfolioId, education: newItem }));
+		dispatch(addEducationInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeEducation(item.id));
-		dispatch(removeEducationFromDatabase(item.id));
+		dispatch(
+			removeEducation({
+				educationId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeEducationFromDatabase({
+				educationId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleEducationVisibility(item.id));
 		dispatch(
-			updateEducationInDatabase({ ...item, visible: !item.visible })
+			toggleEducationVisibility({ portfolioId, educationId: item.id })
+		);
+		dispatch(
+			updateEducationInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
 		);
 	};
 

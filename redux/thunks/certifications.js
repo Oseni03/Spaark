@@ -54,9 +54,9 @@ export const updateCertificationnInDatabase = createAsyncThunk(
 
 export const removeCertificationFromDatabase = createAsyncThunk(
 	"certification/removeCertificationFromDatabase",
-	async (certificationId, { rejectWithValue }) => {
+	async ({ certificationId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteCertification(certificationId);
+			await deleteCertification(certificationId, portfolioId);
 			return { id: certificationId };
 		} catch (error) {
 			return rejectWithValue(

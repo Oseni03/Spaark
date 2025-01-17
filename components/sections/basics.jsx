@@ -6,16 +6,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import {
-	updatePortfolioBasics,
-	updateBasicsInDatabase,
-} from "@/redux/features/basicSlice"; // Ensure this import is correct
+import { useParams } from "react-router-dom";
+import { updateBasics } from "@/redux/features/portfolioSlice"; // Ensure this import is correct
+import { updateBasicsInDatabase } from "@/redux/thunks/basics";
 import { useEffect } from "react";
 import { RichInput } from "@/components/ui/rich-input";
 import { logger } from "@/lib/utils";
 
 export const BasicsSection = () => {
-	const section = useSelector((state) => state.basics);
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const {
 		handleSubmit,
@@ -24,7 +26,7 @@ export const BasicsSection = () => {
 		formState: { errors, defaultValues },
 	} = useForm({
 		resolver: zodResolver(basicsSchema),
-		defaultValues: section,
+		defaultValues: portfolio?.basics || defaultBasics,
 	});
 
 	useEffect(() => {
@@ -35,8 +37,8 @@ export const BasicsSection = () => {
 	}, [errors, defaultValues]);
 
 	const onSubmit = (data) => {
-		dispatch(updatePortfolioBasics(data));
-		dispatch(updateBasicsInDatabase(data));
+		dispatch(updateBasics({ portfolioId, basics: data }));
+		dispatch(updateBasicsInDatabase({ portfolioId, ...data }));
 		logger.info("Form Submitted:", data);
 	};
 

@@ -35,17 +35,17 @@ export async function createBasics(portfolioId, data = defaultBasics) {
 	});
 }
 
-export async function updatePortfolioBasics(data) {
+export async function updatePortfolioBasics({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
 		// Update user in database
 		const updatedBasics = await prisma.basics.update({
-			where: { portfolioId: data.portfolioId },
+			where: { portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(), // Ensure updated timestamp is set

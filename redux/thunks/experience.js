@@ -53,9 +53,9 @@ export const updateExperienceInDatabase = createAsyncThunk(
 
 export const removeExperienceFromDatabase = createAsyncThunk(
 	"experience/removeExperienceFromDatabase",
-	async (experienceId, { rejectWithValue }) => {
+	async ({ experienceId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteExperience(experienceId);
+			await deleteExperience(experienceId, portfolioId);
 			return { id: experienceId };
 		} catch (error) {
 			return rejectWithValue(

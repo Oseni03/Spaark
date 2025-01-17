@@ -54,9 +54,9 @@ export const updateHackathonnInDatabase = createAsyncThunk(
 
 export const removeHackathonFromDatabase = createAsyncThunk(
 	"hackathon/removeHackathonFromDatabase",
-	async (hackathonId, { rejectWithValue }) => {
+	async ({ hackathonId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteHackathon(hackathonId);
+			await deleteHackathon(hackathonId, portfolioId);
 			return { id: hackathonId };
 		} catch (error) {
 			return rejectWithValue(

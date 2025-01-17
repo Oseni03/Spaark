@@ -6,12 +6,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import {
 	addProfile,
-	addProfileInDatabase,
+	updateProfile,
 	removeProfile,
-	removeProfileFromDatabase,
 	toggleProfileVisibility,
+} from "@/redux/features/portfolioSlice";
+import {
+	addProfileInDatabase,
+	removeProfileFromDatabase,
 	updateProfileInDatabase,
-} from "@/redux/features/profileSlice";
+} from "@/redux/thunks/profile";
 import { ProfilesDialog } from "@/components/dialogs/profile-dialog";
 import { useForm } from "react-hook-form";
 import { defaultProfile } from "@/schema/sections";
@@ -20,8 +23,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Profile = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentProfile, setCurrentProfile] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -43,7 +51,7 @@ export const Profile = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.profile);
+	const section = portfolio?.profiles;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -60,16 +68,24 @@ export const Profile = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProfile(newItem));
-		dispatch(addProfileInDatabase(newItem));
+		dispatch(addProfile({ portfolioId, profile: newItem }));
+		dispatch(addProfileInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProfile(item.id));
-		dispatch(removeProfileFromDatabase(item.id));
+		dispatch(removeProfile({ portfolioId, profileId: item.id }));
+		dispatch(
+			removeProfileFromDatabase({ portfolioId, profileId: item.id })
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProfileVisibility(item.id));
-		dispatch(updateProfileInDatabase(item.id, { visible: !item.visible }));
+		dispatch(toggleProfileVisibility({ portfolioId, profileId: item.id }));
+		dispatch(
+			updateProfileInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
+		);
 	};
 
 	return (

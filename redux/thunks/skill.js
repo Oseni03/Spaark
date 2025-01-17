@@ -50,9 +50,9 @@ export const updateSkillnInDatabase = createAsyncThunk(
 
 export const removeSkillFromDatabase = createAsyncThunk(
 	"skill/removeSkillFromDatabase",
-	async (skillId, { rejectWithValue }) => {
+	async ({ skillId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteSkill(skillId);
+			await deleteSkill(skillId, portfolioId);
 			return { id: skillId };
 		} catch (error) {
 			return rejectWithValue(

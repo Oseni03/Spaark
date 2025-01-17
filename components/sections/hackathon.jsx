@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -10,17 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	addHackathon,
-	addHackathonInDatabase,
 	removeHackathon,
-	removeHackathonFromDatabase,
 	toggleHackathonVisibility,
-	updateHackathon,
-} from "@/redux/features/hackathonSlice";
+} from "@/redux/features/portfolioSlice";
+import {
+	addHackathonInDatabase,
+	removeHackathonFromDatabase,
+	updateHackathonnInDatabase,
+} from "@/redux/thunks/hackathon";
 import { HackathonDialog } from "@/components/dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Hackathon = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentHackathon, setCurrentHackathon] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Hackathon = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.hackathon);
+	const section = portfolio?.hackathons;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -58,19 +64,36 @@ export const Hackathon = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addHackathon(newItem));
-		dispatch(addHackathonInDatabase(newItem));
+		dispatch(addHackathon({ portfolioId, hackathon: newItem }));
+		dispatch(addHackathonInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeHackathon(item.id));
-		dispatch(removeHackathonFromDatabase(item.id));
+		dispatch(
+			removeHackathon({
+				hackathonId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeHackathonFromDatabase({
+				hackathonId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleHackathonVisibility(item.id));
-		dispatch(updateHackathon({ ...item, visible: !item.visible }));
+		dispatch(
+			toggleHackathonVisibility({ portfolioId, hackathonId: item.id })
+		);
+		dispatch(
+			updateHackathonnInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
+		);
 	};
 
 	return (

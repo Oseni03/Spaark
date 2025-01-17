@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -10,17 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	addCertification,
-	addCertificationInDatabase,
 	removeCertification,
-	removeCertificationFromDatabase,
 	toggleCertificationVisibility,
+} from "@/redux/features/portfolioSlice";
+import {
+	addCertificationInDatabase,
+	removeCertificationFromDatabase,
 	updateCertificationnInDatabase,
-} from "@/redux/features/certificationSlice";
+} from "@/redux/thunks/certifications";
 import { CertificationDialog } from "@/components/dialogs/certification-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Certification = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentCertification, setCurrentCertification] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Certification = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.certification);
+	const section = portfolio?.certifications;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -60,17 +66,36 @@ export const Certification = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addCertification(newItem));
-		dispatch(addCertificationInDatabase(newItem));
+		dispatch(addCertification({ portfolioId, certification: newItem }));
+		dispatch(addCertificationInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeCertification(item.id));
-		dispatch(removeCertificationFromDatabase(item.id));
+		dispatch(
+			removeCertification({
+				certificationId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeCertificationFromDatabase({
+				certificationId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleCertificationVisibility(item.id));
 		dispatch(
-			updateCertificationnInDatabase({ ...item, visible: !item.visible })
+			toggleCertificationVisibility({
+				portfolioId,
+				certificationId: item.id,
+			})
+		);
+		dispatch(
+			updateCertificationnInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
 		);
 	};
 

@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -10,17 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
 	addSkill,
-	addSkillInDatabase,
 	removeSkill,
-	removeSkillFromDatabase,
 	toggleSkillVisibility,
+} from "@/redux/features/portfolioSlice";
+import {
+	addSkillInDatabase,
+	removeSkillFromDatabase,
 	updateSkillnInDatabase,
-} from "@/redux/features/skillSlice";
+} from "@/redux/thunks/skill";
 import { SkillDialog } from "@/components/dialogs/skill-dialog";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Skill = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentSkill, setCurrentSkill] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Skill = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.skill);
+	const section = portfolio?.skills;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -58,19 +64,34 @@ export const Skill = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		logger.info("Duplicate", item);
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addSkill(newItem));
-		dispatch(addSkillInDatabase(newItem));
+		dispatch(addSkill({ portfolioId, skill: newItem }));
+		dispatch(addSkillInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeSkill(item.id));
-		dispatch(removeSkillFromDatabase(item.id));
+		dispatch(
+			removeSkill({
+				skillId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeSkillFromDatabase({
+				skillId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleSkillVisibility(item.id));
-		dispatch(updateSkillnInDatabase({ ...item, visible: !item.visible }));
+		dispatch(toggleSkillVisibility({ portfolioId, skillId: item.id }));
+		dispatch(
+			updateSkillnInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
+		);
 	};
 
 	return (

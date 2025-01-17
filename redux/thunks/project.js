@@ -49,9 +49,9 @@ export const updateProjectInDatabase = createAsyncThunk(
 
 export const removeProjectFromDatabase = createAsyncThunk(
 	"project/removeProjectFromDatabase",
-	async (projectId, { rejectWithValue }) => {
+	async ({ projectId, portfolioId }, { rejectWithValue }) => {
 		try {
-			await deleteProject(projectId);
+			await deleteProject(projectId, portfolioId);
 			return { id: projectId };
 		} catch (error) {
 			return rejectWithValue(

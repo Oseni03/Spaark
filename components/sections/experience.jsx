@@ -1,6 +1,6 @@
 import { Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
@@ -11,16 +11,22 @@ import { useEffect, useState } from "react";
 import { ExperienceDialog } from "@/components/dialogs/experience-dialog";
 import {
 	addExperience,
-	addExperienceInDatabase,
 	removeExperience,
-	removeExperienceFromDatabase,
 	toggleExperienceVisibility,
+} from "@/redux/features/portfolioSlice";
+import {
+	addExperienceInDatabase,
+	removeExperienceFromDatabase,
 	updateExperienceInDatabase,
-} from "@/redux/features/experienceSlice";
+} from "@/redux/thunks/experience";
 import { createId } from "@paralleldrive/cuid2";
-import { logger } from "@/lib/utils";
+import { useParams } from "react-router-dom";
 
 export const Experience = () => {
+	const { portfolioId } = useParams();
+	const portfolio = useSelector((state) =>
+		state.portfolio.items.find((item) => item.id === portfolioId)
+	);
 	const dispatch = useDispatch();
 	const [currentExperience, setCurrentExperience] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +48,7 @@ export const Experience = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = useSelector((state) => state.experience);
+	const section = portfolio?.experiences;
 	if (!section) return null;
 
 	// CRUD handlers
@@ -60,17 +66,33 @@ export const Experience = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addExperience(newItem));
-		dispatch(addExperienceInDatabase(newItem));
+		dispatch(addExperience({ portfolioId, experience: newItem }));
+		dispatch(addExperienceInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeExperience(item.id));
-		dispatch(removeExperienceFromDatabase(item.id));
+		dispatch(
+			removeExperience({
+				experienceId: item.id,
+				portfolioId,
+			})
+		);
+		dispatch(
+			removeExperienceFromDatabase({
+				experienceId: item.id,
+				portfolioId,
+			})
+		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleExperienceVisibility(item.id));
 		dispatch(
-			updateExperienceInDatabase({ ...item, visible: !item.visible })
+			toggleExperienceVisibility({ portfolioId, experienceId: item.id })
+		);
+		dispatch(
+			updateExperienceInDatabase({
+				...item,
+				visible: !item.visible,
+				portfolioId,
+			})
 		);
 	};
 
