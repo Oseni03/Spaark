@@ -26,8 +26,8 @@ import {
 	updateBasics,
 	setProjects,
 	setExperience,
+	setHackathons,
 } from "@/redux/features/portfolioSlice";
-import { setHackathons } from "@/redux/features/hackathonSlice";
 import { logger } from "@/lib/utils";
 import { setUser } from "@/redux/features/userSlice";
 

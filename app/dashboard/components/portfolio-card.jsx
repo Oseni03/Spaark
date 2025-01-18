@@ -74,7 +74,7 @@ export const PortfolioCard = ({ portfolio }) => {
 						)}
 					>
 						<h4 className="line-clamp-2 font-medium">
-							{portfolio.title}
+							{portfolio.name}
 						</h4>
 						<p className="line-clamp-1 text-xs opacity-75">{`Last updated ${lastUpdated}`}</p>
 					</div>
