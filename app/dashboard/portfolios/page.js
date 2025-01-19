@@ -35,30 +35,25 @@ function Page() {
 
 			{portfolios && (
 				<AnimatePresence key={"portfolios"}>
-					{portfolios
-						.sort(
-							(a, b) =>
-								new Date(b.updatedAt) - new Date(a.updatedAt)
-						)
-						.map((portfolio, index) => (
-							<motion.div
-								key={index}
-								layout
-								initial={{ opacity: 0, x: -50 }}
-								animate={{
-									opacity: 1,
-									x: 0,
-									transition: { delay: (index + 2) * 0.1 },
-								}}
-								exit={{
-									opacity: 0,
-									filter: "blur(8px)",
-									transition: { duration: 0.5 },
-								}}
-							>
-								<PortfolioCard portfolio={portfolio} />
-							</motion.div>
-						))}
+					{portfolios.map((portfolio, index) => (
+						<motion.div
+							key={index}
+							layout
+							initial={{ opacity: 0, x: -50 }}
+							animate={{
+								opacity: 1,
+								x: 0,
+								transition: { delay: (index + 2) * 0.1 },
+							}}
+							exit={{
+								opacity: 0,
+								filter: "blur(8px)",
+								transition: { duration: 0.5 },
+							}}
+						>
+							<PortfolioCard portfolio={portfolio} />
+						</motion.div>
+					))}
 				</AnimatePresence>
 			)}
 		</div>

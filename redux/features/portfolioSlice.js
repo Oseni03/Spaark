@@ -668,9 +668,10 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
 				state.loading = false;
-				const { id, data } = action.payload;
+				const { data } = action.payload;
+				logger.info("Updated Portfolio from reducer case:", data);
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === id
+					(portfolio) => portfolio.id === data.id
 				);
 				if (portfolio) {
 					Object.assign(portfolio, data);

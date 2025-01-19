@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/builder(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/builder(.*)", "/dashboard(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
 	// Check if the route is protected and enforce authentication if it is
@@ -27,7 +27,10 @@ export default clerkMiddleware(async (auth, req) => {
 	} else {
 		// Updated development logic
 		console.log("Splitted: ", hostname?.split(":")[0]);
-		currentHost = hostname?.split(":")[0].replace(".localhost", "");
+		currentHost = hostname
+			?.split(":")[0]
+			.replace(".localhost", "")
+			.replace("adequate-adequately-husky.ngrok-free.app", "");
 	}
 	// If there's no currentHost, likely accessing the root domain, handle accordingly
 	if (

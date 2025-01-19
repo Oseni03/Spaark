@@ -1,13 +1,14 @@
+"use client";
+
 import { Plus } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { BaseCard } from "./base-card";
+import { useRouter } from "next/navigation";
 
 export const CreateBlogCard = () => {
-	const onClick = () => {
-		console.log("Create post clicked");
-	};
+	const router = useRouter();
 	return (
-		<BaseCard onClick={onClick}>
+		<BaseCard onClick={() => router.push("/dashboard/blogs/new")}>
 			<Plus size={64} weight="thin" />
 
 			<div

@@ -91,9 +91,6 @@ export async function createUser(userId, username, email) {
 				id: userId,
 				username,
 				email,
-				basics: {
-					create: defaultBasics,
-				},
 			},
 		});
 		return user;

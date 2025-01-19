@@ -47,9 +47,6 @@ export async function createPortfolio(data) {
 				},
 			},
 		});
-
-		// Revalidate multiple potential paths
-		revalidatePath("/builder");
 		return portfolio;
 	});
 }
@@ -70,9 +67,6 @@ export async function editPortfolio(id, data) {
 			},
 		});
 
-		// Revalidate relevant paths
-		revalidatePath("/builder");
-
 		return updatedPortfolio;
 	});
 }
@@ -89,9 +83,6 @@ export async function deletePortfolio(id) {
 		const deletedPortfolio = await prisma.portfolio.delete({
 			where: { id, userId },
 		});
-
-		// Revalidate relevant paths
-		revalidatePath("/builder");
 
 		return deletedPortfolio;
 	});

@@ -7,7 +7,10 @@ import {
 	LockOpen,
 	PencilSimple,
 	TrashSimple,
+	Globe,
+	Star,
 } from "@phosphor-icons/react";
+import { StarOff } from "lucide-react";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -20,10 +23,41 @@ import dayjs from "dayjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import {
+	updatePortfolioInDatabase,
+	removePortfolioFromDatabase,
+	addPortfolioInDatabase,
+} from "@/redux/thunks/portfolio";
+import { createId } from "@paralleldrive/cuid2";
+import { useState, useEffect } from "react";
+import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { defaultPortfolio, portfolioSchema } from "@/schema/portfolio";
+import { addPortfolio, updatePortfolio } from "@/redux/features/portfolioSlice";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
-	// Create a state management for open dialogs and portfolio management (Update, lock, delete, duplicate)
+	const [isOpen, setIsOpen] = useState(false);
+	const dispatch = useDispatch();
+
+	const form = useForm({
+		resolver: zodResolver(portfolioSchema),
+		defaultValues: portfolio,
+	});
+
+	const {
+		reset,
+		formState: { errors, defaultValues },
+	} = form;
+
+	// Log validation errors
+	useEffect(() => {
+		if (Object.keys(errors).length > 0) {
+			logger.error("Form Validation Errors:", errors);
+		}
+	}, [errors, defaultValues]);
 
 	const lastUpdated = dayjs(portfolio.updatedAt);
 
@@ -31,23 +65,48 @@ export const PortfolioCard = ({ portfolio }) => {
 		router.push(`/builder/${portfolio.id}`);
 	};
 
-	const onUpdate = () => {
-		// open portfolio update dialog
-	};
-
 	const onDuplicate = () => {
-		// Duplicate portfolio
+		const duplicatedPortfolio = {
+			...portfolio,
+			id: createId(), // Remove ID to create a new one
+			name: `${portfolio.name} (Copy)`,
+		};
+		dispatch(addPortfolio(duplicatedPortfolio));
+		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
 	};
 
-	const onLockChange = () => {
-		// lockOpen(portfolio.locked ? "update" : "create", {
-		// 	id: "lock",
-		// 	item: portfolio,
-		// });
+	const onPublicChange = () => {
+		dispatch(
+			updatePortfolioInDatabase({
+				id: portfolio.id,
+				data: { isPublic: !portfolio.isPublic },
+			})
+		);
+		dispatch(
+			updatePortfolio({
+				id: portfolio.id,
+				data: { isPublic: !portfolio.isPublic },
+			})
+		);
+	};
+
+	const onPrimaryChange = () => {
+		dispatch(
+			updatePortfolioInDatabase({
+				id: portfolio.id,
+				data: { isPrimary: !portfolio.isPrimary },
+			})
+		);
+		dispatch(
+			updatePortfolio({
+				id: portfolio.id,
+				data: { isPrimary: !portfolio.isPrimary },
+			})
+		);
 	};
 
 	const onDelete = () => {
-		// delete portfolio (delete dialog)
+		dispatch(removePortfolioFromDatabase(portfolio.id));
 	};
 
 	return (
@@ -81,12 +140,19 @@ export const PortfolioCard = ({ portfolio }) => {
 				</BaseCard>
 			</ContextMenuTrigger>
 
+			<PortfolioDialog
+				form={form}
+				currentPortfolio={portfolio}
+				isOpen={isOpen}
+				setIsOpen={setIsOpen}
+			/>
+
 			<ContextMenuContent>
 				<ContextMenuItem onClick={onOpen}>
 					<FolderOpen size={14} className="mr-2" />
 					{`Open`}
 				</ContextMenuItem>
-				<ContextMenuItem onClick={onUpdate}>
+				<ContextMenuItem onClick={() => setIsOpen(true)}>
 					<PencilSimple size={14} className="mr-2" />
 					{`Rename`}
 				</ContextMenuItem>
@@ -94,17 +160,18 @@ export const PortfolioCard = ({ portfolio }) => {
 					<CopySimple size={14} className="mr-2" />
 					{`Duplicate`}
 				</ContextMenuItem>
-				{portfolio.locked ? (
-					<ContextMenuItem onClick={onLockChange}>
-						<LockOpen size={14} className="mr-2" />
-						{`Unlock`}
-					</ContextMenuItem>
-				) : (
-					<ContextMenuItem onClick={onLockChange}>
-						<Lock size={14} className="mr-2" />
-						{`Lock`}
-					</ContextMenuItem>
-				)}
+				<ContextMenuItem onClick={onPublicChange}>
+					<Globe size={14} className="mr-2" />
+					{portfolio.isPublic ? `Make Private` : `Make Public`}
+				</ContextMenuItem>
+				<ContextMenuItem onClick={onPrimaryChange}>
+					{portfolio.isPrimary ? (
+						<Star size={14} className="mr-2" />
+					) : (
+						<StarOff size={14} className="mr-2" />
+					)}
+					{portfolio.isPrimary ? `Unset Primary` : `Set as Primary`}
+				</ContextMenuItem>
 				<ContextMenuSeparator />
 				<ContextMenuItem className="text-error" onClick={onDelete}>
 					<TrashSimple size={14} className="mr-2" />
