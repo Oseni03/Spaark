@@ -16,6 +16,7 @@ export async function getProfiles(portfolioId) {
 				network: true,
 				username: true,
 				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 		if (profiles.length > 0) {
@@ -38,6 +39,14 @@ export async function createProfile({ portfolioId, ...data }) {
 			data: {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
+			},
+			select: {
+				id: true,
+				visible: true,
+				network: true,
+				username: true,
+				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 
@@ -71,6 +80,14 @@ export async function editProfile(profileId, data) {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: {
+				id: true,
+				visible: true,
+				network: true,
+				username: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths
@@ -101,6 +118,14 @@ export async function deleteProfile(profileId, portfolioId) {
 
 		const deletedProfile = await prisma.profile.delete({
 			where: { id: profileId },
+			select: {
+				id: true,
+				visible: true,
+				network: true,
+				username: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths

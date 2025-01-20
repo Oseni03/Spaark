@@ -11,10 +11,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
-	addExperience,
-	updateExperience,
-} from "@/redux/features/portfolioSlice";
-import {
 	addExperienceInDatabase,
 	updateExperienceInDatabase,
 } from "@/redux/thunks/experience";
@@ -31,7 +27,6 @@ export const ExperienceDialog = ({
 
 	const onSubmit = (data) => {
 		if (currentExperience) {
-			dispatch(updateExperience({ id: currentExperience.id, ...data }));
 			dispatch(
 				updateExperienceInDatabase({
 					id: currentExperience.id,
@@ -39,7 +34,6 @@ export const ExperienceDialog = ({
 				})
 			);
 		} else {
-			dispatch(addExperience(data));
 			dispatch(addExperienceInDatabase(data));
 		}
 		setIsOpen(false);

@@ -9,7 +9,6 @@ import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import { updateBasics } from "@/redux/features/portfolioSlice"; // Ensure this import is correct
 import { updateBasicsInDatabase } from "@/redux/thunks/basics";
 import { useEffect } from "react";
 import { RichInput } from "@/components/ui/rich-input";
@@ -39,7 +38,6 @@ export const BasicsSection = () => {
 	}, [errors, defaultValues]);
 
 	const onSubmit = (data) => {
-		dispatch(updateBasics({ portfolioId, basics: data }));
 		dispatch(updateBasicsInDatabase({ portfolioId, ...data }));
 		logger.info("Form Submitted:", data);
 	};

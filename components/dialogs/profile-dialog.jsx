@@ -1,6 +1,5 @@
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
-import { addProfile, updateProfile } from "@/redux/features/portfolioSlice";
 import {
 	addProfileInDatabase,
 	updateProfileInDatabase,
@@ -28,12 +27,10 @@ export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
 
 	const onSubmit = (data) => {
 		if (currentProfile) {
-			dispatch(updateProfile({ id: currentProfile.id, ...data }));
 			dispatch(
 				updateProfileInDatabase({ id: currentProfile.id, ...data })
 			);
 		} else {
-			dispatch(addProfile(data));
 			dispatch(addProfileInDatabase(data));
 		}
 		setIsOpen(false);

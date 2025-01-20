@@ -1,21 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-	defaultExperience,
-	defaultHackathon,
-	defaultSections,
-	defaultCertification,
 	certificationSchema,
 	experienceSchema,
-	defaultEducation,
 	educationSchema,
 	hackathonSchema,
 	projectSchema,
-	defaultProject,
 	skillSchema,
-	defaultSkill,
+	portfolioSchema,
+	defaultPortfolio,
 } from "@/schema/sections";
-import { portfolioSchema, defaultPortfolio } from "@/schema/portfolio";
-import { defaultBasics } from "@/schema/sections/basics";
 import {
 	addPortfolioInDatabase,
 	updatePortfolioInDatabase,
@@ -58,6 +51,8 @@ import {
 	removeProfileFromDatabase,
 } from "../thunks/profile";
 import { logger } from "@/lib/utils";
+import { transformPortfolio } from "@/lib/utils";
+import { basicsSchema } from "@/schema/sections/basics";
 
 // Initial State
 const initialState = {
@@ -72,579 +67,25 @@ const portfolioSlice = createSlice({
 	initialState,
 	reducers: {
 		setPortfolios(state, action) {
-			state.items = action.payload;
-		},
-		addPortfolio(state, action) {
-			const portfolio = action.payload;
-			const result = portfolioSchema.safeParse(portfolio);
-			if (result.success) {
-				state.items.push({ ...defaultPortfolio, ...result.data });
-			} else {
-				logger.error("Invalid portfolio data:", result.error);
-			}
-		},
-		updatePortfolio(state, action) {
-			const { id, data } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === id
+			const portfolios = action.payload;
+			logger.info("Setportfolios data: ", portfolios);
+			const transformedData = portfolios.map((portfolio) =>
+				transformPortfolio(portfolio)
 			);
-			if (portfolio) {
-				const result = portfolioSchema.safeParse(data);
-				if (result.success) {
-					Object.assign(portfolio, result.data);
-				} else {
-					logger.error("Invalid update data:", result.error);
-				}
-			}
-		},
-		removePortfolio(state, action) {
-			const { id } = action.payload;
-			state.items = state.items.filter(
-				(portfolio) => portfolio.id !== id
-			);
-		},
-		togglePortfolioIsPublic(state, action) {
-			const { id } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === id
-			);
-			if (portfolio) {
-				portfolio.isPublic = !portfolio.isPublic;
-			}
-		},
-		togglePortfolioIsPrimary(state, action) {
-			const { id } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === id
-			);
-			if (portfolio) {
-				portfolio.isPrimary = !portfolio.isPrimary;
-			}
-		},
-		updateBasics(state, action) {
-			const { portfolioId, basics } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.basics = { ...portfolio.basics, ...basics };
-			}
-		},
-		resetBasics(state, action) {
-			const { portfolioId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.basics = defaultBasics; // Reset to default basics
-			}
-		},
-		setCertifications(state, action) {
-			const { portfolioId, certifications } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.certifications.items = certifications;
-			}
-		},
-		addCertification(state, action) {
-			const { portfolioId, certification } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = certificationSchema.safeParse(certification);
-				if (result.success) {
-					portfolio.certifications.items.push({
-						...defaultCertification,
-						...result.data,
-					});
-				} else {
-					logger.error("Invalid certification data:", result.error);
-				}
-			}
-		},
-		updateCertification(state, action) {
-			const { portfolioId, certification } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.certifications.items.findIndex(
-					(item) => item.id === certification.id
-				);
-				if (index !== -1) {
-					const result = certificationSchema.safeParse(certification);
-					if (result.success) {
-						portfolio.certifications.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeCertification(state, action) {
-			const { portfolioId, certificationId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.certifications.items =
-					portfolio.certifications.items.filter(
-						(item) => item.id !== certificationId
-					);
-			}
-		},
-		toggleCertificationVisibility(state, action) {
-			const { portfolioId, certificationId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const certification = portfolio.certifications.items.find(
-					(item) => item.id === certificationId
-				);
-				if (certification) {
-					certification.visible = !certification.visible;
-				}
-			}
-		},
-		// Education Reducers
-		setEducations(state, action) {
-			const { portfolioId, educations } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.educations.items = educations;
-			}
-		},
-		addEducation(state, action) {
-			const { portfolioId, education } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = educationSchema.safeParse(education);
-				if (result.success) {
-					portfolio.educations.items.push({
-						...defaultEducation,
-						...result.data,
-					});
-				} else {
-					logger.error("Invalid education data:", result.error);
-				}
-			}
-		},
-		updateEducation(state, action) {
-			const { portfolioId, education } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.educations.items.findIndex(
-					(item) => item.id === education.id
-				);
-				if (index !== -1) {
-					const result = educationSchema.safeParse(education);
-					if (result.success) {
-						portfolio.educations.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeEducation(state, action) {
-			const { portfolioId, educationId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.educations.items = portfolio.educations.items.filter(
-					(item) => item.id !== educationId
-				);
-			}
-		},
-		toggleEducationVisibility(state, action) {
-			const { portfolioId, educationId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const education = portfolio.educations.items.find(
-					(item) => item.id === educationId
-				);
-				if (education) {
-					education.visible = !education.visible;
-				}
-			}
-		},
+			// const parsedPortfolios = portfolios
+			// 	.map((portfolio) => {
+			// 		const result = portfolioSchema.safeParse(portfolio);
 
-		// Experience Reducers
-		setExperience(state, action) {
-			const { portfolioId, experiences } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.experiences.items = experiences;
-			}
-		},
-		addExperience(state, action) {
-			const { portfolioId, experience } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = experienceSchema.safeParse(experience);
-				if (result.success) {
-					portfolio.experiences.items.push(
-						...defaultExperience,
-						...result.data
-					);
-				} else {
-					logger.error("Invalid experience data:", result.error);
-				}
-			}
-		},
-		updateExperience(state, action) {
-			const { portfolioId, experience } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.experiences.items.findIndex(
-					(item) => item.id === experience.id
-				);
-				if (index !== -1) {
-					const result = experienceSchema.safeParse(experience);
-					if (result.success) {
-						portfolio.experiences.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeExperience(state, action) {
-			const { portfolioId, experienceId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.experiences.items =
-					portfolio.experiences.items.filter(
-						(item) => item.id !== experienceId
-					);
-			}
-		},
-		toggleExperienceVisibility(state, action) {
-			const { portfolioId, experienceId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const experience = portfolio.experiences.items.find(
-					(item) => item.id === experienceId
-				);
-				if (experience) {
-					experience.visible = !experience.visible;
-				}
-			}
-		},
-
-		// Hackathon Reducers
-		setHackathons(state, action) {
-			const { portfolioId, hackathons } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.hackathons.items = hackathons;
-			}
-		},
-		addHackathon(state, action) {
-			const { portfolioId, hackathon } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = hackathonSchema.safeParse(hackathon);
-				if (result.success) {
-					portfolio.hackathons.items.push(
-						...defaultHackathon,
-						...result.data
-					);
-				} else {
-					logger.error("Invalid hackathon data:", result.error);
-				}
-			}
-		},
-		updateHackathon(state, action) {
-			const { portfolioId, hackathon } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.hackathons.items.findIndex(
-					(item) => item.id === hackathon.id
-				);
-				if (index !== -1) {
-					const result = hackathonSchema.safeParse(hackathon);
-					if (result.success) {
-						portfolio.hackathons.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeHackathon(state, action) {
-			const { portfolioId, hackathonId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.hackathons.items = portfolio.hackathons.items.filter(
-					(item) => item.id !== hackathonId
-				);
-			}
-		},
-		toggleHackathonVisibility(state, action) {
-			const { portfolioId, hackathonId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const hackathon = portfolio.hackathons.items.find(
-					(item) => item.id === hackathonId
-				);
-				if (hackathon) {
-					hackathon.visible = !hackathon.visible;
-				}
-			}
-		},
-
-		// Profile Reducers
-		setProfiles(state, action) {
-			const { portfolioId, profiles } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.profiles.items = profiles;
-			}
-		},
-		addProfile(state, action) {
-			const { portfolioId, profile } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = profileSchema.safeParse(profile);
-				if (result.success) {
-					const newProfile = result.data;
-
-					// Check for duplicates
-					const existingProfile = portfolio.profiles.items.find(
-						(item) => item.network === newProfile.network
-					);
-					if (existingProfile) {
-						toast.info(
-							"Profile with the same network already exists"
-						);
-						return;
-					}
-
-					portfolio.profiles.items.push(newProfile);
-				}
-			}
-		},
-		updateProfile(state, action) {
-			const { portfolioId, profile } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.profiles.items.findIndex(
-					(item) => item.id === profile.id
-				);
-				if (index !== -1) {
-					const result = profileSchema.safeParse(profile);
-					if (result.success) {
-						portfolio.profiles.items[index] = result.data;
-					}
-				}
-			}
-		},
-		removeProfile(state, action) {
-			const { portfolioId, profileId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.profiles.items = portfolio.profiles.items.filter(
-					(item) => item.id !== profileId
-				);
-			}
-		},
-		toggleProfileVisibility(state, action) {
-			const { portfolioId, profileId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const profile = portfolio.profiles.items.find(
-					(item) => item.id === profileId
-				);
-				if (profile) {
-					profile.visible = !profile.visible;
-				}
-			}
-		},
-		// Project Reducers
-		setProjects(state, action) {
-			const { portfolioId, projects } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.projects.items = projects;
-			}
-		},
-		addProject(state, action) {
-			const { portfolioId, project } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = projectSchema.safeParse(project);
-				if (result.success) {
-					portfolio.projects.items.push(
-						...defaultProject,
-						...result.data
-					);
-				} else {
-					logger.error("Invalid project data:", result.error);
-				}
-			}
-		},
-		updateProject(state, action) {
-			const { portfolioId, project } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.projects.items.findIndex(
-					(item) => item.id === project.id
-				);
-				if (index !== -1) {
-					const result = projectSchema.safeParse(project);
-					if (result.success) {
-						portfolio.projects.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeProject(state, action) {
-			const { portfolioId, projectId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.projects.items = portfolio.projects.items.filter(
-					(item) => item.id !== projectId
-				);
-			}
-		},
-		toggleProjectVisibility(state, action) {
-			const { portfolioId, projectId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const project = portfolio.projects.items.find(
-					(item) => item.id === projectId
-				);
-				if (project) {
-					project.visible = !project.visible;
-				}
-			}
-		},
-		// Skill Reducers
-		setSkills(state, action) {
-			const { portfolioId, skills } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.skills.items = skills;
-			}
-		},
-		addSkill(state, action) {
-			const { portfolioId, skill } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const result = skillSchema.safeParse(skill);
-				if (result.success) {
-					portfolio.skills.items.push(
-						...defaultSkill,
-						...result.data
-					);
-				} else {
-					logger.error("Invalid skill data:", result.error);
-				}
-			}
-		},
-		updateSkill(state, action) {
-			const { portfolioId, skill } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const index = portfolio.skills.items.findIndex(
-					(item) => item.id === skill.id
-				);
-				if (index !== -1) {
-					const result = skillSchema.safeParse(skill);
-					if (result.success) {
-						portfolio.skills.items[index] = result.data;
-					} else {
-						logger.error("Invalid update data:", result.error);
-					}
-				}
-			}
-		},
-		removeSkill(state, action) {
-			const { portfolioId, skillId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				portfolio.skills.items = portfolio.skills.items.filter(
-					(item) => item.id !== skillId
-				);
-			}
-		},
-		toggleSkillVisibility(state, action) {
-			const { portfolioId, skillId } = action.payload;
-			const portfolio = state.items.find(
-				(portfolio) => portfolio.id === portfolioId
-			);
-			if (portfolio) {
-				const skill = portfolio.skills.items.find(
-					(item) => item.id === skillId
-				);
-				if (skill) {
-					skill.visible = !skill.visible;
-				}
-			}
+			// 		if (result.success) {
+			// 			return result.data;
+			// 		} else {
+			// 			logger.error("Invalid portfolio data:", result.error);
+			// 			return null;
+			// 		}
+			// 	})
+			// 	.filter(Boolean);
+			// logger.info("parsed portfolios data: ", parsedPortfolios);
+			state.items = transformedData;
 		},
 	},
 	extraReducers: (builder) => {
@@ -656,11 +97,22 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(addPortfolioInDatabase.fulfilled, (state, action) => {
 				state.loading = false;
-				state.items.push(action.payload);
+				const { data, error } = action.payload;
+				if (error) {
+					logger.error(error || "Failed to add portfolio");
+					return;
+				}
+				try {
+					const transformedPortfolio = transformPortfolio(data);
+					state.items.push(transformedPortfolio);
+				} catch (error) {
+					logger.error("Invalid portfolio data:", result.error);
+				}
 			})
 			.addCase(addPortfolioInDatabase.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload || "Failed to create portfolio";
+				state.error =
+					action.payload.error || "Failed to create portfolio";
 			})
 			.addCase(updatePortfolioInDatabase.pending, (state) => {
 				state.loading = true;
@@ -669,7 +121,6 @@ const portfolioSlice = createSlice({
 			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
 				state.loading = false;
 				const { data } = action.payload;
-				logger.info("Updated Portfolio from reducer case:", data);
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.id
 				);
@@ -679,7 +130,8 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(updatePortfolioInDatabase.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload || "Failed to update portfolio";
+				state.error =
+					action.payload.error || "Failed to update portfolio";
 			})
 			.addCase(removePortfolioFromDatabase.pending, (state) => {
 				state.loading = true;
@@ -694,7 +146,8 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(removePortfolioFromDatabase.rejected, (state, action) => {
 				state.loading = false;
-				state.error = action.payload || "Failed to delete portfolio";
+				state.error =
+					action.payload.error || "Failed to delete portfolio";
 			});
 
 		// Basics Extra Reducers
@@ -709,16 +162,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateBasicsInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.status = "succeeded";
-					portfolio.basics = {
-						...portfolio.basics,
-						...action.payload,
-					};
+					const result = basicsSchema.safeParse(data);
+					if (result.success) {
+						portfolio.basics = result.data;
+						portfolio.status = "succeeded";
+					} else {
+						logger.error("Invalid basics data:", result.error);
+					}
 				}
 			})
 			.addCase(updateBasicsInDatabase.rejected, (state, action) => {
@@ -728,7 +183,7 @@ const portfolioSlice = createSlice({
 				);
 				if (portfolio) {
 					portfolio.status = "failed";
-					portfolio.error = action.payload;
+					portfolio.error = action.payload.error;
 				}
 			});
 
@@ -744,13 +199,22 @@ const portfolioSlice = createSlice({
 					portfolio.error = null;
 				}
 			})
-			.addCase(addCertificationInDatabase.fulfilled, (state) => {
-				const { portfolioId } = action.meta.arg;
+			.addCase(addCertificationInDatabase.fulfilled, (state, action) => {
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = certificationSchema.safeParse(data);
+					if (result.success) {
+						portfolio.certifications.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error(
+							"Invalid certification data:",
+							result.error
+						);
+					}
 				}
 			})
 			.addCase(addCertificationInDatabase.rejected, (state, action) => {
@@ -761,7 +225,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to add certification";
+						action.payload.error || "Failed to add certification";
 				}
 			})
 			.addCase(updateCertificationnInDatabase.pending, (state) => {
@@ -774,15 +238,33 @@ const portfolioSlice = createSlice({
 					portfolio.error = null;
 				}
 			})
-			.addCase(updateCertificationnInDatabase.fulfilled, (state) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
+			.addCase(
+				updateCertificationnInDatabase.fulfilled,
+				(state, action) => {
+					const { portfolioId, data } = action.meta.arg;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === portfolioId
+					);
+					if (portfolio) {
+						const index = portfolio.certifications.items.findIndex(
+							(item) => item.id === data.id
+						);
+						if (index !== -1) {
+							const result = certificationSchema.safeParse(data);
+							if (result.success) {
+								portfolio.certifications.items[index] =
+									result.data;
+								portfolio.loading = false;
+							} else {
+								logger.error(
+									"Invalid certification data:",
+									result.error
+								);
+							}
+						}
+					}
 				}
-			})
+			)
 			.addCase(
 				updateCertificationnInDatabase.rejected,
 				(state, action) => {
@@ -793,7 +275,8 @@ const portfolioSlice = createSlice({
 					if (portfolio) {
 						portfolio.loading = false;
 						portfolio.error =
-							action.payload || "Failed to update certification";
+							action.payload.error ||
+							"Failed to update certification";
 					}
 				}
 			)
@@ -807,15 +290,22 @@ const portfolioSlice = createSlice({
 					portfolio.error = null;
 				}
 			})
-			.addCase(removeCertificationFromDatabase.fulfilled, (state) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
+			.addCase(
+				removeCertificationFromDatabase.fulfilled,
+				(state, action) => {
+					const { portfolioId, certificationId } = action.meta.arg;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === portfolioId
+					);
+					if (portfolio) {
+						portfolio.certifications.items =
+							portfolio.certifications.items.filter(
+								(item) => item.id !== certificationId
+							);
+						portfolio.loading = false;
+					}
 				}
-			})
+			)
 			.addCase(
 				removeCertificationFromDatabase.rejected,
 				(state, action) => {
@@ -826,7 +316,8 @@ const portfolioSlice = createSlice({
 					if (portfolio) {
 						portfolio.loading = false;
 						portfolio.error =
-							action.payload || "Failed to remove certification";
+							action.payload.error ||
+							"Failed to remove certification";
 					}
 				}
 			);
@@ -844,12 +335,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addEducationInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = educationSchema.safeParse(data);
+					if (result.success) {
+						portfolio.educations.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid education data:", result.error);
+					}
 				}
 			})
 			.addCase(addEducationInDatabase.rejected, (state, action) => {
@@ -860,7 +357,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to add education";
+						action.payload.error || "Failed to add education";
 				}
 			})
 			.addCase(updateEducationInDatabase.pending, (state, action) => {
@@ -874,12 +371,26 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateEducationInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.educations.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = educationSchema.safeParse(data);
+						if (result.success) {
+							portfolio.educations.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error(
+								"Invalid education data:",
+								result.error
+							);
+						}
+					}
 				}
 			})
 			.addCase(updateEducationInDatabase.rejected, (state, action) => {
@@ -890,7 +401,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update education";
+						action.payload.error || "Failed to update education";
 				}
 			})
 			.addCase(removeEducationFromDatabase.pending, (state, action) => {
@@ -904,11 +415,15 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeEducationFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, educationId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.educations.items =
+						portfolio.educations.items.filter(
+							(item) => item.id !== educationId
+						);
 					portfolio.loading = false;
 				}
 			})
@@ -920,7 +435,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove education";
+						action.payload.error || "Failed to remove education";
 				}
 			});
 
@@ -937,12 +452,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addExperienceInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = experienceSchema.safeParse(data);
+					if (result.success) {
+						portfolio.experiences.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid experience data:", result.error);
+					}
 				}
 			})
 			.addCase(addExperienceInDatabase.rejected, (state, action) => {
@@ -953,7 +474,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to add experience";
+						action.payload.error || "Failed to add experience";
 				}
 			})
 			.addCase(updateExperienceInDatabase.pending, (state, action) => {
@@ -967,12 +488,26 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateExperienceInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.experiences.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = experienceSchema.safeParse(data);
+						if (result.success) {
+							portfolio.experiences.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error(
+								"Invalid experience data:",
+								result.error
+							);
+						}
+					}
 				}
 			})
 			.addCase(updateExperienceInDatabase.rejected, (state, action) => {
@@ -983,7 +518,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update experience";
+						action.payload.error || "Failed to update experience";
 				}
 			})
 			.addCase(removeExperienceFromDatabase.pending, (state, action) => {
@@ -999,11 +534,15 @@ const portfolioSlice = createSlice({
 			.addCase(
 				removeExperienceFromDatabase.fulfilled,
 				(state, action) => {
-					const { portfolioId } = action.meta.arg;
+					const { portfolioId, experienceId } = action.meta.arg;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
 					);
 					if (portfolio) {
+						portfolio.experiences.items =
+							portfolio.experiences.items.filter(
+								(item) => item.id !== experienceId
+							);
 						portfolio.loading = false;
 					}
 				}
@@ -1016,7 +555,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove experience";
+						action.payload.error || "Failed to remove experience";
 				}
 			});
 
@@ -1033,12 +572,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addHackathonInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = hackathonSchema.safeParse(data);
+					if (result.success) {
+						portfolio.hackathons.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid hackathon data:", result.error);
+					}
 				}
 			})
 			.addCase(addHackathonInDatabase.rejected, (state, action) => {
@@ -1049,7 +594,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to add hackathon";
+						action.payload.error || "Failed to add hackathon";
 				}
 			})
 			.addCase(updateHackathonInDatabase.pending, (state, action) => {
@@ -1063,12 +608,26 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateHackathonInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.hackathons.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = hackathonSchema.safeParse(data);
+						if (result.success) {
+							portfolio.hackathons.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error(
+								"Invalid hackathon data:",
+								result.error
+							);
+						}
+					}
 				}
 			})
 			.addCase(updateHackathonInDatabase.rejected, (state, action) => {
@@ -1079,7 +638,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update hackathon";
+						action.payload.error || "Failed to update hackathon";
 				}
 			})
 			.addCase(removeHackathonFromDatabase.pending, (state, action) => {
@@ -1093,11 +652,15 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeHackathonFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, hackathonId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.hackathons.items =
+						portfolio.hackathons.items.filter(
+							(item) => item.id !== hackathonId
+						);
 					portfolio.loading = false;
 				}
 			})
@@ -1109,7 +672,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove hackathon";
+						action.payload.error || "Failed to remove hackathon";
 				}
 			});
 
@@ -1126,12 +689,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addProfileInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = profileSchema.safeParse(data);
+					if (result.success) {
+						portfolio.profiles.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid profile data:", result.error);
+					}
 				}
 			})
 			.addCase(addProfileInDatabase.rejected, (state, action) => {
@@ -1141,7 +710,8 @@ const portfolioSlice = createSlice({
 				);
 				if (portfolio) {
 					portfolio.loading = false;
-					portfolio.error = action.payload || "Failed to add profile";
+					portfolio.error =
+						action.payload.error || "Failed to add profile";
 				}
 			})
 			.addCase(updateProfileInDatabase.pending, (state, action) => {
@@ -1155,12 +725,23 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateProfileInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.profiles.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = profileSchema.safeParse(data);
+						if (result.success) {
+							portfolio.profiles.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error("Invalid profile data:", result.error);
+						}
+					}
 				}
 			})
 			.addCase(updateProfileInDatabase.rejected, (state, action) => {
@@ -1171,7 +752,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update profile";
+						action.payload.error || "Failed to update profile";
 				}
 			})
 			.addCase(removeProfileFromDatabase.pending, (state, action) => {
@@ -1185,11 +766,14 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeProfileFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, profileId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.profiles.items = portfolio.profiles.items.filter(
+						(item) => item.id !== profileId
+					);
 					portfolio.loading = false;
 				}
 			})
@@ -1201,7 +785,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove profile";
+						action.payload.error || "Failed to remove profile";
 				}
 			});
 
@@ -1218,12 +802,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addProjectInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = projectSchema.safeParse(data);
+					if (result.success) {
+						portfolio.projects.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid project data:", result.error);
+					}
 				}
 			})
 			.addCase(addProjectInDatabase.rejected, (state, action) => {
@@ -1233,7 +823,8 @@ const portfolioSlice = createSlice({
 				);
 				if (portfolio) {
 					portfolio.loading = false;
-					portfolio.error = action.payload || "Failed to add project";
+					portfolio.error =
+						action.payload.error || "Failed to add project";
 				}
 			})
 			.addCase(updateProjectInDatabase.pending, (state, action) => {
@@ -1247,12 +838,23 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateProjectInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.projects.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = projectSchema.safeParse(data);
+						if (result.success) {
+							portfolio.projects.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error("Invalid project data:", result.error);
+						}
+					}
 				}
 			})
 			.addCase(updateProjectInDatabase.rejected, (state, action) => {
@@ -1263,7 +865,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update project";
+						action.payload.error || "Failed to update project";
 				}
 			})
 			.addCase(removeProjectFromDatabase.pending, (state, action) => {
@@ -1277,11 +879,14 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeProjectFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, projectId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.projects.items = portfolio.projects.items.filter(
+						(item) => item.id !== projectId
+					);
 					portfolio.loading = false;
 				}
 			})
@@ -1293,7 +898,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove project";
+						action.payload.error || "Failed to remove project";
 				}
 			});
 
@@ -1310,12 +915,18 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addSkillInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const result = skillSchema.safeParse(data);
+					if (result.success) {
+						portfolio.skills.items.push(result.data);
+						portfolio.loading = false;
+					} else {
+						logger.error("Invalid skill data:", result.error);
+					}
 				}
 			})
 			.addCase(addSkillInDatabase.rejected, (state, action) => {
@@ -1325,7 +936,8 @@ const portfolioSlice = createSlice({
 				);
 				if (portfolio) {
 					portfolio.loading = false;
-					portfolio.error = action.payload || "Failed to add skill";
+					portfolio.error =
+						action.payload.error || "Failed to add skill";
 				}
 			})
 			.addCase(updateSkillnInDatabase.pending, (state, action) => {
@@ -1339,12 +951,23 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateSkillnInDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, data } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
+					const index = portfolio.skills.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = skillSchema.safeParse(data);
+						if (result.success) {
+							portfolio.skills.items[index] = result.data;
+							portfolio.loading = false;
+						} else {
+							logger.error("Invalid skill data:", result.error);
+						}
+					}
 				}
 			})
 			.addCase(updateSkillnInDatabase.rejected, (state, action) => {
@@ -1355,7 +978,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to update skill";
+						action.payload.error || "Failed to update skill";
 				}
 			})
 			.addCase(removeSkillFromDatabase.pending, (state, action) => {
@@ -1369,11 +992,14 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeSkillFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId } = action.meta.arg;
+				const { portfolioId, skillId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.skills.items = portfolio.skills.items.filter(
+						(item) => item.id !== skillId
+					);
 					portfolio.loading = false;
 				}
 			})
@@ -1385,56 +1011,12 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload || "Failed to remove skill";
+						action.payload.error || "Failed to remove skill";
 				}
 			});
 	},
 });
 
-export const {
-	setPortfolios,
-	addPortfolio,
-	updatePortfolio,
-	removePortfolio,
-	togglePortfolioIsPublic,
-	togglePortfolioIsPrimary,
-	updateBasics,
-	resetBasics,
-	setCertifications,
-	addCertification,
-	updateCertification,
-	removeCertification,
-	toggleCertificationVisibility,
-	setEducations,
-	addEducation,
-	updateEducation,
-	removeEducation,
-	toggleEducationVisibility,
-	setExperience,
-	addExperience,
-	updateExperience,
-	removeExperience,
-	toggleExperienceVisibility,
-	setHackathons,
-	addHackathon,
-	updateHackathon,
-	removeHackathon,
-	toggleHackathonVisibility,
-	setProfiles,
-	addProfile,
-	updateProfile,
-	removeProfile,
-	toggleProfileVisibility,
-	setProjects,
-	addProject,
-	updateProject,
-	removeProject,
-	toggleProjectVisibility,
-	setSkills,
-	addSkill,
-	updateSkill,
-	removeSkill,
-	toggleSkillVisibility,
-} = portfolioSlice.actions;
+export const { setPortfolios } = portfolioSlice.actions;
 
 export default portfolioSlice.reducer;

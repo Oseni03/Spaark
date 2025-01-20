@@ -22,7 +22,7 @@ export default function Page() {
 	const certification = portfolio?.certifications?.items || [];
 	const project = portfolio?.projects?.items || [];
 	const hackathon = portfolio?.hackathons?.items || [];
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.data);
 
 	return (
 		<div className="mx-auto h-full w-full max-w-3xl rounded-xl">

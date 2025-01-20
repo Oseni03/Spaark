@@ -9,11 +9,6 @@ import { defaultEducation, educationSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addEducation,
-	removeEducation,
-	toggleEducationVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addEducationInDatabase,
 	removeEducationFromDatabase,
 	updateEducationInDatabase,
@@ -65,16 +60,9 @@ export const Education = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addEducation({ portfolioId, education: newItem }));
 		dispatch(addEducationInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeEducation({
-				educationId: item.id,
-				portfolioId,
-			})
-		);
 		dispatch(
 			removeEducationFromDatabase({
 				educationId: item.id,
@@ -83,9 +71,6 @@ export const Education = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(
-			toggleEducationVisibility({ portfolioId, educationId: item.id })
-		);
 		dispatch(
 			updateEducationInDatabase({
 				...item,

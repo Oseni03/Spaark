@@ -8,8 +8,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { addPortfolio, updatePortfolio } from "@/redux/features/portfolioSlice";
 import {
 	addPortfolioInDatabase,
 	updatePortfolioInDatabase,
@@ -28,7 +26,6 @@ export const PortfolioDialog = ({
 
 	const onSubmit = (data) => {
 		if (currentPortfolio) {
-			dispatch(updatePortfolio({ id: currentPortfolio.id, ...data }));
 			dispatch(
 				updatePortfolioInDatabase({
 					id: currentPortfolio.id,
@@ -36,7 +33,6 @@ export const PortfolioDialog = ({
 				})
 			);
 		} else {
-			dispatch(addPortfolio({ id: createId(), ...data }));
 			dispatch(addPortfolioInDatabase(data));
 		}
 		setIsOpen(false);

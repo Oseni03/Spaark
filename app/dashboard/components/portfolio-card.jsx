@@ -34,8 +34,7 @@ import { useState, useEffect } from "react";
 import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { defaultPortfolio, portfolioSchema } from "@/schema/portfolio";
-import { addPortfolio, updatePortfolio } from "@/redux/features/portfolioSlice";
+import { defaultPortfolio, portfolioSchema } from "@/schema/sections";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
@@ -71,7 +70,6 @@ export const PortfolioCard = ({ portfolio }) => {
 			id: createId(), // Remove ID to create a new one
 			name: `${portfolio.name} (Copy)`,
 		};
-		dispatch(addPortfolio(duplicatedPortfolio));
 		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
 	};
 
@@ -82,23 +80,11 @@ export const PortfolioCard = ({ portfolio }) => {
 				data: { isPublic: !portfolio.isPublic },
 			})
 		);
-		dispatch(
-			updatePortfolio({
-				id: portfolio.id,
-				data: { isPublic: !portfolio.isPublic },
-			})
-		);
 	};
 
 	const onPrimaryChange = () => {
 		dispatch(
 			updatePortfolioInDatabase({
-				id: portfolio.id,
-				data: { isPrimary: !portfolio.isPrimary },
-			})
-		);
-		dispatch(
-			updatePortfolio({
 				id: portfolio.id,
 				data: { isPrimary: !portfolio.isPrimary },
 			})

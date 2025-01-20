@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPortfolios } from "@/services/portfolio";
-import { getBasics } from "@/services/basics";
-import { getCertifications } from "@/services/certification";
-import { getEducations } from "@/services/education";
-import { getExperiences } from "@/services/experience";
-import { getProfiles } from "@/services/profile";
-import { getSkills } from "@/services/skill";
 import { auth } from "@clerk/nextjs/server";
-import { getProjects } from "@/services/project";
-import { getHackathons } from "@/services/hackathon";
 import { logger } from "@/lib/utils";
+import { getUser } from "@/services/user";
 
 // Helper function to get CORS headers
 const getCorsHeaders = (origin) => {
@@ -69,7 +62,15 @@ export async function GET(req) {
 			userId = authenticatedUserId;
 		}
 
-		const portfolios = await getPortfolios(userId);
+		const [user, portfolios] = await Promise.all([
+			getUser(userId),
+			getPortfolios(userId),
+		]);
+
+		if (!user) {
+			return createErrorResponse(404, "User not found", origin);
+		}
+
 		if (!portfolios.success) {
 			return createErrorResponse(
 				400,
@@ -78,49 +79,7 @@ export async function GET(req) {
 			);
 		}
 
-		const portfolioDataPromises = portfolios.data.map(async (portfolio) => {
-			const portfolioId = portfolio.id;
-
-			const results = await Promise.allSettled([
-				getBasics(portfolioId),
-				getProfiles(portfolioId),
-				getExperiences(portfolioId),
-				getEducations(portfolioId),
-				getCertifications(portfolioId),
-				getSkills(portfolioId),
-				getProjects(portfolioId),
-				getHackathons(portfolioId),
-			]);
-
-			const [
-				basics,
-				profiles,
-				experiences,
-				educations,
-				certifications,
-				skills,
-				projects,
-				hackathons,
-			] = results.map((result) =>
-				result.status === "fulfilled" ? result.value : null
-			);
-
-			return {
-				portfolio,
-				basics,
-				profiles,
-				experiences,
-				educations,
-				certifications,
-				skills,
-				projects,
-				hackathons,
-			};
-		});
-
-		const portfolioData = await Promise.all(portfolioDataPromises);
-
-		return new NextResponse(JSON.stringify({ portfolios: portfolioData }), {
+		return new NextResponse(JSON.stringify({ portfolios, user }), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",

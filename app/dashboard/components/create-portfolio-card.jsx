@@ -4,7 +4,7 @@ import { Plus } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { BaseCard } from "./base-card";
 import { useState, useEffect } from "react";
-import { defaultPortfolio, portfolioSchema } from "@/schema/portfolio";
+import { defaultPortfolio, portfolioSchema } from "@/schema/sections";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { logger } from "@/lib/utils";

@@ -11,10 +11,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
 import {
-	addCertification,
-	updateCertification,
-} from "@/redux/features/portfolioSlice";
-import {
 	addCertificationInDatabase,
 	updateCertificationnInDatabase,
 } from "@/redux/thunks/certifications";
@@ -31,16 +27,12 @@ export const CertificationDialog = ({
 	const onSubmit = (data) => {
 		if (currentCertification) {
 			dispatch(
-				updateCertification({ id: currentCertification.id, ...data })
-			);
-			dispatch(
 				updateCertificationnInDatabase({
 					id: currentCertification.id,
 					...data,
 				})
 			);
 		} else {
-			dispatch(addCertification(data));
 			dispatch(addCertificationInDatabase(data));
 		}
 		setIsOpen(false);

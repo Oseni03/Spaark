@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { portfolioSchema } from "@/schema/portfolio";
+import { portfolioSchema } from "@/schema/sections";
 import {
 	createPortfolio,
 	deletePortfolio,

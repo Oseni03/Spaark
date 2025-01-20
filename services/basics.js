@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
-import { defaultBasics } from "@/schema/sections/basics";
+import { defaultBasics, basicsSchema } from "@/schema/sections/basics";
 
 export async function createBasics(portfolioId, data = defaultBasics) {
 	return withErrorHandling(async () => {
@@ -49,6 +49,19 @@ export async function updatePortfolioBasics({ portfolioId, ...data }) {
 			data: {
 				...data,
 				updatedAt: new Date(), // Ensure updated timestamp is set
+			},
+			select: {
+				createdAt: false,
+				updatedAt: false,
+				name: true,
+				headline: true,
+				email: true,
+				phone: true,
+				location: true,
+				url: true,
+				picture: true,
+				summary: true,
+				about: true,
 			},
 		});
 

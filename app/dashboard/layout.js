@@ -18,16 +18,7 @@ import { cn } from "@/lib/utils";
 import { useSelectedLayoutSegments } from "next/navigation";
 import { siteConfig } from "@/config/site";
 import { useDispatch, useSelector } from "react-redux";
-import {
-	setCertifications,
-	setEducations,
-	setProfiles,
-	setSkills,
-	updateBasics,
-	setProjects,
-	setExperience,
-	setHackathons,
-} from "@/redux/features/portfolioSlice";
+import { setPortfolios } from "@/redux/features/portfolioSlice";
 import { logger } from "@/lib/utils";
 import { setUser } from "@/redux/features/userSlice";
 
@@ -75,69 +66,10 @@ export default function DashboardLayout({ children }) {
 					throw new Error("Failed to fetch user data");
 				}
 
-				const data = await response.json();
+				const { portfolios, user } = await response.json();
 
-				// Dispatch actions to update Redux state
-				data.portfolios.forEach((portfolioData) => {
-					const {
-						portfolio,
-						basics,
-						profiles,
-						experiences,
-						educations,
-						certifications,
-						skills,
-						projects,
-						hackathons,
-					} = portfolioData;
-
-					if (basics)
-						dispatch(
-							updateBasics({ portfolioId: portfolio.id, basics })
-						);
-					if (profiles)
-						dispatch(
-							setProfiles({ portfolioId: portfolio.id, profiles })
-						);
-					if (experiences)
-						dispatch(
-							setExperience({
-								portfolioId: portfolio.id,
-								experiences,
-							})
-						);
-					if (educations)
-						dispatch(
-							setEducations({
-								portfolioId: portfolio.id,
-								educations,
-							})
-						);
-					if (certifications)
-						dispatch(
-							setCertifications({
-								portfolioId: portfolio.id,
-								certifications,
-							})
-						);
-					if (skills)
-						dispatch(
-							setSkills({ portfolioId: portfolio.id, skills })
-						);
-					if (projects)
-						dispatch(
-							setProjects({ portfolioId: portfolio.id, projects })
-						);
-					if (hackathons)
-						dispatch(
-							setHackathons({
-								portfolioId: portfolio.id,
-								hackathons,
-							})
-						);
-				});
-
-				if (data.user) dispatch(setUser(data.user));
+				if (portfolios) dispatch(setPortfolios(portfolios.data));
+				if (user) dispatch(setUser(user));
 			} catch (error) {
 				logger.error("Error fetching or updating user data:", error);
 			}

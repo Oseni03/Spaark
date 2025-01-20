@@ -9,11 +9,6 @@ import { defaultSkill, skillSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addSkill,
-	removeSkill,
-	toggleSkillVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addSkillInDatabase,
 	removeSkillFromDatabase,
 	updateSkillnInDatabase,
@@ -66,16 +61,9 @@ export const Skill = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addSkill({ portfolioId, skill: newItem }));
 		dispatch(addSkillInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeSkill({
-				skillId: item.id,
-				portfolioId,
-			})
-		);
 		dispatch(
 			removeSkillFromDatabase({
 				skillId: item.id,
@@ -84,7 +72,6 @@ export const Skill = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleSkillVisibility({ portfolioId, skillId: item.id }));
 		dispatch(
 			updateSkillnInDatabase({
 				...item,

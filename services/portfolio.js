@@ -21,6 +21,14 @@ export async function getPortfolios(userId) {
 				isPublic: true,
 				isPrimary: true,
 				organizationId: true,
+				basics: true,
+				profiles: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
 			},
 		});
 		if (portfolios.length > 0) {
@@ -45,6 +53,22 @@ export async function createPortfolio(data) {
 				basics: {
 					create: defaultBasics,
 				},
+			},
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isPublic: true,
+				isPrimary: true,
+				organizationId: true,
+				basics: true,
+				profiles: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
 			},
 		});
 		return portfolio;

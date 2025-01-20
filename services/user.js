@@ -1,10 +1,8 @@
 "use server";
 
-import { basicsSchema } from "@/schema/sections/basics";
 import { prisma } from "@/lib/db"; // Assume this is your database connection
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { defaultBasics } from "@/schema/sections/basics";
 import { withErrorHandling } from "./shared";
 
 export async function getUserByUsername(username) {

@@ -18,6 +18,7 @@ export async function getCertifications(portfolioId) {
 				date: true,
 				summary: true,
 				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 		if (certifications.length > 0) {
@@ -42,6 +43,16 @@ export async function createCertification(data) {
 			data: {
 				...data,
 				portfolio: { connect: { id: data.portfolioId } },
+			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				issuer: true,
+				date: true,
+				summary: true,
+				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 
@@ -74,6 +85,16 @@ export async function editCertification(certificationId, data) {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				issuer: true,
+				date: true,
+				summary: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths
@@ -101,6 +122,16 @@ export async function deleteCertification(certificationId, portfolioId) {
 
 		const deletedCertification = await prisma.certification.delete({
 			where: { id: certificationId },
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				issuer: true,
+				date: true,
+				summary: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths

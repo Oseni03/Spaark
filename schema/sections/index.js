@@ -3,14 +3,13 @@ import { z } from "zod";
 import { certificationSchema } from "./certification";
 import { educationSchema } from "./education";
 import { experienceSchema } from "./experience";
-import { languageSchema } from "./language";
 import { profileSchema } from "./profile";
 import { projectSchema } from "./project";
 import { skillSchema } from "./skill";
 import { hackathonSchema } from "./hackathon";
+import { createId } from "@paralleldrive/cuid2";
 import { basicsSchema, defaultBasics } from "./basics";
 import { idSchema } from "../shared/id";
-import { createId } from "@paralleldrive/cuid2";
 
 // Schema
 export const sectionSchema = z.object({
@@ -19,8 +18,12 @@ export const sectionSchema = z.object({
 });
 
 // Schema
-export const sectionsSchema = z.object({
+export const portfolioSchema = z.object({
 	id: idSchema,
+	name: z.string().min(1).max(255),
+	slug: z.string().min(1).max(255),
+	isPublic: z.boolean().default(true),
+	isPrimary: z.boolean().default(false),
 	basics: sectionSchema.extend(basicsSchema),
 	certifications: sectionSchema.extend({
 		id: z.literal("certification"),
@@ -60,8 +63,12 @@ export const defaultSection = {
 	error: null,
 };
 
-export const defaultSections = {
+export const defaultPortfolio = {
 	id: createId(),
+	name: "",
+	slug: "",
+	isPublic: false,
+	isPrimary: false,
 	basics: {
 		...defaultSection,
 		...defaultBasics,

@@ -20,6 +20,7 @@ export async function getExperiences(portfolioId) {
 				summary: true,
 				picture: true,
 				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 		if (experiences.length > 0) {
@@ -42,6 +43,18 @@ export async function createExperience(data) {
 			data: {
 				...data,
 				portfolio: { connect: { id: data.portfolioId } },
+			},
+			select: {
+				id: true,
+				visible: true,
+				company: true,
+				position: true,
+				location: true,
+				date: true,
+				summary: true,
+				picture: true,
+				url: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 
@@ -75,6 +88,18 @@ export async function editExperience(experienceId, data) {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: {
+				id: true,
+				visible: true,
+				company: true,
+				position: true,
+				location: true,
+				date: true,
+				summary: true,
+				picture: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths
@@ -105,6 +130,18 @@ export async function deleteExperience(experienceId, portfolioId) {
 
 		const deletedExp = await prisma.experience.delete({
 			where: { id: experienceId },
+			select: {
+				id: true,
+				visible: true,
+				company: true,
+				position: true,
+				location: true,
+				date: true,
+				summary: true,
+				picture: true,
+				url: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths

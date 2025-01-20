@@ -23,6 +23,7 @@ export async function getProjects(portfolioId) {
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
 				},
+				// Exclude createdAt and updatedAt
 			},
 		});
 		if (projects.length > 0) {
@@ -56,6 +57,21 @@ export async function createProject(data) {
 						icon: link.icon || null,
 					})),
 				},
+			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				date: true,
+				technologies: true,
+				url: true,
+				image: true,
+				video: true,
+				links: {
+					select: { id: true, label: true, url: true, icon: true },
+				},
+				// Exclude createdAt and updatedAt
 			},
 		});
 
@@ -114,6 +130,21 @@ export async function editProject(projectId, data) {
 					},
 				},
 			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				date: true,
+				technologies: true,
+				url: true,
+				image: true,
+				video: true,
+				links: {
+					select: { id: true, label: true, url: true, icon: true },
+				},
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths
@@ -147,6 +178,21 @@ export async function deleteProject(projectId, portfolioId) {
 		// Delete the project and its associated links
 		const deletedProject = await prisma.project.delete({
 			where: { id: projectId },
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				date: true,
+				technologies: true,
+				url: true,
+				image: true,
+				video: true,
+				links: {
+					select: { id: true, label: true, url: true, icon: true },
+				},
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths to reflect changes

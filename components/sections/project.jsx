@@ -9,11 +9,6 @@ import { defaultProject, projectSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addProject,
-	removeProject,
-	toggleProjectVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addProjectInDatabase,
 	removeProjectFromDatabase,
 	updateProjectInDatabase,
@@ -65,16 +60,9 @@ export const Project = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProject({ portfolioId, project: newItem }));
 		dispatch(addProjectInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeProject({
-				projectId: item.id,
-				portfolioId,
-			})
-		);
 		dispatch(
 			removeProjectFromDatabase({
 				projectId: item.id,
@@ -83,7 +71,6 @@ export const Project = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProjectVisibility({ portfolioId, projectId: item.id }));
 		dispatch(
 			updateProjectInDatabase({
 				...item,

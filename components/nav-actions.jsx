@@ -105,7 +105,7 @@ const data = [
 
 export function NavActions() {
 	const [isOpen, setIsOpen] = React.useState(false);
-	const user = useSelector((state) => state.user);
+	const user = useSelector((state) => state.user.data);
 
 	function copyToClipboard() {
 		if (!user.username) {

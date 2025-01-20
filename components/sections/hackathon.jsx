@@ -66,16 +66,9 @@ export const Hackathon = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addHackathon({ portfolioId, hackathon: newItem }));
 		dispatch(addHackathonInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeHackathon({
-				hackathonId: item.id,
-				portfolioId,
-			})
-		);
 		dispatch(
 			removeHackathonFromDatabase({
 				hackathonId: item.id,
@@ -84,9 +77,6 @@ export const Hackathon = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(
-			toggleHackathonVisibility({ portfolioId, hackathonId: item.id })
-		);
 		dispatch(
 			updateHackathonInDatabase({
 				...item,

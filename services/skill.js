@@ -15,6 +15,7 @@ export async function getSkills(portfolioId) {
 				visible: true,
 				name: true,
 				description: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 		if (skills.length > 0) {
@@ -37,6 +38,13 @@ export async function createSkill(data) {
 			data: {
 				...data,
 				portfolio: { connect: { id: data.portfolioId } },
+			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				// Exclude createdAt and updatedAt
 			},
 		});
 
@@ -70,6 +78,13 @@ export async function editSkill(skillId, data) {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths
@@ -100,6 +115,13 @@ export async function deleteSkill(skillId, portfolioId) {
 
 		const deletedSkill = await prisma.skill.delete({
 			where: { id: skillId },
+			select: {
+				id: true,
+				visible: true,
+				name: true,
+				description: true,
+				// Exclude createdAt and updatedAt
+			},
 		});
 
 		// Revalidate relevant paths

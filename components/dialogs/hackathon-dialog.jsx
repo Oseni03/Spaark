@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
-import { addHackathon, updateHackathon } from "@/redux/features/portfolioSlice";
 import {
 	addHackathonInDatabase,
 	updateHackathonInDatabase,
@@ -29,12 +28,10 @@ export const HackathonDialog = ({
 
 	const onSubmit = (data) => {
 		if (currentHackathon) {
-			dispatch(updateHackathon({ id: currentHackathon.id, ...data }));
 			dispatch(
-				updateHackathonnInDatabase({ id: currentHackathon.id, ...data })
+				updateHackathonInDatabase({ id: currentHackathon.id, ...data })
 			);
 		} else {
-			dispatch(addHackathon(data));
 			dispatch(addHackathonInDatabase(data));
 		}
 		setIsOpen(false);

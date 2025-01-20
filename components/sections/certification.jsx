@@ -9,11 +9,6 @@ import { certificationSchema, defaultCertification } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addCertification,
-	removeCertification,
-	toggleCertificationVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addCertificationInDatabase,
 	removeCertificationFromDatabase,
 	updateCertificationnInDatabase,
@@ -66,16 +61,9 @@ export const Certification = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addCertification({ portfolioId, certification: newItem }));
 		dispatch(addCertificationInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeCertification({
-				certificationId: item.id,
-				portfolioId,
-			})
-		);
 		dispatch(
 			removeCertificationFromDatabase({
 				certificationId: item.id,
@@ -84,12 +72,6 @@ export const Certification = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(
-			toggleCertificationVisibility({
-				portfolioId,
-				certificationId: item.id,
-			})
-		);
 		dispatch(
 			updateCertificationnInDatabase({
 				...item,

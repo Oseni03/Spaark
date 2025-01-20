@@ -5,12 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import {
-	addProfile,
-	updateProfile,
-	removeProfile,
-	toggleProfileVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addProfileInDatabase,
 	removeProfileFromDatabase,
 	updateProfileInDatabase,
@@ -68,17 +62,14 @@ export const Profile = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addProfile({ portfolioId, profile: newItem }));
 		dispatch(addProfileInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProfile({ portfolioId, profileId: item.id }));
 		dispatch(
 			removeProfileFromDatabase({ portfolioId, profileId: item.id })
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(toggleProfileVisibility({ portfolioId, profileId: item.id }));
 		dispatch(
 			updateProfileInDatabase({
 				...item,

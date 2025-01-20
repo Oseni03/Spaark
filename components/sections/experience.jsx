@@ -10,11 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { ExperienceDialog } from "@/components/dialogs/experience-dialog";
 import {
-	addExperience,
-	removeExperience,
-	toggleExperienceVisibility,
-} from "@/redux/features/portfolioSlice";
-import {
 	addExperienceInDatabase,
 	removeExperienceFromDatabase,
 	updateExperienceInDatabase,
@@ -66,17 +61,10 @@ export const Experience = () => {
 	const onDuplicate = (item) => {
 		const newItem = { ...item, id: createId() };
 
-		dispatch(addExperience({ portfolioId, experience: newItem }));
 		dispatch(addExperienceInDatabase({ ...newItem, portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeExperience({
-				experienceId: item.id,
-				portfolioId,
-			})
-		);
-		dispatch(
+		patch(
 			removeExperienceFromDatabase({
 				experienceId: item.id,
 				portfolioId,
@@ -84,9 +72,6 @@ export const Experience = () => {
 		);
 	};
 	const onToggleVisibility = (item) => {
-		dispatch(
-			toggleExperienceVisibility({ portfolioId, experienceId: item.id })
-		);
 		dispatch(
 			updateExperienceInDatabase({
 				...item,
