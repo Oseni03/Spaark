@@ -28,7 +28,6 @@ export const addSkillInDatabase = createAsyncThunk(
 export const updateSkillnInDatabase = createAsyncThunk(
 	"skill/updateSkillInDatabase",
 	async (data, { rejectWithValue }) => {
-		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = skillSchema.safeParse(data);
@@ -53,7 +52,7 @@ export const removeSkillFromDatabase = createAsyncThunk(
 	async ({ skillId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteSkill(skillId, portfolioId);
-			return { id: skillId };
+			return { skillId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

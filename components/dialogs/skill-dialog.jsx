@@ -14,16 +14,31 @@ import {
 	addSkillInDatabase,
 	updateSkillnInDatabase,
 } from "@/redux/thunks/skill";
+import { logger } from "@/lib/utils";
 
-export const SkillDialog = ({ form, currentSkill, isOpen, setIsOpen }) => {
+export const SkillDialog = ({
+	portfolioId,
+	form,
+	currentSkill,
+	isOpen,
+	setIsOpen,
+}) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
 		if (currentSkill) {
-			dispatch(updateSkillnInDatabase({ id: currentSkill.id, ...data }));
+			logger.info("Update skill: ", currentSkill);
+			logger.info("Update data: ", data);
+			dispatch(
+				updateSkillnInDatabase({
+					...data,
+					id: currentSkill.id,
+					portfolioId,
+				})
+			);
 		} else {
-			dispatch(addSkillInDatabase(data));
+			dispatch(addSkillInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

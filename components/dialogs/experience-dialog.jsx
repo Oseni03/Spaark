@@ -17,6 +17,7 @@ import {
 import { PictureSection } from "../sections/picture/section";
 
 export const ExperienceDialog = ({
+	portfolioId,
 	form,
 	currentExperience,
 	isOpen,
@@ -31,10 +32,11 @@ export const ExperienceDialog = ({
 				updateExperienceInDatabase({
 					id: currentExperience.id,
 					...data,
+					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addExperienceInDatabase(data));
+			dispatch(addExperienceInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

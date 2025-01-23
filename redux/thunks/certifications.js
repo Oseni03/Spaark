@@ -32,7 +32,6 @@ export const addCertificationInDatabase = createAsyncThunk(
 export const updateCertificationnInDatabase = createAsyncThunk(
 	"certification/updateCertificationInDatabase",
 	async (data, { rejectWithValue }) => {
-		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = certificationSchema.safeParse(data);
@@ -57,7 +56,7 @@ export const removeCertificationFromDatabase = createAsyncThunk(
 	async ({ certificationId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteCertification(certificationId, portfolioId);
-			return { id: certificationId };
+			return { certificationId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

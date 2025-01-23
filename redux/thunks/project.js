@@ -52,7 +52,7 @@ export const removeProjectFromDatabase = createAsyncThunk(
 	async ({ projectId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteProject(projectId, portfolioId);
-			return { id: projectId };
+			return { projectId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

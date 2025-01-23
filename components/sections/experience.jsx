@@ -59,9 +59,9 @@ export const Experience = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addExperienceInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addExperienceInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		patch(
@@ -104,6 +104,7 @@ export const Experience = () => {
 				)}
 			>
 				<ExperienceDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentExperience={currentExperience}
 					isOpen={isOpen}

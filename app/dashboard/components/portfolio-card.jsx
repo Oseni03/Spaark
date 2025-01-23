@@ -77,7 +77,7 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { isPublic: !portfolio.isPublic },
+				data: { ...portfolio, isPublic: !portfolio.isPublic },
 			})
 		);
 	};
@@ -86,7 +86,7 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { isPrimary: !portfolio.isPrimary },
+				data: { ...portfolio, isPrimary: !portfolio.isPrimary },
 			})
 		);
 	};

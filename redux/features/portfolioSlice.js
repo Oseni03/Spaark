@@ -8,6 +8,7 @@ import {
 	skillSchema,
 	portfolioSchema,
 	defaultPortfolio,
+	profileSchema,
 } from "@/schema/sections";
 import {
 	addPortfolioInDatabase,
@@ -99,6 +100,7 @@ const portfolioSlice = createSlice({
 				state.loading = false;
 				const { data, error } = action.payload;
 				if (error) {
+					state.error = error;
 					logger.error(error || "Failed to add portfolio");
 					return;
 				}
@@ -106,7 +108,8 @@ const portfolioSlice = createSlice({
 					const transformedPortfolio = transformPortfolio(data);
 					state.items.push(transformedPortfolio);
 				} catch (error) {
-					logger.error("Invalid portfolio data:", result.error);
+					state.error = "Invalid portfolio data";
+					logger.error("Invalid portfolio data:", error);
 				}
 			})
 			.addCase(addPortfolioInDatabase.rejected, (state, action) => {
@@ -120,12 +123,28 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
 				state.loading = false;
-				const { data } = action.payload;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.id
 				);
 				if (portfolio) {
-					Object.assign(portfolio, data);
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update portfolio");
+						return;
+					}
+					const result = portfolioSchema.safeParse(
+						...defaultPortfolio,
+						...data
+					);
+					if (result.success) {
+						Object.assign(portfolio, result.data);
+						portfolio.loading = false;
+					} else {
+						portfolio.error = "Invalid portfolio data";
+						logger.error("Invalid portfolio data:", result.error);
+					}
 				}
 			})
 			.addCase(updatePortfolioInDatabase.rejected, (state, action) => {
@@ -139,7 +158,7 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(removePortfolioFromDatabase.fulfilled, (state, action) => {
 				state.loading = false;
-				const { id } = action.payload;
+				const { id } = action.meta.arg;
 				state.items = state.items.filter(
 					(portfolio) => portfolio.id !== id
 				);
@@ -162,11 +181,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateBasicsInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update basics");
+						return;
+					}
 					const result = basicsSchema.safeParse(data);
 					if (result.success) {
 						portfolio.basics = result.data;
@@ -182,14 +207,15 @@ const portfolioSlice = createSlice({
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.status = "failed";
-					portfolio.error = action.payload.error;
+					portfolio.loading = false;
+					portfolio.error =
+						action.error?.message || "Failed to update basics";
 				}
 			});
 
 		// Certification Extra Reducers
 		builder
-			.addCase(addCertificationInDatabase.pending, (state) => {
+			.addCase(addCertificationInDatabase.pending, (state, action) => {
 				const { portfolioId } = action.meta.arg;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -200,21 +226,25 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addCertificationInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
-				if (portfolio) {
-					const result = certificationSchema.safeParse(data);
-					if (result.success) {
-						portfolio.certifications.items.push(result.data);
-						portfolio.loading = false;
-					} else {
-						logger.error(
-							"Invalid certification data:",
-							result.error
-						);
-					}
+				if (!portfolio) return;
+
+				portfolio.loading = false;
+				if (error) {
+					portfolio.error = error;
+					logger.error(error || "Failed to add certification");
+					return;
+				}
+
+				const result = certificationSchema.safeParse(data);
+				if (result.success) {
+					portfolio.certifications.items.push(result.data);
+				} else {
+					portfolio.error = "Invalid certification data";
+					logger.error("Invalid certification data:", result.error);
 				}
 			})
 			.addCase(addCertificationInDatabase.rejected, (state, action) => {
@@ -225,42 +255,51 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload.error || "Failed to add certification";
-				}
-			})
-			.addCase(updateCertificationnInDatabase.pending, (state) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
+						action.error?.message || "Failed to add certification";
 				}
 			})
 			.addCase(
-				updateCertificationnInDatabase.fulfilled,
+				updateCertificationnInDatabase.pending,
 				(state, action) => {
-					const { portfolioId, data } = action.meta.arg;
+					const { portfolioId } = action.meta.arg;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
 					);
 					if (portfolio) {
-						const index = portfolio.certifications.items.findIndex(
-							(item) => item.id === data.id
-						);
-						if (index !== -1) {
-							const result = certificationSchema.safeParse(data);
-							if (result.success) {
-								portfolio.certifications.items[index] =
-									result.data;
-								portfolio.loading = false;
-							} else {
-								logger.error(
-									"Invalid certification data:",
-									result.error
-								);
-							}
+						portfolio.loading = true;
+						portfolio.error = null;
+					}
+				}
+			)
+			.addCase(
+				updateCertificationnInDatabase.fulfilled,
+				(state, action) => {
+					const { data, error } = action.payload;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === data.portfolioId
+					);
+					if (!portfolio) return;
+
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update certification");
+						return;
+					}
+
+					const index = portfolio.certifications.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						const result = certificationSchema.safeParse(data);
+						if (result.success) {
+							portfolio.certifications.items[index] = result.data;
+						} else {
+							portfolio.error = "Invalid certification data";
+							logger.error(
+								"Invalid certification data:",
+								result.error
+							);
 						}
 					}
 				}
@@ -275,35 +314,38 @@ const portfolioSlice = createSlice({
 					if (portfolio) {
 						portfolio.loading = false;
 						portfolio.error =
-							action.payload.error ||
+							action?.payload.error ||
 							"Failed to update certification";
 					}
 				}
 			)
-			.addCase(removeCertificationFromDatabase.pending, (state) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
 			.addCase(
-				removeCertificationFromDatabase.fulfilled,
+				removeCertificationFromDatabase.pending,
 				(state, action) => {
-					const { portfolioId, certificationId } = action.meta.arg;
+					const { portfolioId } = action.meta.arg;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
 					);
 					if (portfolio) {
-						portfolio.certifications.items =
-							portfolio.certifications.items.filter(
-								(item) => item.id !== certificationId
-							);
-						portfolio.loading = false;
+						portfolio.loading = true;
+						portfolio.error = null;
 					}
+				}
+			)
+			.addCase(
+				removeCertificationFromDatabase.fulfilled,
+				(state, action) => {
+					const { portfolioId, certificationId } = action.payload;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === portfolioId
+					);
+					if (!portfolio) return;
+
+					portfolio.loading = false;
+					portfolio.certifications.items =
+						portfolio.certifications.items.filter(
+							(item) => item.id !== certificationId
+						);
 				}
 			)
 			.addCase(
@@ -335,11 +377,16 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addEducationInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add education");
+						return;
+					}
 					const result = educationSchema.safeParse(data);
 					if (result.success) {
 						portfolio.educations.items.push(result.data);
@@ -357,7 +404,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload.error || "Failed to add education";
+						action?.payload.error || "Failed to add education";
 				}
 			})
 			.addCase(updateEducationInDatabase.pending, (state, action) => {
@@ -371,11 +418,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateEducationInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update education");
+						return;
+					}
+
 					const index = portfolio.educations.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -401,7 +454,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload.error || "Failed to update education";
+						action?.payload.error || "Failed to update education";
 				}
 			})
 			.addCase(removeEducationFromDatabase.pending, (state, action) => {
@@ -415,7 +468,7 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeEducationFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId, educationId } = action.meta.arg;
+				const { portfolioId, educationId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
@@ -435,7 +488,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload.error || "Failed to remove education";
+						action.payload?.error || "Failed to remove education";
 				}
 			});
 
@@ -452,17 +505,24 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addExperienceInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
+				logger.info("Adding experience to database:", data);
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add Experience");
+						return;
+					}
 					const result = experienceSchema.safeParse(data);
 					if (result.success) {
 						portfolio.experiences.items.push(result.data);
-						portfolio.loading = false;
 					} else {
 						logger.error("Invalid experience data:", result.error);
+						portfolio.error = "Invalid experience data";
 					}
 				}
 			})
@@ -474,7 +534,7 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					portfolio.loading = false;
 					portfolio.error =
-						action.payload.error || "Failed to add experience";
+						action.payload?.error || "Failed to add experience";
 				}
 			})
 			.addCase(updateExperienceInDatabase.pending, (state, action) => {
@@ -488,11 +548,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateExperienceInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update experience");
+						return;
+					}
 					const index = portfolio.experiences.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -534,7 +600,7 @@ const portfolioSlice = createSlice({
 			.addCase(
 				removeExperienceFromDatabase.fulfilled,
 				(state, action) => {
-					const { portfolioId, experienceId } = action.meta.arg;
+					const { portfolioId, experienceId } = action.payload;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
 					);
@@ -572,16 +638,23 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addHackathonInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add hackathon");
+						return;
+					}
 					const result = hackathonSchema.safeParse(data);
 					if (result.success) {
 						portfolio.hackathons.items.push(result.data);
 						portfolio.loading = false;
 					} else {
+						portfolio.error = "Invalid hackathon data";
 						logger.error("Invalid hackathon data:", result.error);
 					}
 				}
@@ -608,11 +681,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateHackathonInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update hackathon");
+						return;
+					}
 					const index = portfolio.hackathons.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -622,6 +701,7 @@ const portfolioSlice = createSlice({
 							portfolio.hackathons.items[index] = result.data;
 							portfolio.loading = false;
 						} else {
+							portfolio.error = "Invalid hackathon data";
 							logger.error(
 								"Invalid hackathon data:",
 								result.error
@@ -652,7 +732,7 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeHackathonFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId, hackathonId } = action.meta.arg;
+				const { portfolioId, hackathonId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
@@ -689,16 +769,28 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addProfileInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add profile");
+						return;
+					}
+					logger.info("Adding profile to portfolio:", data);
 					const result = profileSchema.safeParse(data);
 					if (result.success) {
+						logger.info(
+							"Profile parsed successfully:",
+							result.data
+						);
 						portfolio.profiles.items.push(result.data);
 						portfolio.loading = false;
 					} else {
+						portfolio.error = "Invalid profile data";
 						logger.error("Invalid profile data:", result.error);
 					}
 				}
@@ -725,11 +817,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateProfileInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update profile");
+						return;
+					}
 					const index = portfolio.profiles.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -766,7 +864,8 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeProfileFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId, profileId } = action.meta.arg;
+				logger.info("Removing profile from database:", action.payload);
+				const { portfolioId, profileId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
@@ -802,16 +901,22 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addProjectInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add project");
+						return;
+					}
 					const result = projectSchema.safeParse(data);
 					if (result.success) {
 						portfolio.projects.items.push(result.data);
-						portfolio.loading = false;
 					} else {
+						portfolio.error = "Invaid project data";
 						logger.error("Invalid project data:", result.error);
 					}
 				}
@@ -838,11 +943,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateProjectInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update project");
+						return;
+					}
 					const index = portfolio.projects.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -852,6 +963,7 @@ const portfolioSlice = createSlice({
 							portfolio.projects.items[index] = result.data;
 							portfolio.loading = false;
 						} else {
+							portfolio.error = "Invalid project data";
 							logger.error("Invalid project data:", result.error);
 						}
 					}
@@ -879,15 +991,15 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeProjectFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId, projectId } = action.meta.arg;
+				const { portfolioId, projectId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
 					portfolio.projects.items = portfolio.projects.items.filter(
 						(item) => item.id !== projectId
 					);
-					portfolio.loading = false;
 				}
 			})
 			.addCase(removeProjectFromDatabase.rejected, (state, action) => {
@@ -915,16 +1027,23 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addSkillInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add skill");
+						return;
+					}
 					const result = skillSchema.safeParse(data);
 					if (result.success) {
 						portfolio.skills.items.push(result.data);
 						portfolio.loading = false;
 					} else {
+						portfolio.error = "Invalid skill data";
 						logger.error("Invalid skill data:", result.error);
 					}
 				}
@@ -951,11 +1070,17 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(updateSkillnInDatabase.fulfilled, (state, action) => {
-				const { portfolioId, data } = action.meta.arg;
+				const { data, error } = action.payload;
 				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
+					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
+					portfolio.loading = false;
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update skill");
+						return;
+					}
 					const index = portfolio.skills.items.findIndex(
 						(item) => item.id === data.id
 					);
@@ -965,6 +1090,7 @@ const portfolioSlice = createSlice({
 							portfolio.skills.items[index] = result.data;
 							portfolio.loading = false;
 						} else {
+							portfolio.error = "Invalid skill data";
 							logger.error("Invalid skill data:", result.error);
 						}
 					}
@@ -992,7 +1118,7 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeSkillFromDatabase.fulfilled, (state, action) => {
-				const { portfolioId, skillId } = action.meta.arg;
+				const { portfolioId, skillId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);

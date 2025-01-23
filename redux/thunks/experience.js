@@ -32,7 +32,6 @@ export const addExperienceInDatabase = createAsyncThunk(
 export const updateExperienceInDatabase = createAsyncThunk(
 	"experience/updateExperienceInDatabase",
 	async (data, { rejectWithValue }) => {
-		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = experienceSchema.safeParse(data);
@@ -57,7 +56,7 @@ export const removeExperienceFromDatabase = createAsyncThunk(
 	async ({ experienceId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteExperience(experienceId, portfolioId);
-			return { id: experienceId };
+			return { experienceId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

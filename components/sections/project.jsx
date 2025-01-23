@@ -58,9 +58,9 @@ export const Project = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addProjectInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addProjectInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -101,6 +101,7 @@ export const Project = () => {
 				)}
 			>
 				<ProjectDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentProject={currentProject}
 					isOpen={isOpen}

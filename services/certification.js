@@ -18,6 +18,7 @@ export async function getCertifications(portfolioId) {
 				date: true,
 				summary: true,
 				url: true,
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -30,19 +31,17 @@ export async function getCertifications(portfolioId) {
 	});
 }
 
-export async function createCertification(data) {
+export async function createCertification({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create certification with additional metadata
 		const certification = await prisma.certification.create({
 			data: {
 				...data,
-				portfolio: { connect: { id: data.portfolioId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
 			select: {
 				id: true,
@@ -52,35 +51,27 @@ export async function createCertification(data) {
 				date: true,
 				summary: true,
 				url: true,
-				// Exclude createdAt and updatedAt
+				portfolioId: true,
 			},
 		});
 
-		// Revalidate multiple potential paths
 		revalidatePath("/builder");
 		return certification;
 	});
 }
 
-export async function editCertification(certificationId, data) {
+export async function editCertification(
+	certificationId,
+	{ portfolioId, ...data }
+) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		if (!certificationId) {
+		if (!certificationId || !portfolioId) {
 			throw new Error("Certification Id required");
 		}
 
-		const existingCertification = await prisma.certification.findUnique({
-			where: { id: certificationId, portfolioId: data.portfolioId },
-		});
-
-		if (!existingCertification) {
-			throw new Error(
-				"Certification not found or you do not have permission to update"
-			);
-		}
-
 		const updatedCertification = await prisma.certification.update({
-			where: { id: certificationId },
+			where: { id: certificationId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -93,50 +84,28 @@ export async function editCertification(certificationId, data) {
 				date: true,
 				summary: true,
 				url: true,
-				// Exclude createdAt and updatedAt
+				portfolioId: true,
 			},
 		});
 
-		// Revalidate relevant paths
 		revalidatePath("/builder");
-
 		return updatedCertification;
 	});
 }
 
 export async function deleteCertification(certificationId, portfolioId) {
 	return withErrorHandling(async () => {
-		if (!certificationId) {
+		if (!certificationId || !portfolioId) {
 			throw new Error("Certification Id required");
 		}
 
-		const existingCertification = await prisma.certification.findUnique({
+		await prisma.certification.delete({
 			where: { id: certificationId, portfolioId },
-		});
-
-		if (!existingCertification) {
-			throw new Error(
-				"Certification not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedCertification = await prisma.certification.delete({
-			where: { id: certificationId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				issuer: true,
-				date: true,
-				summary: true,
-				url: true,
-				// Exclude createdAt and updatedAt
-			},
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedCertification;
+		return { certificationId, portfolioId };
 	});
 }

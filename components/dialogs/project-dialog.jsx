@@ -22,7 +22,13 @@ import { CustomLink } from "@/components/custom-link";
 import Uploader from "../sections/picture/uploader";
 import { logger } from "@/lib/utils";
 
-export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
+export const ProjectDialog = ({
+	portfolioId,
+	form,
+	currentProject,
+	isOpen,
+	setIsOpen,
+}) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control, setValue } = form;
 
@@ -30,10 +36,14 @@ export const ProjectDialog = ({ form, currentProject, isOpen, setIsOpen }) => {
 		logger.info("Project data:", data);
 		if (currentProject) {
 			dispatch(
-				updateProjectInDatabase({ id: currentProject.id, ...data })
+				updateProjectInDatabase({
+					id: currentProject.id,
+					...data,
+					portfolioId,
+				})
 			);
 		} else {
-			dispatch(addProjectInDatabase(data));
+			dispatch(addProjectInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

@@ -14,6 +14,7 @@ import {
 } from "@/redux/thunks/portfolio";
 import { createId } from "@paralleldrive/cuid2";
 import { Checkbox } from "../ui/checkbox";
+import { defaultPortfolio } from "@/schema/sections";
 
 export const PortfolioDialog = ({
 	form,
@@ -29,11 +30,11 @@ export const PortfolioDialog = ({
 			dispatch(
 				updatePortfolioInDatabase({
 					id: currentPortfolio.id,
-					...data,
+					data: { ...currentPortfolio, ...data },
 				})
 			);
 		} else {
-			dispatch(addPortfolioInDatabase(data));
+			dispatch(addPortfolioInDatabase({ ...defaultPortfolio, data }));
 		}
 		setIsOpen(false);
 		reset();

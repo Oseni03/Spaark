@@ -21,17 +21,27 @@ import {
 } from "@/components/ui/select";
 import { socialNetworks } from "@/utils/constants";
 
-export const ProfilesDialog = ({ form, currentProfile, isOpen, setIsOpen }) => {
+export const ProfilesDialog = ({
+	portfolioId,
+	form,
+	currentProfile,
+	isOpen,
+	setIsOpen,
+}) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
 		if (currentProfile) {
 			dispatch(
-				updateProfileInDatabase({ id: currentProfile.id, ...data })
+				updateProfileInDatabase({
+					id: currentProfile.id,
+					...data,
+					portfolioId,
+				})
 			);
 		} else {
-			dispatch(addProfileInDatabase(data));
+			dispatch(addProfileInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

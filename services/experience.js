@@ -20,6 +20,7 @@ export async function getExperiences(portfolioId) {
 				summary: true,
 				picture: true,
 				url: true,
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -30,7 +31,7 @@ export async function getExperiences(portfolioId) {
 	});
 }
 
-export async function createExperience(data) {
+export async function createExperience({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -38,11 +39,13 @@ export async function createExperience(data) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create experience with additional metadata
+		// Create experience with correct data structure
 		const exp = await prisma.experience.create({
 			data: {
 				...data,
-				portfolio: { connect: { id: data.portfolioId } },
+				portfolio: {
+					connect: { id: portfolioId },
+				},
 			},
 			select: {
 				id: true,
@@ -54,6 +57,7 @@ export async function createExperience(data) {
 				summary: true,
 				picture: true,
 				url: true,
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -64,26 +68,19 @@ export async function createExperience(data) {
 	});
 }
 
-export async function editExperience(experienceId, data) {
+export async function editExperience(experienceId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingExperience = await prisma.experience.findUnique({
-			where: { id: experienceId, portfolioId: data.portfolioId },
-		});
-
-		if (!existingExperience) {
-			throw new Error(
-				"Experience not found or you do not have permission to update"
-			);
-		}
-
 		const updatedExp = await prisma.experience.update({
-			where: { id: experienceId },
+			where: {
+				id: experienceId,
+				portfolioId: portfolioId,
+			},
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -98,6 +95,7 @@ export async function editExperience(experienceId, data) {
 				summary: true,
 				picture: true,
 				url: true,
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -112,41 +110,19 @@ export async function editExperience(experienceId, data) {
 export async function deleteExperience(experienceId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete an experience"
 			);
 		}
 
-		const existingExperience = await prisma.experience.findUnique({
+		await prisma.experience.delete({
 			where: { id: experienceId, portfolioId },
-		});
-
-		if (!existingExperience) {
-			throw new Error(
-				"Experience not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedExp = await prisma.experience.delete({
-			where: { id: experienceId },
-			select: {
-				id: true,
-				visible: true,
-				company: true,
-				position: true,
-				location: true,
-				date: true,
-				summary: true,
-				picture: true,
-				url: true,
-				// Exclude createdAt and updatedAt
-			},
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedExp;
+		return { experienceId, portfolioId };
 	});
 }

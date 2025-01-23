@@ -58,9 +58,9 @@ export const Education = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addEducationInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addEducationInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -103,6 +103,7 @@ export const Education = () => {
 				)}
 			>
 				<EducationDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentEducation={currentEducation}
 					isOpen={isOpen}

@@ -17,6 +17,7 @@ import {
 import { PictureSection } from "../sections/picture/section";
 
 export const EducationDialog = ({
+	portfolioId,
 	form,
 	currentEducation,
 	isOpen,
@@ -28,10 +29,14 @@ export const EducationDialog = ({
 	const onSubmit = (data) => {
 		if (currentEducation) {
 			dispatch(
-				updateEducationInDatabase({ id: currentEducation.id, ...data })
+				updateEducationInDatabase({
+					id: currentEducation.id,
+					...data,
+					portfolioId,
+				})
 			);
 		} else {
-			dispatch(addEducationInDatabase(data));
+			dispatch(addEducationInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

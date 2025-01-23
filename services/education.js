@@ -19,6 +19,7 @@ export async function getEducations(portfolioId) {
 				summary: true,
 				logo: true,
 				url: true,
+				portfolioId: true,
 			},
 		});
 		if (educations.length > 0) {
@@ -28,11 +29,11 @@ export async function getEducations(portfolioId) {
 	});
 }
 
-export async function createEducation(data) {
+export async function createEducation({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -40,7 +41,18 @@ export async function createEducation(data) {
 		const edu = await prisma.education.create({
 			data: {
 				...data,
-				portfolio: { connect: { id: data.portfolioId } },
+				portfolio: { connect: { id: portfolioId } },
+			},
+			select: {
+				id: true,
+				visible: true,
+				institution: true,
+				studyType: true,
+				date: true,
+				summary: true,
+				logo: true,
+				url: true,
+				portfolioId: true,
 			},
 		});
 
@@ -50,29 +62,30 @@ export async function createEducation(data) {
 	});
 }
 
-export async function editEducation(educationId, data) {
+export async function editEducation(educationId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingEdu = await prisma.education.findUnique({
-			where: { id: educationId, portfolioId: data.portfolioId },
-		});
-
-		if (!existingEdu) {
-			throw new Error(
-				"Education not found or you do not have permission to update"
-			);
-		}
-
 		const updatedEdu = await prisma.education.update({
-			where: { id: educationId },
+			where: { id: educationId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
+			},
+			select: {
+				id: true,
+				visible: true,
+				institution: true,
+				studyType: true,
+				date: true,
+				summary: true,
+				logo: true,
+				url: true,
+				portfolioId: true,
 			},
 		});
 
@@ -86,29 +99,19 @@ export async function editEducation(educationId, data) {
 export async function deleteEducation(educationId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a education"
 			);
 		}
 
-		const existingEdu = await prisma.education.findUnique({
+		await prisma.education.delete({
 			where: { id: educationId, portfolioId },
-		});
-
-		if (!existingEdu) {
-			throw new Error(
-				"Education not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedEdu = await prisma.education.delete({
-			where: { id: educationId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedEdu;
+		return { educationId, portfolioId };
 	});
 }

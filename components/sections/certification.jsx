@@ -59,9 +59,9 @@ export const Certification = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addCertificationInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addCertificationInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -104,6 +104,7 @@ export const Certification = () => {
 				)}
 			>
 				<CertificationDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentCertification={currentCertification}
 					isOpen={isOpen}

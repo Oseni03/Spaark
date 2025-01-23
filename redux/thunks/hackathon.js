@@ -5,7 +5,6 @@ import {
 	editHackathon,
 	deleteHackathon,
 } from "@/services/hackathon";
-import { logger } from "@/lib/utils";
 import { z } from "zod";
 
 export const addHackathonInDatabase = createAsyncThunk(
@@ -33,7 +32,6 @@ export const addHackathonInDatabase = createAsyncThunk(
 export const updateHackathonInDatabase = createAsyncThunk(
 	"hackathon/updateHackathonInDatabase",
 	async (data, { rejectWithValue }) => {
-		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = hackathonSchema.safeParse(data);
@@ -58,7 +56,7 @@ export const removeHackathonFromDatabase = createAsyncThunk(
 	async ({ hackathonId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteHackathon(hackathonId, portfolioId);
-			return { id: hackathonId };
+			return { hackathonId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

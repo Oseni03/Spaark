@@ -28,7 +28,6 @@ export async function getProfiles(portfolioId) {
 
 export async function createProfile({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
 		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
@@ -46,36 +45,24 @@ export async function createProfile({ portfolioId, ...data }) {
 				network: true,
 				username: true,
 				url: true,
-				// Exclude createdAt and updatedAt
+				portfolioId: true,
 			},
 		});
 
-		// Revalidate multiple potential paths
 		revalidatePath("/builder");
 		return profile;
 	});
 }
 
-export async function editProfile(profileId, data) {
+export async function editProfile(profileId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, portfolioId: data.portfolioId },
-		});
-
-		if (!existingProfile) {
-			throw new Error(
-				"Profile not found or you do not have permission to update"
-			);
-		}
-
 		const updatedProfile = await prisma.profile.update({
-			where: { id: profileId },
+			where: { id: profileId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -86,13 +73,11 @@ export async function editProfile(profileId, data) {
 				network: true,
 				username: true,
 				url: true,
-				// Exclude createdAt and updatedAt
+				portfolioId: true,
 			},
 		});
 
-		// Revalidate relevant paths
 		revalidatePath("/builder");
-
 		return updatedProfile;
 	});
 }
@@ -100,37 +85,19 @@ export async function editProfile(profileId, data) {
 export async function deleteProfile(profileId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a profile"
 			);
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
+		await prisma.profile.delete({
 			where: { id: profileId, portfolioId },
-		});
-
-		if (!existingProfile) {
-			throw new Error(
-				"Profile not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedProfile = await prisma.profile.delete({
-			where: { id: profileId },
-			select: {
-				id: true,
-				visible: true,
-				network: true,
-				username: true,
-				url: true,
-				// Exclude createdAt and updatedAt
-			},
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedProfile;
+		return { portfolioId, profileId };
 	});
 }

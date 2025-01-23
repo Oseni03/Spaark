@@ -9,30 +9,24 @@ import {
 	PURGE,
 	REGISTER,
 } from "redux-persist";
-import { CookieStorage } from "redux-persist-cookie-storage";
-import Cookies from "js-cookie";
-import portfolioReducer from "./features/portfolioSlice";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import userReducer from "./features/userSlice";
+import portfolioReducer from "./features/portfolioSlice";
 
-// Custom cookie storage configuration
+// Persist Config
 const persistConfig = {
 	key: "root",
-	version: 1,
-	storage: new CookieStorage(Cookies, {
-		domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, // Notice the dot prefix
-		path: "/",
-		secure: process.env.NODE_ENV === "production",
-		sameSite: "Lax", // Helps prevent CSRF attacks
-	}),
+	storage,
+	whitelist: ["user", "portfolios"], // Add the reducers you want to persist
 };
 
-// Combine reducers
+// Root Reducer
 const rootReducer = combineReducers({
 	user: userReducer,
 	portfolios: portfolioReducer,
 });
 
-// Create persisted reducer
+// Create Persisted Reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Store Configuration
@@ -48,10 +42,10 @@ export const store = configureStore({
 					PERSIST,
 					PURGE,
 					REGISTER,
-					// Add any custom actions you want to ignore
 				],
 			},
 		}),
 });
 
+// Persistor
 export const persistor = persistStore(store);

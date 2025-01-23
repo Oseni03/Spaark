@@ -32,7 +32,6 @@ export const addEducationInDatabase = createAsyncThunk(
 export const updateEducationInDatabase = createAsyncThunk(
 	"education/updateEducationInDatabase",
 	async (data, { rejectWithValue }) => {
-		logger.info("Update data: ", data);
 		try {
 			// Validate input before sending to service
 			const validatedData = educationSchema.safeParse(data);
@@ -57,7 +56,7 @@ export const removeEducationFromDatabase = createAsyncThunk(
 	async ({ educationId, portfolioId }, { rejectWithValue }) => {
 		try {
 			await deleteEducation(educationId, portfolioId);
-			return { id: educationId };
+			return { educationId, portfolioId };
 		} catch (error) {
 			return rejectWithValue(
 				error instanceof Error

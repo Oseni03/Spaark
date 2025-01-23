@@ -20,6 +20,7 @@ import { CustomLink } from "@/components/custom-link";
 export const HackathonDialog = ({
 	form,
 	currentHackathon,
+	portfolioId,
 	isOpen,
 	setIsOpen,
 }) => {
@@ -29,10 +30,14 @@ export const HackathonDialog = ({
 	const onSubmit = (data) => {
 		if (currentHackathon) {
 			dispatch(
-				updateHackathonInDatabase({ id: currentHackathon.id, ...data })
+				updateHackathonInDatabase({
+					...data,
+					id: currentHackathon.id,
+					portfolioId,
+				})
 			);
 		} else {
-			dispatch(addHackathonInDatabase(data));
+			dispatch(addHackathonInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

@@ -60,9 +60,9 @@ export const Profile = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addProfileInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addProfileInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -100,6 +100,7 @@ export const Profile = () => {
 				)}
 			>
 				<ProfilesDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentProfile={currentProfile}
 					isOpen={isOpen}

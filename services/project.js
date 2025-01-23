@@ -23,6 +23,7 @@ export async function getProjects(portfolioId) {
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
 				},
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -33,7 +34,7 @@ export async function getProjects(portfolioId) {
 	});
 }
 
-export async function createProject(data) {
+export async function createProject({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -48,7 +49,7 @@ export async function createProject(data) {
 		const project = await prisma.project.create({
 			data: {
 				...projectData,
-				portfolio: { connect: { id: data.portfolioId } },
+				portfolio: { connect: { id: portfolioId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id,
@@ -71,6 +72,7 @@ export async function createProject(data) {
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
 				},
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -81,23 +83,12 @@ export async function createProject(data) {
 	});
 }
 
-export async function editProject(projectId, data) {
+export async function editProject(projectId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
-		}
-
-		// Check if the project exists and belongs to the authenticated user
-		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, portfolioId: data.portfolioId },
-		});
-
-		if (!existingProject) {
-			throw new Error(
-				"Project not found or you do not have permission to update"
-			);
 		}
 
 		// Destructure links from the data and validate them
@@ -105,7 +96,7 @@ export async function editProject(projectId, data) {
 
 		// Perform the update, including nested operations for links
 		const updatedProject = await prisma.project.update({
-			where: { id: projectId },
+			where: { id: projectId, portfolioId },
 			data: {
 				...projectData,
 				updatedAt: new Date(),
@@ -143,6 +134,7 @@ export async function editProject(projectId, data) {
 				links: {
 					select: { id: true, label: true, url: true, icon: true },
 				},
+				portfolioId: true,
 				// Exclude createdAt and updatedAt
 			},
 		});
@@ -158,46 +150,20 @@ export async function deleteProject(projectId, portfolioId) {
 	return withErrorHandling(async () => {
 		// Authenticate user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: You must be logged in to delete a project."
 			);
 		}
 
-		// Check if the project exists and belongs to the authenticated user
-		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, portfolioId },
-		});
-
-		if (!existingProject) {
-			throw new Error(
-				"Project not found or you do not have permission to delete it."
-			);
-		}
-
 		// Delete the project and its associated links
-		const deletedProject = await prisma.project.delete({
-			where: { id: projectId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				technologies: true,
-				url: true,
-				image: true,
-				video: true,
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-				// Exclude createdAt and updatedAt
-			},
+		await prisma.project.delete({
+			where: { id: projectId, portfolioId },
 		});
 
 		// Revalidate relevant paths to reflect changes
 		revalidatePath("/builder");
 
-		return deletedProject;
+		return { projectId, portfolioId };
 	});
 }

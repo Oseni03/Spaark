@@ -1,3 +1,5 @@
+"use client";
+
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -14,8 +16,10 @@ import {
 	addCertificationInDatabase,
 	updateCertificationnInDatabase,
 } from "@/redux/thunks/certifications";
+import { logger } from "@/lib/utils";
 
 export const CertificationDialog = ({
+	portfolioId,
 	form,
 	currentCertification,
 	isOpen,
@@ -25,15 +29,17 @@ export const CertificationDialog = ({
 	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
+		logger.info("Certification submitted data", data);
 		if (currentCertification) {
 			dispatch(
 				updateCertificationnInDatabase({
-					id: currentCertification.id,
 					...data,
+					id: currentCertification.id,
+					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addCertificationInDatabase(data));
+			dispatch(addCertificationInDatabase({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

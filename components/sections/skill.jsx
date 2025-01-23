@@ -59,9 +59,7 @@ export const Skill = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addSkillInDatabase({ ...newItem, portfolioId }));
+		dispatch(addSkillInDatabase({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -102,6 +100,7 @@ export const Skill = () => {
 				)}
 			>
 				<SkillDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentSkill={currentSkill}
 					isOpen={isOpen}

@@ -64,9 +64,9 @@ export const Hackathon = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		const newItem = { ...item, id: createId() };
-
-		dispatch(addHackathonInDatabase({ ...newItem, portfolioId }));
+		dispatch(
+			addHackathonInDatabase({ ...item, id: createId(), portfolioId })
+		);
 	};
 	const onDelete = (item) => {
 		dispatch(
@@ -109,6 +109,7 @@ export const Hackathon = () => {
 				)}
 			>
 				<HackathonDialog
+					portfolioId={portfolioId}
 					form={form}
 					currentHackathon={currentHackathon}
 					isOpen={isOpen}
