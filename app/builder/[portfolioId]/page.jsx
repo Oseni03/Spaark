@@ -1,6 +1,6 @@
 "use client";
 
-import DefaultTemplate from "@/components/templates/main/default-template";
+import DefaultTemplate from "@/components/templates/default";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowRight } from "lucide-react";
@@ -21,6 +21,7 @@ export default function Page() {
 	const certification = portfolio?.certifications?.items || [];
 	const project = portfolio?.projects?.items || [];
 	const hackathon = portfolio?.hackathons?.items || [];
+	const profiles = portfolio?.profiles?.items || [];
 	const user = useSelector((state) => state.user.data);
 
 	return (
@@ -48,6 +49,7 @@ export default function Page() {
 				skills={skill.filter((item) => item.visible)}
 				hackathons={hackathon.filter((item) => item.visible)}
 				certifications={certification.filter((item) => item.visible)}
+				profiles={profiles}
 			/>
 		</div>
 	);

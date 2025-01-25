@@ -2,8 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
-import DefaultTemplate from "@/components/templates/main/default-template";
-import PortfolioNavbar from "@/components/templates/shared/navbar";
+import DefaultTemplate from "@/components/templates/default";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
 import { useUser } from "@/context/UserContext";
 import { logger } from "@/lib/utils";
@@ -87,8 +86,8 @@ export default function Page({ params }) {
 				skills={filterVisible(portfolioData.skill)}
 				hackathons={filterVisible(portfolioData.hackathon)}
 				certifications={filterVisible(portfolioData.certification)}
+				profiles={portfolioData.profile}
 			/>
-			<PortfolioNavbar profile={portfolioData.profile} />
 		</div>
 	);
 }

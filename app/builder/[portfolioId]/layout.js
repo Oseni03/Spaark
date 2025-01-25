@@ -15,7 +15,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
-import PortfolioNavbar from "@/components/templates/shared/navbar";
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -177,9 +176,6 @@ function BuilderLayout({ children }) {
 				</header>
 				<main className={cn("flex-1 p-4", PORTFOLIO_TAILWIND_CLASS)}>
 					{children}
-					<PortfolioNavbar
-						profile={portfolio?.profiles?.items || []}
-					/>
 				</main>
 			</div>
 
