@@ -6,6 +6,7 @@ import { isTrialing } from "@/lib/utils";
 import { UserProvider } from "@/context/UserContext";
 import { logger } from "@/lib/utils";
 import NotFound from "../not-found";
+import { cn } from "@/lib/utils";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -81,7 +82,9 @@ export default async function UserLayout({ params, children }) {
 					)}
 					<meta name="url" content={metaTags.url} />
 				</head>
-				<body className={PORTFOLIO_TAILWIND_CLASS}>
+				<body
+					className={cn(PORTFOLIO_TAILWIND_CLASS, "scrollbar-hide")}
+				>
 					<UserProvider user={user} metaTags={metaTags}>
 						{children}
 					</UserProvider>

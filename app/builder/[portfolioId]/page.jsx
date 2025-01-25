@@ -10,7 +10,6 @@ import { useParams } from "next/navigation";
 
 export default function Page() {
 	const { portfolioId } = useParams();
-
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);

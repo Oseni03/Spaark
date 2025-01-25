@@ -25,8 +25,7 @@ export default function Page({ params }) {
 	const { subdomain } = resolvedParams;
 	const [isLoading, setIsLoading] = useState(true);
 	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
-	logger.info("User: ", user);
-	logger.info("params: ", params);
+	const [template, setTemplate] = useState("default");
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -47,6 +46,7 @@ export default function Page({ params }) {
 				if (!data.basics?.data)
 					throw new Error("No portfolio data found");
 
+				setTemplate(data.template || "default");
 				setPortfolioData({
 					basics: data.basics?.data || {},
 					experience: data.experiences?.data || [],

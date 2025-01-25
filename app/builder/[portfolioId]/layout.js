@@ -3,7 +3,8 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import { AppSidebar } from "@/components/app-sidebar";
+import { LeftAppSidebar } from "@/components/left-app-sidebar";
+import { RightSidebar } from "@/components/right-app-sidebar";
 import { NavActions } from "@/components/nav-actions";
 import {
 	Breadcrumb,
@@ -12,32 +13,147 @@ import {
 	BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
 import PortfolioNavbar from "@/components/templates/shared/navbar";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { PanelLeft, PanelRight } from "lucide-react";
 
 function BuilderLayout({ children }) {
 	const { portfolioId } = useParams();
+	const isDesktop = useMediaQuery("(min-width: 1024px)");
+	const [leftOpen, setLeftOpen] = React.useState(true);
+	const [rightOpen, setRightOpen] = React.useState(false);
+	const [leftCollapsed, setLeftCollapsed] = React.useState(false);
+	const [rightCollapsed, setRightCollapsed] = React.useState(true);
+
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 
+	if (isDesktop) {
+		return (
+			<div className="relative h-screen overflow-hidden">
+				<ResizablePanelGroup direction="horizontal">
+					<ResizablePanel
+						defaultSize={25}
+						minSize={0}
+						maxSize={40}
+						collapsible={true}
+						collapsedSize={0}
+						onCollapse={() => setLeftCollapsed(true)}
+						onExpand={() => setLeftCollapsed(false)}
+						className={cn(
+							"bg-background transition-all duration-300",
+							leftCollapsed && "min-w-0 max-w-0 p-0 opacity-0"
+						)}
+					>
+						<LeftAppSidebar />
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel>
+						<div className="flex h-full flex-col">
+							<header className="flex h-14 shrink-0 items-center gap-2">
+								<div className="flex flex-1 items-center gap-2 px-3">
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={() =>
+											setLeftCollapsed(!leftCollapsed)
+										}
+										className={cn(
+											"transition-transform",
+											leftCollapsed && "rotate-180"
+										)}
+									>
+										<PanelLeft className="h-5 w-5" />
+									</Button>
+									<Breadcrumb>
+										<BreadcrumbList>
+											<BreadcrumbItem>
+												<BreadcrumbPage className="line-clamp-1">
+													Portfolio Builder
+												</BreadcrumbPage>
+											</BreadcrumbItem>
+										</BreadcrumbList>
+									</Breadcrumb>
+								</div>
+								<div className="ml-auto flex items-center gap-2 px-3">
+									<NavActions />
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={() =>
+											setRightCollapsed(!rightCollapsed)
+										}
+										className={cn(
+											"transition-transform",
+											rightCollapsed && "-rotate-180"
+										)}
+									>
+										<PanelRight className="h-5 w-5" />
+									</Button>
+								</div>
+							</header>
+							<main
+								className={cn(
+									"flex-1 overflow-auto scrollbar-hide p-4",
+									PORTFOLIO_TAILWIND_CLASS
+								)}
+							>
+								{children}
+							</main>
+						</div>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel
+						defaultSize={25}
+						minSize={0}
+						maxSize={40}
+						collapsible={true}
+						collapsedSize={0}
+						onCollapse={() => setRightCollapsed(true)}
+						onExpand={() => setRightCollapsed(false)}
+						className={cn(
+							"bg-background transition-all duration-300",
+							rightCollapsed && "min-w-0 max-w-0 p-0 opacity-0"
+						)}
+					>
+						<RightSidebar />
+					</ResizablePanel>
+				</ResizablePanelGroup>
+			</div>
+		);
+	}
+
 	return (
-		<SidebarProvider>
-			<AppSidebar />
-			<SidebarInset>
+		<div className="relative">
+			<Sheet open={leftOpen} onOpenChange={setLeftOpen}>
+				<SheetContent
+					side="left"
+					className="w-[80vw] sm:w-[50vw] md:w-[40vw] p-0"
+				>
+					<LeftAppSidebar />
+				</SheetContent>
+			</Sheet>
+
+			<div className="flex min-h-screen flex-col">
 				<header className="flex h-14 shrink-0 items-center gap-2">
 					<div className="flex flex-1 items-center gap-2 px-3">
-						<SidebarTrigger />
-						<Separator
-							orientation="vertical"
-							className="mr-2 h-4"
-						/>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setLeftOpen(true)}
+						>
+							<PanelLeft className="h-5 w-5" />
+						</Button>
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem>
@@ -48,23 +164,34 @@ function BuilderLayout({ children }) {
 							</BreadcrumbList>
 						</Breadcrumb>
 					</div>
-					<div className="ml-auto px-3">
+					<div className="ml-auto flex items-center gap-2 px-3">
 						<NavActions />
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => setRightOpen(true)}
+						>
+							<PanelRight className="h-5 w-5" />
+						</Button>
 					</div>
 				</header>
-				<div
-					className={cn(
-						"flex flex-1 flex-col gap-4 px-4 py-10",
-						PORTFOLIO_TAILWIND_CLASS
-					)}
-				>
+				<main className={cn("flex-1 p-4", PORTFOLIO_TAILWIND_CLASS)}>
 					{children}
 					<PortfolioNavbar
 						profile={portfolio?.profiles?.items || []}
 					/>
-				</div>
-			</SidebarInset>
-		</SidebarProvider>
+				</main>
+			</div>
+
+			<Sheet open={rightOpen} onOpenChange={setRightOpen}>
+				<SheetContent
+					side="right"
+					className="w-[80vw] sm:w-[50vw] md:w-[40vw] p-0"
+				>
+					<RightSidebar />
+				</SheetContent>
+			</Sheet>
+		</div>
 	);
 }
 
