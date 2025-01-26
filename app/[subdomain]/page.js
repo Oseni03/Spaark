@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { notFound } from "next/navigation";
-import DefaultTemplate from "@/components/templates/default";
+import { TemplateWrapper } from "@/components/templates/template-wrapper";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
 import { useUser } from "@/context/UserContext";
 import { logger } from "@/lib/utils";
@@ -74,19 +74,12 @@ export default function Page({ params }) {
 		);
 	logger.info("Portfolio data: ", portfolioData);
 
-	const filterVisible = (items) => items.filter((item) => item?.visible);
-
 	return (
-		<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
-			<DefaultTemplate
-				{...portfolioData}
-				projects={filterVisible(portfolioData.project)}
-				experiences={filterVisible(portfolioData.experience)}
-				educations={filterVisible(portfolioData.education)}
-				skills={filterVisible(portfolioData.skill)}
-				hackathons={filterVisible(portfolioData.hackathon)}
-				certifications={filterVisible(portfolioData.certification)}
-				profiles={portfolioData.profile}
+		<div className="mx-auto w-full max-w-5xl h-[calc(100vh-48px)]">
+			<TemplateWrapper
+				template={template}
+				data={portfolioData}
+				className="h-full"
 			/>
 		</div>
 	);

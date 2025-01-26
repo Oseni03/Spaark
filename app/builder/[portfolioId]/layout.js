@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { useSelector } from "react-redux";
-import { useParams } from "next/navigation";
 import { LeftAppSidebar } from "@/components/left-app-sidebar";
 import { RightSidebar } from "@/components/right-app-sidebar";
 import { NavActions } from "@/components/nav-actions";
@@ -26,16 +24,11 @@ import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
 
 function BuilderLayout({ children }) {
-	const { portfolioId } = useParams();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
 	const [rightOpen, setRightOpen] = React.useState(false);
 	const [leftCollapsed, setLeftCollapsed] = React.useState(false);
 	const [rightCollapsed, setRightCollapsed] = React.useState(true);
-
-	const portfolio = useSelector((state) =>
-		state.portfolios.items.find((item) => item.id === portfolioId)
-	);
 
 	if (isDesktop) {
 		return (

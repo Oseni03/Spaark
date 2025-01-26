@@ -164,11 +164,11 @@ const ProjectCard = ({
 					/>
 				)}
 				{image && (
-					<img
+					<Image
 						src={image}
 						alt={title}
-						width="500"
-						height="300"
+						width={500}
+						height={300}
 						className="h-40 w-full overflow-hidden object-cover object-top"
 					/>
 				)}
@@ -210,9 +210,11 @@ const ProjectCard = ({
 									key={idx}
 									className="flex gap-2 px-2 py-1 text-[10px]"
 								>
-									<img
+									<Image
 										src={`https://cdn.simpleicons.org/${link.icon}`}
 										alt={link.label}
+										width={20}
+										height={20}
 										className="w-5 h-5"
 									/>
 									{link.label}
@@ -281,9 +283,11 @@ const HackathonCard = ({
 						{links.map((link, idx) => (
 							<Link href={link?.url} key={idx} target="_blank">
 								<Badge className="flex gap-2 px-2 py-1 text-[10px]">
-									<img
+									<Image
 										src={`https://cdn.simpleicons.org/${link.icon}`}
 										alt={link.label}
+										width={20}
+										height={20}
 										className="w-5 h-5"
 									/>
 									{link.label}
