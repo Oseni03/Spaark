@@ -106,7 +106,7 @@ model Portfolio {
   isPrimary   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  template    String    @default("minimal")
+  template    String    @default("default")
 
   // Ownership
   userId         String

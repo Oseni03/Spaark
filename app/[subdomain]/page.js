@@ -1,85 +1,62 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { notFound } from "next/navigation";
+import { useState, useEffect } from "react";
 import { TemplateWrapper } from "@/components/templates/template-wrapper";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
-import { useUser } from "@/context/UserContext";
+import { usePortfolio } from "@/context/PortfolioContext";
 import { logger } from "@/lib/utils";
 
-const INITIAL_STATE = {
-	basics: {},
-	experience: [],
-	education: [],
-	skill: [],
-	certification: [],
-	project: [],
-	hackathon: [],
-	profile: [],
-};
-
-export default function Page({ params }) {
-	const { user } = useUser();
-	const resolvedParams = use(params);
-	const { subdomain } = resolvedParams;
+export default function Page() {
+	const { portfolio } = usePortfolio();
 	const [isLoading, setIsLoading] = useState(true);
-	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
-	const [template, setTemplate] = useState("default");
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				if (!user) {
-					notFound();
-				}
+		if (portfolio) {
+			setIsLoading(false);
+		}
+	}, [portfolio]);
 
-				logger.info(`Fetching portfolio data for ${subdomain}`);
-				const response = await fetch(
-					`/api/get-portfolio?userId=${user.id}`
-				);
-
-				if (!response.ok) throw new Error("Failed to fetch portfolio");
-
-				const data = await response.json();
-
-				if (!data.basics?.data)
-					throw new Error("No portfolio data found");
-
-				setTemplate(data.template || "default");
-				setPortfolioData({
-					basics: data.basics?.data || {},
-					experience: data.experiences?.data || [],
-					education: data.educations?.data || [],
-					skill: data.skills?.data || [],
-					certification: data.certifications?.data || [],
-					project: data.projects?.data || [],
-					hackathon: data.hackathons?.data || [],
-					profile: data.profiles?.data || [],
-				});
-				setIsLoading(false);
-			} catch (error) {
-				logger.error(error);
-				notFound();
-			}
-		};
-
-		fetchData();
-	}, [subdomain, user]);
-
-	if (isLoading)
+	if (isLoading) {
 		return (
 			<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
 				<PortfolioSkeleton />
 			</div>
 		);
+	}
+
+	const portfolioData = {
+		basics: portfolio.basics || {},
+		experiences: (portfolio.experiences?.items || []).filter(
+			(item) => item.visible
+		),
+		educations: (portfolio.educations?.items || []).filter(
+			(item) => item.visible
+		),
+		skills: (portfolio.skills?.items || []).filter((item) => item.visible),
+		certifications: (portfolio.certifications?.items || []).filter(
+			(item) => item.visible
+		),
+		projects: (portfolio.projects?.items || []).filter(
+			(item) => item.visible
+		),
+		hackathons: (portfolio.hackathons?.items || []).filter(
+			(item) => item.visible
+		),
+		profiles: portfolio.profiles?.items || [],
+	};
+
 	logger.info("Portfolio data: ", portfolioData);
 
+	// Determine the template to use
+	const templateToUse =
+		portfolio.template || portfolio.basics?.template || "default";
+
 	return (
-		<div className="mx-auto w-full max-w-5xl h-[calc(100vh-48px)]">
+		<div className="mx-auto w-full max-w-2xl h-[calc(100vh-48px)]">
 			<TemplateWrapper
-				template={template}
+				template={templateToUse}
 				data={portfolioData}
-				className="h-full"
+				className="h-full py-12 sm:py-24"
 			/>
 		</div>
 	);

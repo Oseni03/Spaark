@@ -21,6 +21,7 @@ export async function getPortfolios(userId) {
 				isPublic: true,
 				isPrimary: true,
 				organizationId: true,
+				template: true,
 				basics: true,
 				profiles: true,
 				experiences: true,
@@ -61,6 +62,7 @@ export async function createPortfolio(data) {
 				isPublic: true,
 				isPrimary: true,
 				organizationId: true,
+				template: true,
 				basics: true,
 				profiles: true,
 				experiences: true,
@@ -109,5 +111,31 @@ export async function deletePortfolio(id) {
 		});
 
 		return deletedPortfolio;
+	});
+}
+
+export async function getPortfolioBySlug(slug) {
+	return withErrorHandling(async () => {
+		const portfolio = await prisma.portfolio.findUnique({
+			where: { slug },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isPublic: true,
+				isPrimary: true,
+				organizationId: true,
+				template: true,
+				basics: true,
+				profiles: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
+		});
+		return portfolio;
 	});
 }
