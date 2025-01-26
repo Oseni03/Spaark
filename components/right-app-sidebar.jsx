@@ -2,8 +2,6 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 import { Copyright } from "./copyright";
 import { TemplateSection } from "./sections/template";
-import { SectionIcon } from "./section-icon";
-import ModeToggle from "./mode-toggle";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 export const RightSidebar = () => {
@@ -14,22 +12,6 @@ export const RightSidebar = () => {
 				<TemplateSection />
 				<Separator />
 				<Copyright className="text-center" />
-			</div>
-
-			<div className="hidden basis-12 flex-col items-center justify-between bg-secondary-accent/30 py-4 sm:flex">
-				<div />
-				<div className="flex flex-col items-center justify-center gap-y-2">
-					<SectionIcon
-						id="template"
-						name="Template"
-						onClick={() => {
-							document
-								.querySelector("#template")
-								?.scrollIntoView({ behavior: "smooth" });
-						}}
-					/>
-				</div>
-				<ModeToggle />
 			</div>
 		</>
 	);

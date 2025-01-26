@@ -15,20 +15,6 @@ import {
 import { Button } from "./ui/button";
 import { Tooltip } from "./ui/tooltip";
 
-// type MetadataKey =
-//   | "template"
-//   | "layout"
-//   | "typography"
-//   | "theme"
-//   | "css"
-//   | "page"
-//   | "locale"
-//   | "sharing"
-//   | "statistics"
-//   | "export"
-//   | "notes"
-//   | "information";
-
 const getSectionIcon = (id, props = {}) => {
 	switch (id) {
 		// Left Sidebar

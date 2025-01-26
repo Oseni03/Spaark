@@ -24,6 +24,7 @@ export const portfolioSchema = z.object({
 	slug: z.string().min(1).max(255),
 	isPublic: z.boolean().default(true),
 	isPrimary: z.boolean().default(false),
+	template: z.string().default("default"),
 	basics: sectionSchema.extend(basicsSchema),
 	certifications: sectionSchema.extend({
 		id: z.literal("certification"),
@@ -69,6 +70,7 @@ export const defaultPortfolio = {
 	slug: "",
 	isPublic: false,
 	isPrimary: false,
+	template: "default",
 	basics: {
 		...defaultSection,
 		...defaultBasics,
