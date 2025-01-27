@@ -20,6 +20,7 @@ export async function getPortfolios(userId) {
 				slug: true,
 				isPublic: true,
 				isPrimary: true,
+				customDomain: true,
 				organizationId: true,
 				template: true,
 				basics: true,
@@ -61,6 +62,7 @@ export async function createPortfolio(data) {
 				slug: true,
 				isPublic: true,
 				isPrimary: true,
+				customDomain: true,
 				organizationId: true,
 				template: true,
 				basics: true,
@@ -124,6 +126,7 @@ export async function getPortfolioBySlug(slug) {
 				slug: true,
 				isPublic: true,
 				isPrimary: true,
+				customDomain: true,
 				organizationId: true,
 				template: true,
 				basics: true,
@@ -136,6 +139,64 @@ export async function getPortfolioBySlug(slug) {
 				hackathons: true,
 			},
 		});
+		return portfolio;
+	});
+}
+
+export async function getPortfolio(domain) {
+	return withErrorHandling(async () => {
+		// Try to find portfolio by custom domain first
+		let portfolio = await prisma.portfolio.findFirst({
+			where: { customDomain: domain },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isPublic: true,
+				isPrimary: true,
+				customDomain: true,
+				organizationId: true,
+				template: true,
+				basics: true,
+				profiles: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
+		});
+
+		// If not found by custom domain, try slug
+		if (!portfolio) {
+			portfolio = await prisma.portfolio.findFirst({
+				where: { slug: domain },
+				select: {
+					id: true,
+					name: true,
+					slug: true,
+					isPublic: true,
+					isPrimary: true,
+					customDomain: true,
+					organizationId: true,
+					template: true,
+					basics: true,
+					profiles: true,
+					experiences: true,
+					educations: true,
+					skills: true,
+					certifications: true,
+					projects: true,
+					hackathons: true,
+				},
+			});
+		}
+
+		if (!portfolio || !portfolio.isPublic) {
+			return null;
+		}
+
 		return portfolio;
 	});
 }

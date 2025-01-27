@@ -1,7 +1,7 @@
 import React from "react";
 import { z } from "zod";
 import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
-import { getPortfolioBySlug } from "@/services/portfolio";
+import { getPortfolio } from "@/services/portfolio";
 import { logger, transformPortfolio } from "@/lib/utils";
 import NotFound from "../not-found";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default async function PortfolioLayout({ params, children }) {
 		const { subdomain: portfolioSlug } = validationResult.data;
 
 		// Fetch portfolio by slug
-		const portfolioResult = await getPortfolioBySlug(portfolioSlug);
+		const portfolioResult = await getPortfolio(portfolioSlug);
 		logger.info("Portfolio result: ", portfolioResult);
 
 		if (!portfolioResult.success || !portfolioResult.data) {
@@ -86,4 +86,17 @@ export default async function PortfolioLayout({ params, children }) {
 		logger.error(`Error loading portfolio for ${portfolioSlug}:`, error);
 		return NotFound();
 	}
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }) {
+	const { subdomain } = params;
+	const portfolio = await getPortfolio(subdomain);
+
+	return {
+		title: portfolio.data?.basics?.name || portfolio.data?.name,
+		description:
+			portfolio.data?.basics?.summary ||
+			`${portfolio.data?.name}'s Portfolio`,
+	};
 }

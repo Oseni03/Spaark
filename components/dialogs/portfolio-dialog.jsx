@@ -15,6 +15,9 @@ import {
 import { createId } from "@paralleldrive/cuid2";
 import { Checkbox } from "../ui/checkbox";
 import { defaultPortfolio } from "@/schema/sections";
+import { DomainConfiguration } from "../domain-configuration";
+import { DomainStatus } from "../domain-status";
+import { useEffect } from "react";
 
 export const PortfolioDialog = ({
 	form,
@@ -25,19 +28,57 @@ export const PortfolioDialog = ({
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control } = form;
 
-	const onSubmit = (data) => {
-		if (currentPortfolio) {
-			dispatch(
-				updatePortfolioInDatabase({
-					id: currentPortfolio.id,
-					data: { ...currentPortfolio, ...data },
-				})
-			);
-		} else {
-			dispatch(addPortfolioInDatabase({ ...defaultPortfolio, data }));
+	// Initialize form with default values when dialog opens
+	useEffect(() => {
+		if (isOpen) {
+			reset({
+				name: currentPortfolio?.name || "",
+				slug: currentPortfolio?.slug || "",
+				isPublic: currentPortfolio?.isPublic ?? true,
+				isPrimary: currentPortfolio?.isPrimary ?? false,
+				customDomain: currentPortfolio?.customDomain || "",
+			});
 		}
-		setIsOpen(false);
-		reset();
+	}, [isOpen, currentPortfolio, reset]);
+
+	const onSubmit = async (data) => {
+		try {
+			if (data.customDomain) {
+				// Handle domain update
+				const domainResponse = await fetch("/api/domains", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						domain: data.customDomain,
+						portfolioId:
+							currentPortfolio?.id || data.id || createId(),
+					}),
+				});
+
+				if (!domainResponse.ok) {
+					throw new Error("Failed to update domain");
+				}
+			}
+
+			// Update portfolio
+			if (currentPortfolio) {
+				dispatch(
+					updatePortfolioInDatabase({
+						id: currentPortfolio.id,
+						data: { ...currentPortfolio, ...data },
+					})
+				);
+			} else {
+				dispatch(
+					addPortfolioInDatabase({ ...defaultPortfolio, ...data })
+				);
+			}
+
+			setIsOpen(false);
+			reset();
+		} catch (error) {
+			console.error("Error updating portfolio:", error);
+		}
 	};
 
 	return (
@@ -89,6 +130,40 @@ export const PortfolioDialog = ({
 							</div>
 						)}
 					/>
+
+					<Controller
+						name="customDomain"
+						control={control}
+						render={({ field, fieldState }) => (
+							<div>
+								<label>Custom Domain</label>
+								<div className="relative flex w-full max-w-md">
+									<Input
+										{...field}
+										placeholder="yourdomain.com"
+									/>
+									{field.value && (
+										<div className="absolute right-3 z-10 flex h-full items-center">
+											<DomainStatus
+												domain={field.value}
+											/>
+										</div>
+									)}
+								</div>
+								{fieldState.error && (
+									<small className="text-red-500 opacity-75">
+										{fieldState.error?.message}
+									</small>
+								)}
+							</div>
+						)}
+					/>
+
+					{currentPortfolio?.customDomain && (
+						<DomainConfiguration
+							domain={currentPortfolio.customDomain}
+						/>
+					)}
 
 					<Controller
 						name="isPublic"
