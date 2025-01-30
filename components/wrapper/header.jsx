@@ -17,7 +17,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { siteConfig } from "@/config/site";
 import Image from "next/image";
 
-export const Header1 = () => {
+export const Header1 = ({ className }) => {
 	const navigationItems = [
 		{
 			title: "Sections",
@@ -45,7 +45,7 @@ export const Header1 = () => {
 
 	const [isOpen, setOpen] = useState(false);
 	return (
-		<header className="w-full z-40 fixed top-0 left-0 bg-background border-b">
+		<header className="w-full z-40 fixed top-0 left-0 bg-background border-b shadow backdrop-blur-md">
 			<div className="container relative mx-auto min-h-14 flex gap-4 flex-row lg:grid lg:grid-cols-2 items-center">
 				<div className="justify-start items-center gap-4 lg:flex flex-row">
 					<NavigationMenu className="flex justify-start items-start">
