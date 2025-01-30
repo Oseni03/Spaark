@@ -13,6 +13,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }, parent) {
+	const { slug } = await params;
 	const post = await sanityFetch({
 		query: postQuery,
 		params,
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }, parent) {
 	logger.info("Fetched Post:", post);
 
 	if (!post) {
-		logger.error(`Post not found. Slug: ${params.slug}`);
+		logger.error(`Post not found. Slug: ${slug}`);
 		return {};
 	}
 
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }, parent) {
 	return {
 		title: post.title,
 		description: post.description ?? "",
-		alternates: { canonical: `/blog/post/${params.slug}` },
+		alternates: { canonical: `/blog/post/${slug}` },
 		openGraph: {
 			images: imageUrl ? [imageUrl, ...previousImages] : previousImages,
 		},

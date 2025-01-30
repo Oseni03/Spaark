@@ -22,9 +22,7 @@ export function TryProduct() {
 					{siteConfig.description}
 				</p>
 				<div className="px-4 pb-4">
-					<Button className="w-full" variant="blue">
-						Try {siteConfig.name}
-					</Button>
+					<Button className="w-full">Try {siteConfig.name}</Button>
 				</div>
 			</div>
 		</Link>

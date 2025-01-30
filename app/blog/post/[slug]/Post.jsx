@@ -23,7 +23,9 @@ export function Post({ post }) {
 					<Card>
 						<CardContent className="p-10">
 							<Prose>
-								<h1>{post.title}</h1>
+								<h1 className="text-3xl font-bold">
+									{post.title}
+								</h1>
 								<p>{post.description}</p>
 								{post.mainImage ? (
 									<div className="-mx-10 my-8">
