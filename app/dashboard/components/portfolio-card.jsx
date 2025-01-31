@@ -35,11 +35,13 @@ import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultPortfolio, portfolioSchema } from "@/schema/sections";
+import { useOrganizationContext } from "@/context/OrganizationContext";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
 	const [isOpen, setIsOpen] = useState(false);
 	const dispatch = useDispatch();
+	const { organization, canManagePortfolios } = useOrganizationContext();
 
 	const form = useForm({
 		resolver: zodResolver(portfolioSchema),
@@ -95,6 +97,9 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(removePortfolioFromDatabase(portfolio.id));
 	};
 
+	// Only show edit/delete options if user has permission
+	const showManageOptions = !organization || canManagePortfolios;
+
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger>
@@ -121,6 +126,11 @@ export const PortfolioCard = ({ portfolio }) => {
 						<h4 className="line-clamp-2 font-medium">
 							{portfolio.name}
 						</h4>
+						{portfolio.organization && (
+							<p className="text-xs text-muted-foreground">
+								{portfolio.organization.name}
+							</p>
+						)}
 						<p className="line-clamp-1 text-xs opacity-75">{`Last updated ${lastUpdated}`}</p>
 					</div>
 				</BaseCard>
@@ -133,37 +143,41 @@ export const PortfolioCard = ({ portfolio }) => {
 				setIsOpen={setIsOpen}
 			/>
 
-			<ContextMenuContent>
-				<ContextMenuItem onClick={onOpen}>
-					<FolderOpen size={14} className="mr-2" />
-					{`Open`}
-				</ContextMenuItem>
-				<ContextMenuItem onClick={() => setIsOpen(true)}>
-					<PencilSimple size={14} className="mr-2" />
-					{`Rename`}
-				</ContextMenuItem>
-				<ContextMenuItem onClick={onDuplicate}>
-					<CopySimple size={14} className="mr-2" />
-					{`Duplicate`}
-				</ContextMenuItem>
-				<ContextMenuItem onClick={onPublicChange}>
-					<Globe size={14} className="mr-2" />
-					{portfolio.isPublic ? `Make Private` : `Make Public`}
-				</ContextMenuItem>
-				<ContextMenuItem onClick={onPrimaryChange}>
-					{portfolio.isPrimary ? (
-						<Star size={14} className="mr-2" />
-					) : (
-						<StarOff size={14} className="mr-2" />
-					)}
-					{portfolio.isPrimary ? `Unset Primary` : `Set as Primary`}
-				</ContextMenuItem>
-				<ContextMenuSeparator />
-				<ContextMenuItem className="text-error" onClick={onDelete}>
-					<TrashSimple size={14} className="mr-2" />
-					{`Delete`}
-				</ContextMenuItem>
-			</ContextMenuContent>
+			{showManageOptions && (
+				<ContextMenuContent>
+					<ContextMenuItem onClick={onOpen}>
+						<FolderOpen size={14} className="mr-2" />
+						{`Open`}
+					</ContextMenuItem>
+					<ContextMenuItem onClick={() => setIsOpen(true)}>
+						<PencilSimple size={14} className="mr-2" />
+						{`Rename`}
+					</ContextMenuItem>
+					<ContextMenuItem onClick={onDuplicate}>
+						<CopySimple size={14} className="mr-2" />
+						{`Duplicate`}
+					</ContextMenuItem>
+					<ContextMenuItem onClick={onPublicChange}>
+						<Globe size={14} className="mr-2" />
+						{portfolio.isPublic ? `Make Private` : `Make Public`}
+					</ContextMenuItem>
+					<ContextMenuItem onClick={onPrimaryChange}>
+						{portfolio.isPrimary ? (
+							<Star size={14} className="mr-2" />
+						) : (
+							<StarOff size={14} className="mr-2" />
+						)}
+						{portfolio.isPrimary
+							? `Unset Primary`
+							: `Set as Primary`}
+					</ContextMenuItem>
+					<ContextMenuSeparator />
+					<ContextMenuItem className="text-error" onClick={onDelete}>
+						<TrashSimple size={14} className="mr-2" />
+						{`Delete`}
+					</ContextMenuItem>
+				</ContextMenuContent>
+			)}
 		</ContextMenu>
 	);
 };

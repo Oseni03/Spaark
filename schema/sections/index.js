@@ -26,6 +26,8 @@ export const portfolioSchema = z.object({
 	isPrimary: z.boolean().default(false),
 	template: z.string().default("default"),
 	customDomain: z.string().optional(),
+	// Add organization fields
+	organizationId: z.string().optional(),
 	basics: sectionSchema.extend(basicsSchema),
 	certifications: sectionSchema.extend({
 		id: z.literal("certification"),
@@ -72,6 +74,7 @@ export const defaultPortfolio = {
 	isPublic: false,
 	isPrimary: false,
 	template: "default",
+	organizationId: null,
 	basics: {
 		...defaultSection,
 		...defaultBasics,

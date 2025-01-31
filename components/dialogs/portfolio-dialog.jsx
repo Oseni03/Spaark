@@ -1,3 +1,5 @@
+"use client";
+
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,7 @@ import { defaultPortfolio } from "@/schema/sections";
 import { DomainConfiguration } from "../domain-configuration";
 import { DomainStatus } from "../domain-status";
 import { useEffect } from "react";
+import { useOrganizationContext } from "@/context/OrganizationContext";
 
 export const PortfolioDialog = ({
 	form,
@@ -27,6 +30,7 @@ export const PortfolioDialog = ({
 }) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control } = form;
+	const { organization, canManagePortfolios } = useOrganizationContext();
 
 	// Initialize form with default values when dialog opens
 	useEffect(() => {
@@ -65,12 +69,20 @@ export const PortfolioDialog = ({
 				dispatch(
 					updatePortfolioInDatabase({
 						id: currentPortfolio.id,
-						data: { ...currentPortfolio, ...data },
+						data: {
+							...currentPortfolio,
+							...data,
+							organizationId: organization?.id || null,
+						},
 					})
 				);
 			} else {
 				dispatch(
-					addPortfolioInDatabase({ ...defaultPortfolio, ...data })
+					addPortfolioInDatabase({
+						...defaultPortfolio,
+						...data,
+						organizationId: organization?.id || null,
+					})
 				);
 			}
 
@@ -80,6 +92,11 @@ export const PortfolioDialog = ({
 			console.error("Error updating portfolio:", error);
 		}
 	};
+
+	// Disable form if user can't manage portfolios
+	if (organization && !canManagePortfolios) {
+		return <div>You don&apos;t have permission to manage portfolios</div>;
+	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>

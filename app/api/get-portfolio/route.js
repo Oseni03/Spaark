@@ -52,19 +52,22 @@ export async function GET(req) {
 		const { searchParams } = new URL(req.url);
 		let userId = searchParams.get("userId");
 
-		if (!userId) {
-			const { userId: authenticatedUserId } = await auth();
+		// Get both userId and orgId from auth
+		const { userId: authenticatedUserId, orgId } = await auth();
 
-			if (!authenticatedUserId) {
-				return createErrorResponse(401, "Unauthorized", origin);
-			}
-
-			userId = authenticatedUserId;
+		if (!userId && !authenticatedUserId) {
+			return createErrorResponse(401, "Unauthorized", origin);
 		}
 
+		userId = userId || authenticatedUserId;
+
+		// Get portfolios for both user and organization if available
+		const portfoliosPromise = getPortfolios(userId, orgId);
+		const userPromise = getUser(userId);
+
 		const [user, portfolios] = await Promise.all([
-			getUser(userId),
-			getPortfolios(userId),
+			userPromise,
+			portfoliosPromise,
 		]);
 
 		if (!user) {
@@ -74,7 +77,7 @@ export async function GET(req) {
 		if (!portfolios.success) {
 			return createErrorResponse(
 				400,
-				portfolios.error || "Error getting user portfolios",
+				portfolios.error || "Error getting portfolios",
 				origin
 			);
 		}
@@ -90,8 +93,8 @@ export async function GET(req) {
 			},
 		});
 	} catch (error) {
-		logger.error("Error fetching user data:", error);
-		return createErrorResponse(500, "Failed to fetch user data", origin);
+		logger.error("Error fetching data:", error);
+		return createErrorResponse(500, "Failed to fetch data", origin);
 	}
 }
 
