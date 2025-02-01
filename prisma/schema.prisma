@@ -124,6 +124,7 @@ model Portfolio {
   certifications Certification[]
   projects       Project[]
   hackathons     Hackathon[]
+  blogs          Blog[]
 
   @@index([userId])
   @@index([organizationId])
@@ -324,4 +325,52 @@ model Code {
   user   User?   @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model Blog {
+  id            String      @id @default(cuid())
+  title         String
+  slug          String      @unique
+  content       Json?       // For rich text content
+  excerpt       String?     @db.Text
+  featuredImage Json?       // For image metadata
+  status        String      @default("draft") // draft, published
+  publishedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  views         Int         @default(0)
+  likes         Int         @default(0)
+  
+  // Relations
+  portfolioId   String
+  portfolio     Portfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  authorId      String      // Clerk user ID
+  tags          Tag[]
+  comments      Comment[]
+
+  @@index([portfolioId])
+  @@index([authorId])
+  @@index([status])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  authorId  String   // Clerk user ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([blogId])
+  @@index([authorId])
 }

@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
 import { CreateBlogCard } from "../components/create-blog-card";
 import { BaseCard } from "../components/base-card";
 import { BlogCard } from "../components/blog-card";
 
 function Page() {
-	const [blogs, setBlogs] = useState([]);
-	const [loading, setLoading] = useState(false);
+	const { items: blogs, loading } = useSelector((state) => state.blogs);
 
 	return (
 		<div className="grid grid-cols-1 gap-8 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
