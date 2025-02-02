@@ -4,11 +4,12 @@ import {
 	CopySimple,
 	FolderOpen,
 	Lock,
-	LockOpen,
 	PencilSimple,
 	TrashSimple,
 	Globe,
 	Star,
+	Layout,
+	FileText,
 } from "@phosphor-icons/react";
 import { StarOff } from "lucide-react";
 import {
@@ -103,14 +104,17 @@ export const PortfolioCard = ({ portfolio }) => {
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger>
-				<BaseCard className="space-y-0" onClick={onOpen}>
+				<BaseCard
+					className="relative overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+					onClick={onOpen}
+				>
 					<AnimatePresence>
 						{portfolio.locked && (
 							<motion.div
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
-								className="absolute inset-0 flex items-center justify-center bg-background/75 backdrop-blur-sm"
+								className="absolute inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-sm"
 							>
 								<Lock size={42} />
 							</motion.div>
@@ -123,15 +127,38 @@ export const PortfolioCard = ({ portfolio }) => {
 							"bg-gradient-to-t from-background/80 to-transparent"
 						)}
 					>
-						<h4 className="line-clamp-2 font-medium">
-							{portfolio.name}
-						</h4>
-						{portfolio.organization && (
-							<p className="text-xs text-muted-foreground">
-								{portfolio.organization.name}
+						<div className="mb-4">
+							<div className="flex items-center gap-2 mb-2">
+								<Layout className="w-5 h-5" />
+								<h3 className="font-medium">
+									{portfolio.name}
+								</h3>
+							</div>
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Globe className="w-4 h-4" />
+								<span>
+									{portfolio.customDomain || "No domain set"}
+								</span>
+							</div>
+						</div>
+
+						<div className="space-y-2 text-sm text-muted-foreground">
+							<p>Template: {portfolio.template || "Default"}</p>
+							<p>
+								Last updated:{" "}
+								{lastUpdated.format("MMMM D, YYYY")}
 							</p>
-						)}
-						<p className="line-clamp-1 text-xs opacity-75">{`Last updated ${lastUpdated}`}</p>
+							<div className="flex items-center gap-2">
+								<FileText className="w-4 h-4" />
+								Blog:{" "}
+								{portfolio.blogEnabled ? "Enabled" : "Disabled"}
+							</div>
+							{portfolio.organization && (
+								<p className="text-xs">
+									Organization: {portfolio.organization.name}
+								</p>
+							)}
+						</div>
 					</div>
 				</BaseCard>
 			</ContextMenuTrigger>
