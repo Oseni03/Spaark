@@ -14,7 +14,11 @@ const userSlice = createSlice({
 	reducers: {
 		setUser(state, action) {
 			logger.info("redux user data: ", action.payload);
-			state.data = { ...defaultUser, ...action.payload };
+			state.data = {
+				...defaultUser,
+				...action.payload,
+				subscription: action.payload.subscription || null,
+			};
 		},
 		clearUser: (state) => {
 			state.data = null;

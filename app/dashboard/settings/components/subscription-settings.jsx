@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { Card } from "@/components/ui/card";
 import { CreditCard, Package } from "@phosphor-icons/react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import Pricing from "@/components/homepage/pricing";
 
 export function SubscriptionSettings() {
 	const subscription = useSelector((state) => state.user.subscription);
@@ -25,13 +27,20 @@ export function SubscriptionSettings() {
 							Current Plan
 						</h4>
 						<p className="text-sm text-muted-foreground">
-							{subscription?.plan || "Free Plan"}
+							{subscription?.plan || "Not Subscribed"}
 						</p>
 					</div>
-					<Button variant="outline">
-						<CreditCard className="mr-2 h-4 w-4" />
-						Manage Subscription
-					</Button>
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button variant="outline">
+								<CreditCard className="mr-2 h-4 w-4" />
+								Manage Subscription
+							</Button>
+						</DialogTrigger>
+						<DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+							<Pricing isDialog={true} />
+						</DialogContent>
+					</Dialog>
 				</div>
 			</Card>
 		</div>

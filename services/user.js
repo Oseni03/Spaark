@@ -5,20 +5,31 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 
+const userSelect = {
+	id: true,
+	username: true,
+	email: true,
+	subscribed: true,
+	basics: true,
+	createdAt: true,
+	subscription: {
+		select: {
+			id: true,
+			type: true,
+			frequency: true,
+			status: true,
+			priceId: true,
+			startDate: true,
+			endDate: true,
+		},
+	},
+};
+
 export async function getUserByUsername(username) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { username },
-			select: {
-				id: true,
-				username: true,
-				email: true,
-				subscribed: true,
-				basics: true,
-				subscribed: true,
-				createdAt: true,
-			},
+			select: userSelect,
 		});
 		return user;
 	});
@@ -26,18 +37,9 @@ export async function getUserByUsername(username) {
 
 export async function getUserByEmail(email) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { email },
-			select: {
-				id: true,
-				username: true,
-				email: true,
-				subscribed: true,
-				basics: true,
-				subscribed: true,
-				createdAt: true,
-			},
+			select: userSelect,
 		});
 		return user;
 	});
@@ -66,17 +68,9 @@ export async function getUsers() {
 
 export async function getUser(userId) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				subscribed: true,
-				createdAt: true,
-				updatedAt: true,
-			},
+			select: userSelect,
 		});
 		return user;
 	});

@@ -35,6 +35,7 @@ const PricingCard = ({
 	onMouseLeave,
 	onBillingChange,
 	onSubscribe,
+	processing,
 }) => {
 	return (
 		<Card
@@ -106,7 +107,9 @@ const PricingCard = ({
 					className="w-full mt-8"
 					onClick={() => onSubscribe(type, billing)}
 					variant="default"
+					disabled={processing}
 				>
+					{processing && <Spinner />}
 					Get Started
 				</Button>
 			</CardContent>
@@ -114,7 +117,7 @@ const PricingCard = ({
 	);
 };
 
-export default function Pricing() {
+export default function Pricing({ isDialog = false }) {
 	const router = useRouter();
 	const { user } = useUser();
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -169,13 +172,15 @@ export default function Pricing() {
 	};
 
 	return (
-		<div className="container">
+		<div className={`${isDialog ? "" : "container"}`}>
 			<PricingHeader
 				title="Choose Your Plan"
 				subtitle="Build your professional portfolio with our flexible pricing options"
 			/>
 
-			<div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+			<div
+				className={`grid md:grid-cols-2 gap-8 ${isDialog ? "max-w-4xl" : "max-w-6xl"} mx-auto`}
+			>
 				<PricingCard
 					type="Individual"
 					billing={individualBilling}
@@ -189,6 +194,7 @@ export default function Pricing() {
 					onMouseLeave={() => setIsHoveredIndividual(false)}
 					onBillingChange={setIndividualBilling}
 					onSubscribe={handleCheckout}
+					processing={isProcessing}
 				/>
 
 				<PricingCard
@@ -201,6 +207,7 @@ export default function Pricing() {
 					onMouseLeave={() => setIsHoveredTeam(false)}
 					onBillingChange={setTeamBilling}
 					onSubscribe={handleCheckout}
+					processing={isProcessing}
 				/>
 			</div>
 		</div>
