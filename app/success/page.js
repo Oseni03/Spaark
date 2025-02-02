@@ -15,52 +15,66 @@ function PaymentStatusContent() {
 	// Get all required parameters
 	const status = searchParams.get("status");
 	const tx_ref = searchParams.get("tx_ref");
-	const transaction_id = searchParams.get("transaction_id");
 
 	useEffect(() => {
 		const verifyPayment = async () => {
-			logger.info('Starting payment verification', { tx_ref, status, transaction_id });
-			
-			if (!tx_ref || !status || !transaction_id) {
-				logger.error('Missing verification parameters', { tx_ref, status, transaction_id });
+			logger.info("Starting payment verification", {
+				tx_ref,
+				status,
+				status,
+			});
+
+			if (!tx_ref || !status) {
+				logger.error("Missing verification parameters", {
+					tx_ref,
+					status,
+				});
 				toast.error("Invalid payment verification data");
 				setIsProcessing(false);
 				return;
 			}
 
 			try {
-				logger.info('Sending verification request');
+				logger.info("Sending verification request");
 				const response = await fetch("/api/payment/verify", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						tx_ref,
 						status,
-						transaction_id,
 					}),
 				});
 
 				const data = await response.json();
-				logger.info('Verification response received', { success: response.ok, data });
+				logger.info("Verification response received", {
+					success: response.ok,
+					data,
+				});
 
 				if (!response.ok) {
-					logger.error('Verification request failed', { status: response.status, data });
+					logger.error("Verification request failed", {
+						status: response.status,
+						data,
+					});
 					throw new Error(
 						data.message || "Payment verification failed"
 					);
 				}
 
 				if (status === "successful") {
-					logger.info('Payment verified successfully');
+					logger.info("Payment verified successfully");
 					toast.success("Payment verified successfully!");
 				} else {
-					logger.warn('Payment was not successful', { status });
+					logger.warn("Payment was not successful", { status });
 					toast.error("Payment was not successful");
 				}
 
 				logger.info("Payment verification completed:", data);
 			} catch (error) {
-				logger.error('Payment verification error:', { message: error.message, stack: error.stack });
+				logger.error("Payment verification error:", {
+					message: error.message,
+					stack: error.stack,
+				});
 				toast.error(error.message || "Error verifying payment");
 				logger.error("Payment verification error:", error);
 			} finally {
@@ -69,7 +83,7 @@ function PaymentStatusContent() {
 		};
 
 		verifyPayment();
-	}, [status, tx_ref, transaction_id]);
+	}, [status, tx_ref]);
 
 	if (isProcessing) {
 		return (

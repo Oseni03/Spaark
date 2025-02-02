@@ -10,15 +10,20 @@ export async function initializeSubscription({
 	priceId,
 }) {
 	try {
-		logger.info("Initializing subscription", { userId, type, frequency });
+		logger.info("Initializing subscription", {
+			userId,
+			type,
+			frequency,
+			priceId,
+		});
 
 		const subscription = await prisma.subscription.create({
 			data: {
 				userId,
 				status: "pending",
-				planType: type,
-				frequency: frequency,
-				priceId: priceId,
+				type,
+				frequency,
+				priceId,
 				startDate: new Date(),
 				endDate: null,
 			},
@@ -68,25 +73,70 @@ export async function createTransaction({
 	}
 }
 
-export async function handlePaymentSuccess(transactionId) {
+export async function handlePaymentFailure({ transactionId }) {
 	try {
-		logger.info("Processing successful payment", { transactionId });
+		logger.info("Processing failed payment", { transactionId });
 
 		const result = await prisma.$transaction(async (prisma) => {
 			const transaction = await prisma.transaction.update({
 				where: { id: transactionId },
-				data: { status: "completed" },
+				data: { status: "cancelled" },
 				include: { subscription: true },
 			});
 
 			if (transaction.subscription) {
 				await prisma.subscription.update({
 					where: { id: transaction.subscription.id },
-					data: { status: "active" },
+					data: { status: "cancelled" },
 				});
 			}
 
 			return transaction;
+		});
+
+		logger.info("Failed payment processed", { transactionId });
+		return result;
+	} catch (error) {
+		logger.error("Failed to process payment failure:", error);
+		throw error;
+	}
+}
+
+export async function handlePaymentSuccess({ transactionId }) {
+	try {
+		logger.info("Processing successful payment", { transactionId });
+
+		const transaction = await prisma.transaction.findUnique({
+			where: { id: transactionId },
+			include: { subscription: true },
+		});
+
+		if (!transaction) {
+			throw new Error("Transaction not found");
+		}
+
+		if (transaction.status === "cancelled") {
+			logger.info("Transaction already cancelled, skipping update", {
+				transactionId,
+			});
+			return transaction;
+		}
+
+		const result = await prisma.$transaction(async (prisma) => {
+			const updatedTransaction = await prisma.transaction.update({
+				where: { id: transactionId },
+				data: { status: "completed" },
+				include: { subscription: true },
+			});
+
+			if (updatedTransaction.subscription) {
+				await prisma.subscription.update({
+					where: { id: updatedTransaction.subscription.id },
+					data: { status: "active" },
+				});
+			}
+
+			return updatedTransaction;
 		});
 
 		logger.info("Payment processed successfully", { transactionId });

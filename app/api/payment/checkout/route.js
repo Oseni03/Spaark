@@ -10,7 +10,8 @@ import { getSubscriptionData } from "@/utils/subscription-plans";
 export async function POST(request) {
 	try {
 		const body = await request.json();
-		const { type, frequency, userEmail, username, userId } = body;
+		const { type, frequency, userEmail, username, userId, returnUrl } =
+			body;
 
 		logger.info("Starting checkout process", {
 			type,
@@ -54,7 +55,7 @@ export async function POST(request) {
 		logger.info("Initializing subscription");
 		const subscription = await initializeSubscription({
 			userId,
-			type,
+			type: type.toUpperCase(),
 			frequency,
 			priceId,
 		});
@@ -88,7 +89,7 @@ export async function POST(request) {
 				amount: price,
 				currency: "USD",
 				payment_options: "card",
-				redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}`,
+				redirect_url: returnUrl || process.env.NEXT_PUBLIC_APP_URL,
 				customer: {
 					email: userEmail,
 					name: username || "Unknown User",

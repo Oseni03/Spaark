@@ -117,7 +117,10 @@ const PricingCard = ({
 	);
 };
 
-export default function Pricing({ isDialog = false }) {
+export default function Pricing({
+	isDialog = false,
+	returnUrl = process.env.NEXT_PUBLIC_APP_URL,
+}) {
 	const router = useRouter();
 	const { user } = useUser();
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -146,6 +149,7 @@ export default function Pricing({ isDialog = false }) {
 				userId: user.id,
 				userEmail: user.emailAddresses[0].emailAddress,
 				username: user.username || user.fullName,
+				returnUrl, // Add returnUrl to the payload
 			});
 
 			logger.info("Checkout response received", {

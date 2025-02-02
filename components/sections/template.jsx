@@ -231,7 +231,7 @@ export function TemplateSection() {
 				onOpenChange={setShowPricingDialog}
 			>
 				<DialogContent className="max-w-5xl">
-					<Pricing isDialog={true} />
+					<Pricing isDialog={true} returnUrl={window.location.href} />
 				</DialogContent>
 			</Dialog>
 		</>

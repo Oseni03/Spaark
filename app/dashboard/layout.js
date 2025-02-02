@@ -12,8 +12,10 @@ import { OrganizationProvider } from "@/context/OrganizationContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
+import { useVerifyPayment } from "@/hooks/use-verify-payment";
 
 export default function DashboardLayout({ children }) {
+	useVerifyPayment();
 	const dispatch = useDispatch();
 
 	useEffect(() => {

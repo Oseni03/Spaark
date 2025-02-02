@@ -22,8 +22,10 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
+import { useVerifyPayment } from "@/hooks/use-verify-payment";
 
 function BuilderLayout({ children }) {
+	useVerifyPayment();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
 	const [rightOpen, setRightOpen] = React.useState(false);
