@@ -39,7 +39,7 @@ export default function Page() {
 	};
 
 	return (
-		<div className="h-full w-full">
+		<div className="h-full w-full scrollbar-hide">
 			{!user.subscribed && showBanner && (
 				<div className="relative bg-blue-50 dark:bg-blue-900/50 px-6 py-4 mb-12 flex items-center justify-between rounded-lg border border-blue-100 dark:border-blue-800 mx-6">
 					<div className="flex items-center gap-x-3">

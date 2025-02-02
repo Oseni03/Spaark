@@ -11,6 +11,7 @@ const portfolioSelect = {
 	name: true,
 	slug: true,
 	isPublic: true,
+	blogEnabled: true,
 	isPrimary: true,
 	customDomain: true,
 	organizationId: true,

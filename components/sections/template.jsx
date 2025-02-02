@@ -9,6 +9,11 @@ import { SectionIcon } from "../section-icon";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { motion } from "framer-motion";
 import { ScrollArea } from "../ui/scroll-area";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
+import { Globe, Eye, EyeSlash } from "@phosphor-icons/react";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 
 const templates = [
 	{
@@ -44,11 +49,54 @@ export function TemplateSection() {
 		);
 	};
 
+	const toggleLiveStatus = async () => {
+		if (!portfolio) return;
+
+		dispatch(
+			updatePortfolioInDatabase({
+				id: portfolio.id,
+				data: { ...portfolio, isPublic: !portfolio.isPublic },
+			})
+		);
+	};
+
 	return (
 		<section id="template" className="flex h-full flex-col gap-y-4">
+			<div className="space-y-4">
+				<div className="flex items-center justify-between">
+					<div className="space-y-1">
+						<Label>Live Status</Label>
+						<div className="text-sm text-muted-foreground">
+							{portfolio?.isPublic ? (
+								<span className="flex items-center gap-2">
+									<Globe className="text-green-500" />
+									Your portfolio is live
+								</span>
+							) : (
+								<span className="flex items-center gap-2">
+									<EyeSlash className="text-yellow-500" />
+									Your portfolio is hidden
+								</span>
+							)}
+						</div>
+					</div>
+					<Switch
+						checked={portfolio?.isPublic}
+						onCheckedChange={toggleLiveStatus}
+					/>
+				</div>
+
+				<div className="flex items-center gap-4">
+					<Button variant="outline" size="sm">
+						<Eye className="mr-2 h-4 w-4" />
+						Preview Portfolio
+					</Button>
+				</div>
+				<Separator />
+			</div>
+
 			<header className="flex shrink-0 items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<SectionIcon id="template" size={18} name="Template" />
 					<h2 className="line-clamp-1 text-2xl font-bold lg:text-3xl">
 						Template
 					</h2>
