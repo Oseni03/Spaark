@@ -50,6 +50,8 @@ model User {
   // One-to-one relation to Code
   code           Code?
   codeId         String?         @unique
+
+  portfolioLimit Int       @default(1)  // Default limit for individual accounts
 }
 
 model Organization {

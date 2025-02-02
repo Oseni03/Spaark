@@ -24,6 +24,8 @@ export function OrganizationProvider({ children }) {
 		canManagePortfolios:
 			activeOrg?.membership?.role === "admin" ||
 			activeOrg?.membership?.permissions?.includes("portfolio:manage"),
+		canCreateOrganization: !activeOrg, // Only allow when not in an organization
+		isIndividualAccount: !activeOrg,
 	};
 
 	return (
