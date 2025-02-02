@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { Check } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import axios from "axios";
 import { Spinner } from "../ui/Spinner";
-import { siteConfig } from "@/config/site";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
+import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -25,53 +25,144 @@ const PricingHeader = ({ title, subtitle }) => (
 	</section>
 );
 
+const PricingCard = ({
+	type,
+	billing,
+	features,
+	prices,
+	isHovered,
+	onMouseEnter,
+	onMouseLeave,
+	onBillingChange,
+	onSubscribe,
+}) => {
+	return (
+		<Card
+			className={`relative transition-all duration-300 ${
+				isHovered ? "transform -translate-y-2 shadow-xl" : ""
+			}`}
+			onMouseEnter={onMouseEnter}
+			onMouseLeave={onMouseLeave}
+		>
+			<CardHeader>
+				<CardTitle>{type}</CardTitle>
+				<p className="text-sm text-gray-500">
+					{type === "Individual"
+						? "Perfect for freelancers and solo developers"
+						: "For organizations and development teams"}
+				</p>
+			</CardHeader>
+			<CardContent>
+				{/* Billing toggle */}
+				<div className="flex bg-gray-100 dark:text-gray-900 rounded-lg p-1 mb-6">
+					{Object.keys(prices).map((period) => (
+						<button
+							key={period}
+							className={`flex-1 py-2 rounded-md text-sm transition-all duration-300 ${
+								billing === period
+									? "bg-white shadow-sm transform scale-105"
+									: "hover:bg-gray-200"
+							}`}
+							onClick={() => onBillingChange(period)}
+						>
+							{period.charAt(0).toUpperCase() + period.slice(1)}
+						</button>
+					))}
+				</div>
+
+				{/* Price display */}
+				<div className="mb-8 text-center">
+					<div className="flex items-baseline justify-center">
+						<span className="text-4xl font-bold">
+							${prices[billing].price}
+						</span>
+						<span className="text-gray-500 ml-2">
+							/{prices[billing].interval}
+						</span>
+					</div>
+					{billing === "yearly" && (
+						<span className="text-green-600 text-sm mt-1">
+							Save 20% with annual billing
+						</span>
+					)}
+				</div>
+
+				{/* Features list */}
+				<ul className="space-y-4">
+					{features.map((feature, index) => (
+						<li
+							key={feature}
+							className="flex items-center transform transition-all duration-300 hover:translate-x-2"
+							style={{ transitionDelay: `${index * 50}ms` }}
+						>
+							<Check className="h-5 w-5 text-green-500 mr-2" />
+							<span>{feature}</span>
+						</li>
+					))}
+				</ul>
+
+				<Button
+					size="lg"
+					className="w-full mt-8"
+					onClick={() => onSubscribe(type, billing)}
+					variant="default"
+				>
+					Get Started
+				</Button>
+			</CardContent>
+		</Card>
+	);
+};
+
 export default function Pricing() {
 	const router = useRouter();
 	const { user } = useUser();
 	const [isProcessing, setIsProcessing] = useState(false);
+	const [individualBilling, setIndividualBilling] = useState("monthly");
+	const [teamBilling, setTeamBilling] = useState("monthly");
+	const [isHoveredIndividual, setIsHoveredIndividual] = useState(false);
+	const [isHoveredTeam, setIsHoveredTeam] = useState(false);
 
-	const handleCheckout = async (priceId, title, amount) => {
-		// Prevent multiple simultaneous checkout attempts
-		if (isProcessing) return;
-
-		// Validate user
-		if (!user?.emailAddresses[0]?.emailAddress) {
-			toast.error("Please log in to proceed with checkout");
+	const handleCheckout = async (type, billing) => {
+		if (isProcessing || !user) {
+			logger.info("Checkout blocked", { isProcessing, hasUser: !!user });
 			return;
 		}
 
 		setIsProcessing(true);
+		logger.info("Starting checkout process", {
+			type,
+			billing,
+			userId: user.id,
+		});
 
 		try {
-			// Make the checkout request
-			const response = await axios.post("/api/checkout", {
+			const response = await axios.post("/api/payment/checkout", {
+				type,
+				frequency: billing.toUpperCase(),
 				userId: user.id,
-				priceId,
-				title,
-				amount,
 				userEmail: user.emailAddresses[0].emailAddress,
 				username: user.username || user.fullName,
 			});
 
-			// Redirect to payment link
+			logger.info("Checkout response received", {
+				hasLink: !!response.data.link,
+			});
+
 			if (response.data.link) {
 				window.location.href = response.data.link;
 				return;
 			}
 
-			// Fallback error handling
+			logger.error("No payment link received");
 			toast.error("Unable to initiate checkout");
 		} catch (err) {
-			// Error handling
-			if (axios.isAxiosError(err)) {
-				toast.error(
-					err.response?.data?.message ||
-						"An error occurred during checkout"
-				);
-			} else {
-				toast.error("Unexpected error. Please try again.");
-			}
-			logger.error("Checkout error:", err);
+			logger.error("Checkout error:", {
+				message: err.message,
+				response: err.response?.data,
+				stack: err.stack,
+			});
+			toast.error(err.response?.data?.message || "Checkout failed");
 		} finally {
 			setIsProcessing(false);
 		}
@@ -80,377 +171,38 @@ export default function Pricing() {
 	return (
 		<div className="container">
 			<PricingHeader
-				title="Pricing That Works for You"
-				subtitle={`Choose a plan that fits your needs and budget. Whether you're just starting or ready to unlock premium features, ${siteConfig.name} has a plan to help you shine.`}
+				title="Choose Your Plan"
+				subtitle="Build your professional portfolio with our flexible pricing options"
 			/>
-			<Tabs defaultValue="monthly" className="mx-auto">
-				<TabsList className="flex justify-center">
-					<TabsTrigger value="monthly">Monthly</TabsTrigger>
-					<TabsTrigger value="annually">Annually</TabsTrigger>
-				</TabsList>
-				<TabsContent value="monthly">
-					<section className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-8 mt-8">
-						<div className="flex flex-col md:flex-row gap-6 justify-center items-center py-12 px-4">
-							{/* Standard Plan Card */}
-							<div className="w-full max-w-md border border-gray-200 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
-								<div className="mb-6">
-									<h2 className="text-2xl font-bold mb-2">
-										Essential Dev
-									</h2>
-									<div className="flex items-baseline">
-										<span className="text-4xl font-extrabold mr-2">
-											$5
-										</span>
-										<span>/month</span>
-									</div>
-									<p className="mt-4">
-										Perfect for beginners or developers
-										looking to create a simple, professional
-										portfolio with essential features.
-									</p>
-								</div>
 
-								<ul className="mb-6 space-y-4">
-									{[
-										"Mobile-Responsive Design",
-										"Unlimited Project Display",
-										"Basic shareable link",
-										"Contact Form with Email Notifications",
-									].map((feature, index) => (
-										<li
-											key={index}
-											className="flex items-center space-x-3"
-										>
-											<svg
-												className="h-5 w-5 text-green-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
-											<span>{feature}</span>
-										</li>
-									))}
-								</ul>
+			<div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+				<PricingCard
+					type="Individual"
+					billing={individualBilling}
+					prices={SUBSCRIPTION_PLANS.INDIVIDUAL}
+					features={
+						SUBSCRIPTION_PLANS.INDIVIDUAL[individualBilling]
+							.features
+					}
+					isHovered={isHoveredIndividual}
+					onMouseEnter={() => setIsHoveredIndividual(true)}
+					onMouseLeave={() => setIsHoveredIndividual(false)}
+					onBillingChange={setIndividualBilling}
+					onSubscribe={handleCheckout}
+				/>
 
-								<Button
-									size="lg"
-									disabled={isProcessing}
-									className="w-full dark:bg-white py-3 rounded-lg dark:hover:bg-gray-700 transition-colors font-semibold"
-									onClick={() => {
-										if (user?.id) {
-											handleCheckout(
-												process.env
-													.NEXT_PUBLIC_ESSENTIAL_PRICE_ID,
-												"Essential Dev",
-												5
-											);
-										} else {
-											toast(
-												"Please login or sign up to purchase",
-												{
-													description:
-														"You must be logged in to make a purchase",
-													action: {
-														label: "Sign Up",
-														onClick: () => {
-															router.push(
-																"/sign-up"
-															);
-														},
-													},
-												}
-											);
-										}
-									}}
-								>
-									{isProcessing && <Spinner />}
-									Subscribe Now
-								</Button>
-							</div>
-
-							{/* Discounted Plan Card */}
-							<div className="w-full max-w-md bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-xl shadow-xl p-6 relative overflow-hidden transform transition-all duration-300 hover:scale-105">
-								<div className="absolute top-0 right-0 m-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
-									30% OFF
-								</div>
-
-								<div className="mb-6">
-									<h2 className="text-2xl font-bold mb-2">
-										Coming Soon: Pro Dev Suite
-									</h2>
-									<div className="flex items-baseline">
-										<span className="text-4xl font-extrabold mr-2 line-through opacity-50">
-											$60
-										</span>
-										<span className="text-4xl font-extrabold text-white mr-2">
-											$42
-										</span>
-										<span className="text-gray-200">
-											/6 months
-										</span>
-									</div>
-									<p className="mt-4 text-white/80">
-										Pre-order our upcoming pro features and
-										save big on our most comprehensive plan.
-									</p>
-								</div>
-
-								<ul className="mb-6 space-y-4">
-									{[
-										"All 'Essential Dev' Features",
-										"Custom Domain Integration",
-										"Blog Integration",
-										"Priority Customer Support",
-									].map((feature, index) => (
-										<li
-											key={index}
-											className="flex items-center space-x-3"
-										>
-											<svg
-												className="h-5 w-5 text-green-300"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
-											<span>{feature}</span>
-										</li>
-									))}
-								</ul>
-
-								<Button
-									size="lg"
-									disabled={isProcessing}
-									className="w-full bg-white text-purple-700 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-									onClick={() => {
-										if (user?.id) {
-											handleCheckout(
-												process.env
-													.NEXT_PUBLIC_PRO_PRICE_ID,
-												"Pro Dev Suite",
-												42
-											);
-										} else {
-											toast(
-												"Please login or sign up to purchase",
-												{
-													description:
-														"You must be logged in to make a purchase",
-													action: {
-														label: "Sign Up",
-														onClick: () => {
-															router.push(
-																"/sign-up"
-															);
-														},
-													},
-												}
-											);
-										}
-									}}
-								>
-									{isProcessing && <Spinner />}
-									Pre-order Now
-								</Button>
-							</div>
-						</div>
-					</section>
-				</TabsContent>
-				<TabsContent value="annually">
-					<section className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-8 mt-8">
-						<div className="flex flex-col md:flex-row gap-6 justify-center items-center py-12 px-4">
-							{/* Standard Plan Card */}
-							<div className="w-full max-w-md border border-gray-200 rounded-xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
-								<div className="mb-6">
-									<h2 className="text-2xl font-bold mb-2">
-										Essential Dev
-									</h2>
-									<div className="flex items-baseline">
-										<span className="text-4xl font-extrabold mr-2">
-											$50
-										</span>
-										<span>/year</span>
-									</div>
-									<p className="mt-4">
-										Perfect for beginners or developers
-										looking to create a simple, professional
-										portfolio with essential features.
-									</p>
-								</div>
-
-								<ul className="mb-6 space-y-4">
-									{[
-										"Mobile-Responsive Design",
-										"Unlimited Project Display",
-										"Basic shareable link",
-										"Contact Form with Email Notifications",
-									].map((feature, index) => (
-										<li
-											key={index}
-											className="flex items-center space-x-3"
-										>
-											<svg
-												className="h-5 w-5 text-green-500"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
-											<span>{feature}</span>
-										</li>
-									))}
-								</ul>
-
-								<Button
-									size="lg"
-									disabled={isProcessing}
-									className="w-full dark:bg-white py-3 rounded-lg dark:hover:bg-gray-700 transition-colors font-semibold"
-									onClick={() => {
-										if (user?.id) {
-											handleCheckout(
-												process.env
-													.NEXT_PUBLIC_ESSENTIAL_YEARLY_PRICE_ID,
-												"Essential Dev",
-												50
-											);
-										} else {
-											toast(
-												"Please login or sign up to purchase",
-												{
-													description:
-														"You must be logged in to make a purchase",
-													action: {
-														label: "Sign Up",
-														onClick: () => {
-															router.push(
-																"/sign-up"
-															);
-														},
-													},
-												}
-											);
-										}
-									}}
-								>
-									{isProcessing && <Spinner />}
-									Subscribe Now
-								</Button>
-							</div>
-
-							{/* Discounted Plan Card */}
-							<div className="w-full max-w-md bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-xl shadow-xl p-6 relative overflow-hidden transform transition-all duration-300 hover:scale-105">
-								<div className="absolute top-0 right-0 m-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
-									30% OFF
-								</div>
-
-								<div className="mb-6">
-									<h2 className="text-2xl font-bold mb-2">
-										Coming Soon: Pro Dev Suite
-									</h2>
-									<div className="flex items-baseline">
-										<span className="text-4xl font-extrabold mr-2 line-through opacity-50">
-											$120
-										</span>
-										<span className="text-4xl font-extrabold text-white mr-2">
-											$84
-										</span>
-										<span className="text-gray-200">
-											/year
-										</span>
-									</div>
-									<p className="mt-4 text-white/80">
-										Pre-order our upcoming pro features and
-										save big on our most comprehensive plan.
-									</p>
-								</div>
-
-								<ul className="mb-6 space-y-4">
-									{[
-										"All 'Essential Dev' Features",
-										"Custom Domain Integration",
-										"Blog Integration",
-										"Priority Customer Support",
-									].map((feature, index) => (
-										<li
-											key={index}
-											className="flex items-center space-x-3"
-										>
-											<svg
-												className="h-5 w-5 text-green-300"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth="2"
-													d="M5 13l4 4L19 7"
-												/>
-											</svg>
-											<span>{feature}</span>
-										</li>
-									))}
-								</ul>
-
-								<Button
-									size="lg"
-									disabled={isProcessing}
-									className="w-full bg-white text-purple-700 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold"
-									onClick={() => {
-										if (user?.id) {
-											handleCheckout(
-												process.env
-													.NEXT_PUBLIC_PRO_YEARLY_PRICE_ID,
-												"Pro Dev Suite",
-												84
-											);
-										} else {
-											toast(
-												"Please login or sign up to purchase",
-												{
-													description:
-														"You must be logged in to make a purchase",
-													action: {
-														label: "Sign Up",
-														onClick: () => {
-															router.push(
-																"/sign-up"
-															);
-														},
-													},
-												}
-											);
-										}
-									}}
-								>
-									{isProcessing && <Spinner />}
-									Pre-order Now
-								</Button>
-							</div>
-						</div>
-					</section>
-				</TabsContent>
-			</Tabs>
+				<PricingCard
+					type="Team"
+					billing={teamBilling}
+					prices={SUBSCRIPTION_PLANS.TEAM}
+					features={SUBSCRIPTION_PLANS.TEAM[teamBilling].features}
+					isHovered={isHoveredTeam}
+					onMouseEnter={() => setIsHoveredTeam(true)}
+					onMouseLeave={() => setIsHoveredTeam(false)}
+					onBillingChange={setTeamBilling}
+					onSubscribe={handleCheckout}
+				/>
+			</div>
 		</div>
 	);
 }

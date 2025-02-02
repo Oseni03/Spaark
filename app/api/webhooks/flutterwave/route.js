@@ -1,35 +1,41 @@
 import { NextResponse } from "next/server";
-import { handleCancelledSubscription } from "@/services/flutterwave";
+import {
+	handleChargeWebhook,
+	handleSubscriptionCancelled,
+} from "@/services/webhooks";
 import { logger } from "@/lib/utils";
 
 export async function POST(req) {
 	const secretHash = process.env.FLW_SECRET_HASH;
 	const signature = req.headers.get("verif-hash");
 
-	// Validate the signature
 	if (!signature || signature !== secretHash) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
 	try {
-		const payload = await req.json(); // Parse the JSON payload
+		const payload = await req.json();
+		logger.info(`Received webhook: ${payload.event}`);
 
-		// Log the received payload for debugging purposes
-		logger.info("Webhook payload:", payload);
+		switch (payload.event) {
+			case "charge.completed":
+				await handleChargeWebhook(payload.data);
+				break;
 
-		if (
-			payload.event === "subscription.cancelled" &&
-			payload.data.status === "deactivated"
-		) {
-			await handleCancelledSubscription(payload.data);
+			case "subscription.cancelled":
+				await handleSubscriptionCancelled(payload.data);
+				break;
+
+			default:
+				logger.info(`Unhandled webhook event: ${payload.event}`);
+				break;
 		}
 
-		// Respond quickly to confirm receipt
-		return NextResponse.json({ success: true }, { status: 200 });
+		return NextResponse.json({ received: true });
 	} catch (error) {
-		logger.error("Error handling webhook:", error);
+		logger.error("Webhook processing error:", error);
 		return NextResponse.json(
-			{ error: "Internal Server Error" },
+			{ error: "Webhook processing failed" },
 			{ status: 500 }
 		);
 	}

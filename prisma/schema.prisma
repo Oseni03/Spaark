@@ -45,6 +45,7 @@ model User {
   memberships    OrganizationMember[]
   organizations  Organization[]     // Organizations owned by user
   transactions   Transaction[]
+  subscription   Subscription?
 
   // One-to-one relation to Code
   code           Code?
@@ -288,15 +289,36 @@ model Hackathon {
 }
 
 model Transaction {
-  id        String   @id @default(cuid())
-  userId    String
-  status    String?  @default("pending")
-  priceId   String
-  title     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id            String       @id @default(cuid())
+  userId        String
+  status        String      @default("pending")
+  priceId       String
+  title         String
+  amount        Float
+  subscriptionId String?
+  subscription  Subscription? @relation(fields: [subscriptionId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime?   @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([subscriptionId])
+}
+
+model Subscription {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  type          String    // INDIVIDUAL or TEAM
+  frequency     String    // weekly, monthly, yearly
+  status        String    @default("pending")
+  priceId       String
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
 
   @@index([userId])
 }
