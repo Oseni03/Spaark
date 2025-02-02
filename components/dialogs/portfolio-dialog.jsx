@@ -38,7 +38,7 @@ export const PortfolioDialog = ({
 			reset({
 				name: currentPortfolio?.name || "",
 				slug: currentPortfolio?.slug || "",
-				isPublic: currentPortfolio?.isPublic ?? true,
+				isLive: currentPortfolio?.isLive ?? false,
 				isPrimary: currentPortfolio?.isPrimary ?? false,
 				customDomain: currentPortfolio?.customDomain || "",
 			});
@@ -183,12 +183,12 @@ export const PortfolioDialog = ({
 					)}
 
 					<Controller
-						name="isPublic"
+						name="isLive"
 						control={control}
 						render={({ field, fieldState }) => (
 							<div className="items-top flex space-x-2">
 								<Checkbox
-									id="isPublic"
+									id="isLive"
 									checked={field.value}
 									onCheckedChange={field.onChange}
 								/>
@@ -199,7 +199,7 @@ export const PortfolioDialog = ({
 								)}
 								<div className="grid gap-1.5 leading-none">
 									<label
-										htmlFor="isPublic"
+										htmlFor="isLive"
 										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 									>
 										Public

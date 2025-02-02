@@ -72,17 +72,9 @@ export const PortfolioCard = ({ portfolio }) => {
 			...portfolio,
 			id: createId(), // Remove ID to create a new one
 			name: `${portfolio.name} (Copy)`,
+			slug: `${portfolio.slug}-copy`
 		};
 		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
-	};
-
-	const onPublicChange = () => {
-		dispatch(
-			updatePortfolioInDatabase({
-				id: portfolio.id,
-				data: { ...portfolio, isPublic: !portfolio.isPublic },
-			})
-		);
 	};
 
 	const onPrimaryChange = () => {
@@ -183,10 +175,6 @@ export const PortfolioCard = ({ portfolio }) => {
 					<ContextMenuItem onClick={onDuplicate}>
 						<CopySimple size={14} className="mr-2" />
 						{`Duplicate`}
-					</ContextMenuItem>
-					<ContextMenuItem onClick={onPublicChange}>
-						<Globe size={14} className="mr-2" />
-						{portfolio.isPublic ? `Make Private` : `Make Public`}
 					</ContextMenuItem>
 					<ContextMenuItem onClick={onPrimaryChange}>
 						{portfolio.isPrimary ? (

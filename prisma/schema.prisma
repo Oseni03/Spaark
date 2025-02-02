@@ -103,7 +103,7 @@ model Portfolio {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
-  isPublic    Boolean   @default(true)
+  isLive      Boolean   @default(false)
   blogEnabled Boolean   @default(false)
   isPrimary   Boolean   @default(false)
   customDomain String?

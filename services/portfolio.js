@@ -10,7 +10,7 @@ const portfolioSelect = {
 	id: true,
 	name: true,
 	slug: true,
-	isPublic: true,
+	isLive: true,
 	blogEnabled: true,
 	isPrimary: true,
 	customDomain: true,
@@ -143,7 +143,7 @@ export async function getPortfolio(domain) {
 		const portfolio = await prisma.portfolio.findFirst({
 			where: {
 				OR: [{ customDomain: domain }, { slug: domain }],
-				isPublic: true,
+				isLive: true,
 			},
 			select: portfolioSelect,
 		});
