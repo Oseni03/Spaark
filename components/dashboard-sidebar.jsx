@@ -21,6 +21,7 @@ import {
 	IconBook,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/app/dashboard/layout";
 
 const links = [
 	{
@@ -55,23 +56,28 @@ export function DashboardSidebar() {
 			<SidebarHeader>
 				<div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
 					<div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
-						<OrganizationSwitcher
-							afterCreateOrganizationUrl="/dashboard/portfolios"
-							afterLeaveOrganizationUrl="/dashboard/portfolios"
-							afterSelectOrganizationUrl="/dashboard/portfolios"
-							createOrganizationMode={
-								isIndividualAccount ? "none" : "modal"
-							}
-							appearance={{
-								elements: {
-									rootBox: "w-full",
-									organizationSwitcherTrigger: cn(
-										"w-full flex justify-between items-center",
-										"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
-									),
-								},
-							}}
-						/>
+						{isIndividualAccount ? (
+							<Logo />
+						) : (
+							<OrganizationSwitcher
+								afterCreateOrganizationUrl="/dashboard/portfolios"
+								afterLeaveOrganizationUrl="/dashboard/portfolios"
+								afterSelectOrganizationUrl="/dashboard/portfolios"
+								createOrganizationMode={
+									isIndividualAccount ? "none" : "modal"
+								}
+								// hidePersonal={false}
+								appearance={{
+									elements: {
+										rootBox: "w-full",
+										organizationSwitcherTrigger: cn(
+											"w-full flex justify-between items-center",
+											"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
+										),
+									},
+								}}
+							/>
+						)}
 					</div>
 				</div>
 			</SidebarHeader>
