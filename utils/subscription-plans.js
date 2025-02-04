@@ -1,9 +1,6 @@
 export const SUBSCRIPTION_PLANS = {
 	INDIVIDUAL: {
 		weekly: {
-			name: "Individual Weekly Plan",
-			description:
-				"Perfect for individuals who need a short-term solution with all essential features.",
 			price: 3,
 			priceId: process.env.NEXT_PUBLIC_WEEKLY_INDIVIDUAL_PRICE_ID,
 			interval: "week",
@@ -17,9 +14,6 @@ export const SUBSCRIPTION_PLANS = {
 			],
 		},
 		monthly: {
-			name: "Individual Monthly Plan",
-			description:
-				"Ideal for individuals looking for a monthly subscription with comprehensive features.",
 			price: 10,
 			priceId: process.env.NEXT_PUBLIC_MONTHLY_INDIVIDUAL_PRICE_ID,
 			interval: "month",
@@ -33,9 +27,6 @@ export const SUBSCRIPTION_PLANS = {
 			],
 		},
 		yearly: {
-			name: "Individual Yearly Plan",
-			description:
-				"Best value for individuals who want a long-term subscription with all features included.",
 			price: 96,
 			priceId: process.env.NEXT_PUBLIC_YEARLY_INDIVIDUAL_PRICE_ID,
 			interval: "year",
@@ -51,9 +42,6 @@ export const SUBSCRIPTION_PLANS = {
 	},
 	TEAM: {
 		monthly: {
-			name: "Team Monthly Plan",
-			description:
-				"Great for teams needing collaboration tools and shared resources on a monthly basis.",
 			price: 25,
 			priceId: process.env.NEXT_PUBLIC_MONTHLY_TEAM_PRICE_ID,
 			interval: "month",
@@ -67,9 +55,6 @@ export const SUBSCRIPTION_PLANS = {
 			],
 		},
 		yearly: {
-			name: "Team Yearly Plan",
-			description:
-				"Best value for teams looking for long-term collaboration tools and premium support.",
 			price: 240,
 			priceId: process.env.NEXT_PUBLIC_YEARLY_TEAM_PRICE_ID,
 			interval: "year",
