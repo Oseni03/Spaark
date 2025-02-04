@@ -179,3 +179,49 @@ export async function publishBlog({ blogId, portfolioId }) {
 		return blogSchema.parse(blog);
 	});
 }
+
+export async function getBlogPosts(portfolioId) {
+	return withErrorHandling(async () => {
+		const posts = await prisma.blog.findMany({
+			where: {
+				portfolioId,
+				status: "published",
+			},
+			orderBy: {
+				publishedAt: "desc",
+			},
+			include: {
+				tags: true,
+			},
+		});
+
+		return posts;
+	});
+}
+
+export async function getBlogPost(portfolioId, slug) {
+	return withErrorHandling(async () => {
+		const post = await prisma.blog.findFirst({
+			where: {
+				portfolioId,
+				slug,
+				status: "published",
+			},
+			include: {
+				tags: true,
+			},
+		});
+
+		if (!post) {
+			throw new Error("Post not found");
+		}
+
+		// Increment view count
+		await prisma.blog.update({
+			where: { id: post.id },
+			data: { views: { increment: 1 } },
+		});
+
+		return post;
+	});
+}

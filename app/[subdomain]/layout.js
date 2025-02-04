@@ -76,6 +76,7 @@ export default async function PortfolioLayout({ params, children }) {
 					<PortfolioProvider
 						portfolio={portfolio}
 						metaTags={metaTags}
+						blogEnabled={portfolio.blogEnabled}
 					>
 						{children}
 					</PortfolioProvider>

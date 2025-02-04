@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }) {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(`/api/get-portfolio`);
+				const response = await fetch(`/api/portfolio`);
 				if (!response.ok) {
 					throw new Error("Failed to fetch user data");
 				}
