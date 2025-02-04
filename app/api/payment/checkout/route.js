@@ -81,41 +81,42 @@ export async function POST(request) {
 		});
 		logger.info("Transaction created", { transactionId: txn.data.id });
 
-		logger.info("Initiating Flutterwave payment");
-		const flutterwaveResponse = await axios.post(
-			"https://api.flutterwave.com/v3/payments",
+		logger.info("Initiating Paystack payment");
+		const paystackResponse = await axios.post(
+			"https://api.paystack.co/transaction/initialize",
 			{
-				tx_ref: txn.data.id,
-				amount: price,
-				currency: "USD",
-				payment_options: "card",
-				redirect_url: returnUrl || process.env.NEXT_PUBLIC_APP_URL,
-				customer: {
-					email: userEmail,
-					name: username || "Unknown User",
-				},
-				meta: {
+				email: userEmail,
+				plan: priceId, // Using priceId as Paystack plan code
+				reference: txn.data.id,
+				callback_url: returnUrl || process.env.NEXT_PUBLIC_APP_URL,
+				metadata: {
 					subscriptionId: subscription.id,
 					type,
 					frequency,
-				},
-				customizations: {
-					title: `${type} Subscription`,
-					description: `${frequency} subscription payment`,
+					price, // Keep price in metadata for tracking
+					custom_fields: [
+						{
+							display_name: "Subscription Type",
+							variable_name: "subscription_type",
+							value: type,
+						},
+					],
 				},
 			},
 			{
 				headers: {
-					Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+					Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+					"Content-Type": "application/json",
 				},
 			}
 		);
-		logger.info("Flutterwave payment initiated", {
-			paymentLink: flutterwaveResponse.data.data.link,
+
+		logger.info("Paystack payment initiated", {
+			paymentLink: paystackResponse.data.data.authorization_url,
 		});
 
 		return NextResponse.json({
-			link: flutterwaveResponse.data.data.link,
+			link: paystackResponse.data.data.authorization_url,
 			status: "success",
 		});
 	} catch (error) {

@@ -11,15 +11,14 @@ axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
 export async function POST(request) {
 	try {
-		const { tx_ref, status } = await request.json();
+		const { reference } = await request.json();
 
-		// Verify payment with Flutterwave
+		// Verify payment with Paystack
 		const response = await axios.get(
-			`https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${tx_ref}`,
+			`https://api.paystack.co/transaction/verify/${reference}`,
 			{
 				headers: {
-					accept: "application/json",
-					Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+					Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
 					"Content-Type": "application/json",
 				},
 			}
@@ -27,9 +26,9 @@ export async function POST(request) {
 
 		const { data } = response.data;
 
-		if (status === "cancelled" || data.status === "cancelled") {
+		if (data.status === "abandoned" || data.status === "failed") {
 			await handlePaymentFailure({
-				transactionId: tx_ref,
+				transactionId: reference,
 			});
 
 			return NextResponse.json({
@@ -39,14 +38,9 @@ export async function POST(request) {
 			});
 		}
 
-		// Verify that the transaction was successful
-		if (
-			data.status === "successful" &&
-			data.tx_ref === tx_ref &&
-			status === "successful"
-		) {
+		if (data.status === "success") {
 			await handlePaymentSuccess({
-				transactionId: tx_ref,
+				transactionId: reference,
 			});
 
 			return NextResponse.json({
