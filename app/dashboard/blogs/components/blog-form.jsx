@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { slugify } from "@/utils/text";
@@ -48,6 +48,7 @@ export function BlogForm({
 		featuredImage: undefined,
 	},
 }) {
+	const [validationLoading, setValidationLoading] = useState(false);
 	const form = useForm({
 		resolver: zodResolver(blogFormSchema),
 		defaultValues,
@@ -92,6 +93,7 @@ export function BlogForm({
 	};
 
 	const handleSubmit = async (data) => {
+		setValidationLoading(true);
 		try {
 			logger.info("Validating form data", { data });
 
@@ -126,6 +128,8 @@ export function BlogForm({
 			}
 			// Let the error propagate to be handled by the parent
 			throw error;
+		} finally {
+			setValidationLoading(false);
 		}
 	};
 
@@ -292,8 +296,10 @@ export function BlogForm({
 					)}
 				/>
 
-				<Button type="submit" disabled={loading}>
-					{loading ? "Saving..." : "Save Blog Post"}
+				<Button type="submit" disabled={loading || validationLoading}>
+					{loading || validationLoading
+						? "Saving..."
+						: "Save Blog Post"}
 				</Button>
 			</form>
 		</Form>

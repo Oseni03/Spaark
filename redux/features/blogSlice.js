@@ -4,7 +4,6 @@ import {
 	updateBlogInDatabase,
 	removeBlogFromDatabase,
 	fetchBlogsForPortfolio,
-	publishBlogInDatabase,
 } from "../thunks/blog";
 import { logger } from "@/lib/utils";
 
@@ -100,14 +99,14 @@ export const blogSlice = createSlice({
 
 				if (!data) return;
 
-				const index = state.items.findIndex(
-					(blog) => blog.id === data.id
-				);
-
 				if (error) {
 					state.error = error || "Failed to update blog";
 					return;
 				}
+
+				const index = state.items.findIndex(
+					(blog) => blog.id === data.id
+				);
 
 				if (index !== -1) {
 					state.items[index] = data;
@@ -131,44 +130,6 @@ export const blogSlice = createSlice({
 			.addCase(removeBlogFromDatabase.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload?.error || "Failed to remove blog";
-			})
-			// Publish blog
-			.addCase(publishBlogInDatabase.pending, (state) => {
-				state.loading = true;
-				state.error = null;
-			})
-			.addCase(publishBlogInDatabase.fulfilled, (state, action) => {
-				const { data, error } = action.payload;
-				state.loading = false;
-
-				if (!data) {
-					logger.warn("No data received in publish blog response");
-					return;
-				}
-
-				logger.info("Publishing blog:", {
-					blogId: data.id,
-					previousStatus: state.items.find((b) => b.id === data.id)
-						?.status,
-					newStatus: data.status,
-				});
-
-				const index = state.items.findIndex(
-					(blog) => blog.id === data.id
-				);
-
-				if (error) {
-					state.error = error || "Failed to update blog";
-					return;
-				}
-
-				if (index !== -1) {
-					state.items[index] = action.payload;
-				}
-			})
-			.addCase(publishBlogInDatabase.rejected, (state, action) => {
-				state.loading = false;
-				state.error = action.payload?.error || "Failed to publish blog";
 			});
 	},
 });

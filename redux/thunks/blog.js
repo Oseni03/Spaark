@@ -39,10 +39,6 @@ export const createBlogInDatabase = createAsyncThunk(
 				},
 			});
 
-			if (!blog) {
-				return rejectWithValue({ error: "Failed to create blog" });
-			}
-
 			return blog;
 		} catch (error) {
 			logger.error("Error creating blog:", error);
@@ -79,19 +75,6 @@ export const removeBlogFromDatabase = createAsyncThunk(
 			return { id: blogId };
 		} catch (error) {
 			logger.error("Error removing blog:", error);
-			return rejectWithValue({ error: error.message });
-		}
-	}
-);
-
-export const publishBlogInDatabase = createAsyncThunk(
-	"blogs/publish",
-	async ({ blogId, portfolioId }, { rejectWithValue }) => {
-		try {
-			const blog = await publishBlogAction({ blogId, portfolioId });
-			return blog;
-		} catch (error) {
-			logger.error("Error publishing blog:", error);
 			return rejectWithValue({ error: error.message });
 		}
 	}

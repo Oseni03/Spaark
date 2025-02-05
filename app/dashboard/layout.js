@@ -6,6 +6,7 @@ import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { useDispatch } from "react-redux";
 import { setPortfolios } from "@/redux/features/portfolioSlice";
+import { setBlogs } from "@/redux/features/blogSlice";
 import { logger } from "@/lib/utils";
 import { setUser } from "@/redux/features/userSlice";
 import { OrganizationProvider } from "@/context/OrganizationContext";
@@ -41,11 +42,47 @@ export default function DashboardLayout({ children }) {
 					hasUser: !!user,
 				});
 
-				if (portfolios) {
+				if (portfolios?.data) {
 					logger.info("Updating portfolios in store", {
 						count: portfolios.data.length,
 					});
 					dispatch(setPortfolios(portfolios.data));
+
+					// Fetch blogs for each portfolio
+					const blogsPromises = portfolios.data.map(
+						async (portfolio) => {
+							try {
+								const blogResponse = await fetch(
+									`/api/blogs?portfolioId=${portfolio.id}`
+								);
+								if (!blogResponse.ok)
+									throw new Error(
+										`Failed to fetch blogs for portfolio ${portfolio.id}`
+									);
+								const { blogs } = await blogResponse.json();
+								return blogs?.data || [];
+							} catch (error) {
+								logger.error(
+									`Error fetching blogs for portfolio ${portfolio.id}:`,
+									error
+								);
+								return [];
+							}
+						}
+					);
+
+					// Wait for all blog fetches to complete
+					const allBlogs = await Promise.all(blogsPromises);
+					// Combine all blogs into a single array
+					const flattenedBlogs = allBlogs.flat();
+
+					logger.info("Updating blogs in store", {
+						totalBlogs: flattenedBlogs.length,
+						portfoliosCount: portfolios.data.length,
+						blogs: flattenedBlogs,
+					});
+
+					dispatch(setBlogs(flattenedBlogs));
 				}
 
 				if (user) {

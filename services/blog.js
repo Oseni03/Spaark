@@ -31,6 +31,13 @@ const select = {
 	},
 };
 
+const serializeDates = (blog) => ({
+	...blog,
+	publishedAt: blog.publishedAt?.toISOString(),
+	createdAt: blog.createdAt?.toISOString(),
+	updatedAt: blog.updatedAt?.toISOString(),
+});
+
 export async function getBlogs(portfolioId) {
 	return withErrorHandling(async () => {
 		const blogs = await prisma.blog.findMany({
@@ -38,8 +45,11 @@ export async function getBlogs(portfolioId) {
 			orderBy: { updatedAt: "desc" },
 			select,
 		});
-
-		return blogs.map((blog) => blogSchema.parse(blog));
+		const processed = blogs.map((blog) => {
+			const parsed = blogSchema.parse(blog);
+			return serializeDates(parsed);
+		});
+		return processed;
 	});
 }
 
@@ -57,7 +67,7 @@ export async function getBlog(blogId, portfolioId) {
 			throw new Error("Blog not found");
 		}
 
-		return blogSchema.parse(blog);
+		return serializeDates(blogSchema.parse(blog));
 	});
 }
 
@@ -83,7 +93,7 @@ export async function createBlog({ portfolioId, data }) {
 		});
 
 		revalidatePath("/dashboard/blogs");
-		return blogSchema.parse(blog);
+		return serializeDates(blogSchema.parse(blog));
 	});
 }
 
@@ -113,7 +123,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 		});
 
 		revalidatePath("/dashboard/blogs");
-		return blogSchema.parse(blog);
+		return serializeDates(blogSchema.parse(blog));
 	});
 }
 
@@ -136,30 +146,6 @@ export async function deleteBlog({ blogId, portfolioId }) {
 	});
 }
 
-export async function publishBlog({ blogId, portfolioId }) {
-	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
-
-		const blog = await prisma.blog.update({
-			where: {
-				id: blogId,
-				portfolioId,
-			},
-			data: {
-				status: "published",
-				publishedAt: new Date(),
-			},
-			select,
-		});
-
-		revalidatePath("/dashboard/blogs");
-		return blogSchema.parse(blog);
-	});
-}
-
 export async function getBlogPosts(portfolioId) {
 	return withErrorHandling(async () => {
 		const posts = await prisma.blog.findMany({
@@ -173,7 +159,7 @@ export async function getBlogPosts(portfolioId) {
 			select,
 		});
 
-		return posts;
+		return posts.map((post) => serializeDates(blogSchema.parse(post)));
 	});
 }
 
@@ -195,6 +181,6 @@ export async function getBlogPost(portfolioId, slug) {
 			data: { views: { increment: 1 } },
 		});
 
-		return blogSchema.parse(post);
+		return serializeDates(blogSchema.parse(post));
 	});
 }

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
 	removeBlogFromDatabase,
-	publishBlogInDatabase,
+	updateBlogInDatabase,
 	createBlogInDatabase,
 } from "@/redux/thunks/blog";
 import {
@@ -48,7 +48,7 @@ export const BlogCard = ({ blog }) => {
 	const router = useRouter();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-	const formattedDate = dayjs(blog.updatedAt).fromNow();
+	const formattedDate = dayjs(new Date(blog.updatedAt)).fromNow();
 
 	const onOpen = () => {
 		router.push(`/dashboard/blogs/${blog.id}`);
@@ -114,9 +114,14 @@ export const BlogCard = ({ blog }) => {
 	const onPublish = async () => {
 		try {
 			const result = await dispatch(
-				publishBlogInDatabase({
+				updateBlogInDatabase({
 					blogId: blog.id,
 					portfolioId: blog.portfolioId,
+					data: {
+						status: blog.status === "draft" ? "published" : "draft",
+						publishedAt:
+							blog.status === "draft" ? new Date() : null,
+					},
 				})
 			).unwrap();
 
@@ -135,13 +140,15 @@ export const BlogCard = ({ blog }) => {
 		}
 	};
 
+	if (!blog) return;
+
 	return (
 		<>
 			<ContextMenu>
 				<ContextMenuTrigger>
 					<BaseCard className="space-y-0" onClick={onOpen}>
 						<AnimatePresence>
-							{blog.status === "published" && (
+							{blog.status === "draft" && (
 								<motion.div
 									initial={{ opacity: 0 }}
 									animate={{ opacity: 1 }}
