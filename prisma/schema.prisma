@@ -358,7 +358,7 @@ model Blog {
   slug          String      @unique
   content       Json?       // For rich text content
   excerpt       String?     @db.Text
-  featuredImage Json?       // For image metadata
+  featuredImage String?
   status        String      @default("draft") // draft, published
   publishedAt   DateTime?
   createdAt     DateTime    @default(now())

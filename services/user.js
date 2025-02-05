@@ -4,14 +4,16 @@ import { prisma } from "@/lib/db"; // Assume this is your database connection
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { userSchema } from "@/schema/user";
 
 const userSelect = {
 	id: true,
 	username: true,
 	email: true,
 	subscribed: true,
-	basics: true,
+	userType: true,
 	createdAt: true,
+	updatedAt: true,
 	subscription: {
 		select: {
 			id: true,
@@ -31,7 +33,7 @@ export async function getUserByUsername(username) {
 			where: { username },
 			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -41,7 +43,7 @@ export async function getUserByEmail(email) {
 			where: { email },
 			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -62,7 +64,7 @@ export async function getUsers() {
 				},
 			},
 		});
-		return users;
+		return users.map((user) => userSchema.parse(user));
 	});
 }
 
@@ -72,7 +74,7 @@ export async function getUser(userId) {
 			where: { id: userId },
 			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -85,7 +87,7 @@ export async function createUser(userId, username, email) {
 				email,
 			},
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -102,12 +104,13 @@ export async function updateUser(data) {
 				...data,
 				updatedAt: new Date(), // Ensure updated timestamp is set
 			},
+			select: userSelect,
 		});
 
 		// Revalidate the path to update cached data
 		revalidatePath("/builder");
 
-		return updatedUser;
+		return userSchema.parse(updatedUser);
 	});
 }
 
@@ -118,6 +121,6 @@ export async function deleteUser(userId) {
 				id: userId,
 			},
 		});
-		return user;
+		return { userId };
 	});
 }

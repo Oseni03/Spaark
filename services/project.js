@@ -6,26 +6,28 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { projectSchema } from "@/schema/sections";
 
+const select = {
+	id: true,
+	visible: true,
+	name: true,
+	description: true,
+	date: true,
+	technologies: true,
+	url: true,
+	image: true,
+	video: true,
+	links: {
+		select: { id: true, label: true, url: true, icon: true },
+	},
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
 export async function getProjects(portfolioId) {
 	return withErrorHandling(async () => {
 		const projects = await prisma.project.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				technologies: true,
-				url: true,
-				image: true,
-				video: true,
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 		if (projects.length > 0) {
 			return projects.map((item) => projectSchema.parse(item));
@@ -59,27 +61,12 @@ export async function createProject({ portfolioId, ...data }) {
 					})),
 				},
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				technologies: true,
-				url: true,
-				image: true,
-				video: true,
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return project;
+		return projectSchema.parse(project);
 	});
 }
 
@@ -121,28 +108,13 @@ export async function editProject(projectId, { portfolioId, ...data }) {
 					},
 				},
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				technologies: true,
-				url: true,
-				image: true,
-				video: true,
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedProject;
+		return projectSchema.parse(updatedProject);
 	});
 }
 

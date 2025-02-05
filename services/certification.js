@@ -6,21 +6,23 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { certificationSchema } from "@/schema/sections";
 
+const certificationSelect = {
+	id: true,
+	visible: true,
+	name: true,
+	issuer: true,
+	date: true,
+	summary: true,
+	url: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
 export async function getCertifications(portfolioId) {
 	return withErrorHandling(async () => {
 		const certifications = await prisma.certification.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				issuer: true,
-				date: true,
-				summary: true,
-				url: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select: certificationSelect,
 		});
 		if (certifications.length > 0) {
 			return certifications.map((item) =>
@@ -43,20 +45,11 @@ export async function createCertification({ portfolioId, ...data }) {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				issuer: true,
-				date: true,
-				summary: true,
-				url: true,
-				portfolioId: true,
-			},
+			select: certificationSelect,
 		});
 
 		revalidatePath("/builder");
-		return certification;
+		return certificationSchema.parse(certification);
 	});
 }
 
@@ -76,20 +69,11 @@ export async function editCertification(
 				...data,
 				updatedAt: new Date(),
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				issuer: true,
-				date: true,
-				summary: true,
-				url: true,
-				portfolioId: true,
-			},
+			select: certificationSelect,
 		});
 
 		revalidatePath("/builder");
-		return updatedCertification;
+		return certificationSchema.parse(updatedCertification);
 	});
 }
 

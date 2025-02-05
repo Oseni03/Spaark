@@ -7,13 +7,7 @@ export const blogMetadataSchema = z.object({
 	title: z.string().min(1, "Title is required"),
 	slug: z.string(),
 	excerpt: z.string().optional(),
-	featuredImage: z
-		.object({
-			url: z.string().url("Invalid image URL"),
-			alt: z.string(),
-			title: z.string(),
-		})
-		.optional(),
+	featuredImage: z.string().url("Invalid image URL").optional().nullable(),
 	status: z.enum(["draft", "published"]).default("draft"),
 	tags: z.array(z.string()).default([]),
 });
@@ -34,8 +28,7 @@ export const blogSchema = z
 	.merge(blogMetadataSchema);
 
 // Default values
-export const defaultBlog = {
-	id: createId(),
+export const defaultBlogMetadata = {
 	title: "",
 	slug: "",
 	excerpt: "",
@@ -43,9 +36,14 @@ export const defaultBlog = {
 	featuredImage: null,
 	status: "draft",
 	tags: [],
+};
+
+export const defaultBlog = {
+	...defaultBlogMetadata,
+	id: createId(),
 	views: 0,
 	likes: 0,
 	publishedAt: null,
-	createdAt: new Date(),
-	updatedAt: new Date(),
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
 };

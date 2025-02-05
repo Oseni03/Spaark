@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { logger } from "@/lib/utils";
-import { blogSchema, blogMetadataSchema } from "@/schema/sections/blog";
-import { slugify } from "@/utils/text";
+import { blogSchema } from "@/schema/sections/blog";
 import {
 	getBlogs as getBlogsAction,
 	getBlog as getBlogAction,
@@ -28,24 +27,15 @@ export const createBlogInDatabase = createAsyncThunk(
 	"blogs/create",
 	async ({ portfolioId, data }, { rejectWithValue }) => {
 		try {
-			// Validate metadata
-			const metadata = blogMetadataSchema.parse({
-				title: data.title,
-				slug: slugify(data.title),
-				featuredImage: data.featuredImage,
-				excerpt: data.excerpt,
-			});
-
 			const blog = await createBlogAction({
 				portfolioId,
 				data: {
-					...metadata,
-					content: data.content,
+					...data,
 					status: "draft",
 				},
 			});
 
-			return blogSchema.parse(blog);
+			return blog;
 		} catch (error) {
 			logger.error("Error creating blog:", error);
 			return rejectWithValue({ error: error.message });
@@ -57,23 +47,13 @@ export const updateBlogInDatabase = createAsyncThunk(
 	"blogs/update",
 	async ({ blogId, portfolioId, data }, { rejectWithValue }) => {
 		try {
-			const metadata = blogMetadataSchema.parse({
-				title: data.title,
-				slug: slugify(data.title),
-				featuredImage: data.featuredImage,
-				excerpt: data.excerpt,
-			});
-
 			const blog = await updateBlogAction({
 				blogId,
 				portfolioId,
-				data: {
-					...metadata,
-					content: data.content,
-				},
+				data,
 			});
 
-			return blogSchema.parse(blog);
+			return blog;
 		} catch (error) {
 			logger.error("Error updating blog:", error);
 			return rejectWithValue({ error: error.message });
@@ -99,7 +79,7 @@ export const publishBlogInDatabase = createAsyncThunk(
 	async ({ blogId, portfolioId }, { rejectWithValue }) => {
 		try {
 			const blog = await publishBlogAction({ blogId, portfolioId });
-			return blogSchema.parse(blog);
+			return blog;
 		} catch (error) {
 			logger.error("Error publishing blog:", error);
 			return rejectWithValue({ error: error.message });

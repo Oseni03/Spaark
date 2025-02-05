@@ -6,17 +6,22 @@ import {
 	editEducation,
 } from "@/services/education";
 import { z } from "zod";
+import { logger } from "@/lib/utils";
 
 export const addEducationInDatabase = createAsyncThunk(
 	"education/addEducationInDatabase",
 	async (data, { rejectWithValue }) => {
 		try {
+			logger.info("Adding education:", data);
 			// Validate input before sending to service
 			const validatedData = educationSchema.safeParse(data);
 			if (validatedData.success) {
-				return await createEducation(validatedData.data);
+				const result = await createEducation(validatedData.data);
+				logger.info("Education added successfully:", result);
+				return result;
 			}
 		} catch (error) {
+			logger.error("Error adding education:", error);
 			if (error instanceof z.ZodError) {
 				return rejectWithValue(error.errors[0].message);
 			}

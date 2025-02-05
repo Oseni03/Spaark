@@ -6,18 +6,20 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { skillSchema } from "@/schema/sections";
 
+const select = {
+	id: true,
+	visible: true,
+	name: true,
+	description: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
 export async function getSkills(portfolioId) {
 	return withErrorHandling(async () => {
 		const skills = await prisma.skill.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 		if (skills.length > 0) {
 			return skills.map((item) => skillSchema.parse(item));
@@ -40,19 +42,12 @@ export async function createSkill({ portfolioId, ...data }) {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return skill;
+		return skillSchema.parse(skill);
 	});
 }
 
@@ -80,20 +75,13 @@ export async function editSkill(skillId, { portfolioId, ...data }) {
 				...data,
 				updatedAt: new Date(),
 			},
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedSkill;
+		return skillSchema.parse(updatedSkill);
 	});
 }
 
@@ -118,14 +106,6 @@ export async function deleteSkill(skillId, portfolioId) {
 
 		await prisma.skill.delete({
 			where: { id: skillId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
 		});
 
 		// Revalidate relevant paths

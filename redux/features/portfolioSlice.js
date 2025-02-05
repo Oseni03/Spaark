@@ -1,15 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-	certificationSchema,
-	experienceSchema,
-	educationSchema,
-	hackathonSchema,
-	projectSchema,
-	skillSchema,
-	portfolioSchema,
-	defaultPortfolio,
-	profileSchema,
-} from "@/schema/sections";
+import { portfolioSchema, defaultPortfolio } from "@/schema/sections";
 import {
 	addPortfolioInDatabase,
 	updatePortfolioInDatabase,
@@ -53,82 +43,79 @@ import {
 } from "../thunks/profile";
 import { logger } from "@/lib/utils";
 import { transformPortfolio } from "@/lib/utils";
-import { basicsSchema } from "@/schema/sections/basics";
 
 // Initial State
 const initialState = {
-	items: [], // Array of portfolios with unique IDs
-	loading: false,
+	items: [],
+	loading: false, // Only global loading state
 	error: null,
 };
 
-// Portfolio Slice
 const portfolioSlice = createSlice({
-	name: "portfolio",
+	name: "portfolios",
 	initialState,
 	reducers: {
 		setPortfolios(state, action) {
+			state.loading = false;
 			const portfolios = action.payload;
 			logger.info("Setportfolios data: ", portfolios);
 			const transformedData = portfolios.map((portfolio) =>
 				transformPortfolio(portfolio)
 			);
-			// const parsedPortfolios = portfolios
-			// 	.map((portfolio) => {
-			// 		const result = portfolioSchema.safeParse(portfolio);
-
-			// 		if (result.success) {
-			// 			return result.data;
-			// 		} else {
-			// 			logger.error("Invalid portfolio data:", result.error);
-			// 			return null;
-			// 		}
-			// 	})
-			// 	.filter(Boolean);
-			// logger.info("parsed portfolios data: ", parsedPortfolios);
 			state.items = transformedData;
 		},
 	},
 	extraReducers: (builder) => {
-		// Portfolio Extra Reducers
+		// Simplified loading handlers
+		const setPending = (state) => {
+			state.loading = true;
+			state.error = null;
+		};
+
+		const setFulfilled = (state) => {
+			state.loading = false;
+		};
+
+		const setRejected = (state, action) => {
+			state.loading = false;
+			state.error =
+				action.payload?.error ||
+				action.error?.message ||
+				"Operation failed";
+		};
+
+		// Portfolio operations
 		builder
-			.addCase(addPortfolioInDatabase.pending, (state) => {
-				state.loading = true;
-				state.error = null;
-			})
+			.addCase(addPortfolioInDatabase.pending, setPending)
 			.addCase(addPortfolioInDatabase.fulfilled, (state, action) => {
-				state.loading = false;
+				setFulfilled(state);
 				const { data, error } = action.payload;
 				if (error) {
 					state.error = error;
-					logger.error(error || "Failed to add portfolio");
+					logger.error("Error adding portfolio:", error);
 					return;
 				}
 				try {
 					const transformedPortfolio = transformPortfolio(data);
 					state.items.push(transformedPortfolio);
+					logger.info(
+						"Portfolio added successfully:",
+						transformedPortfolio
+					);
 				} catch (error) {
 					state.error = "Invalid portfolio data";
-					logger.error("Invalid portfolio data:", error);
+					logger.error("Error transforming portfolio data:", error);
 				}
 			})
-			.addCase(addPortfolioInDatabase.rejected, (state, action) => {
-				state.loading = false;
-				state.error =
-					action.payload.error || "Failed to create portfolio";
-			})
-			.addCase(updatePortfolioInDatabase.pending, (state) => {
-				state.loading = true;
-				state.error = null;
-			})
+			.addCase(addPortfolioInDatabase.rejected, setRejected)
+			.addCase(updatePortfolioInDatabase.pending, setPending)
 			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
-				state.loading = false;
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.id
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update portfolio");
@@ -140,147 +127,76 @@ const portfolioSlice = createSlice({
 					);
 					if (result.success) {
 						Object.assign(portfolio, result.data);
-						portfolio.loading = false;
 					} else {
 						portfolio.error = "Invalid portfolio data";
 						logger.error("Invalid portfolio data:", result.error);
 					}
 				}
 			})
-			.addCase(updatePortfolioInDatabase.rejected, (state, action) => {
-				state.loading = false;
-				state.error =
-					action.payload.error || "Failed to update portfolio";
-			})
-			.addCase(removePortfolioFromDatabase.pending, (state) => {
-				state.loading = true;
-				state.error = null;
-			})
+			.addCase(updatePortfolioInDatabase.rejected, setRejected)
+			.addCase(removePortfolioFromDatabase.pending, setPending)
 			.addCase(removePortfolioFromDatabase.fulfilled, (state, action) => {
-				state.loading = false;
-				const { id } = action.meta.arg;
+				setFulfilled(state, action);
+				const { id } = action.payload;
 				state.items = state.items.filter(
 					(portfolio) => portfolio.id !== id
 				);
 			})
-			.addCase(removePortfolioFromDatabase.rejected, (state, action) => {
-				state.loading = false;
-				state.error =
-					action.payload.error || "Failed to delete portfolio";
-			});
+			.addCase(removePortfolioFromDatabase.rejected, setRejected);
 
 		// Basics Extra Reducers
 		builder
-			.addCase(updateBasicsInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.status = "loading";
-				}
-			})
+			.addCase(updateBasicsInDatabase.pending, setPending)
 			.addCase(updateBasicsInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update basics");
 						return;
 					}
-					const result = basicsSchema.safeParse(data);
-					if (result.success) {
-						portfolio.basics = result.data;
-						portfolio.status = "succeeded";
-					} else {
-						logger.error("Invalid basics data:", result.error);
-					}
+					portfolio.basics = data;
+					portfolio.status = "succeeded";
 				}
 			})
-			.addCase(updateBasicsInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.error?.message || "Failed to update basics";
-				}
-			});
+			.addCase(updateBasicsInDatabase.rejected, setRejected);
 
 		// Certification Extra Reducers
 		builder
-			.addCase(addCertificationInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addCertificationInDatabase.pending, setPending)
 			.addCase(addCertificationInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (!portfolio) return;
 
-				portfolio.loading = false;
 				if (error) {
-					portfolio.error = error;
+					state.error = error;
 					logger.error(error || "Failed to add certification");
 					return;
 				}
 
-				const result = certificationSchema.safeParse(data);
-				if (result.success) {
-					portfolio.certifications.items.push(result.data);
-				} else {
-					portfolio.error = "Invalid certification data";
-					logger.error("Invalid certification data:", result.error);
-				}
+				// Simply push the data without individual schema validation
+				portfolio.certifications.items.push(data);
 			})
-			.addCase(addCertificationInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.error?.message || "Failed to add certification";
-				}
-			})
-			.addCase(
-				updateCertificationnInDatabase.pending,
-				(state, action) => {
-					const { portfolioId } = action.meta.arg;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.loading = true;
-						portfolio.error = null;
-					}
-				}
-			)
+			.addCase(addCertificationInDatabase.rejected, setRejected)
+			.addCase(updateCertificationnInDatabase.pending, setPending)
 			.addCase(
 				updateCertificationnInDatabase.fulfilled,
 				(state, action) => {
+					setFulfilled(state, action);
 					const { data, error } = action.payload;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === data.portfolioId
 					);
 					if (!portfolio) return;
 
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update certification");
@@ -291,92 +207,35 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = certificationSchema.safeParse(data);
-						if (result.success) {
-							portfolio.certifications.items[index] = result.data;
-						} else {
-							portfolio.error = "Invalid certification data";
-							logger.error(
-								"Invalid certification data:",
-								result.error
-							);
-						}
+						portfolio.certifications.items[index] = data;
 					}
 				}
 			)
-			.addCase(
-				updateCertificationnInDatabase.rejected,
-				(state, action) => {
-					const { portfolioId } = action.meta.arg;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.loading = false;
-						portfolio.error =
-							action?.payload.error ||
-							"Failed to update certification";
-					}
-				}
-			)
-			.addCase(
-				removeCertificationFromDatabase.pending,
-				(state, action) => {
-					const { portfolioId } = action.meta.arg;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.loading = true;
-						portfolio.error = null;
-					}
-				}
-			)
+			.addCase(updateCertificationnInDatabase.rejected, setRejected)
+			.addCase(removeCertificationFromDatabase.pending, setPending)
 			.addCase(
 				removeCertificationFromDatabase.fulfilled,
 				(state, action) => {
+					setFulfilled(state, action);
 					const { portfolioId, certificationId } = action.payload;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
 					);
 					if (!portfolio) return;
 
-					portfolio.loading = false;
 					portfolio.certifications.items =
 						portfolio.certifications.items.filter(
 							(item) => item.id !== certificationId
 						);
 				}
 			)
-			.addCase(
-				removeCertificationFromDatabase.rejected,
-				(state, action) => {
-					const { portfolioId } = action.meta.arg;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.loading = false;
-						portfolio.error =
-							action.payload.error ||
-							"Failed to remove certification";
-					}
-				}
-			);
+			.addCase(removeCertificationFromDatabase.rejected, setRejected);
 
 		// Education Extra Reducers
 		builder
-			.addCase(addEducationInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addEducationInDatabase.pending, setPending)
 			.addCase(addEducationInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
@@ -387,37 +246,13 @@ const portfolioSlice = createSlice({
 						logger.error(error || "Failed to add education");
 						return;
 					}
-					const result = educationSchema.safeParse(data);
-					if (result.success) {
-						portfolio.educations.items.push(result.data);
-						portfolio.loading = false;
-					} else {
-						logger.error("Invalid education data:", result.error);
-					}
+					portfolio.educations.items.push(data);
 				}
 			})
-			.addCase(addEducationInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action?.payload.error || "Failed to add education";
-				}
-			})
-			.addCase(updateEducationInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addEducationInDatabase.rejected, setRejected)
+			.addCase(updateEducationInDatabase.pending, setPending)
 			.addCase(updateEducationInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
@@ -433,41 +268,14 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = educationSchema.safeParse(data);
-						if (result.success) {
-							portfolio.educations.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							logger.error(
-								"Invalid education data:",
-								result.error
-							);
-						}
+						portfolio.educations.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateEducationInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action?.payload.error || "Failed to update education";
-				}
-			})
-			.addCase(removeEducationFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateEducationInDatabase.rejected, setRejected)
+			.addCase(removeEducationFromDatabase.pending, setPending)
 			.addCase(removeEducationFromDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { portfolioId, educationId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -477,83 +285,38 @@ const portfolioSlice = createSlice({
 						portfolio.educations.items.filter(
 							(item) => item.id !== educationId
 						);
-					portfolio.loading = false;
 				}
 			})
-			.addCase(removeEducationFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload?.error || "Failed to remove education";
-				}
-			});
+			.addCase(removeEducationFromDatabase.rejected, setRejected);
 
 		// Experience Extra Reducers
 		builder
-			.addCase(addExperienceInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addExperienceInDatabase.pending, setPending)
 			.addCase(addExperienceInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				logger.info("Adding experience to database:", data);
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to add Experience");
 						return;
 					}
-					const result = experienceSchema.safeParse(data);
-					if (result.success) {
-						portfolio.experiences.items.push(result.data);
-					} else {
-						logger.error("Invalid experience data:", result.error);
-						portfolio.error = "Invalid experience data";
-					}
+					portfolio.experiences.items.push(data);
 				}
 			})
-			.addCase(addExperienceInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload?.error || "Failed to add experience";
-				}
-			})
-			.addCase(updateExperienceInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addExperienceInDatabase.rejected, setRejected)
+			.addCase(updateExperienceInDatabase.pending, setPending)
 			.addCase(updateExperienceInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update experience");
@@ -563,43 +326,16 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = experienceSchema.safeParse(data);
-						if (result.success) {
-							portfolio.experiences.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							logger.error(
-								"Invalid experience data:",
-								result.error
-							);
-						}
+						portfolio.experiences.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateExperienceInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to update experience";
-				}
-			})
-			.addCase(removeExperienceFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateExperienceInDatabase.rejected, setRejected)
+			.addCase(removeExperienceFromDatabase.pending, setPending)
 			.addCase(
 				removeExperienceFromDatabase.fulfilled,
 				(state, action) => {
+					setFulfilled(state, action);
 					const { portfolioId, experienceId } = action.payload;
 					const portfolio = state.items.find(
 						(portfolio) => portfolio.id === portfolioId
@@ -609,84 +345,38 @@ const portfolioSlice = createSlice({
 							portfolio.experiences.items.filter(
 								(item) => item.id !== experienceId
 							);
-						portfolio.loading = false;
 					}
 				}
 			)
-			.addCase(removeExperienceFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to remove experience";
-				}
-			});
+			.addCase(removeExperienceFromDatabase.rejected, setRejected);
 
 		// Hackathon Extra Reducers
 		builder
-			.addCase(addHackathonInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addHackathonInDatabase.pending, setPending)
 			.addCase(addHackathonInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to add hackathon");
 						return;
 					}
-					const result = hackathonSchema.safeParse(data);
-					if (result.success) {
-						portfolio.hackathons.items.push(result.data);
-						portfolio.loading = false;
-					} else {
-						portfolio.error = "Invalid hackathon data";
-						logger.error("Invalid hackathon data:", result.error);
-					}
+					portfolio.hackathons.items.push(data);
 				}
 			})
-			.addCase(addHackathonInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to add hackathon";
-				}
-			})
-			.addCase(updateHackathonInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addHackathonInDatabase.rejected, setRejected)
+			.addCase(updateHackathonInDatabase.pending, setPending)
 			.addCase(updateHackathonInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update hackathon");
@@ -696,42 +386,14 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = hackathonSchema.safeParse(data);
-						if (result.success) {
-							portfolio.hackathons.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							portfolio.error = "Invalid hackathon data";
-							logger.error(
-								"Invalid hackathon data:",
-								result.error
-							);
-						}
+						portfolio.hackathons.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateHackathonInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to update hackathon";
-				}
-			})
-			.addCase(removeHackathonFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateHackathonInDatabase.rejected, setRejected)
+			.addCase(removeHackathonFromDatabase.pending, setPending)
 			.addCase(removeHackathonFromDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { portfolioId, hackathonId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -741,88 +403,38 @@ const portfolioSlice = createSlice({
 						portfolio.hackathons.items.filter(
 							(item) => item.id !== hackathonId
 						);
-					portfolio.loading = false;
 				}
 			})
-			.addCase(removeHackathonFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to remove hackathon";
-				}
-			});
+			.addCase(removeHackathonFromDatabase.rejected, setRejected);
 
 		// Profile Extra Reducers
 		builder
-			.addCase(addProfileInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addProfileInDatabase.pending, setPending)
 			.addCase(addProfileInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to add profile");
 						return;
 					}
 					logger.info("Adding profile to portfolio:", data);
-					const result = profileSchema.safeParse(data);
-					if (result.success) {
-						logger.info(
-							"Profile parsed successfully:",
-							result.data
-						);
-						portfolio.profiles.items.push(result.data);
-						portfolio.loading = false;
-					} else {
-						portfolio.error = "Invalid profile data";
-						logger.error("Invalid profile data:", result.error);
-					}
+					portfolio.profiles.items.push(data);
 				}
 			})
-			.addCase(addProfileInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to add profile";
-				}
-			})
-			.addCase(updateProfileInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addProfileInDatabase.rejected, setRejected)
+			.addCase(updateProfileInDatabase.pending, setPending)
 			.addCase(updateProfileInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update profile");
@@ -832,38 +444,14 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = profileSchema.safeParse(data);
-						if (result.success) {
-							portfolio.profiles.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							logger.error("Invalid profile data:", result.error);
-						}
+						portfolio.profiles.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateProfileInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to update profile";
-				}
-			})
-			.addCase(removeProfileFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateProfileInDatabase.rejected, setRejected)
+			.addCase(removeProfileFromDatabase.pending, setPending)
 			.addCase(removeProfileFromDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				logger.info("Removing profile from database:", action.payload);
 				const { portfolioId, profileId } = action.payload;
 				const portfolio = state.items.find(
@@ -873,82 +461,37 @@ const portfolioSlice = createSlice({
 					portfolio.profiles.items = portfolio.profiles.items.filter(
 						(item) => item.id !== profileId
 					);
-					portfolio.loading = false;
 				}
 			})
-			.addCase(removeProfileFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to remove profile";
-				}
-			});
+			.addCase(removeProfileFromDatabase.rejected, setRejected);
 
 		// Project Extra Reducers
 		builder
-			.addCase(addProjectInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addProjectInDatabase.pending, setPending)
 			.addCase(addProjectInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to add project");
 						return;
 					}
-					const result = projectSchema.safeParse(data);
-					if (result.success) {
-						portfolio.projects.items.push(result.data);
-					} else {
-						portfolio.error = "Invaid project data";
-						logger.error("Invalid project data:", result.error);
-					}
+					portfolio.projects.items.push(data);
 				}
 			})
-			.addCase(addProjectInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to add project";
-				}
-			})
-			.addCase(updateProjectInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addProjectInDatabase.rejected, setRejected)
+			.addCase(updateProjectInDatabase.pending, setPending)
 			.addCase(updateProjectInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update project");
@@ -958,124 +501,53 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = projectSchema.safeParse(data);
-						if (result.success) {
-							portfolio.projects.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							portfolio.error = "Invalid project data";
-							logger.error("Invalid project data:", result.error);
-						}
+						portfolio.projects.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateProjectInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to update project";
-				}
-			})
-			.addCase(removeProjectFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateProjectInDatabase.rejected, setRejected)
+			.addCase(removeProjectFromDatabase.pending, setPending)
 			.addCase(removeProjectFromDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { portfolioId, projectId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					portfolio.projects.items = portfolio.projects.items.filter(
 						(item) => item.id !== projectId
 					);
 				}
 			})
-			.addCase(removeProjectFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to remove project";
-				}
-			});
+			.addCase(removeProjectFromDatabase.rejected, setRejected);
 
 		// Skill Extra Reducers
 		builder
-			.addCase(addSkillInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addSkillInDatabase.pending, setPending)
 			.addCase(addSkillInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to add skill");
 						return;
 					}
-					const result = skillSchema.safeParse(data);
-					if (result.success) {
-						portfolio.skills.items.push(result.data);
-						portfolio.loading = false;
-					} else {
-						portfolio.error = "Invalid skill data";
-						logger.error("Invalid skill data:", result.error);
-					}
+					portfolio.skills.items.push(data);
 				}
 			})
-			.addCase(addSkillInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to add skill";
-				}
-			})
-			.addCase(updateSkillnInDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(addSkillInDatabase.rejected, setRejected)
+			.addCase(updateSkillnInDatabase.pending, setPending)
 			.addCase(updateSkillnInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === data.portfolioId
 				);
 				if (portfolio) {
-					portfolio.loading = false;
 					if (error) {
 						portfolio.error = error;
 						logger.error(error || "Failed to update skill");
@@ -1085,39 +557,14 @@ const portfolioSlice = createSlice({
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						const result = skillSchema.safeParse(data);
-						if (result.success) {
-							portfolio.skills.items[index] = result.data;
-							portfolio.loading = false;
-						} else {
-							portfolio.error = "Invalid skill data";
-							logger.error("Invalid skill data:", result.error);
-						}
+						portfolio.skills.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateSkillnInDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to update skill";
-				}
-			})
-			.addCase(removeSkillFromDatabase.pending, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = true;
-					portfolio.error = null;
-				}
-			})
+			.addCase(updateSkillnInDatabase.rejected, setRejected)
+			.addCase(removeSkillFromDatabase.pending, setPending)
 			.addCase(removeSkillFromDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
 				const { portfolioId, skillId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
@@ -1126,20 +573,9 @@ const portfolioSlice = createSlice({
 					portfolio.skills.items = portfolio.skills.items.filter(
 						(item) => item.id !== skillId
 					);
-					portfolio.loading = false;
 				}
 			})
-			.addCase(removeSkillFromDatabase.rejected, (state, action) => {
-				const { portfolioId } = action.meta.arg;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === portfolioId
-				);
-				if (portfolio) {
-					portfolio.loading = false;
-					portfolio.error =
-						action.payload.error || "Failed to remove skill";
-				}
-			});
+			.addCase(removeSkillFromDatabase.rejected, setRejected);
 	},
 });
 

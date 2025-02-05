@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { slugify } from "@/utils/text";
 import { blogMetadataSchema } from "@/schema/sections/blog";
 import {
 	Form,
@@ -24,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RichInput } from "@/components/ui/rich-input";
 import { FeaturedImage } from "../new/components/featured-image";
 import { z } from "zod";
+import { logger } from "@/lib/utils";
 
 // Form Schema
 const blogFormSchema = blogMetadataSchema.extend({
@@ -48,15 +51,100 @@ export function BlogForm({
 	const form = useForm({
 		resolver: zodResolver(blogFormSchema),
 		defaultValues,
+		mode: "onChange", // Enable real-time validation
 	});
+
+	const {
+		formState: { errors },
+	} = form;
+
+	// Log validation errors
+	useEffect(() => {
+		if (Object.keys(errors).length > 0) {
+			logger.error("Form Validation Errors:", errors);
+		}
+	}, [errors]);
+
+	logger.info("BlogForm initialized", {
+		portfoliosAvailable: portfolios.length,
+		hasDefaultValues: !!Object.keys(defaultValues).length,
+	});
+
+	const validateSlugUniqueness = async (slug, blogId = null) => {
+		try {
+			const response = await fetch("/api/blogs/validate-slug", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ slug, excludeId: blogId }),
+			});
+
+			const data = await response.json();
+			if (!data.isUnique) {
+				throw new Error(
+					"This slug is already in use. Please choose a different one."
+				);
+			}
+		} catch (error) {
+			throw new Error(
+				error.message || "Failed to validate slug uniqueness"
+			);
+		}
+	};
+
+	const handleSubmit = async (data) => {
+		try {
+			logger.info("Validating form data", { data });
+
+			// Validate required fields
+			if (!data.title || !data.portfolioId) {
+				logger.error("Form validation failed", { data });
+				throw new Error("Please fill in all required fields");
+			}
+
+			// Validate slug uniqueness
+			await validateSlugUniqueness(data.slug, defaultValues.id);
+
+			// Ensure content is not null
+			const formData = {
+				...data,
+				content: data.content || "", // Provide default empty string if null
+			};
+
+			logger.info("Submitting form data", { formData });
+			await onSubmit(formData);
+		} catch (error) {
+			logger.error("Form submission error", {
+				error: error.message,
+				formData: data,
+			});
+			// Set form error for slug field if it's a slug uniqueness error
+			if (error.message.includes("slug is already in use")) {
+				form.setError("slug", {
+					type: "manual",
+					message: error.message,
+				});
+			}
+			// Let the error propagate to be handled by the parent
+			throw error;
+		}
+	};
+
+	const generateSlug = () => {
+		const title = form.getValues("title");
+		form.setValue("slug", slugify(title));
+	};
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+			<form
+				onSubmit={form.handleSubmit(handleSubmit)}
+				className="space-y-8"
+				noValidate // Let our custom validation handle it
+			>
 				<FormField
 					control={form.control}
 					name="portfolioId"
-					render={({ field }) => (
+					render={({ field, fieldState }) => (
 						<FormItem>
 							<FormLabel>Select Portfolio</FormLabel>
 							<Select
@@ -74,12 +162,16 @@ export function BlogForm({
 											key={portfolio.id}
 											value={portfolio.id}
 										>
-											{portfolio.title}
+											{portfolio.name}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
-							<FormMessage />
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
 						</FormItem>
 					)}
 				/>
@@ -87,7 +179,7 @@ export function BlogForm({
 				<FormField
 					control={form.control}
 					name="title"
-					render={({ field }) => (
+					render={({ field, fieldState }) => (
 						<FormItem>
 							<FormLabel>Title</FormLabel>
 							<FormControl>
@@ -96,7 +188,41 @@ export function BlogForm({
 									{...field}
 								/>
 							</FormControl>
-							<FormMessage />
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="slug"
+					render={({ field, fieldState }) => (
+						<FormItem>
+							<FormLabel>Slug</FormLabel>
+							<div className="flex gap-2">
+								<FormControl>
+									<Input
+										placeholder="Enter post slug"
+										{...field}
+									/>
+								</FormControl>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={generateSlug}
+								>
+									Generate
+								</Button>
+							</div>
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
 						</FormItem>
 					)}
 				/>
@@ -104,7 +230,7 @@ export function BlogForm({
 				<FormField
 					control={form.control}
 					name="excerpt"
-					render={({ field }) => (
+					render={({ field, fieldState }) => (
 						<FormItem>
 							<FormLabel>Excerpt</FormLabel>
 							<FormControl>
@@ -113,7 +239,11 @@ export function BlogForm({
 									{...field}
 								/>
 							</FormControl>
-							<FormMessage />
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
 						</FormItem>
 					)}
 				/>
@@ -121,7 +251,7 @@ export function BlogForm({
 				<FormField
 					control={form.control}
 					name="featuredImage"
-					render={({ field }) => (
+					render={({ field, fieldState }) => (
 						<FormItem className="flex flex-col space-y-5">
 							<FormLabel>Featured Image</FormLabel>
 							<FormControl>
@@ -130,7 +260,11 @@ export function BlogForm({
 									setImage={field.onChange}
 								/>
 							</FormControl>
-							<FormMessage />
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
 						</FormItem>
 					)}
 				/>
@@ -138,7 +272,7 @@ export function BlogForm({
 				<FormField
 					control={form.control}
 					name="content"
-					render={({ field }) => (
+					render={({ field, fieldState }) => (
 						<FormItem>
 							<FormLabel>Content</FormLabel>
 							<FormControl>
@@ -149,7 +283,11 @@ export function BlogForm({
 									editorClassName="min-h-[500px]"
 								/>
 							</FormControl>
-							<FormMessage />
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
 						</FormItem>
 					)}
 				/>

@@ -6,6 +6,22 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics, basicsSchema } from "@/schema/sections/basics";
 
+const select = {
+	id: true,
+	createdAt: false,
+	updatedAt: false,
+	name: true,
+	headline: true,
+	email: true,
+	phone: true,
+	location: true,
+	url: true,
+	picture: true,
+	summary: true,
+	about: true,
+	portfolioId: true,
+};
+
 export async function createBasics(portfolioId, data = defaultBasics) {
 	return withErrorHandling(async () => {
 		if (!portfolioId) {
@@ -30,8 +46,9 @@ export async function createBasics(portfolioId, data = defaultBasics) {
 				...data,
 				portfolioId,
 			},
+			select,
 		});
-		return basics;
+		return basicsSchema.parse(basics);
 	});
 }
 
@@ -50,25 +67,13 @@ export async function updatePortfolioBasics({ portfolioId, ...data }) {
 				...data,
 				updatedAt: new Date(), // Ensure updated timestamp is set
 			},
-			select: {
-				createdAt: false,
-				updatedAt: false,
-				name: true,
-				headline: true,
-				email: true,
-				phone: true,
-				location: true,
-				url: true,
-				picture: true,
-				summary: true,
-				about: true,
-			},
+			select,
 		});
 
 		// Revalidate the path to update cached data
 		revalidatePath("/builder");
 
-		return updatedBasics;
+		return basicsSchema.parse(updatedBasics);
 	});
 }
 
@@ -82,17 +87,7 @@ export async function getBasics(portfolioId) {
 		// Fetch user from database
 		const userData = await prisma.basics.findUnique({
 			where: { portfolioId },
-			select: {
-				name: true,
-				headline: true,
-				email: true,
-				phone: true,
-				location: true,
-				url: true,
-				picture: true,
-				summary: true,
-				about: true,
-			},
+			select,
 		});
 
 		if (!userData) {

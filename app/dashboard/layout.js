@@ -20,24 +20,57 @@ export default function DashboardLayout({ children }) {
 
 	useEffect(() => {
 		const fetchData = async () => {
+			const startTime = performance.now();
+			logger.info("Starting dashboard data fetch");
+
 			try {
+				logger.info("Fetching portfolio data from API");
 				const response = await fetch(`/api/portfolio`);
+
 				if (!response.ok) {
+					logger.error("API request failed", {
+						status: response.status,
+						statusText: response.statusText,
+					});
 					throw new Error("Failed to fetch user data");
 				}
 
 				const { portfolios, user } = await response.json();
+				logger.info("Data received from API", {
+					portfoliosCount: portfolios?.data?.length,
+					hasUser: !!user,
+				});
 
-				if (portfolios) dispatch(setPortfolios(portfolios.data));
-				if (user) dispatch(setUser(user));
+				if (portfolios) {
+					logger.info("Updating portfolios in store", {
+						count: portfolios.data.length,
+					});
+					dispatch(setPortfolios(portfolios.data));
+				}
+
+				if (user) {
+					logger.info("Updating user in store", {
+						userId: user.id,
+					});
+					dispatch(setUser(user));
+				}
+
+				const endTime = performance.now();
+				logger.info("Dashboard data fetch completed", {
+					duration: `${(endTime - startTime).toFixed(2)}ms`,
+				});
 			} catch (error) {
-				logger.error("Error fetching or updating user data:", error);
+				logger.error("Error in dashboard data fetch", {
+					error: error.message,
+					stack: error.stack,
+				});
 			}
 		};
 
 		fetchData();
 	}, [dispatch]);
 
+	logger.info("Rendering dashboard layout");
 	return (
 		<OrganizationProvider>
 			<SidebarProvider>

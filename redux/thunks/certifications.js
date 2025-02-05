@@ -6,17 +6,34 @@ import {
 } from "@/services/certification";
 import { certificationSchema } from "@/schema/sections";
 import { z } from "zod";
+import { logger } from "@/lib/utils";
 
 export const addCertificationInDatabase = createAsyncThunk(
 	"certification/addCertificationInDatabase",
 	async (data, { rejectWithValue }) => {
 		try {
-			// Validate input before sending to service
+			logger.info("Adding certification:", {
+				portfolioId: data.portfolioId,
+				certificationName: data.name,
+			});
+
 			const validatedData = certificationSchema.safeParse(data);
 			if (validatedData.success) {
-				return await createCertification(validatedData.data);
+				const result = await createCertification(validatedData.data);
+				logger.info("Successfully added certification:", {
+					id: result.id,
+					portfolioId: result.portfolioId,
+				});
+				return result;
 			}
+
+			logger.error("Validation failed for certification data:", {
+				errors: validatedData.error.errors,
+			});
+			return rejectWithValue("Invalid certification data");
 		} catch (error) {
+			logger.error("Failed to add certification:", error);
+
 			if (error instanceof z.ZodError) {
 				return rejectWithValue(error.errors[0].message);
 			}

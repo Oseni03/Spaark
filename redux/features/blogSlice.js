@@ -6,6 +6,7 @@ import {
 	fetchBlogsForPortfolio,
 	publishBlogInDatabase,
 } from "../thunks/blog";
+import { logger } from "@/lib/utils";
 
 const initialState = {
 	items: [],
@@ -44,7 +45,22 @@ export const blogSlice = createSlice({
 				state.error = null;
 			})
 			.addCase(fetchBlogsForPortfolio.fulfilled, (state, action) => {
-				state.items = action.payload;
+				const { data, error } = action.payload;
+				if (error) {
+					logger.error("Blog fetch failed:", {
+						error,
+						state: { ...state, items: state.items.length },
+					});
+					state.error = error;
+					return;
+				}
+
+				logger.info("Blogs fetched successfully:", {
+					count: data.length,
+					state: { loading: state.loading, hasError: !!state.error },
+				});
+
+				state.items = data;
 				state.loading = false;
 			})
 			.addCase(fetchBlogsForPortfolio.rejected, (state, action) => {
@@ -57,8 +73,17 @@ export const blogSlice = createSlice({
 				state.error = null;
 			})
 			.addCase(createBlogInDatabase.fulfilled, (state, action) => {
-				state.items.unshift(action.payload);
+				const { data, error } = action.payload;
 				state.loading = false;
+
+				if (error) {
+					logger.error("Error creating blog:", error);
+					state.error = error;
+					return;
+				}
+
+				logger.info("Blog created successfully:", data);
+				state.items.unshift(data);
 			})
 			.addCase(createBlogInDatabase.rejected, (state, action) => {
 				state.loading = false;
@@ -70,13 +95,23 @@ export const blogSlice = createSlice({
 				state.error = null;
 			})
 			.addCase(updateBlogInDatabase.fulfilled, (state, action) => {
-				const index = state.items.findIndex(
-					(blog) => blog.id === action.payload.id
-				);
-				if (index !== -1) {
-					state.items[index] = action.payload;
-				}
+				const { data, error } = action.payload;
 				state.loading = false;
+
+				if (!data) return;
+
+				const index = state.items.findIndex(
+					(blog) => blog.id === data.id
+				);
+
+				if (error) {
+					state.error = error || "Failed to update blog";
+					return;
+				}
+
+				if (index !== -1) {
+					state.items[index] = data;
+				}
 			})
 			.addCase(updateBlogInDatabase.rejected, (state, action) => {
 				state.loading = false;
@@ -103,13 +138,33 @@ export const blogSlice = createSlice({
 				state.error = null;
 			})
 			.addCase(publishBlogInDatabase.fulfilled, (state, action) => {
+				const { data, error } = action.payload;
+				state.loading = false;
+
+				if (!data) {
+					logger.warn("No data received in publish blog response");
+					return;
+				}
+
+				logger.info("Publishing blog:", {
+					blogId: data.id,
+					previousStatus: state.items.find((b) => b.id === data.id)
+						?.status,
+					newStatus: data.status,
+				});
+
 				const index = state.items.findIndex(
-					(blog) => blog.id === action.payload.id
+					(blog) => blog.id === data.id
 				);
+
+				if (error) {
+					state.error = error || "Failed to update blog";
+					return;
+				}
+
 				if (index !== -1) {
 					state.items[index] = action.payload;
 				}
-				state.loading = false;
 			})
 			.addCase(publishBlogInDatabase.rejected, (state, action) => {
 				state.loading = false;

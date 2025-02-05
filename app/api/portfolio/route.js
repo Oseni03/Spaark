@@ -47,6 +47,14 @@ const createErrorResponse = (status, message, origin) => {
 
 export async function GET(req) {
 	const origin = req.headers.get("origin") || "";
+	const requestId = Math.random().toString(36).substring(7);
+
+	logger.info("Portfolio API request received", {
+		requestId,
+		method: "GET",
+		origin,
+		url: req.url,
+	});
 
 	try {
 		const { searchParams } = new URL(req.url);
@@ -55,11 +63,25 @@ export async function GET(req) {
 		// Get both userId and orgId from auth
 		const { userId: authenticatedUserId, orgId } = await auth();
 
+		logger.info("Auth details", {
+			requestId,
+			userId,
+			authenticatedUserId,
+			orgId,
+		});
+
 		if (!userId && !authenticatedUserId) {
+			logger.error("Unauthorized request", { requestId });
 			return createErrorResponse(401, "Unauthorized", origin);
 		}
 
 		userId = userId || authenticatedUserId;
+
+		logger.info("Fetching data", {
+			requestId,
+			userId,
+			orgId,
+		});
 
 		// Get portfolios for both user and organization if available
 		const portfoliosPromise = getPortfolios(userId, orgId);
@@ -71,16 +93,29 @@ export async function GET(req) {
 		]);
 
 		if (!user) {
+			logger.error("User not found", {
+				requestId,
+				userId,
+			});
 			return createErrorResponse(404, "User not found", origin);
 		}
 
 		if (!portfolios.success) {
+			logger.error("Portfolio fetch failed", {
+				requestId,
+				error: portfolios.error,
+			});
 			return createErrorResponse(
 				400,
 				portfolios.error || "Error getting portfolios",
 				origin
 			);
 		}
+
+		logger.info("Successfully fetched portfolio data", {
+			requestId,
+			portfolioCount: portfolios.data?.length,
+		});
 
 		return new NextResponse(JSON.stringify({ portfolios, user }), {
 			status: 200,
@@ -93,7 +128,12 @@ export async function GET(req) {
 			},
 		});
 	} catch (error) {
-		logger.error("Error fetching data:", error);
+		logger.error("Error in portfolio API", {
+			requestId,
+			error: error.message,
+			stack: error.stack,
+			url: req.url,
+		});
 		return createErrorResponse(500, "Failed to fetch data", origin);
 	}
 }

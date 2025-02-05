@@ -5,6 +5,8 @@ import {
 	LockOpen,
 	PencilSimple,
 	TrashSimple,
+	CloudArrowUp, // Add this
+	CloudX, // Add this
 } from "@phosphor-icons/react";
 import {
 	ContextMenu,
@@ -15,16 +17,20 @@ import {
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
 
+// Initialize the relative time plugin
+dayjs.extend(relativeTime);
+
 export const BlogCard = ({ blog }) => {
 	const router = useRouter();
 	// Create a state management for open dialogs and blog management (Update, visible, delete, duplicate)
 
-	const lastUpdated = dayjs().to(portfolio.updatedAt);
+	const formattedDate = dayjs(blog.updatedAt).fromNow(); // Change .to() to .fromNow()
 
 	const onOpen = () => {
 		// Should a Shadcn drawer for viewing and updating the blog post
@@ -43,6 +49,10 @@ export const BlogCard = ({ blog }) => {
 	};
 
 	const onDelete = () => {
+		// delete blog post (delete dialog)
+	};
+
+	const onPublish = () => {
 		// delete blog post (delete dialog)
 	};
 
@@ -72,7 +82,7 @@ export const BlogCard = ({ blog }) => {
 						<h4 className="line-clamp-2 font-medium">
 							{blog.title}
 						</h4>
-						<p className="line-clamp-1 text-xs opacity-75">{`Last updated ${lastUpdated}`}</p>
+						<p className="line-clamp-1 text-xs opacity-75">{`Last updated ${formattedDate}`}</p>
 					</div>
 				</BaseCard>
 			</ContextMenuTrigger>
@@ -90,15 +100,15 @@ export const BlogCard = ({ blog }) => {
 					<CopySimple size={14} className="mr-2" />
 					{`Duplicate`}
 				</ContextMenuItem>
-				{blog.visible ? (
-					<ContextMenuItem onClick={onLockChange}>
-						<LockOpen size={14} className="mr-2" />
-						{`Show`}
+				{blog.status == "draft" ? (
+					<ContextMenuItem onClick={onPublish}>
+						<CloudArrowUp size={14} className="mr-2" />
+						{`Publish`}
 					</ContextMenuItem>
 				) : (
-					<ContextMenuItem onClick={onLockChange}>
-						<Lock size={14} className="mr-2" />
-						{`Unshow`}
+					<ContextMenuItem onClick={onPublish}>
+						<CloudX size={14} className="mr-2" />
+						{`Unpublish`}
 					</ContextMenuItem>
 				)}
 				<ContextMenuSeparator />

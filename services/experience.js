@@ -6,23 +6,25 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { experienceSchema } from "@/schema/sections";
 
+const experienceSelect = {
+	id: true,
+	visible: true,
+	company: true,
+	position: true,
+	location: true,
+	date: true,
+	summary: true,
+	picture: true,
+	url: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
 export async function getExperiences(portfolioId) {
 	return withErrorHandling(async () => {
 		const experiences = await prisma.experience.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				company: true,
-				position: true,
-				location: true,
-				date: true,
-				summary: true,
-				picture: true,
-				url: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select: experienceSelect,
 		});
 		if (experiences.length > 0) {
 			return experiences.map((item) => experienceSchema.parse(item));
@@ -47,24 +49,12 @@ export async function createExperience({ portfolioId, ...data }) {
 					connect: { id: portfolioId },
 				},
 			},
-			select: {
-				id: true,
-				visible: true,
-				company: true,
-				position: true,
-				location: true,
-				date: true,
-				summary: true,
-				picture: true,
-				url: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select: experienceSelect,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return exp;
+		return experienceSchema.parse(exp);
 	});
 }
 
@@ -85,25 +75,13 @@ export async function editExperience(experienceId, { portfolioId, ...data }) {
 				...data,
 				updatedAt: new Date(),
 			},
-			select: {
-				id: true,
-				visible: true,
-				company: true,
-				position: true,
-				location: true,
-				date: true,
-				summary: true,
-				picture: true,
-				url: true,
-				portfolioId: true,
-				// Exclude createdAt and updatedAt
-			},
+			select: experienceSelect,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedExp;
+		return experienceSchema.parse(updatedExp);
 	});
 }
 

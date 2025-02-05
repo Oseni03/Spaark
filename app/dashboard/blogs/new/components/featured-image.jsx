@@ -26,11 +26,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 				if (file.type.startsWith("image/")) {
 					const reader = new FileReader();
 					reader.onload = (event) => {
-						setImage({
-							url: event.target.result,
-							alt: file.name,
-							title: file.name,
-						});
+						setImage(event.target.result);
 					};
 					reader.readAsDataURL(file);
 				}
@@ -56,11 +52,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 				if (file.type.startsWith("image/")) {
 					const reader = new FileReader();
 					reader.onload = (event) => {
-						setImage({
-							url: event.target.result,
-							alt: file.name,
-							title: file.name,
-						});
+						setImage(event.target.result);
 					};
 					reader.readAsDataURL(file);
 				}
@@ -130,8 +122,8 @@ export const FeaturedImage = ({ image, setImage }) => {
 			onMouseLeave={() => setIsHovering(false)}
 		>
 			<img
-				src={image.url}
-				alt={image.alt}
+				src={image}
+				alt={"Blog image"}
 				className="w-full h-full object-cover rounded-lg"
 			/>
 
@@ -169,7 +161,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 				</div>
 
 				{/* Image caption/alt text */}
-				<div className="absolute bottom-4 left-4 right-4">
+				{/* <div className="absolute bottom-4 left-4 right-4">
 					<input
 						type="text"
 						value={image.alt}
@@ -179,7 +171,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 						placeholder="Write a caption for your image (optional)"
 						className="w-full px-3 py-2 bg-white bg-opacity-90 rounded-md text-sm"
 					/>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);

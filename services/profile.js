@@ -6,18 +6,21 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { profileSchema } from "@/schema/sections";
 
+const select = {
+	id: true,
+	visible: true,
+	network: true,
+	username: true,
+	url: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
 export async function getProfiles(portfolioId) {
 	return withErrorHandling(async () => {
 		const profiles = await prisma.profile.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				network: true,
-				username: true,
-				url: true,
-				// Exclude createdAt and updatedAt
-			},
+			select,
 		});
 		if (profiles.length > 0) {
 			return profiles.map((item) => profileSchema.parse(item));
@@ -39,18 +42,11 @@ export async function createProfile({ portfolioId, ...data }) {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
 			},
-			select: {
-				id: true,
-				visible: true,
-				network: true,
-				username: true,
-				url: true,
-				portfolioId: true,
-			},
+			select,
 		});
 
 		revalidatePath("/builder");
-		return profile;
+		return profileSchema.parse(profile);
 	});
 }
 
@@ -67,18 +63,11 @@ export async function editProfile(profileId, { portfolioId, ...data }) {
 				...data,
 				updatedAt: new Date(),
 			},
-			select: {
-				id: true,
-				visible: true,
-				network: true,
-				username: true,
-				url: true,
-				portfolioId: true,
-			},
+			select,
 		});
 
 		revalidatePath("/builder");
-		return updatedProfile;
+		return profileSchema.parse(updatedProfile);
 	});
 }
 

@@ -6,21 +6,23 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { educationSchema } from "@/schema/sections";
 
+const educationSelect = {
+	id: true,
+	visible: true,
+	institution: true,
+	studyType: true,
+	date: true,
+	summary: true,
+	logo: true,
+	url: true,
+	portfolioId: true,
+};
+
 export async function getEducations(portfolioId) {
 	return withErrorHandling(async () => {
 		const educations = await prisma.education.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				visible: true,
-				institution: true,
-				studyType: true,
-				date: true,
-				summary: true,
-				logo: true,
-				url: true,
-				portfolioId: true,
-			},
+			select: educationSelect,
 		});
 		if (educations.length > 0) {
 			return educations.map((item) => educationSchema.parse(item));
@@ -43,22 +45,12 @@ export async function createEducation({ portfolioId, ...data }) {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
 			},
-			select: {
-				id: true,
-				visible: true,
-				institution: true,
-				studyType: true,
-				date: true,
-				summary: true,
-				logo: true,
-				url: true,
-				portfolioId: true,
-			},
+			select: educationSelect,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return edu;
+		return educationSchema.parse(edu);
 	});
 }
 
@@ -76,23 +68,13 @@ export async function editEducation(educationId, { portfolioId, ...data }) {
 				...data,
 				updatedAt: new Date(),
 			},
-			select: {
-				id: true,
-				visible: true,
-				institution: true,
-				studyType: true,
-				date: true,
-				summary: true,
-				logo: true,
-				url: true,
-				portfolioId: true,
-			},
+			select: educationSelect,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedEdu;
+		return educationSchema.parse(updatedEdu);
 	});
 }
 

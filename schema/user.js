@@ -17,7 +17,10 @@ const subscriptionSchema = z
 	.nullable();
 
 export const userSchema = z.object({
-	id: idSchema,
+	id: z
+		.string()
+		.default(createId())
+		.describe("Unique identifier for the item in Cuid2 format"),
 	username: z.literal("").or(z.string().min(3).max(255)),
 	email: z.string().email(),
 	subscribed: z.boolean().default(false),
@@ -32,7 +35,7 @@ export const defaultUser = {
 	username: "",
 	email: "",
 	subscribed: false,
-	userType: "",
+	userType: "INDIVIDUAL",
 	createdAt: "",
 	updatedAt: "",
 	subscription: null,

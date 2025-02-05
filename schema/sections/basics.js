@@ -1,6 +1,10 @@
+import { createId } from "@paralleldrive/cuid2";
+import { idSchema } from "../shared/id";
 import { z } from "zod";
 
 export const basicsSchema = z.object({
+	id: idSchema,
+	portfolioId: z.string(),
 	name: z.literal("").or(z.string().min(2, "Name is required")),
 	headline: z.literal("").or(z.string().min(2, "Headline is required")),
 	email: z.literal("").or(z.string().email("Invalid email address")),
@@ -16,6 +20,8 @@ export const basicsSchema = z.object({
 
 // Defaults
 export const defaultBasics = {
+	id: createId(),
+	portfolioId: "",
 	name: "",
 	headline: "",
 	email: "",

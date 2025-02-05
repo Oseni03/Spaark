@@ -4,8 +4,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
-import { blogSchema, blogMetadataSchema } from "@/schema/sections/blog";
-import { logger } from "@/lib/utils";
+import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
 
 export async function getBlogs(portfolioId) {
@@ -55,18 +54,9 @@ export async function createBlog({ portfolioId, data }) {
 			throw new Error("Unauthorized");
 		}
 
-		// Validate metadata
-		const metadata = blogMetadataSchema.parse({
-			title: data.title,
-			slug: slugify(data.title),
-			featuredImage: data.featuredImage,
-			excerpt: data.excerpt,
-		});
-
 		const blog = await prisma.blog.create({
 			data: {
-				...metadata,
-				content: data.content,
+				...data,
 				authorId: userId,
 				portfolio: { connect: { id: portfolioId } },
 				tags: {
@@ -79,8 +69,6 @@ export async function createBlog({ portfolioId, data }) {
 			include: {
 				tags: true,
 				portfolio: true,
-				views: true,
-				likes: true,
 			},
 		});
 
@@ -96,21 +84,13 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 			throw new Error("Unauthorized");
 		}
 
-		const metadata = blogMetadataSchema.parse({
-			title: data.title,
-			slug: slugify(data.title),
-			featuredImage: data.featuredImage,
-			excerpt: data.excerpt,
-		});
-
 		const blog = await prisma.blog.update({
 			where: {
 				id: blogId,
 				portfolioId,
 			},
 			data: {
-				...metadata,
-				content: data.content,
+				...data,
 				tags: {
 					set: [], // Remove existing tags
 					connectOrCreate: (data.tags || []).map((tag) => ({

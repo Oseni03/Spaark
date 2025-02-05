@@ -7,29 +7,31 @@ import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 
+const select = {
+	id: true,
+	name: true,
+	description: true,
+	date: true,
+	location: true,
+	visible: true,
+	url: true,
+	logo: true,
+	portfolioId: true,
+	links: {
+		select: {
+			id: true,
+			label: true,
+			url: true,
+			icon: true,
+		},
+	},
+};
+
 export async function getHackathons(portfolioId) {
 	return withErrorHandling(async () => {
 		const hackathons = await prisma.hackathon.findMany({
 			where: { portfolioId },
-			select: {
-				id: true,
-				name: true,
-				description: true,
-				date: true,
-				location: true,
-				visible: true,
-				url: true,
-				logo: true,
-				portfolioId: true,
-				links: {
-					select: {
-						id: true,
-						label: true,
-						url: true,
-						icon: true,
-					},
-				},
-			},
+			select,
 		});
 		if (hackathons.length > 0) {
 			return hackathons.map((item) => hackathonSchema.parse(item));
@@ -90,32 +92,14 @@ export async function createHackathon({ portfolioId, ...data }) {
 					})),
 				},
 			},
-			select: {
-				id: true,
-				name: true,
-				description: true,
-				date: true,
-				location: true,
-				visible: true,
-				url: true,
-				logo: true,
-				portfolioId: true,
-				links: {
-					select: {
-						id: true,
-						label: true,
-						url: true,
-						icon: true,
-					},
-				},
-			},
+			select,
 		});
 
 		logger.info("Created hackathon:", hackathon);
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return hackathon;
+		return hackathonSchema.parse(hackathon);
 	});
 }
 
@@ -154,31 +138,13 @@ export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 					},
 				},
 			},
-			select: {
-				id: true,
-				name: true,
-				description: true,
-				date: true,
-				location: true,
-				visible: true,
-				url: true,
-				logo: true,
-				portfolioId: true,
-				links: {
-					select: {
-						id: true,
-						label: true,
-						url: true,
-						icon: true,
-					},
-				},
-			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedHackathon;
+		return hackathonSchema.parse(updatedHackathon);
 	});
 }
 
