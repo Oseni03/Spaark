@@ -14,10 +14,30 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
 import { useVerifyPayment } from "@/hooks/use-verify-payment";
+import { usePathname } from "next/navigation";
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
+const generateBreadcrumbs = (pathname) => {
+	const paths = pathname.split("/").filter(Boolean);
+	return paths.map((path, index) => ({
+		label: path.charAt(0).toUpperCase() + path.slice(1),
+		href: "/" + paths.slice(0, index + 1).join("/"),
+		current: index === paths.length - 1,
+	}));
+};
 
 export default function DashboardLayout({ children }) {
 	useVerifyPayment();
 	const dispatch = useDispatch();
+	const pathname = usePathname();
+	const breadcrumbs = generateBreadcrumbs(pathname);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -115,7 +135,46 @@ export default function DashboardLayout({ children }) {
 				<main className="flex flex-1 min-h-screen">
 					<div className="p-2 md:p-10 flex flex-col gap-2 flex-1 w-full h-full">
 						<div className="flex items-center justify-between">
-							<SidebarTrigger />
+							<div className="flex items-center gap-4">
+								<SidebarTrigger />
+								<Breadcrumb>
+									<BreadcrumbList>
+										<BreadcrumbItem>
+											<BreadcrumbLink href="/dashboard">
+												Dashboard
+											</BreadcrumbLink>
+										</BreadcrumbItem>
+										{breadcrumbs
+											.slice(1)
+											.map((breadcrumb, index) => (
+												<React.Fragment
+													key={breadcrumb.href}
+												>
+													<BreadcrumbSeparator />
+													<BreadcrumbItem>
+														{breadcrumb.current ? (
+															<BreadcrumbPage>
+																{
+																	breadcrumb.label
+																}
+															</BreadcrumbPage>
+														) : (
+															<BreadcrumbLink
+																href={
+																	breadcrumb.href
+																}
+															>
+																{
+																	breadcrumb.label
+																}
+															</BreadcrumbLink>
+														)}
+													</BreadcrumbItem>
+												</React.Fragment>
+											))}
+									</BreadcrumbList>
+								</Breadcrumb>
+							</div>
 							<ModeToggle />
 						</div>
 						{children}
@@ -125,6 +184,7 @@ export default function DashboardLayout({ children }) {
 		</OrganizationProvider>
 	);
 }
+
 export const Logo = () => {
 	return (
 		<Link
