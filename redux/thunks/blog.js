@@ -27,6 +27,10 @@ export const createBlogInDatabase = createAsyncThunk(
 	"blogs/create",
 	async ({ portfolioId, data }, { rejectWithValue }) => {
 		try {
+			if (!portfolioId) {
+				return rejectWithValue({ error: "Portfolio ID is required" });
+			}
+
 			const blog = await createBlogAction({
 				portfolioId,
 				data: {
@@ -35,10 +39,16 @@ export const createBlogInDatabase = createAsyncThunk(
 				},
 			});
 
+			if (!blog) {
+				return rejectWithValue({ error: "Failed to create blog" });
+			}
+
 			return blog;
 		} catch (error) {
 			logger.error("Error creating blog:", error);
-			return rejectWithValue({ error: error.message });
+			return rejectWithValue({
+				error: error.message || "Failed to create blog post",
+			});
 		}
 	}
 );

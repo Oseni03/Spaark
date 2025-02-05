@@ -7,17 +7,36 @@ import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
 
+const select = {
+	id: true,
+	title: true,
+	slug: true,
+	excerpt: true,
+	content: true,
+	featuredImage: true,
+	status: true,
+	publishedAt: true,
+	createdAt: true,
+	updatedAt: true,
+	views: true,
+	likes: true,
+	portfolioId: true,
+	authorId: true,
+	tags: {
+		select: {
+			id: true,
+			name: true,
+			slug: true,
+		},
+	},
+};
+
 export async function getBlogs(portfolioId) {
 	return withErrorHandling(async () => {
 		const blogs = await prisma.blog.findMany({
 			where: { portfolioId },
 			orderBy: { updatedAt: "desc" },
-			include: {
-				tags: true,
-				portfolio: true,
-				views: true,
-				likes: true,
-			},
+			select,
 		});
 
 		return blogs.map((blog) => blogSchema.parse(blog));
@@ -31,12 +50,7 @@ export async function getBlog(blogId, portfolioId) {
 				id: blogId,
 				portfolioId,
 			},
-			include: {
-				portfolio: true,
-				tags: true,
-				views: true,
-				likes: true,
-			},
+			select,
 		});
 
 		if (!blog) {
@@ -50,9 +64,8 @@ export async function getBlog(blogId, portfolioId) {
 export async function createBlog({ portfolioId, data }) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
+		if (!userId) throw new Error("Unauthorized");
+		if (!portfolioId) throw new Error("Portfolio ID is required");
 
 		const blog = await prisma.blog.create({
 			data: {
@@ -66,10 +79,7 @@ export async function createBlog({ portfolioId, data }) {
 					})),
 				},
 			},
-			include: {
-				tags: true,
-				portfolio: true,
-			},
+			select,
 		});
 
 		revalidatePath("/dashboard/blogs");
@@ -99,12 +109,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 					})),
 				},
 			},
-			include: {
-				tags: true,
-				portfolio: true,
-				views: true,
-				likes: true,
-			},
+			select,
 		});
 
 		revalidatePath("/dashboard/blogs");
@@ -147,12 +152,7 @@ export async function publishBlog({ blogId, portfolioId }) {
 				status: "published",
 				publishedAt: new Date(),
 			},
-			include: {
-				tags: true,
-				portfolio: true,
-				views: true,
-				likes: true,
-			},
+			select,
 		});
 
 		revalidatePath("/dashboard/blogs");
@@ -170,9 +170,7 @@ export async function getBlogPosts(portfolioId) {
 			orderBy: {
 				publishedAt: "desc",
 			},
-			include: {
-				tags: true,
-			},
+			select,
 		});
 
 		return posts;
@@ -187,21 +185,16 @@ export async function getBlogPost(portfolioId, slug) {
 				slug,
 				status: "published",
 			},
-			include: {
-				tags: true,
-			},
+			select,
 		});
 
-		if (!post) {
-			throw new Error("Post not found");
-		}
+		if (!post) throw new Error("Post not found");
 
-		// Increment view count
 		await prisma.blog.update({
 			where: { id: post.id },
 			data: { views: { increment: 1 } },
 		});
 
-		return post;
+		return blogSchema.parse(post);
 	});
 }
