@@ -36,6 +36,7 @@ export default function Page() {
 			(item) => item.visible
 		),
 		profiles: portfolio?.profiles?.items || [],
+		blogEnabled: portfolio?.blogEnabled || false,
 	};
 
 	return (

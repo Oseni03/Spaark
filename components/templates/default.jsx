@@ -18,7 +18,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ChevronRightIcon } from "lucide-react";
+import { ChevronRightIcon, HomeIcon, NotebookIcon } from "lucide-react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { ContactForm } from "@/app/contact-us/components/contact-form";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
@@ -31,15 +31,12 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { siteConfig } from "@/config/site";
-import { useUser } from "@clerk/nextjs";
 import {
 	GithubLogo,
 	LinkedinLogo,
 	XLogo,
 	YoutubeLogo,
 } from "@phosphor-icons/react";
-import { Pen } from "lucide-react";
 import { BuildWithButton } from "../build-with-button";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -189,11 +186,11 @@ const ProjectCard = ({
 			<CardContent className="mt-auto flex flex-col px-5">
 				{tags && tags.length > 0 && (
 					<div className="mt-2 flex flex-wrap gap-1">
-						{tags?.map((tag) => (
+						{tags?.map((tag, index) => (
 							<Badge
 								className="px-1 py-0 text-[10px]"
 								variant="secondary"
-								key={tag}
+								key={index}
 							>
 								{tag}
 							</Badge>
@@ -376,14 +373,23 @@ const ContactCard = () => {
 	);
 };
 
-const Navbar = ({ profile }) => {
-	const { isSignedIn } = useUser();
+const Navbar = ({ profile, blogEnabled }) => {
+	const navbar = [
+		{ href: "/", icon: HomeIcon, label: "Home" },
+		{
+			href: "/blog",
+			icon: NotebookIcon,
+			label: "Blog",
+			requiresBlog: true,
+		},
+	].filter((item) => !item.requiresBlog || blogEnabled);
+
 	return (
 		<div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-6 flex flex-col origin-bottom h-full max-h-14">
 			<div className="fixed bottom-0 inset-x-0 h-16 w-full bg-background to-transparent backdrop-blur-lg [-webkit-mask-image:linear-gradient(to_top,black,transparent)] dark:bg-background"></div>
 			<Dock className="z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-1 bg-background [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] transform-gpu dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] ">
-				{siteConfig.navbar.map((item) => (
-					<DockIcon key={item.href}>
+				{navbar.map((item, index) => (
+					<DockIcon key={index}>
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Link
@@ -405,29 +411,6 @@ const Navbar = ({ profile }) => {
 						</Tooltip>
 					</DockIcon>
 				))}
-				{isSignedIn && (
-					<DockIcon key={"builder"}>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Link
-									href={"/builder"}
-									className={cn(
-										buttonVariants({
-											variant: "ghost",
-											size: "icon",
-										}),
-										"size-12"
-									)}
-								>
-									<Pen size={5} />
-								</Link>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>Builder</p>
-							</TooltipContent>
-						</Tooltip>
-					</DockIcon>
-				)}
 
 				<Separator orientation="vertical" className="h-full" />
 				{Object.entries(profile)
@@ -497,6 +480,7 @@ export default function DefaultTemplate({
 	hackathons,
 	certifications,
 	profiles = [],
+	blogEnabled = false,
 }) {
 	return (
 		<>
@@ -552,11 +536,11 @@ export default function DefaultTemplate({
 							</BlurFade>
 							{experiences.map((work, id) => (
 								<BlurFade
-									key={work.company}
+									key={work.id}
 									delay={BLUR_FADE_DELAY * 6 + id * 0.05}
 								>
 									<ResumeCard
-										key={work.company}
+										key={work.id}
 										logoUrl={work.picture}
 										altText={work.company}
 										title={work.company}
@@ -581,11 +565,11 @@ export default function DefaultTemplate({
 							</BlurFade>
 							{educations.map((edu, id) => (
 								<BlurFade
-									key={edu.institution}
+									key={edu.id}
 									delay={BLUR_FADE_DELAY * 8 + id * 0.05}
 								>
 									<ResumeCard
-										key={edu.institution}
+										key={edu.id}
 										href={edu.url}
 										logoUrl={edu.logo}
 										altText={edu.institution}
@@ -648,7 +632,7 @@ export default function DefaultTemplate({
 									>
 										<ProjectCard
 											href={project.url}
-											key={project.name}
+											key={project.id}
 											title={project.name}
 											description={HTMLReactParser(
 												project.description || ""
@@ -793,7 +777,7 @@ export default function DefaultTemplate({
 					</div>
 				</section>
 			</main>
-			<Navbar profile={profiles} />
+			<Navbar profile={profiles} blogEnabled={blogEnabled} />
 		</>
 	);
 }

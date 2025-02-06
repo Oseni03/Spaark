@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
+import { transformPortfolio } from "@/lib/utils";
 
 const portfolioSelect = {
 	id: true,
@@ -68,9 +69,32 @@ export async function createPortfolio(data) {
 			},
 			select: portfolioSelect,
 		});
-		return portfolio;
+		return transformPortfolio(portfolio);
 	});
 }
+
+// Helper function to filter valid basics fields
+const getValidBasicsUpdateFields = (basics) => {
+	const validFields = [
+		"name",
+		"headline",
+		"email",
+		"phone",
+		"location",
+		"url",
+		"picture",
+		"summary",
+		"about",
+		"updatedAt",
+	];
+
+	return Object.keys(basics)
+		.filter((key) => validFields.includes(key))
+		.reduce((obj, key) => {
+			obj[key] = basics[key];
+			return obj;
+		}, {});
+};
 
 export async function editPortfolio(id, data) {
 	return withErrorHandling(async () => {
@@ -88,16 +112,42 @@ export async function editPortfolio(id, data) {
 			whereClause.OR.push({ organizationId: orgId });
 		}
 
+		// Extract main portfolio fields
+		const {
+			basics,
+			profiles,
+			experiences,
+			educations,
+			skills,
+			certifications,
+			projects,
+			hackathons,
+			...portfolioData
+		} = data;
+
+		// Remove id from portfolioData if it exists
+		delete portfolioData.id;
+
+		// Update the portfolio with only top-level fields
 		const updatedPortfolio = await prisma.portfolio.update({
 			where: whereClause,
 			data: {
-				...data,
+				...portfolioData,
 				updatedAt: new Date(),
+				// Update basics if provided
+				...(basics && {
+					basics: {
+						update: {
+							...getValidBasicsUpdateFields(basics),
+							updatedAt: new Date(),
+						},
+					},
+				}),
 			},
 			select: portfolioSelect,
 		});
 
-		return updatedPortfolio;
+		return transformPortfolio(updatedPortfolio);
 	});
 }
 

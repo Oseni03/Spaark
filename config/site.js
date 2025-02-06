@@ -55,8 +55,4 @@ export const siteConfig = {
 			id: "cloud-integration",
 		},
 	],
-	navbar: [
-		{ href: "/", icon: HomeIcon, label: "Home" },
-		{ href: "/blog", icon: NotebookIcon, label: "Blog", requiresBlog: true },
-	],
 };

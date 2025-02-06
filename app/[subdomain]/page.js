@@ -43,13 +43,13 @@ export default function Page() {
 			(item) => item.visible
 		),
 		profiles: portfolio.profiles?.items || [],
+		blogEnabled: portfolio.blogEnabled || false,
 	};
 
 	logger.info("Portfolio data: ", portfolioData);
 
 	// Determine the template to use
-	const templateToUse =
-		portfolio.template || portfolio.basics?.template || "default";
+	const templateToUse = portfolio.template || "default";
 
 	return (
 		<div className="mx-auto w-full max-w-2xl h-[calc(100vh-48px)]">

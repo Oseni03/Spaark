@@ -121,16 +121,7 @@ const portfolioSlice = createSlice({
 						logger.error(error || "Failed to update portfolio");
 						return;
 					}
-					const result = portfolioSchema.safeParse(
-						...defaultPortfolio,
-						...data
-					);
-					if (result.success) {
-						Object.assign(portfolio, result.data);
-					} else {
-						portfolio.error = "Invalid portfolio data";
-						logger.error("Invalid portfolio data:", result.error);
-					}
+					Object.assign(portfolio, data);
 				}
 			})
 			.addCase(updatePortfolioInDatabase.rejected, setRejected)
