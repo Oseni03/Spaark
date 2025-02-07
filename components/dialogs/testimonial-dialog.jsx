@@ -2,6 +2,7 @@ import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
 	Dialog,
 	DialogContent,
@@ -9,7 +10,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { RichInput } from "@/components/ui/rich-input";
 import {
 	addTestimonialInDatabase,
 	updateTestimonialInDatabase,
@@ -157,12 +157,10 @@ export const TestimonialDialog = ({
 							render={({ field, fieldState }) => (
 								<div>
 									<label>Testimonial Message</label>
-									<RichInput
+									<Textarea
 										{...field}
-										content={field.value}
-										onChange={(value) =>
-											field.onChange(value)
-										}
+										placeholder="Write your testimonial message..."
+										className="min-h-[100px] resize-none"
 									/>
 									{fieldState.error && (
 										<small className="text-red-500 opacity-75">

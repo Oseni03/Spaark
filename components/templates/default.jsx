@@ -480,14 +480,14 @@ const Navbar = ({ profile, blogEnabled }) => {
 export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+	const [isPaused, setIsPaused] = useState(false);
 	const autoPlayInterval = 5000;
-	const slideTransitionDuration = 500;
 	const showRating = true;
 
 	useEffect(() => {
 		let intervalId;
 
-		if (isAutoPlaying && testimonials.length > 1) {
+		if (isAutoPlaying && !isPaused && testimonials.length > 1) {
 			intervalId = setInterval(() => {
 				setCurrentIndex((prevIndex) =>
 					prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
@@ -500,7 +500,7 @@ export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 				clearInterval(intervalId);
 			}
 		};
-	}, [isAutoPlaying, testimonials.length, autoPlayInterval]);
+	}, [isAutoPlaying, isPaused, testimonials.length, autoPlayInterval]);
 
 	const goToNext = () => {
 		setCurrentIndex((prevIndex) =>
@@ -516,65 +516,103 @@ export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 		setIsAutoPlaying(false);
 	};
 
+	const handleKeyDown = (e) => {
+		if (e.key === "ArrowLeft") goToPrevious();
+		if (e.key === "ArrowRight") goToNext();
+	};
+
 	const renderStars = (rating) => {
 		return Array(rating).fill("★").join("");
 	};
 
 	return (
 		<div
-			className={cn(`relative w-full max-w-3xl mx-auto px-4`, className)}
+			className={cn(`relative w-full max-w-2xl mx-auto`, className)}
+			onMouseEnter={() => setIsPaused(true)}
+			onMouseLeave={() => setIsPaused(false)}
+			onKeyDown={handleKeyDown}
+			role="region"
+			aria-label="Testimonials carousel"
+			tabIndex={0}
 		>
-			<div className="relative overflow-hidden bg-white rounded-lg shadow-lg">
-				<div
-					className="transition-transform ease-in-out flex"
-					style={{
-						transform: `translateX(-${currentIndex * 100}%)`,
-						transitionDuration: `${slideTransitionDuration}ms`,
-					}}
+			<motion.div
+				className="relative overflow-hidden rounded-xl bg-card shadow-lg dark:bg-card border"
+				initial={false}
+			>
+				<motion.div
+					className="flex"
+					animate={{ x: `-${currentIndex * 100}%` }}
+					transition={{ type: "spring", stiffness: 300, damping: 30 }}
 				>
 					{testimonials.map((testimonial, index) => (
-						<div
+						<motion.div
 							key={index}
-							className="w-full flex-shrink-0 p-8"
+							className="w-full flex-shrink-0 p-6"
 							style={{ width: "100%" }}
+							initial={{ opacity: 0 }}
+							animate={{
+								opacity: currentIndex === index ? 1 : 0.5,
+							}}
+							transition={{ duration: 0.3 }}
 						>
-							<p className="text-gray-700 mb-4">
-								{testimonial.text}
-							</p>
-							{showRating && testimonial.rating && (
-								<div className="text-yellow-400 mb-2">
-									{renderStars(testimonial.rating)}
-								</div>
-							)}
-							<div className="font-medium text-gray-900">
-								{testimonial.author}
+							<div className="flex flex-col items-center text-center space-y-4">
+								{testimonial.avatar && (
+									<Avatar className="size-20 border">
+										<AvatarImage
+											src={testimonial.avatar}
+											alt={testimonial.name}
+											className="object-cover"
+										/>
+										<AvatarFallback>
+											{testimonial.name[0]}
+										</AvatarFallback>
+									</Avatar>
+								)}
+								<blockquote className="space-y-2">
+									<p className="text-muted-foreground text-sm md:text-base">
+										{testimonial.message}
+									</p>
+									{showRating && testimonial.rating && (
+										<div className="text-yellow-400 dark:text-yellow-300 text-sm">
+											{renderStars(testimonial.rating)}
+										</div>
+									)}
+									<footer className="space-y-1">
+										<div className="font-medium text-foreground">
+											{testimonial.name}
+										</div>
+										<div className="text-xs text-muted-foreground">
+											{testimonial.role}
+											{testimonial.company && (
+												<>, {testimonial.company}</>
+											)}
+										</div>
+									</footer>
+								</blockquote>
 							</div>
-							<div className="text-gray-500 text-sm">
-								{testimonial.role}
-							</div>
-						</div>
+						</motion.div>
 					))}
-				</div>
+				</motion.div>
 
 				{testimonials.length > 1 && (
 					<>
 						<button
 							onClick={goToPrevious}
-							className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg -ml-4"
+							className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-2 shadow-lg backdrop-blur-sm transition-opacity hover:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
 							aria-label="Previous testimonial"
 						>
-							<ChevronLeft className="w-6 h-6" />
+							<ChevronLeft className="h-5 w-5" />
 						</button>
 
 						<button
 							onClick={goToNext}
-							className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg -mr-4"
+							className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-2 shadow-lg backdrop-blur-sm transition-opacity hover:bg-background focus:outline-none focus:ring-2 focus:ring-ring"
 							aria-label="Next testimonial"
 						>
-							<ChevronRight className="w-6 h-6" />
+							<ChevronRight className="h-5 w-5" />
 						</button>
 
-						<div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+						<div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
 							{testimonials.map((_, index) => (
 								<button
 									key={index}
@@ -582,18 +620,20 @@ export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 										setCurrentIndex(index);
 										setIsAutoPlaying(false);
 									}}
-									className={`w-2 h-2 rounded-full transition-colors ${
+									className={cn(
+										"h-2 w-2 rounded-full transition-colors",
 										currentIndex === index
-											? "bg-blue-500"
-											: "bg-gray-300"
-									}`}
+											? "bg-primary"
+											: "bg-muted hover:bg-muted-foreground"
+									)}
 									aria-label={`Go to slide ${index + 1}`}
+									aria-current={currentIndex === index}
 								/>
 							))}
 						</div>
 					</>
 				)}
-			</div>
+			</motion.div>
 		</div>
 	);
 };
@@ -777,7 +817,34 @@ export default function DefaultTemplate({
 					</section>
 				)}
 				{testimonials.length > 0 && (
-					<TestimonialCarousel testimonials={testimonials} />
+					<section id="testimonials">
+						<div className="space-y-12 w-full py-12">
+							<BlurFade delay={BLUR_FADE_DELAY * 11}>
+								<div className="flex flex-col items-center justify-center space-y-4 text-center">
+									<div className="space-y-2">
+										<div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
+											Testimonials
+										</div>
+										<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+											What people say
+										</h2>
+										<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[800px] mx-auto">
+											I&rsquo;ve had the pleasure of
+											working with amazing people
+											throughout my career. Here&rsquo;s
+											what some of them have to say about
+											our collaboration.
+										</p>
+									</div>
+								</div>
+							</BlurFade>
+							<BlurFade delay={BLUR_FADE_DELAY * 12}>
+								<TestimonialCarousel
+									testimonials={testimonials}
+								/>
+							</BlurFade>
+						</div>
+					</section>
 				)}
 				{certifications.length > 0 && (
 					<section id="certifications">
