@@ -11,6 +11,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { basicsSchema, defaultBasics } from "./basics";
 import { idSchema } from "../shared/id";
 import { testimonialSchema } from "./testimonial";
+import { teamSchema } from "./team"; // Add this line
 
 // Schema
 export const sectionSchema = z.object({
@@ -62,6 +63,11 @@ export const portfolioSchema = z.object({
 	testimonials: sectionSchema.extend({
 		id: z.literal("testimonial"),
 		items: z.array(testimonialSchema),
+	}),
+	teams: sectionSchema.extend({
+		// Add this section
+		id: z.literal("team"),
+		items: z.array(teamSchema),
 	}),
 });
 
@@ -130,6 +136,13 @@ export const defaultPortfolio = {
 		name: "Testimonials",
 		items: [],
 	},
+	teams: {
+		// Add this section
+		...defaultSection,
+		id: "team",
+		name: "Team",
+		items: [],
+	},
 };
 
 export * from "./certification";
@@ -141,3 +154,4 @@ export * from "./profile";
 export * from "./project";
 export * from "./skill";
 export * from "./testimonial";
+export * from "./team"; // Add this line

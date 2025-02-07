@@ -26,6 +26,7 @@ const portfolioSelect = {
 	projects: true,
 	hackathons: true,
 	testimonials: true,
+	teams: true,
 };
 
 export async function getPortfolios(userId, orgId = null) {
@@ -124,6 +125,7 @@ export async function editPortfolio(id, data) {
 			projects,
 			hackathons,
 			testimonials,
+			teams,
 			...portfolioData
 		} = data;
 

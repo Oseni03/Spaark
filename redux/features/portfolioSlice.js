@@ -48,6 +48,11 @@ import {
 } from "../thunks/testimonials";
 import { logger } from "@/lib/utils";
 import { transformPortfolio } from "@/lib/utils";
+import {
+	addTeamMemberInDatabase,
+	updateTeamMemberInDatabase,
+	removeTeamMemberFromDatabase,
+} from "../thunks/team";
 
 // Initial State
 const initialState = {
@@ -632,6 +637,65 @@ const portfolioSlice = createSlice({
 				}
 			)
 			.addCase(removeTestimonialFromDatabase.rejected, setRejected);
+
+		// Team Member Extra Reducers
+		builder
+			.addCase(addTeamMemberInDatabase.pending, setPending)
+			.addCase(addTeamMemberInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state);
+				const { data, error } = action.payload;
+				const portfolio = state.items.find(
+					(portfolio) => portfolio.id === data.portfolioId
+				);
+				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add team member");
+						return;
+					}
+					portfolio.teams.items.push(data);
+				}
+			})
+			.addCase(addTeamMemberInDatabase.rejected, setRejected)
+			.addCase(updateTeamMemberInDatabase.pending, setPending)
+			.addCase(updateTeamMemberInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state);
+				const { data, error } = action.payload;
+				const portfolio = state.items.find(
+					(portfolio) => portfolio.id === data.portfolioId
+				);
+				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update team member");
+						return;
+					}
+					const index = portfolio.teams.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						portfolio.teams.items[index] = data;
+					}
+				}
+			})
+			.addCase(updateTeamMemberInDatabase.rejected, setRejected)
+			.addCase(removeTeamMemberFromDatabase.pending, setPending)
+			.addCase(
+				removeTeamMemberFromDatabase.fulfilled,
+				(state, action) => {
+					setFulfilled(state);
+					const { portfolioId, teamMemberId } = action.payload;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === portfolioId
+					);
+					if (portfolio) {
+						portfolio.teams.items = portfolio.teams.items.filter(
+							(item) => item.id !== teamMemberId
+						);
+					}
+				}
+			)
+			.addCase(removeTeamMemberFromDatabase.rejected, setRejected);
 	},
 });
 

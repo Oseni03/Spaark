@@ -38,6 +38,7 @@ export default function Page() {
 		testimonials: (portfolio?.testimonials?.items || []).filter(
 			(item) => item.visible
 		),
+		teams: (portfolio?.teams?.items || []).filter((item) => item.visible),
 		profiles: portfolio?.profiles?.items || [],
 		blogEnabled: portfolio?.blogEnabled || false,
 	};

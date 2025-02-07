@@ -41,30 +41,30 @@ model User {
   updatedAt  DateTime? @updatedAt
 
   // Relations
-  portfolios     Portfolio[]
-  memberships    OrganizationMember[]
-  organizations  Organization[]     // Organizations owned by user
-  transactions   Transaction[]
-  subscription   Subscription?
+  portfolios    Portfolio[]
+  memberships   OrganizationMember[]
+  organizations Organization[] // Organizations owned by user
+  transactions  Transaction[]
+  subscription  Subscription?
 
   // One-to-one relation to Code
-  code           Code?
-  codeId         String?         @unique
+  code   Code?
+  codeId String? @unique
 
-  portfolioLimit Int       @default(1)  // Default limit for individual accounts
+  portfolioLimit Int @default(1) // Default limit for individual accounts
 }
 
 model Organization {
-  id          String    @id @default(cuid())
-  clerkOrgId  String    @unique
-  name        String
-  slug        String    @unique
-  industry    String?
-  size        String?
-  logo        String?
-  website     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
+  id         String    @id @default(cuid())
+  clerkOrgId String    @unique
+  name       String
+  slug       String    @unique
+  industry   String?
+  size       String?
+  logo       String?
+  website    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
 
   // Organization settings
   allowMemberInvites Boolean @default(false)
@@ -73,7 +73,7 @@ model Organization {
 
   // Relations
   ownerId    String
-  owner      User               @relation(fields: [ownerId], references: [id])
+  owner      User                 @relation(fields: [ownerId], references: [id])
   members    OrganizationMember[]
   portfolios Portfolio[]
 
@@ -84,34 +84,34 @@ model OrganizationMember {
   id             String       @id @default(cuid())
   organizationId String
   userId         String
-  role           Role        @default(MEMBER)
+  role           Role         @default(MEMBER)
   permissions    Permission[]
-  status         String      @default("pending") // pending, active, suspended
+  status         String       @default("pending") // pending, active, suspended
   invitedBy      String?
-  invitedAt      DateTime    @default(now())
+  invitedAt      DateTime     @default(now())
   joinedAt       DateTime?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime?   @updatedAt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?    @updatedAt
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
   @@index([organizationId])
 }
 
 model Portfolio {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  isLive      Boolean   @default(false)
-  blogEnabled Boolean   @default(false)
-  isPrimary   Boolean   @default(false)
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  isLive       Boolean   @default(false)
+  blogEnabled  Boolean   @default(false)
+  isPrimary    Boolean   @default(false)
   customDomain String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  template    String    @default("default")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
+  template     String    @default("default")
 
   // Ownership
   userId         String
@@ -121,7 +121,7 @@ model Portfolio {
 
   // Portfolio content
   basics         Basics?
-  profiles       Profile[]        // Social profiles
+  profiles       Profile[] // Social profiles
   experiences    Experience[]
   educations     Education[]
   skills         Skill[]
@@ -130,6 +130,7 @@ model Portfolio {
   hackathons     Hackathon[]
   blogs          Blog[]
   testimonials   Testimonial[]
+  teams          Team[] // Add this line
 
   @@index([userId])
   @@index([organizationId])
@@ -151,20 +152,20 @@ model Basics {
   updatedAt   DateTime? @updatedAt
 
   // Relation to Portfolio
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
   id          String    @id @default(cuid())
   portfolioId String
   visible     Boolean   @default(true)
-  network     String    // e.g., "github", "linkedin"
+  network     String // e.g., "github", "linkedin"
   username    String
   url         String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@unique([portfolioId, network])
   @@index([portfolioId])
@@ -184,7 +185,7 @@ model Experience {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
@@ -202,13 +203,13 @@ model Education {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
 
 model Skill {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   portfolioId String
   visible     Boolean  @default(true)
   name        String
@@ -216,7 +217,7 @@ model Skill {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
@@ -233,7 +234,7 @@ model Certification {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
@@ -241,7 +242,7 @@ model Certification {
 model Project {
   id           String    @id @default(cuid())
   portfolioId  String
-  visible      Boolean  @default(true)
+  visible      Boolean   @default(true)
   name         String
   description  String
   date         String
@@ -254,7 +255,7 @@ model Project {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
 
-  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
@@ -269,60 +270,62 @@ model Link {
 
   project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  Team        Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
   projectId   String?
   hackathonId String?
+  teamId      String?
 }
 
 model Hackathon {
-  id            String   @id @default(cuid())
-  portfolioId   String
-  visible       Boolean  @default(true)
-  name          String
-  description   String
-  date          String
-  location      String
-  url           String?
-  logo          String?
-  links         Link[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  description String
+  date        String
+  location    String
+  url         String?
+  logo        String?
+  links       Link[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
 
 model Transaction {
-  id            String       @id @default(cuid())
-  userId        String
-  status        String      @default("pending")
-  priceId       String
-  title         String
-  amount        Float
+  id             String        @id @default(cuid())
+  userId         String
+  status         String        @default("pending")
+  priceId        String
+  title          String
+  amount         Float
   subscriptionId String?
-  subscription  Subscription? @relation(fields: [subscriptionId], references: [id])
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime?   @updatedAt
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime?     @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([subscriptionId])
 }
 
 model Subscription {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  type          String    // INDIVIDUAL or TEAM
-  frequency     String    // weekly, monthly, yearly
-  status        String    @default("pending")
-  priceId       String
-  startDate     DateTime?
-  endDate       DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime? @updatedAt
-  
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions  Transaction[]
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  type      String // INDIVIDUAL or TEAM
+  frequency String // weekly, monthly, yearly
+  status    String    @default("pending")
+  priceId   String
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
 
   @@index([userId])
 }
@@ -354,25 +357,25 @@ model Code {
 }
 
 model Blog {
-  id            String      @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
-  slug          String      @unique
-  content       Json?       // For rich text content
-  excerpt       String?     @db.Text
+  slug          String    @unique
+  content       Json? // For rich text content
+  excerpt       String?   @db.Text
   featuredImage String?
-  status        String      @default("draft") // draft, published
+  status        String    @default("draft") // draft, published
   publishedAt   DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  views         Int         @default(0)
-  likes         Int         @default(0)
-  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  views         Int       @default(0)
+  likes         Int       @default(0)
+
   // Relations
-  portfolioId   String
-  portfolio     Portfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  authorId      String      // Clerk user ID
-  tags          Tag[]
-  comments      Comment[]
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  authorId    String // Clerk user ID
+  tags        Tag[]
+  comments    Comment[]
 
   @@index([portfolioId])
   @@index([authorId])
@@ -414,7 +417,24 @@ model Testimonial {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  role        String
+  bio         String?
+  avatar      String?
+  links       Link[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@index([portfolioId])
 }
