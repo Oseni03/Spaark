@@ -12,6 +12,7 @@ import { Certification } from "@/components/sections/certification";
 import { Project } from "@/components/sections/project";
 import { Hackathon } from "@/components/sections/hackathon";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { Testimonial } from "./sections/testimonial";
 
 export function LeftAppSidebar() {
 	const router = useRouter();
@@ -52,6 +53,8 @@ export function LeftAppSidebar() {
 			<Certification />
 			<Separator />
 			<Project />
+			<Separator />
+			<Testimonial />
 			<Separator />
 			<Hackathon />
 		</div>

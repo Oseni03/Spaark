@@ -41,6 +41,11 @@ import {
 	updateProfileInDatabase,
 	removeProfileFromDatabase,
 } from "../thunks/profile";
+import {
+	addTestimonialInDatabase,
+	updateTestimonialInDatabase,
+	removeTestimonialFromDatabase,
+} from "../thunks/testimonials";
 import { logger } from "@/lib/utils";
 import { transformPortfolio } from "@/lib/utils";
 
@@ -567,6 +572,66 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeSkillFromDatabase.rejected, setRejected);
+
+		// Testimonial Extra Reducers
+		builder
+			.addCase(addTestimonialInDatabase.pending, setPending)
+			.addCase(addTestimonialInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
+				const { data, error } = action.payload;
+				const portfolio = state.items.find(
+					(portfolio) => portfolio.id === data.portfolioId
+				);
+				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to add testimonial");
+						return;
+					}
+					portfolio.testimonials.items.push(data);
+				}
+			})
+			.addCase(addTestimonialInDatabase.rejected, setRejected)
+			.addCase(updateTestimonialInDatabase.pending, setPending)
+			.addCase(updateTestimonialInDatabase.fulfilled, (state, action) => {
+				setFulfilled(state, action);
+				const { data, error } = action.payload;
+				const portfolio = state.items.find(
+					(portfolio) => portfolio.id === data.portfolioId
+				);
+				if (portfolio) {
+					if (error) {
+						portfolio.error = error;
+						logger.error(error || "Failed to update testimonial");
+						return;
+					}
+					const index = portfolio.testimonials.items.findIndex(
+						(item) => item.id === data.id
+					);
+					if (index !== -1) {
+						portfolio.testimonials.items[index] = data;
+					}
+				}
+			})
+			.addCase(updateTestimonialInDatabase.rejected, setRejected)
+			.addCase(removeTestimonialFromDatabase.pending, setPending)
+			.addCase(
+				removeTestimonialFromDatabase.fulfilled,
+				(state, action) => {
+					setFulfilled(state, action);
+					const { portfolioId, testimonialId } = action.payload;
+					const portfolio = state.items.find(
+						(portfolio) => portfolio.id === portfolioId
+					);
+					if (portfolio) {
+						portfolio.testimonials.items =
+							portfolio.testimonials.items.filter(
+								(item) => item.id !== testimonialId
+							);
+					}
+				}
+			)
+			.addCase(removeTestimonialFromDatabase.rejected, setRejected);
 	},
 });
 

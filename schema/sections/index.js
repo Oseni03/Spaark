@@ -10,6 +10,7 @@ import { hackathonSchema } from "./hackathon";
 import { createId } from "@paralleldrive/cuid2";
 import { basicsSchema, defaultBasics } from "./basics";
 import { idSchema } from "../shared/id";
+import { testimonialSchema } from "./testimonial";
 
 // Schema
 export const sectionSchema = z.object({
@@ -57,6 +58,10 @@ export const portfolioSchema = z.object({
 	skills: sectionSchema.extend({
 		id: z.literal("skill"),
 		items: z.array(skillSchema),
+	}),
+	testimonials: sectionSchema.extend({
+		id: z.literal("testimonial"),
+		items: z.array(testimonialSchema),
 	}),
 });
 
@@ -119,6 +124,12 @@ export const defaultPortfolio = {
 		items: [],
 	},
 	skills: { ...defaultSection, id: "skills", name: "Skills", items: [] },
+	testimonials: {
+		...defaultSection,
+		id: "testimonial",
+		name: "Testimonials",
+		items: [],
+	},
 };
 
 export * from "./certification";
@@ -129,3 +140,4 @@ export * from "./language";
 export * from "./profile";
 export * from "./project";
 export * from "./skill";
+export * from "./testimonial";

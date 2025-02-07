@@ -35,6 +35,9 @@ export default function Page() {
 		certifications: (portfolio?.certifications?.items || []).filter(
 			(item) => item.visible
 		),
+		testimonials: (portfolio?.testimonials?.items || []).filter(
+			(item) => item.visible
+		),
 		profiles: portfolio?.profiles?.items || [],
 		blogEnabled: portfolio?.blogEnabled || false,
 	};

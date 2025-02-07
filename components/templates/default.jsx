@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import BlurFade from "@/components/magicui/blur-fade";
@@ -8,7 +8,6 @@ import BlurFadeText from "@/components/magicui/blur-fade-text";
 import HTMLReactParser from "html-react-parser";
 import { getInitials, cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Globe } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	Card,
@@ -18,7 +17,14 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ChevronRightIcon, HomeIcon, NotebookIcon } from "lucide-react";
+import {
+	ChevronRightIcon,
+	HomeIcon,
+	NotebookIcon,
+	Globe,
+	ChevronLeft,
+	ChevronRight,
+} from "lucide-react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { ContactForm } from "@/app/contact-us/components/contact-form";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
@@ -471,6 +477,127 @@ const Navbar = ({ profile, blogEnabled }) => {
 	);
 };
 
+export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
+	const [currentIndex, setCurrentIndex] = useState(0);
+	const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+	const autoPlayInterval = 5000;
+	const slideTransitionDuration = 500;
+	const showRating = true;
+
+	useEffect(() => {
+		let intervalId;
+
+		if (isAutoPlaying && testimonials.length > 1) {
+			intervalId = setInterval(() => {
+				setCurrentIndex((prevIndex) =>
+					prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+				);
+			}, autoPlayInterval);
+		}
+
+		return () => {
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
+		};
+	}, [isAutoPlaying, testimonials.length, autoPlayInterval]);
+
+	const goToNext = () => {
+		setCurrentIndex((prevIndex) =>
+			prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+		);
+		setIsAutoPlaying(false);
+	};
+
+	const goToPrevious = () => {
+		setCurrentIndex((prevIndex) =>
+			prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+		);
+		setIsAutoPlaying(false);
+	};
+
+	const renderStars = (rating) => {
+		return Array(rating).fill("★").join("");
+	};
+
+	return (
+		<div
+			className={cn(`relative w-full max-w-3xl mx-auto px-4`, className)}
+		>
+			<div className="relative overflow-hidden bg-white rounded-lg shadow-lg">
+				<div
+					className="transition-transform ease-in-out flex"
+					style={{
+						transform: `translateX(-${currentIndex * 100}%)`,
+						transitionDuration: `${slideTransitionDuration}ms`,
+					}}
+				>
+					{testimonials.map((testimonial, index) => (
+						<div
+							key={index}
+							className="w-full flex-shrink-0 p-8"
+							style={{ width: "100%" }}
+						>
+							<p className="text-gray-700 mb-4">
+								{testimonial.text}
+							</p>
+							{showRating && testimonial.rating && (
+								<div className="text-yellow-400 mb-2">
+									{renderStars(testimonial.rating)}
+								</div>
+							)}
+							<div className="font-medium text-gray-900">
+								{testimonial.author}
+							</div>
+							<div className="text-gray-500 text-sm">
+								{testimonial.role}
+							</div>
+						</div>
+					))}
+				</div>
+
+				{testimonials.length > 1 && (
+					<>
+						<button
+							onClick={goToPrevious}
+							className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg -ml-4"
+							aria-label="Previous testimonial"
+						>
+							<ChevronLeft className="w-6 h-6" />
+						</button>
+
+						<button
+							onClick={goToNext}
+							className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg -mr-4"
+							aria-label="Next testimonial"
+						>
+							<ChevronRight className="w-6 h-6" />
+						</button>
+
+						<div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+							{testimonials.map((_, index) => (
+								<button
+									key={index}
+									onClick={() => {
+										setCurrentIndex(index);
+										setIsAutoPlaying(false);
+									}}
+									className={`w-2 h-2 rounded-full transition-colors ${
+										currentIndex === index
+											? "bg-blue-500"
+											: "bg-gray-300"
+									}`}
+									aria-label={`Go to slide ${index + 1}`}
+								/>
+							))}
+						</div>
+					</>
+				)}
+			</div>
+		</div>
+	);
+};
+
 export default function DefaultTemplate({
 	basics,
 	experiences,
@@ -480,6 +607,7 @@ export default function DefaultTemplate({
 	hackathons,
 	certifications,
 	profiles = [],
+	testimonials = [],
 	blogEnabled = false,
 }) {
 	return (
@@ -647,6 +775,9 @@ export default function DefaultTemplate({
 							</div>
 						</div>
 					</section>
+				)}
+				{testimonials.length > 0 && (
+					<TestimonialCarousel testimonials={testimonials} />
 				)}
 				{certifications.length > 0 && (
 					<section id="certifications">

@@ -25,6 +25,7 @@ const portfolioSelect = {
 	certifications: true,
 	projects: true,
 	hackathons: true,
+	testimonials: true,
 };
 
 export async function getPortfolios(userId, orgId = null) {
@@ -122,6 +123,7 @@ export async function editPortfolio(id, data) {
 			certifications,
 			projects,
 			hackathons,
+			testimonials,
 			...portfolioData
 		} = data;
 

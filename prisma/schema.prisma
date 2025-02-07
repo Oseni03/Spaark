@@ -129,6 +129,7 @@ model Portfolio {
   projects       Project[]
   hackathons     Hackathon[]
   blogs          Blog[]
+  testimonials   Testimonial[]
 
   @@index([userId])
   @@index([organizationId])
@@ -398,4 +399,22 @@ model Comment {
 
   @@index([blogId])
   @@index([authorId])
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  role        String
+  company     String?
+  message     String
+  avatar      String?
+  rating      Int?     @default(5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
