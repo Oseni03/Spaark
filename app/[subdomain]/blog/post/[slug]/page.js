@@ -1,52 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { formatDate } from "@/lib/utils";
 import { getBlogPost } from "@/services/blog";
 import { getPortfolioFromSlug } from "@/lib/blog-utils";
-import BlogPostSkeleton from "../../../components/blog-post-skeleton";
+import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
 import NotFound from "@/app/not-found";
+import { BlogPost } from "@/components/blog/blog-post";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import Head from "next/head";
 
-const BlogPost = ({ title, date, author, authorHandle, content }) => {
-	return (
-		<article className="max-w-4xl mx-auto px-6 py-12">
-			<div className="text-center mb-12">
-				<div className="inline-block mb-6">
-					<img
-						src="/api/placeholder/48/48"
-						alt="Post icon"
-						className="w-12 h-12"
-					/>
-				</div>
-				<h1 className="text-4xl font-bold mb-8">{title}</h1>
-			</div>
-
-			<div className="mb-12">
-				<div className="flex items-center gap-3 text-gray-600 mb-6">
-					<span>{date}</span>
-					<div className="flex items-center gap-2">
-						<img
-							src="/api/placeholder/24/24"
-							alt={author}
-							className="w-6 h-6 rounded-full"
-						/>
-						<span>{authorHandle}</span>
-					</div>
-				</div>
-			</div>
-
-			<div
-				className="prose prose-lg max-w-none dark:prose-invert"
-				dangerouslySetInnerHTML={{ __html: content }}
-			/>
-		</article>
-	);
-};
-
-export default function BlogPostPage() {
+export default function Page() {
 	const { slug, subdomain } = useParams();
+	const router = useRouter();
 	const portfolioContext = usePortfolio();
 	const [post, setPost] = useState(null);
 	const [portfolio, setPortfolio] = useState(portfolioContext?.portfolio);
@@ -103,12 +72,42 @@ export default function BlogPostPage() {
 			: JSON.stringify(post.content);
 
 	return (
-		<BlogPost
-			title={post.title}
-			date={formatDate(post.publishedAt)}
-			author={portfolio.basics?.name || "Anonymous"}
-			authorHandle={portfolio.basics?.headline || "Author"}
-			content={contentHtml}
-		/>
+		<>
+			<Head>
+				<title>{`${post.title} | ${portfolio.basics?.name || "Blog"}`}</title>
+				<meta name="description" content={post.excerpt || post.title} />
+				<meta property="og:title" content={post.title} />
+				<meta
+					property="og:description"
+					content={post.excerpt || post.title}
+				/>
+				{post.featuredImage && (
+					<meta property="og:image" content={post.featuredImage} />
+				)}
+			</Head>
+
+			<div className="space-y-4">
+				<Button
+					variant="ghost"
+					className="flex items-center gap-2 mt-8"
+					onClick={() => router.back()}
+				>
+					<ChevronLeft className="h-4 w-4" />
+					Back to Blog
+				</Button>
+
+				<BlogPost
+					title={post.title}
+					excerpt={post.excerpt}
+					featuredImage={post.featuredImage}
+					date={formatDate(post.publishedAt)}
+					author={{
+						name: portfolio.basics?.name || "Anonymous",
+						image: portfolio.basics?.picture,
+					}}
+					content={contentHtml}
+				/>
+			</div>
+		</>
 	);
 }

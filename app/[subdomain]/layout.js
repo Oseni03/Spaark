@@ -47,7 +47,9 @@ export default async function PortfolioLayout({ params, children }) {
 			title: headline ? `${name} - ${headline}` : name,
 			description: summary,
 			image: picture,
-			url: `${portfolioSlug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+			url: portfolio.customDomain
+				? portfolio.customDomain
+				: `${portfolioSlug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
 		};
 
 		return (
@@ -71,7 +73,10 @@ export default async function PortfolioLayout({ params, children }) {
 					<meta name="url" content={metaTags.url} />
 				</head>
 				<body
-					className={cn(PORTFOLIO_TAILWIND_CLASS, "scrollbar-hide")}
+					className={cn(
+						"mx-auto max-w-7xl px-6 lg:px-8",
+						"scrollbar-hide"
+					)}
 				>
 					<PortfolioProvider
 						portfolio={portfolio}
@@ -91,13 +96,17 @@ export default async function PortfolioLayout({ params, children }) {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }) {
-	const { subdomain } = params;
+	const validatedParams = await Promise.resolve(params);
+	const { subdomain } = validatedParams;
 	const portfolio = await getPortfolio(subdomain);
+	const name = portfolio.data?.basics?.name || portfolio.data?.name;
+	const headline = portfolio.data?.basics?.headline;
 
 	return {
-		title: portfolio.data?.basics?.name || portfolio.data?.name,
-		description:
-			portfolio.data?.basics?.summary ||
-			`${portfolio.data?.name}'s Portfolio`,
+		title: {
+			template: `%s | ${name}`,
+			default: headline ? `${name} - ${headline}` : name,
+		},
+		description: portfolio.data?.basics?.summary || `${name}'s Portfolio`,
 	};
 }

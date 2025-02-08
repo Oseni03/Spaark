@@ -6,19 +6,20 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { getBlogPosts } from "@/services/blog";
 import { getPortfolioFromSlug } from "@/lib/blog-utils";
-import BlogListSkeleton from "../components/blog-list-skeleton";
+import BlogListSkeleton from "../../../components/blog/blog-list-skeleton";
 import NotFound from "@/app/not-found";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/utils";
 
 function TagFilter({ tags, selectedTag, onTagSelect }) {
+	logger.info("Tags:", tags);
 	return (
 		<div className="mb-8">
-			<div className="flex flex-wrap gap-2">
+			<div className="flex items-center flex-wrap gap-2">
 				<Badge
 					className={`cursor-pointer ${!selectedTag ? "bg-primary" : ""}`}
-					variant="secondary"
 					onClick={() => onTagSelect(null)}
 				>
 					All
@@ -38,7 +39,7 @@ function TagFilter({ tags, selectedTag, onTagSelect }) {
 	);
 }
 
-export default function BlogPage() {
+export default function Page() {
 	const { subdomain } = useParams();
 	const searchParams = useSearchParams();
 	const router = useRouter();
@@ -86,6 +87,7 @@ export default function BlogPage() {
 						setTags(uniqueTags);
 					} else {
 						setError("Failed to fetch posts");
+						return NotFound();
 					}
 				} else {
 					setError("Blog not enabled");
@@ -151,7 +153,7 @@ function PostCard({ post }) {
 			<Link href={`/blog/post/${post.slug}`}>
 				<div className="relative h-48 w-full">
 					<Image
-						src={post.featuredImage.url}
+						src={post.featuredImage}
 						alt={post.title}
 						layout="fill"
 						objectFit="cover"

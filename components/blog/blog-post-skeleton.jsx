@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-const BlogPostSkeleton = () => {
+export const BlogPostSkeleton = () => {
 	return (
 		<article className="max-w-4xl mx-auto px-6 py-12">
 			<div className="text-center mb-12">
@@ -32,5 +32,3 @@ const BlogPostSkeleton = () => {
 		</article>
 	);
 };
-
-export default BlogPostSkeleton;

@@ -25,25 +25,29 @@ export default function Page() {
 	}
 
 	const portfolioData = {
-		basics: portfolio.basics || {},
-		experiences: (portfolio.experiences?.items || []).filter(
+		basics: portfolio?.basics || defaultBasics,
+		experiences: (portfolio?.experiences?.items || []).filter(
 			(item) => item.visible
 		),
-		educations: (portfolio.educations?.items || []).filter(
+		projects: (portfolio?.projects?.items || []).filter(
 			(item) => item.visible
 		),
-		skills: (portfolio.skills?.items || []).filter((item) => item.visible),
-		certifications: (portfolio.certifications?.items || []).filter(
+		educations: (portfolio?.educations?.items || []).filter(
 			(item) => item.visible
 		),
-		projects: (portfolio.projects?.items || []).filter(
+		skills: (portfolio?.skills?.items || []).filter((item) => item.visible),
+		hackathons: (portfolio?.hackathons?.items || []).filter(
 			(item) => item.visible
 		),
-		hackathons: (portfolio.hackathons?.items || []).filter(
+		certifications: (portfolio?.certifications?.items || []).filter(
 			(item) => item.visible
 		),
-		profiles: portfolio.profiles?.items || [],
-		blogEnabled: portfolio.blogEnabled || false,
+		testimonials: (portfolio?.testimonials?.items || []).filter(
+			(item) => item.visible
+		),
+		teams: (portfolio?.teams?.items || []).filter((item) => item.visible),
+		profiles: portfolio?.profiles?.items || [],
+		blogEnabled: portfolio?.blogEnabled || false,
 	};
 
 	logger.info("Portfolio data: ", portfolioData);
