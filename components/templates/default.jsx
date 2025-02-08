@@ -547,7 +547,7 @@ export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 					{testimonials.map((testimonial, index) => (
 						<motion.div
 							key={index}
-							className="w-full flex-shrink-0 p-6"
+							className="w-full flex-shrink-0 p-6 flex items-center justify-center" // Added flex, items-center, and justify-center
 							style={{ width: "100%" }}
 							initial={{ opacity: 0 }}
 							animate={{
@@ -638,6 +638,26 @@ export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 	);
 };
 
+// Add this after other section definitions and before the DefaultTemplate component
+const TeamMemberCard = ({ name, role, avatar }) => {
+	return (
+		<Card className="text-center border hover:shadow-lg transition-all duration-300 ease-out">
+			<CardContent className="p-6 py-10 flex flex-col items-center">
+				<Avatar className="size-24 border mb-4">
+					<AvatarImage
+						src={avatar}
+						alt={name}
+						className="object-cover"
+					/>
+					<AvatarFallback>{name[0]}</AvatarFallback>
+				</Avatar>
+				<h3 className="font-semibold mb-1">{name}</h3>
+				<p className="text-sm text-muted-foreground">{role}</p>
+			</CardContent>
+		</Card>
+	);
+};
+
 export default function DefaultTemplate({
 	basics,
 	experiences,
@@ -648,6 +668,7 @@ export default function DefaultTemplate({
 	certifications,
 	profiles = [],
 	testimonials = [],
+	teams = [], // Add this new prop
 	blogEnabled = false,
 }) {
 	return (
@@ -949,6 +970,48 @@ export default function DefaultTemplate({
 										</BlurFade>
 									))}
 								</ul>
+							</BlurFade>
+						</div>
+					</section>
+				)}
+				{teams.length > 0 && (
+					<section id="team">
+						<div className="space-y-12 w-full py-12">
+							<BlurFade delay={BLUR_FADE_DELAY * 13}>
+								<div className="flex flex-col items-center justify-center space-y-4 text-center">
+									<div className="space-y-2">
+										<div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
+											Our Team
+										</div>
+										<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+											Save your time and money by choosing
+											our team
+										</h2>
+										<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[800px] mx-auto">
+											Meet our talented team of
+											professionals dedicated to bringing
+											your vision to life
+										</p>
+									</div>
+								</div>
+							</BlurFade>
+							<BlurFade delay={BLUR_FADE_DELAY * 14}>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-[1200px] mx-auto">
+									{teams.map((member, id) => (
+										<BlurFade
+											key={member.id}
+											delay={
+												BLUR_FADE_DELAY * 15 + id * 0.05
+											}
+										>
+											<TeamMemberCard
+												name={member.name}
+												role={member.role}
+												avatar={member.avatar}
+											/>
+										</BlurFade>
+									))}
+								</div>
 							</BlurFade>
 						</div>
 					</section>

@@ -97,7 +97,7 @@ export const TeamDialog = ({
 							/>
 						</div>
 
-						<Controller
+						{/* <Controller
 							name="bio"
 							control={control}
 							render={({ field, fieldState }) => (
@@ -123,7 +123,7 @@ export const TeamDialog = ({
 								setValue={setValue}
 								links={currentTeamMember?.links || []}
 							/>
-						</div>
+						</div> */}
 
 						<div className="flex justify-end space-x-2">
 							<Button
