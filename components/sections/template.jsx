@@ -18,6 +18,12 @@ import { Separator } from "../ui/separator";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "../ui/dialog";
 import Pricing from "../homepage/pricing";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "../ui/tooltip";
 
 const templates = [
 	{
@@ -148,10 +154,23 @@ export function TemplateSection() {
 								)}
 							</div>
 						</div>
-						<Switch
-							checked={portfolio?.isLive}
-							onCheckedChange={toggleLiveStatus}
-						/>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger>
+									<Switch
+										checked={portfolio?.isLive}
+										onCheckedChange={toggleLiveStatus}
+									/>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>
+										{portfolio?.isLive
+											? "Take portfolio offline"
+											: "Make portfolio live"}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 					</div>
 
 					<div className="flex items-center gap-4">
