@@ -9,7 +9,15 @@ export const blogMetadataSchema = z.object({
 	excerpt: z.string().optional(),
 	featuredImage: z.string().url("Invalid image URL").optional().nullable(),
 	status: z.enum(["draft", "published"]).default("draft"),
-	tags: z.array(z.string()).default([]),
+	tags: z
+		.array(
+			z.object({
+				id: z.string().optional(),
+				name: z.string(),
+				slug: z.string().optional(),
+			})
+		)
+		.default([]),
 });
 
 // Schema for full blog post

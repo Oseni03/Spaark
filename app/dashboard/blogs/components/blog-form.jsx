@@ -27,6 +27,10 @@ import { RichInput } from "@/components/ui/rich-input";
 import { FeaturedImage } from "../new/components/featured-image";
 import { z } from "zod";
 import { logger } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { BadgeInput } from "@/components/ui/badge-input";
+import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Form Schema
 const blogFormSchema = blogMetadataSchema.extend({
@@ -34,6 +38,12 @@ const blogFormSchema = blogMetadataSchema.extend({
 		required_error: "Please select a portfolio",
 	}),
 	content: z.any().nullable(),
+});
+
+// Transform a tag string into a tag object
+const createTagObject = (tagName) => ({
+	name: tagName,
+	slug: slugify(tagName),
 });
 
 export function BlogForm({
@@ -46,6 +56,7 @@ export function BlogForm({
 		excerpt: "",
 		content: null,
 		featuredImage: undefined,
+		tags: [],
 	},
 }) {
 	const [validationLoading, setValidationLoading] = useState(false);
@@ -242,6 +253,84 @@ export function BlogForm({
 									placeholder="Enter blog excerpt"
 									{...field}
 								/>
+							</FormControl>
+							{fieldState.error && (
+								<FormMessage>
+									{fieldState.error?.message}
+								</FormMessage>
+							)}
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="tags"
+					render={({ field, fieldState }) => (
+						<FormItem>
+							<FormLabel>Tags</FormLabel>
+							<FormControl>
+								<div className="space-y-2">
+									<BadgeInput
+										value={
+											field.value?.map(
+												(tag) => tag.name
+											) || []
+										}
+										onChange={(newTags) => {
+											const tagObjects =
+												newTags.map(createTagObject);
+											field.onChange(tagObjects);
+										}}
+										placeholder="Enter tags separated by commas"
+									/>
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+										<AnimatePresence>
+											{field.value?.map((tag, index) => (
+												<motion.div
+													key={tag.slug}
+													layout
+													initial={{
+														opacity: 0,
+														y: -50,
+													}}
+													animate={{
+														opacity: 1,
+														y: 0,
+														transition: {
+															delay: index * 0.1,
+														},
+													}}
+													exit={{
+														opacity: 0,
+														x: -50,
+													}}
+												>
+													<Badge
+														className="cursor-pointer"
+														onClick={() => {
+															field.onChange(
+																field.value.filter(
+																	(v) =>
+																		v.slug !==
+																		tag.slug
+																)
+															);
+														}}
+													>
+														<span className="mr-1">
+															{tag.name}
+														</span>
+														<X
+															size={12}
+															weight="bold"
+														/>
+													</Badge>
+												</motion.div>
+											))}
+										</AnimatePresence>
+									</div>
+								</div>
 							</FormControl>
 							{fieldState.error && (
 								<FormMessage>

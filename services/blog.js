@@ -38,6 +38,12 @@ const serializeDates = (blog) => ({
 	updatedAt: blog.updatedAt?.toISOString(),
 });
 
+// Keep tags as objects when processing blog data
+const processBlog = (blog) => {
+	const parsed = blogSchema.parse(blog);
+	return serializeDates(parsed);
+};
+
 export async function getBlogs(portfolioId) {
 	return withErrorHandling(async () => {
 		const blogs = await prisma.blog.findMany({
@@ -45,14 +51,11 @@ export async function getBlogs(portfolioId) {
 			orderBy: { updatedAt: "desc" },
 			select,
 		});
-		const processed = blogs.map((blog) => {
-			const parsed = blogSchema.parse(blog);
-			return serializeDates(parsed);
-		});
-		return processed;
+		return blogs.map(processBlog);
 	});
 }
 
+// Update other functions to use processBlog instead of direct serialization
 export async function getBlog(blogId, portfolioId) {
 	return withErrorHandling(async () => {
 		const blog = await prisma.blog.findFirst({
@@ -67,7 +70,7 @@ export async function getBlog(blogId, portfolioId) {
 			throw new Error("Blog not found");
 		}
 
-		return serializeDates(blogSchema.parse(blog));
+		return processBlog(blog);
 	});
 }
 
@@ -77,15 +80,23 @@ export async function createBlog({ portfolioId, data }) {
 		if (!userId) throw new Error("Unauthorized");
 		if (!portfolioId) throw new Error("Portfolio ID is required");
 
+		// Separate tags from main data
+		const { tags = [], ...blogData } = data;
+
 		const blog = await prisma.blog.create({
 			data: {
-				...data,
+				...blogData,
 				authorId: userId,
 				portfolio: { connect: { id: portfolioId } },
 				tags: {
-					connectOrCreate: (data.tags || []).map((tag) => ({
-						where: { name: tag },
-						create: { name: tag, slug: slugify(tag) },
+					connectOrCreate: tags.map((tag) => ({
+						where: {
+							slug: tag.slug || slugify(tag.name),
+						},
+						create: {
+							name: tag.name,
+							slug: tag.slug || slugify(tag.name),
+						},
 					})),
 				},
 			},
@@ -93,16 +104,17 @@ export async function createBlog({ portfolioId, data }) {
 		});
 
 		revalidatePath("/dashboard/blogs");
-		return serializeDates(blogSchema.parse(blog));
+		return processBlog(blog);
 	});
 }
 
 export async function updateBlog({ blogId, portfolioId, data }) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
+		if (!userId) throw new Error("Unauthorized");
+
+		// Separate tags from main data
+		const { tags = [], ...blogData } = data;
 
 		const blog = await prisma.blog.update({
 			where: {
@@ -110,12 +122,17 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 				portfolioId,
 			},
 			data: {
-				...data,
+				...blogData,
 				tags: {
-					set: [], // Remove existing tags
-					connectOrCreate: (data.tags || []).map((tag) => ({
-						where: { name: tag },
-						create: { name: tag, slug: slugify(tag) },
+					set: [], // Clear existing tags
+					connectOrCreate: tags.map((tag) => ({
+						where: {
+							slug: tag.slug || slugify(tag.name),
+						},
+						create: {
+							name: tag.name,
+							slug: tag.slug || slugify(tag.name),
+						},
 					})),
 				},
 			},
@@ -123,7 +140,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 		});
 
 		revalidatePath("/dashboard/blogs");
-		return serializeDates(blogSchema.parse(blog));
+		return processBlog(blog);
 	});
 }
 
@@ -159,7 +176,7 @@ export async function getBlogPosts(portfolioId) {
 			select,
 		});
 
-		return posts.map((post) => serializeDates(blogSchema.parse(post)));
+		return posts.map(processBlog);
 	});
 }
 
@@ -181,6 +198,6 @@ export async function getBlogPost(portfolioId, slug) {
 			data: { views: { increment: 1 } },
 		});
 
-		return serializeDates(blogSchema.parse(post));
+		return processBlog(post);
 	});
 }
