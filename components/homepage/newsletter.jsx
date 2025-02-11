@@ -18,7 +18,7 @@ const Newsletter = () => {
 		const response = await createSubscriber(email);
 
 		if (response.success) {
-			toast({ title: "Thank you for subscribing!" });
+			toast.success("Thank you for subscribing!");
 			setEmail(""); // Reset the input field
 		} else {
 			toast.info(response.error);
