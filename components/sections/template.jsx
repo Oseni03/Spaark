@@ -24,6 +24,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "../ui/tooltip";
+import { useOrganizationContext } from "@/context/OrganizationContext";
 
 const templates = [
 	{
@@ -45,6 +46,12 @@ export function TemplateSection() {
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
+	const {
+		organization,
+		hasActiveSubscription,
+		hasReachedPortfolioLimit,
+		canManagePortfolios,
+	} = useOrganizationContext();
 
 	logger.info("Current portfolio:", portfolio); // Debug log
 	logger.info("Available templates:", templates); // Debug log
@@ -55,27 +62,66 @@ export function TemplateSection() {
 	const handleTemplateSelect = (templateId) => {
 		if (!portfolio) return;
 
-		dispatch(
-			updatePortfolioInDatabase({
-				id: portfolio.id,
-				data: { ...portfolio, template: templateId },
-			})
-		);
-	};
-
-	const toggleLiveStatus = async () => {
-		if (!portfolio) return;
-
-		if (!isSubscribed) {
-			setShowPricingDialog(true);
+		// Check permissions only if in an organization context
+		if (organization && !canManagePortfolios) {
+			toast.error("You don't have permission to manage portfolios");
 			return;
 		}
 
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
+				data: { ...portfolio, template: templateId },
+			})
+		);
+
+		toast.success("Template updated successfully");
+	};
+
+	const toggleLiveStatus = async () => {
+		if (!portfolio) return;
+
+		// Organization-specific checks
+		if (organization) {
+			if (!canManagePortfolios) {
+				toast.error("You don't have permission to manage portfolios");
+				return;
+			}
+
+			if (!portfolio.isLive) {
+				if (!hasActiveSubscription) {
+					setShowPricingDialog(true);
+					return;
+				}
+
+				if (hasReachedPortfolioLimit) {
+					toast.error(
+						"Portfolio limit reached. Please upgrade your plan."
+					);
+					setShowPricingDialog(true);
+					return;
+				}
+			}
+		} else {
+			// Individual user checks
+			if (!portfolio.isLive && !isSubscribed) {
+				setShowPricingDialog(true);
+				return;
+			}
+		}
+
+		// If all checks pass, update the portfolio
+		dispatch(
+			updatePortfolioInDatabase({
+				id: portfolio.id,
 				data: { ...portfolio, isLive: !portfolio.isLive },
 			})
+		);
+
+		toast.success(
+			portfolio.isLive
+				? "Portfolio is now hidden"
+				: "Portfolio is now live!"
 		);
 	};
 
@@ -250,7 +296,11 @@ export function TemplateSection() {
 				onOpenChange={setShowPricingDialog}
 			>
 				<DialogContent className="max-w-5xl">
-					<Pricing isDialog={true} returnUrl={window.location.href} />
+					<Pricing
+						isDialog={true}
+						returnUrl={window.location.href}
+						isOrganizationAccount={organization}
+					/>
 				</DialogContent>
 			</Dialog>
 		</>

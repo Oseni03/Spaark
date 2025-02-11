@@ -13,7 +13,6 @@ import {
 	SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { useOrganizationContext } from "@/context/OrganizationContext";
 import {
 	IconArrowLeft,
 	IconBrandTabler,
@@ -49,35 +48,30 @@ const links = [
 
 export function DashboardSidebar() {
 	const pathname = usePathname();
-	const { isIndividualAccount } = useOrganizationContext();
 
 	return (
 		<Sidebar>
 			<SidebarHeader>
 				<div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
 					<div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
-						{isIndividualAccount ? (
-							<Logo />
-						) : (
-							<OrganizationSwitcher
-								afterCreateOrganizationUrl="/dashboard/portfolios"
-								afterLeaveOrganizationUrl="/dashboard/portfolios"
-								afterSelectOrganizationUrl="/dashboard/portfolios"
-								createOrganizationMode={
-									isIndividualAccount ? "none" : "modal"
-								}
-								// hidePersonal={false}
-								appearance={{
-									elements: {
-										rootBox: "w-full",
-										organizationSwitcherTrigger: cn(
-											"w-full flex justify-between items-center",
-											"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
-										),
-									},
-								}}
-							/>
-						)}
+						<OrganizationSwitcher
+							afterCreateOrganizationUrl="/dashboard/portfolios"
+							afterLeaveOrganizationUrl="/dashboard/portfolios"
+							afterSelectOrganizationUrl="/dashboard/portfolios"
+							// createOrganizationMode={
+							// 	isIndividualAccount ? "none" : "modal"
+							// }
+							// hidePersonal={false}
+							appearance={{
+								elements: {
+									rootBox: "w-full",
+									organizationSwitcherTrigger: cn(
+										"w-full flex justify-between items-center",
+										"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
+									),
+								},
+							}}
+						/>
 					</div>
 				</div>
 			</SidebarHeader>

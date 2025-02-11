@@ -7,7 +7,7 @@ import { createId } from "@paralleldrive/cuid2";
 const subscriptionSchema = z
 	.object({
 		id: idSchema,
-		type: z.string(),
+		type: z.enum(["INDIVIDUAL", "TEAM"]),
 		frequency: z.string(),
 		status: z.string(),
 		priceId: z.string(),

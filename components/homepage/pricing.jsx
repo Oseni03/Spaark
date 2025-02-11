@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUser } from "@clerk/nextjs";
+import { useOrganization, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import axios from "axios";
 import { Spinner } from "../ui/Spinner";
@@ -123,6 +123,7 @@ export default function Pricing({
 }) {
 	const router = useRouter();
 	const { user } = useUser();
+	const { organization } = useOrganization();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [individualBilling, setIndividualBilling] = useState("monthly");
 	const [teamBilling, setTeamBilling] = useState("monthly");
@@ -132,6 +133,20 @@ export default function Pricing({
 	const handleCheckout = async (type, billing) => {
 		if (isProcessing || !user) {
 			logger.info("Checkout blocked", { isProcessing, hasUser: !!user });
+			return;
+		}
+
+		if (organization && !(type.toUpperCase() === "TEAM")) {
+			toast.error(
+				"Organization account can only subscribe to TEAM plan."
+			);
+			return;
+		}
+
+		if (!organization && !(type.toUpperCase() === "INDIVIDUAL")) {
+			toast.error(
+				"Individual account can only subscribe to INDIVIDUAL plan."
+			);
 			return;
 		}
 

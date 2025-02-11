@@ -125,8 +125,8 @@ export const Header1 = ({ className }) => {
 					<div className="border-r hidden md:inline"></div>
 					<SignedIn>
 						<UserButton />
-						<Link href={"/builder"}>
-							<Button size="sm">Builder</Button>
+						<Link href={"/dashboard/portfolios"}>
+							<Button size="sm">Dashboard</Button>
 						</Link>
 					</SignedIn>
 					<SignedOut>

@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   // directUrl = env("DIRECT_URL")
 }
 
@@ -50,8 +50,6 @@ model User {
   // One-to-one relation to Code
   code   Code?
   codeId String? @unique
-
-  portfolioLimit Int @default(1) // Default limit for individual accounts
 }
 
 model Organization {
@@ -76,6 +74,10 @@ model Organization {
   owner      User                 @relation(fields: [ownerId], references: [id])
   members    OrganizationMember[]
   portfolios Portfolio[]
+
+  // Add new subscription relation
+  subscriptionId String?       @unique
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
 
   @@index([ownerId])
 }
@@ -313,19 +315,21 @@ model Transaction {
 }
 
 model Subscription {
-  id        String    @id @default(cuid())
-  userId    String    @unique
-  type      String // INDIVIDUAL or TEAM
-  frequency String // weekly, monthly, yearly
-  status    String    @default("pending")
-  priceId   String
-  startDate DateTime?
-  endDate   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id             String    @id @default(cuid())
+  userId         String?   @unique
+  type           String // INDIVIDUAL or TEAM
+  frequency      String // weekly, monthly, yearly
+  status         String    @default("pending")
+  priceId        String
+  startDate      DateTime?
+  endDate        DateTime?
+  portfolioLimit Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  organization Organization?
 
   @@index([userId])
 }
@@ -396,7 +400,7 @@ model Comment {
   content   String   @db.Text
   blogId    String
   blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  authorId  String   // Clerk user ID
+  authorId  String // Clerk user ID
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

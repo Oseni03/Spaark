@@ -38,7 +38,10 @@ export function SubscriptionSettings() {
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-							<Pricing isDialog={true} />
+							<Pricing
+								isDialog={true}
+								returnUrl={window.location.href}
+							/>
 						</DialogContent>
 					</Dialog>
 				</div>
