@@ -105,7 +105,7 @@ const PricingCard = ({
 				<Button
 					size="lg"
 					className="w-full mt-8"
-					onClick={() => onSubscribe(type, billing)}
+					onClick={() => onSubscribe(type.toUpperCase(), billing)}
 					variant="default"
 					disabled={processing}
 				>
@@ -165,6 +165,7 @@ export default function Pricing({
 				userEmail: user.emailAddresses[0].emailAddress,
 				username: user.username || user.fullName,
 				returnUrl, // Add returnUrl to the payload
+				orgId: organization?.id,
 			});
 
 			logger.info("Checkout response received", {

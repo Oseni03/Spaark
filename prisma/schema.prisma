@@ -54,7 +54,7 @@ model User {
 
 model Organization {
   id         String    @id @default(cuid())
-  clerkOrgId String    @unique
+  // clerkOrgId String    @unique
   name       String
   slug       String    @unique
   industry   String?
@@ -70,14 +70,14 @@ model Organization {
   defaultRole        Role    @default(MEMBER)
 
   // Relations
-  ownerId    String
-  owner      User                 @relation(fields: [ownerId], references: [id])
-  members    OrganizationMember[]
-  portfolios Portfolio[]
+  ownerId       String
+  owner         User                 @relation(fields: [ownerId], references: [id])
+  members       OrganizationMember[]
+  portfolios    Portfolio[]
+  transactions  Transaction[]
 
   // Add new subscription relation
-  subscriptionId String?       @unique
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscription   Subscription?
 
   @@index([ownerId])
 }
@@ -299,7 +299,8 @@ model Hackathon {
 
 model Transaction {
   id             String        @id @default(cuid())
-  userId         String
+  userId         String?
+  organizationId String?
   status         String        @default("pending")
   priceId        String
   title          String
@@ -308,15 +309,18 @@ model Transaction {
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime?     @updatedAt
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([organizationId])
   @@index([subscriptionId])
 }
 
 model Subscription {
   id             String    @id @default(cuid())
   userId         String?   @unique
+  organizationId String?   @unique
   type           String // INDIVIDUAL or TEAM
   frequency      String // weekly, monthly, yearly
   status         String    @default("pending")
@@ -329,9 +333,10 @@ model Subscription {
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
-  organization Organization?
+  organization Organization?  @relation(fields: [organizationId], references: [id])
 
   @@index([userId])
+  @@index([organizationId])
 }
 
 model Contact {

@@ -5,6 +5,8 @@ import { logger } from "@/lib/utils";
 
 export async function initializeSubscription({
 	userId,
+	orgId,
+	portfolioLimit,
 	type,
 	frequency,
 	priceId,
@@ -12,15 +14,22 @@ export async function initializeSubscription({
 	try {
 		logger.info("Initializing subscription", {
 			userId,
+			orgId,
 			type,
 			frequency,
 			priceId,
 		});
 
+		if (!userId && !orgId) {
+			throw new Error("UserId or OrgId has to be provided");
+		}
+
 		const subscription = await prisma.subscription.create({
 			data: {
-				userId,
+				userId: userId || null,
+				organizationId: orgId || null,
 				status: "pending",
+				portfolioLimit,
 				type,
 				frequency,
 				priceId,
@@ -41,17 +50,28 @@ export async function initializeSubscription({
 
 export async function createTransaction({
 	userId,
+	orgId,
 	title,
 	subscriptionId,
 	amount,
 	priceId,
 }) {
 	try {
-		logger.info("Creating transaction", { userId, subscriptionId, amount });
+		logger.info("Creating transaction", {
+			userId,
+			orgId,
+			subscriptionId,
+			amount,
+		});
+
+		if (!userId && !orgId) {
+			throw new Error("UserId or OrgId has to be provided");
+		}
 
 		const transaction = await prisma.transaction.create({
 			data: {
 				userId,
+				organizationId: orgId || null,
 				title,
 				status: "pending",
 				amount,

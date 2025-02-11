@@ -39,6 +39,7 @@ export const SUBSCRIPTION_PLANS = {
 				"Social media integration",
 			],
 		},
+		portfolioLimit: 1,
 	},
 	TEAM: {
 		monthly: {
@@ -67,6 +68,7 @@ export const SUBSCRIPTION_PLANS = {
 				"Custom branding",
 			],
 		},
+		portfolioLimit: 3,
 	},
 };
 
@@ -94,9 +96,10 @@ export const getSubscriptionData = (type, frequency) => {
 
 	const freq = frequency.toLowerCase();
 	const plan = SUBSCRIPTION_PLANS[planType][freq];
+	const portfolioLimit = SUBSCRIPTION_PLANS[planType]["portfolioLimit"];
 
 	// Validate frequency exists for plan type
-	if (!plan) {
+	if (!plan || !portfolioLimit) {
 		logger.error(`Invalid frequency ${frequency} for plan type ${type}`);
 		throw new Error(`Invalid frequency ${frequency} for plan type ${type}`);
 	}
@@ -105,5 +108,6 @@ export const getSubscriptionData = (type, frequency) => {
 		price: plan.price,
 		priceId: plan.priceId,
 		interval: plan.interval,
+		portfolioLimit,
 	};
 };
