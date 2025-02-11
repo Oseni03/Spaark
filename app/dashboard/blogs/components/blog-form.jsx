@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RichInput } from "@/components/ui/rich-input";
-import { FeaturedImage } from "../new/components/featured-image";
+import { FeaturedImage } from "./featured-image";
 import { z } from "zod";
 import { logger } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";

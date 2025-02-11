@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react";
 import { Camera, X, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { logger } from "@/lib/utils";
 import {
 	Dialog,
 	DialogContent,
@@ -16,6 +18,39 @@ export const FeaturedImage = ({ image, setImage }) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isHovering, setIsHovering] = useState(false);
 
+	const handleUpload = async (file) => {
+		if (!file) return;
+
+		if (file.size / 1024 / 1024 > 50) {
+			toast.error("File size too big (max 50MB)");
+			return;
+		}
+
+		if (!file.type.startsWith("image/")) {
+			toast.error("Invalid file type (must be an image)");
+			return;
+		}
+
+		try {
+			const response = await fetch("/api/file-upload", {
+				method: "POST",
+				body: file,
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to upload file");
+			}
+
+			const { blob } = await response.json();
+			setImage(blob.url);
+			toast.success("Image uploaded successfully");
+			logger.info("Image uploaded:", blob.url);
+		} catch (error) {
+			logger.error("Upload error:", error);
+			toast.error("Failed to upload image");
+		}
+	};
+
 	const handleDrop = useCallback(
 		(e) => {
 			e.preventDefault();
@@ -23,16 +58,10 @@ export const FeaturedImage = ({ image, setImage }) => {
 
 			if (e.dataTransfer.files && e.dataTransfer.files[0]) {
 				const file = e.dataTransfer.files[0];
-				if (file.type.startsWith("image/")) {
-					const reader = new FileReader();
-					reader.onload = (event) => {
-						setImage(event.target.result);
-					};
-					reader.readAsDataURL(file);
-				}
+				handleUpload(file);
 			}
 		},
-		[setImage]
+		[setIsDragging]
 	);
 
 	const handleDrag = useCallback((e) => {
@@ -45,21 +74,12 @@ export const FeaturedImage = ({ image, setImage }) => {
 		}
 	}, []);
 
-	const handleFileSelect = useCallback(
-		(e) => {
-			if (e.target.files && e.target.files[0]) {
-				const file = e.target.files[0];
-				if (file.type.startsWith("image/")) {
-					const reader = new FileReader();
-					reader.onload = (event) => {
-						setImage(event.target.result);
-					};
-					reader.readAsDataURL(file);
-				}
-			}
-		},
-		[setImage]
-	);
+	const handleFileSelect = useCallback((e) => {
+		if (e.target.files && e.target.files[0]) {
+			const file = e.target.files[0];
+			handleUpload(file);
+		}
+	}, []);
 
 	const removeImage = () => {
 		setImage(null);

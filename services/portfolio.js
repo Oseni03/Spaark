@@ -197,7 +197,7 @@ export async function getPortfolio(domain) {
 		const portfolio = await prisma.portfolio.findFirst({
 			where: {
 				OR: [{ customDomain: domain }, { slug: domain }],
-				// isLive: true,
+				isLive: true,
 			},
 			select: portfolioSelect,
 		});
