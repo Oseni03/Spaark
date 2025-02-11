@@ -1,16 +1,31 @@
-import { logger } from "@/lib/utils";
-import { getUsers } from "@/services/user";
+import { getBlogPosts } from "@/services/blog";
+import { getAllPortfolios } from "@/services/portfolio";
 
 export default async function sitemap() {
 	const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-	const users = await getUsers();
+	const portfolios = await getAllPortfolios();
 
-	const userSitemapEntries = users?.data.map((user) => ({
-		url: `https://${user.username}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
-		lastModified: user.updatedAt.toISOString(),
+	const portfolioSitemapEntries = portfolios?.map((portfolio) => ({
+		url: portfolio.customDomain
+			? portfolio.customDomain
+			: `https://${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+		lastModified:
+			portfolio?.updatedAt.toISOString() || new Date().toISOString(),
 		changeFrequency: "daily",
 		priority: 0.9,
 	}));
+
+	const blogsSitemapEntries = portfolios.map((portfolio) => {
+		const blogs = getBlogPosts(portfolio.id);
+		return blogs.map((blog) => ({
+			url: `${portfolio.customDomain}/blog/post/${blog.slug}`
+				? portfolio.customDomain
+				: `https://${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/blog/post/${blog.slug}`,
+			lastModified: blog?.updatedAt || new Date().toISOString(),
+			changeFrequency: "daily",
+			priority: 0.9,
+		}));
+	});
 
 	const staticPages = [
 		{
@@ -39,5 +54,5 @@ export default async function sitemap() {
 		},
 	];
 
-	return [...staticPages, ...userSitemapEntries];
+	return [...staticPages, ...portfolioSitemapEntries, ...blogsSitemapEntries];
 }

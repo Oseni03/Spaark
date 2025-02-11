@@ -29,6 +29,17 @@ const portfolioSelect = {
 	teams: true,
 };
 
+export async function getAllPortfolios() {
+	return withErrorHandling(async () => {
+		const portfolios = await prisma.portfolio.findMany({
+			where: { isLive: true },
+			select: portfolioSelect,
+		});
+
+		return portfolios.length > 0 ? portfolios : [];
+	});
+}
+
 export async function getPortfolios(userId, orgId = null) {
 	return withErrorHandling(async () => {
 		if (!userId) {
