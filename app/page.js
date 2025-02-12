@@ -23,9 +23,9 @@ export default function Home() {
 			>
 				<Newsletter />
 			</div>{" "}
-			{/* <div className="flex justify-center items-center w-full my-[8rem]">
+			<div className="flex justify-center items-center w-full my-[8rem]">
 				<AccordionComponent />
-			</div> */}
+			</div>
 		</PageWrapper>
 	);
 }

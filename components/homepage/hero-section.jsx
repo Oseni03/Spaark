@@ -24,14 +24,18 @@ export const HeroSection = () => (
 						{siteConfig.description}
 					</p>
 				</div>
-				<div className="flex flex-row gap-3">
-					<Link href={"/sign-up"}>
-						<Button size="lg" className="gap-4">
-							Sign up here <MoveRight className="w-4 h-4" />
+				<div className="grid grid-cols-1 md:grid-flow-col gap-3 w-full max-w-md">
+					<Link href={"/sign-up"} className="w-full">
+						<Button size="lg" className="w-full gap-4">
+							Create portfolio <MoveRight className="w-4 h-4" />
 						</Button>
 					</Link>
-					<Link href={siteConfig.github}>
-						<Button size="lg" className="gap-4" variant="outline">
+					<Link href={siteConfig.github} className="w-full">
+						<Button
+							size="lg"
+							className="w-full gap-4"
+							variant="outline"
+						>
 							Star on GitHub{" "}
 							<Image
 								src="/github.svg"
@@ -42,7 +46,7 @@ export const HeroSection = () => (
 						</Button>
 					</Link>
 				</div>
-				<a
+				{/* <a
 					href="https://www.producthunt.com/products/spaark-2?utm_source=badge-follow&utm_medium=badge&utm_souce=badge-spaark&#0045;2"
 					target="_blank"
 					style={{
@@ -59,7 +63,7 @@ export const HeroSection = () => (
 						width="250"
 						height="54"
 					/>
-				</a>
+				</a> */}
 			</div>
 		</div>
 	</div>

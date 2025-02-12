@@ -1,6 +1,5 @@
 import Footer from "./footer";
 import { Header1 } from "./header";
-import NavBar from "./navbar";
 
 export function BlogWrapper({ children }) {
 	return (

@@ -72,7 +72,7 @@ export const PortfolioCard = ({ portfolio }) => {
 			...portfolio,
 			id: createId(), // Remove ID to create a new one
 			name: `${portfolio.name} (Copy)`,
-			slug: `${portfolio.slug}-copy`
+			slug: `${portfolio.slug}-copy`,
 		};
 		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
 	};
