@@ -34,10 +34,10 @@ export const Header1 = () => {
 					title: "Pricing",
 					href: "/#pricing",
 				},
-				{
-					title: "Newsletter",
-					href: "/#newsletter",
-				},
+				// {
+				// 	title: "Newsletter",
+				// 	href: "/#newsletter",
+				// },
 			],
 		},
 	];

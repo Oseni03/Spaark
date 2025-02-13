@@ -40,8 +40,9 @@ export function AccordionComponent() {
 						<p>
 							We offer flexible plans starting at $3/week for
 							individual accounts. Choose between weekly, monthly
-							($10), or yearly ($96) billing. Team accounts start
-							at $25/month with additional collaboration features.
+							($10), or yearly ($96) billing. Team plans start at
+							$25/month or $240/year with enhanced collaboration
+							features.
 						</p>
 					</AccordionContent>
 				</AccordionItem>
@@ -68,9 +69,11 @@ export function AccordionComponent() {
 					<AccordionContent>
 						<p>
 							Team plans include all individual features plus team
-							collaboration, shared templates, team analytics,
-							priority support, and custom branding. You can
-							manage up to 3 portfolios under one team account.
+							collaboration, shared templates, and custom branding
+							options. Individual features include template
+							options, custom domain support, project showcase,
+							skills visualization, built-in blog, and contact
+							form functionality.
 						</p>
 					</AccordionContent>
 				</AccordionItem>

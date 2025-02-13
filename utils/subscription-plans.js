@@ -5,41 +5,43 @@ export const SUBSCRIPTION_PLANS = {
 			priceId: process.env.NEXT_PUBLIC_WEEKLY_INDIVIDUAL_PRICE_ID,
 			interval: "week",
 			features: [
-				"Unlimited portfolio pages",
+				"Template options",
 				"Custom domain support",
 				"Project showcase",
 				"Skills visualization",
-				"Resume builder",
-				"Social media integration",
+				"Built-in blog",
+				"contact form",
 			],
+			portfolioLimit: 1,
 		},
 		monthly: {
 			price: 10,
 			priceId: process.env.NEXT_PUBLIC_MONTHLY_INDIVIDUAL_PRICE_ID,
 			interval: "month",
 			features: [
-				"Unlimited portfolio pages",
+				"Template options",
 				"Custom domain support",
 				"Project showcase",
 				"Skills visualization",
-				"Resume builder",
-				"Social media integration",
+				"Built-in blog",
+				"contact form",
 			],
+			portfolioLimit: 1,
 		},
 		yearly: {
 			price: 96,
 			priceId: process.env.NEXT_PUBLIC_YEARLY_INDIVIDUAL_PRICE_ID,
 			interval: "year",
 			features: [
-				"Unlimited portfolio pages",
+				"Template options",
 				"Custom domain support",
 				"Project showcase",
 				"Skills visualization",
-				"Resume builder",
-				"Social media integration",
+				"Built-in blog",
+				"contact form",
 			],
+			portfolioLimit: 1,
 		},
-		portfolioLimit: 1,
 	},
 	TEAM: {
 		monthly: {
@@ -50,10 +52,9 @@ export const SUBSCRIPTION_PLANS = {
 				"All Individual features",
 				"Team collaboration",
 				"Shared templates",
-				"Team analytics",
-				"Priority support",
 				"Custom branding",
 			],
+			portfolioLimit: 3,
 		},
 		yearly: {
 			price: 240,
@@ -63,12 +64,10 @@ export const SUBSCRIPTION_PLANS = {
 				"All Individual features",
 				"Team collaboration",
 				"Shared templates",
-				"Team analytics",
-				"Priority support",
 				"Custom branding",
 			],
+			portfolioLimit: 3,
 		},
-		portfolioLimit: 3,
 	},
 };
 
@@ -96,10 +95,9 @@ export const getSubscriptionData = (type, frequency) => {
 
 	const freq = frequency.toLowerCase();
 	const plan = SUBSCRIPTION_PLANS[planType][freq];
-	const portfolioLimit = SUBSCRIPTION_PLANS[planType]["portfolioLimit"];
 
 	// Validate frequency exists for plan type
-	if (!plan || !portfolioLimit) {
+	if (!plan) {
 		logger.error(`Invalid frequency ${frequency} for plan type ${type}`);
 		throw new Error(`Invalid frequency ${frequency} for plan type ${type}`);
 	}
@@ -108,6 +106,6 @@ export const getSubscriptionData = (type, frequency) => {
 		price: plan.price,
 		priceId: plan.priceId,
 		interval: plan.interval,
-		portfolioLimit,
+		portfolioLimit: plan.portfolioLimit,
 	};
 };

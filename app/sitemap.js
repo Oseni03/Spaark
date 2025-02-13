@@ -1,9 +1,12 @@
 import { getBlogPosts } from "@/services/blog";
 import { getAllPortfolios } from "@/services/portfolio";
+import { client } from "@/sanity/lib/client";
+import { postSlugsQuery } from "@/sanity/lib/queries";
 
 export default async function sitemap() {
 	const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 	const portfolios = await getAllPortfolios();
+	const blogPosts = await client.fetch(postSlugsQuery);
 
 	const portfolioSitemapEntries = portfolios?.map((portfolio) => ({
 		url: portfolio.customDomain
@@ -54,5 +57,17 @@ export default async function sitemap() {
 		},
 	];
 
-	return [...staticPages, ...portfolioSitemapEntries, ...blogsSitemapEntries];
+	const blogSitemapEntries = blogPosts.map((post) => ({
+		url: `${baseUrl}/blog/post/${post.slug}`,
+		lastModified: post?.date || new Date().toISOString(),
+		changeFrequency: "weekly",
+		priority: 0.7,
+	}));
+
+	return [
+		...staticPages,
+		...portfolioSitemapEntries,
+		...blogsSitemapEntries,
+		...blogSitemapEntries,
+	];
 }

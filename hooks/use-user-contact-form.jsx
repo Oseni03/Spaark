@@ -90,7 +90,7 @@ export const useUserContactForm = () => {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					username: subdomain,
+					subdomain,
 					subject: "New contact message",
 					props: {
 						name: formData.full_name,

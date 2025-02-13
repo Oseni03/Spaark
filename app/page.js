@@ -17,12 +17,12 @@ export default function Home() {
 			<div id="pricing" className="flex my-[8rem]">
 				<Pricing />
 			</div>
-			<div
+			{/* <div
 				id="newsletter"
 				className="flex mt-[8rem] w-full justify-center items-center px-4"
 			>
 				<Newsletter />
-			</div>{" "}
+			</div>{" "} */}
 			<div className="flex justify-center items-center w-full my-[8rem]">
 				<AccordionComponent />
 			</div>
