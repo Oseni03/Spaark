@@ -2,7 +2,7 @@ import {
 	addDomainToVercel,
 	removeDomainFromVercelProject,
 } from "@/lib/domains";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { validDomainRegex } from "@/lib/domains";
 

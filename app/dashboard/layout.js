@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -33,7 +33,7 @@ const generateBreadcrumbs = (pathname) => {
 	}));
 };
 
-export default function DashboardLayout({ children }) {
+const DashboardLayoutContent = ({ children }) => {
 	useVerifyPayment();
 	const dispatch = useDispatch();
 	const pathname = usePathname();
@@ -182,6 +182,14 @@ export default function DashboardLayout({ children }) {
 				</main>
 			</SidebarProvider>
 		</OrganizationProvider>
+	);
+};
+
+export default function DashboardLayout({ children }) {
+	return (
+		<Suspense fallback={null}>
+			<DashboardLayoutContent>{children}</DashboardLayoutContent>
+		</Suspense>
 	);
 }
 

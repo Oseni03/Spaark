@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { LeftAppSidebar } from "@/components/left-app-sidebar";
 import { RightSidebar } from "@/components/right-app-sidebar";
 import { NavActions } from "@/components/nav-actions";
@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
 import { useVerifyPayment } from "@/hooks/use-verify-payment";
 
-function BuilderLayout({ children }) {
+function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
@@ -183,6 +183,14 @@ function BuilderLayout({ children }) {
 				</SheetContent>
 			</Sheet>
 		</div>
+	);
+}
+
+function BuilderLayout({ children }) {
+	return (
+		<Suspense fallback={null}>
+			<BuilderLayoutContent>{children}</BuilderLayoutContent>
+		</Suspense>
 	);
 }
 

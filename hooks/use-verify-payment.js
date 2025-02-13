@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 
 export function useVerifyPayment() {
-	const searchParams = useSearchParams();
+	const searchParams = useSearchParams() || new URLSearchParams();
 	const status = searchParams.get("status");
 	const tx_ref = searchParams.get("tx_ref");
 

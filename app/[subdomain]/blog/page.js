@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
@@ -39,10 +39,10 @@ function TagFilter({ tags, selectedTag, onTagSelect }) {
 	);
 }
 
-export default function Page() {
-	const { subdomain } = useParams();
+function BlogContent() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const { subdomain } = useParams();
 	const portfolioContext = usePortfolio();
 	const [posts, setPosts] = useState([]);
 	const [allPosts, setAllPosts] = useState([]);
@@ -144,6 +144,14 @@ export default function Page() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function Page() {
+	return (
+		<Suspense fallback={<BlogListSkeleton />}>
+			<BlogContent />
+		</Suspense>
 	);
 }
 
