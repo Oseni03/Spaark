@@ -5,7 +5,7 @@ import { FileCode, Code, Globe, Book } from "lucide-react";
 
 export const siteConfig = {
 	name: "Spaark",
-	heroIntro: "Create your professional portfolio in minutes",
+	heroIntro: "Create your tech portfolio in minutes",
 	description:
 		"Choose from our beautiful templates, fill in your details, and get your portfolio live in minutes.",
 	keywords: [
