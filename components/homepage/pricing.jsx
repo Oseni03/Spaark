@@ -105,7 +105,7 @@ const PricingCard = ({
 				<Button
 					size="lg"
 					className="w-full mt-8"
-					onClick={() => onSubscribe(type.toUpperCase(), billing)}
+					onClick={() => onSubscribe(type, billing)}
 					variant="default"
 					disabled={processing}
 				>
@@ -133,6 +133,8 @@ export default function Pricing({
 	const handleCheckout = async (type, billing) => {
 		if (isProcessing || !user) {
 			logger.info("Checkout blocked", { isProcessing, hasUser: !!user });
+			router.push("/sign-in");
+			toast("Sign in to subscribe!");
 			return;
 		}
 
@@ -159,7 +161,7 @@ export default function Pricing({
 
 		try {
 			const response = await axios.post("/api/payment/checkout", {
-				type,
+				type: type.toUpperCase(),
 				frequency: billing.toUpperCase(),
 				userId: user.id,
 				userEmail: user.emailAddresses[0].emailAddress,

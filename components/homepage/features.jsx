@@ -1,8 +1,11 @@
 import { siteConfig } from "@/config/site";
 
 export const Features = () => (
-	<section id="features" className="container mx-auto px-6 py-10 py-md-16">
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
+	<section
+		id="features"
+		className="container mx-auto px-6 py-10 py-md-16 max-w-4xl"
+	>
+		<div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
 			{siteConfig.features.map((feature) => (
 				<div
 					key={feature.id}

@@ -53,7 +53,7 @@ export const PictureSection = ({
 			const { blob } = await response.json();
 
 			// Update local state and form value
-			if (blob?.url) {
+			if (blob.url) {
 				setLocalPictureUrl(blob.url);
 				setValue(name, blob.url);
 			} else {

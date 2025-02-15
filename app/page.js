@@ -11,7 +11,7 @@ export default function Home() {
 			<div className="flex mb-[8rem] md:mb-0 w-full">
 				<HeroSection />
 			</div>
-			<div className="flex my-[8rem] w-full" id="features">
+			<div className="flex my-md-[8rem] w-full" id="features">
 				<Features />
 			</div>
 			<div id="pricing" className="flex my-[8rem]">
