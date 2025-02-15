@@ -9,45 +9,26 @@ import {
 	PURGE,
 	REGISTER,
 } from "redux-persist";
-import { CookieStorage } from "redux-persist-cookie-storage";
-import Cookies from "js-cookie";
-import profileReducer from "./features/profileSlice";
-import portfolioReducer from "./features/portfolioSlice";
-import experienceReducer from "./features/experienceSlice";
-import educationReducer from "./features/educationSlice";
-import skillReducer from "./features/skillSlice";
-import certificationReducer from "./features/certificationSlice";
-import projectReducer from "./features/projectSlice";
-import hackathonReducer from "./features/hackathonSlice";
-import basicsReducer from "./features/basicSlice";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import userReducer from "./features/userSlice";
+import portfolioReducer from "./features/portfolioSlice";
+import blogReducer from "./features/blogSlice";
 
-// Custom cookie storage configuration
+// Persist Config
 const persistConfig = {
 	key: "root",
-	version: 1,
-	storage: new CookieStorage(Cookies, {
-		domain: `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, // Notice the dot prefix
-		path: "/",
-		secure: process.env.NODE_ENV === "production",
-		sameSite: "Lax", // Helps prevent CSRF attacks
-	}),
+	storage,
+	whitelist: ["user", "portfolios", "blogs"], // Add the reducers you want to persist
 };
 
-// Combine reducers
+// Root Reducer
 const rootReducer = combineReducers({
 	user: userReducer,
-	basics: basicsReducer,
-	profile: profileReducer,
-	experience: experienceReducer,
-	education: educationReducer,
-	skill: skillReducer,
-	certification: certificationReducer,
-	project: projectReducer,
-	hackathon: hackathonReducer,
+	portfolios: portfolioReducer,
+	blogs: blogReducer,
 });
 
-// Create persisted reducer
+// Create Persisted Reducer
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Store Configuration
@@ -63,10 +44,10 @@ export const store = configureStore({
 					PERSIST,
 					PURGE,
 					REGISTER,
-					// Add any custom actions you want to ignore
 				],
 			},
 		}),
 });
 
+// Persistor
 export const persistor = persistStore(store);

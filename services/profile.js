@@ -6,17 +6,21 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { profileSchema } from "@/schema/sections";
 
-export async function getUserProfiles(userId) {
+const select = {
+	id: true,
+	visible: true,
+	network: true,
+	username: true,
+	url: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
+export async function getProfiles(portfolioId) {
 	return withErrorHandling(async () => {
 		const profiles = await prisma.profile.findMany({
-			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				network: true,
-				username: true,
-				url: true,
-			},
+			where: { portfolioId },
+			select,
 		});
 		if (profiles.length > 0) {
 			return profiles.map((item) => profileSchema.parse(item));
@@ -25,11 +29,10 @@ export async function getUserProfiles(userId) {
 	});
 }
 
-export async function createProfile(data) {
+export async function createProfile({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -37,75 +40,53 @@ export async function createProfile(data) {
 		const profile = await prisma.profile.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
+			select,
 		});
 
-		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return profile;
+		return profileSchema.parse(profile);
 	});
 }
 
-export async function editProfile(profileId, data) {
+export async function editProfile(profileId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
-		});
-
-		if (!existingProfile) {
-			throw new Error(
-				"Profile not found or you do not have permission to update"
-			);
-		}
-
 		const updatedProfile = await prisma.profile.update({
-			where: { id: profileId },
+			where: { id: profileId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
 			},
+			select,
 		});
 
-		// Revalidate relevant paths
 		revalidatePath("/builder");
-
-		return updatedProfile;
+		return profileSchema.parse(updatedProfile);
 	});
 }
 
-export async function deleteProfile(profileId) {
+export async function deleteProfile(profileId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a profile"
 			);
 		}
 
-		const existingProfile = await prisma.profile.findUnique({
-			where: { id: profileId, userId },
-		});
-
-		if (!existingProfile) {
-			throw new Error(
-				"Profile not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedProfile = await prisma.profile.delete({
-			where: { id: profileId },
+		await prisma.profile.delete({
+			where: { id: profileId, portfolioId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedProfile;
+		return { portfolioId, profileId };
 	});
 }

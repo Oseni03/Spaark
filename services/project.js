@@ -6,24 +6,28 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { projectSchema } from "@/schema/sections";
 
-export async function getUserProjects(userId) {
+const select = {
+	id: true,
+	visible: true,
+	name: true,
+	description: true,
+	date: true,
+	technologies: true,
+	url: true,
+	image: true,
+	video: true,
+	links: {
+		select: { id: true, label: true, url: true, icon: true },
+	},
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
+export async function getProjects(portfolioId) {
 	return withErrorHandling(async () => {
 		const projects = await prisma.project.findMany({
-			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-				date: true,
-				technologies: true,
-				url: true,
-				image: true,
-				video: true,
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-			},
+			where: { portfolioId },
+			select,
 		});
 		if (projects.length > 0) {
 			return projects.map((item) => projectSchema.parse(item));
@@ -32,7 +36,7 @@ export async function getUserProjects(userId) {
 	});
 }
 
-export async function createProject(data) {
+export async function createProject({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
@@ -47,7 +51,7 @@ export async function createProject(data) {
 		const project = await prisma.project.create({
 			data: {
 				...projectData,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 				links: {
 					create: links.map((link) => ({
 						id: link.id,
@@ -57,31 +61,21 @@ export async function createProject(data) {
 					})),
 				},
 			},
+			select,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return project;
+		return projectSchema.parse(project);
 	});
 }
 
-export async function editProject(projectId, data) {
+export async function editProject(projectId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
-		}
-
-		// Check if the project exists and belongs to the authenticated user
-		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, userId },
-		});
-
-		if (!existingProject) {
-			throw new Error(
-				"Project not found or you do not have permission to update"
-			);
 		}
 
 		// Destructure links from the data and validate them
@@ -89,7 +83,7 @@ export async function editProject(projectId, data) {
 
 		// Perform the update, including nested operations for links
 		const updatedProject = await prisma.project.update({
-			where: { id: projectId },
+			where: { id: projectId, portfolioId },
 			data: {
 				...projectData,
 				updatedAt: new Date(),
@@ -114,44 +108,34 @@ export async function editProject(projectId, data) {
 					},
 				},
 			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedProject;
+		return projectSchema.parse(updatedProject);
 	});
 }
 
-export async function deleteProject(projectId) {
+export async function deleteProject(projectId, portfolioId) {
 	return withErrorHandling(async () => {
 		// Authenticate user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: You must be logged in to delete a project."
 			);
 		}
 
-		// Check if the project exists and belongs to the authenticated user
-		const existingProject = await prisma.project.findFirst({
-			where: { id: projectId, userId },
-		});
-
-		if (!existingProject) {
-			throw new Error(
-				"Project not found or you do not have permission to delete it."
-			);
-		}
-
 		// Delete the project and its associated links
-		const deletedProject = await prisma.project.delete({
-			where: { id: projectId },
+		await prisma.project.delete({
+			where: { id: projectId, portfolioId },
 		});
 
 		// Revalidate relevant paths to reflect changes
 		revalidatePath("/builder");
 
-		return deletedProject;
+		return { projectId, portfolioId };
 	});
 }

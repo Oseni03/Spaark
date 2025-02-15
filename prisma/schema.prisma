@@ -1,95 +1,201 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+enum UserType {
+  INDIVIDUAL
+  ORGANIZATION
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum Permission {
+  MANAGE_ORGANIZATION
+  MANAGE_MEMBERS
+  INVITE_MEMBERS
+  MANAGE_ROLES
+  CREATE_PORTFOLIO
+  EDIT_PORTFOLIO
+  DELETE_PORTFOLIO
+  VIEW_ANALYTICS
 }
 
 model User {
   id         String    @id @default(cuid())
   email      String    @unique
   username   String?   @unique
+  userType   UserType  @default(INDIVIDUAL)
   subscribed Boolean?  @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime? @updatedAt
 
-  // One-to-one relationship with Basics
+  // Relations
+  portfolios    Portfolio[]
+  memberships   OrganizationMember[]
+  organizations Organization[] // Organizations owned by user
+  transactions  Transaction[]
+  subscription  Subscription?
+
+  // One-to-one relation to Code
+  code   Code?
+  codeId String? @unique
+}
+
+model Organization {
+  id         String    @id @default(cuid())
+  // clerkOrgId String    @unique
+  name       String
+  slug       String    @unique
+  industry   String?
+  size       String?
+  logo       String?
+  website    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  // Organization settings
+  allowMemberInvites Boolean @default(false)
+  requireApproval    Boolean @default(true)
+  defaultRole        Role    @default(MEMBER)
+
+  // Relations
+  ownerId       String
+  owner         User                 @relation(fields: [ownerId], references: [id])
+  members       OrganizationMember[]
+  portfolios    Portfolio[]
+  transactions  Transaction[]
+
+  // Add new subscription relation
+  subscription   Subscription?
+
+  @@index([ownerId])
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role         @default(MEMBER)
+  permissions    Permission[]
+  status         String       @default("pending") // pending, active, suspended
+  invitedBy      String?
+  invitedAt      DateTime     @default(now())
+  joinedAt       DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?    @updatedAt
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model Portfolio {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  isLive       Boolean   @default(false)
+  blogEnabled  Boolean   @default(false)
+  isPrimary    Boolean   @default(false)
+  customDomain String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
+  template     String    @default("default")
+
+  // Ownership
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Portfolio content
   basics         Basics?
-  profiles       Profile[]
+  profiles       Profile[] // Social profiles
   experiences    Experience[]
   educations     Education[]
   skills         Skill[]
   certifications Certification[]
   projects       Project[]
   hackathons     Hackathon[]
-  Transaction    Transaction[]
-  // One-to-one relation to Code
-  code           Code?
-  codeId         String?         @unique
+  blogs          Blog[]
+  testimonials   Testimonial[]
+  teams          Team[] // Add this line
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Basics {
-  id        String    @id @default(cuid())
-  name      String
-  headline  String
-  email     String
-  phone     String?
-  location  String
-  url       String?
-  picture   String?
-  summary   String
-  about     String
-  userId    String    @unique
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id          String    @id @default(cuid())
+  name        String
+  headline    String
+  email       String
+  phone       String?
+  location    String
+  url         String?
+  picture     String?
+  summary     String
+  about       String
+  portfolioId String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
 
-  // Foreign key to User
-  user User @relation(fields: [userId], references: [id])
+  // Relation to Portfolio
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
-  id        String    @id @default(uuid()) // Unique identifier for each profile
-  userId    String
-  visible   Boolean   @default(true) // Visibility status of the profile
-  network   String    @unique
-  username  String
-  url       String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id          String    @id @default(cuid())
+  portfolioId String
+  visible     Boolean   @default(true)
+  network     String // e.g., "github", "linkedin"
+  username    String
+  url         String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, network])
+  @@index([portfolioId])
 }
 
 model Experience {
-  id        String   @id @default(uuid())
-  userId    String
-  visible   Boolean  @default(true) // Visibility status of the profile
-  company   String
-  position  String
-  location  String?
-  date      String
-  summary   String
-  picture   String?
-  url       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true) // Visibility status of the profile
+  company     String
+  position    String
+  location    String?
+  date        String
+  summary     String
+  picture     String?
+  url         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Education {
-  id          String   @id @default(uuid())
-  userId      String
-  visible     Boolean  @default(true) // Visibility status of the profile
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
   institution String
   studyType   String
   date        String
@@ -99,56 +205,65 @@ model Education {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Skill {
-  id          String   @id @default(uuid())
-  userId      String
-  visible     Boolean  @default(true) // Visibility status of the profile
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
   name        String
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Certification {
-  id        String   @id @default(uuid())
-  userId    String
-  visible   Boolean  @default(true)
-  name      String
-  issuer    String
-  date      String
-  summary   String
-  url       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  issuer      String
+  date        String
+  summary     String
+  url         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Project {
-  id           String   @id @default(uuid())
-  userId       String
-  visible      Boolean  @default(true)
+  id           String    @id @default(cuid())
+  portfolioId  String
+  visible      Boolean   @default(true)
   name         String
   description  String
   date         String
   technologies String[]
   url          String?
   image        String?
+  github       String?
   video        String?
   links        Link[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Link {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   label     String
   url       String
   icon      String? // Slug for the icon (e.g., from simpleicons.org)
@@ -157,13 +272,15 @@ model Link {
 
   project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
+  Team        Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
   projectId   String?
   hackathonId String?
+  teamId      String?
 }
 
 model Hackathon {
-  id          String   @id @default(uuid())
-  userId      String
+  id          String   @id @default(cuid())
+  portfolioId String
   visible     Boolean  @default(true)
   name        String
   description String
@@ -175,23 +292,55 @@ model Hackathon {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
 model Transaction {
-  id        String   @id @default(uuid())
-  userId    String
-  status    String?  @default("pending")
-  priceId   String // Changed to String for more flexibility
-  title     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String        @id @default(cuid())
+  userId         String?
+  organizationId String?
+  status         String        @default("pending")
+  priceId        String
+  title          String
+  amount         Float
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime?     @updatedAt
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([organizationId])
+  @@index([subscriptionId])
+}
+
+model Subscription {
+  id             String    @id @default(cuid())
+  userId         String?   @unique
+  organizationId String?   @unique
+  type           String // INDIVIDUAL or TEAM
+  frequency      String // weekly, monthly, yearly
+  status         String    @default("pending")
+  priceId        String
+  startDate      DateTime?
+  endDate        DateTime?
+  portfolioLimit Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  organization Organization?  @relation(fields: [organizationId], references: [id])
+
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Contact {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   email     String
   full_name String
   message   String
@@ -214,4 +363,94 @@ model Code {
   user   User?   @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model Blog {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  content       Json? // For rich text content
+  excerpt       String?   @db.Text
+  featuredImage String?
+  status        String    @default("draft") // draft, published
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  views         Int       @default(0)
+  likes         Int       @default(0)
+
+  // Relations
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  authorId    String // Clerk user ID
+  tags        Tag[]
+  comments    Comment[]
+
+  @@index([portfolioId])
+  @@index([authorId])
+  @@index([status])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  blogs     Blog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  authorId  String // Clerk user ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([blogId])
+  @@index([authorId])
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  role        String
+  company     String?
+  message     String
+  avatar      String?
+  rating      Int?     @default(5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  portfolioId String
+  visible     Boolean  @default(true)
+  name        String
+  role        String
+  bio         String?
+  avatar      String?
+  links       Link[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+}
+
+model Newsletter {
+  id          String   @id @default(cuid())
+  email       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

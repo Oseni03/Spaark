@@ -26,5 +26,11 @@ const nextConfig = {
 			},
 		];
 	},
+	images: {
+		domains: [
+			"cdn.sanity.io",
+			"assets.aceternity.com", // Keep existing domains if any
+		],
+	},
 };
 export default nextConfig;

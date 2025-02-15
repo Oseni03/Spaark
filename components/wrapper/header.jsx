@@ -10,12 +10,11 @@ import {
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Menu, MoveRight, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ModeToggle from "../mode-toggle";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { siteConfig } from "@/config/site";
-import Image from "next/image";
 
 export const Header1 = () => {
 	const navigationItems = [
@@ -35,17 +34,32 @@ export const Header1 = () => {
 					title: "Pricing",
 					href: "/#pricing",
 				},
-				{
-					title: "Newsletter",
-					href: "/#newsletter",
-				},
+				// {
+				// 	title: "Newsletter",
+				// 	href: "/#newsletter",
+				// },
 			],
 		},
 	];
 
 	const [isOpen, setOpen] = useState(false);
+	const [scrolled, setScrolled] = useState(false);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			setScrolled(window.scrollY > 20);
+		};
+
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
+
 	return (
-		<header className="w-full z-40 fixed top-0 left-0 bg-background border-b">
+		<header
+			className={`w-full z-40 fixed top-0 left-0 border-b backdrop-blur-md transition-colors duration-200 ${
+				scrolled ? "bg-background/60" : "bg-background"
+			}`}
+		>
 			<div className="container relative mx-auto min-h-14 flex gap-4 flex-row lg:grid lg:grid-cols-2 items-center">
 				<div className="justify-start items-center gap-4 lg:flex flex-row">
 					<NavigationMenu className="flex justify-start items-start">
@@ -125,8 +139,8 @@ export const Header1 = () => {
 					<div className="border-r hidden md:inline"></div>
 					<SignedIn>
 						<UserButton />
-						<Link href={"/builder"}>
-							<Button size="sm">Builder</Button>
+						<Link href={"/dashboard/portfolios"}>
+							<Button size="sm">Dashboard</Button>
 						</Link>
 					</SignedIn>
 					<SignedOut>

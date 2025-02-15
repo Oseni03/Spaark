@@ -7,15 +7,31 @@ import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 
-export async function getUserHackathons(userId) {
+const select = {
+	id: true,
+	name: true,
+	description: true,
+	date: true,
+	location: true,
+	visible: true,
+	url: true,
+	logo: true,
+	portfolioId: true,
+	links: {
+		select: {
+			id: true,
+			label: true,
+			url: true,
+			icon: true,
+		},
+	},
+};
+
+export async function getHackathons(portfolioId) {
 	return withErrorHandling(async () => {
 		const hackathons = await prisma.hackathon.findMany({
-			where: { userId },
-			include: {
-				links: {
-					select: { id: true, label: true, url: true, icon: true },
-				},
-			},
+			where: { portfolioId },
+			select,
 		});
 		if (hackathons.length > 0) {
 			return hackathons.map((item) => hackathonSchema.parse(item));
@@ -24,7 +40,7 @@ export async function getUserHackathons(userId) {
 	});
 }
 
-export async function createHackathon(data) {
+export async function createHackathon({ portfolioId, ...data }) {
 	logger.info("createHackathon called with data:", data);
 
 	// Validate input data
@@ -42,7 +58,7 @@ export async function createHackathon(data) {
 
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			logger.error("No authenticated user found");
 			throw new Error("Unauthorized");
 		}
@@ -66,54 +82,44 @@ export async function createHackathon(data) {
 		const hackathon = await prisma.hackathon.create({
 			data: {
 				...safeHackathonData,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 				links: {
 					create: links.map((link) => ({
-						id: link.id || undefined, // Let Prisma generate if not provided
+						id: link.id || undefined,
 						label: link.label,
 						url: link.url,
 						icon: link.icon || null,
 					})),
 				},
 			},
+			select,
 		});
 
 		logger.info("Created hackathon:", hackathon);
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return hackathon;
+		return hackathonSchema.parse(hackathon);
 	});
 }
 
-export async function editHackathon(hackathonId, data) {
+export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
-		}
-
-		const existingHackathon = await prisma.hackathon.findUnique({
-			where: { id: hackathonId, userId },
-		});
-
-		if (!existingHackathon) {
-			throw new Error(
-				"Hackathon not found or you do not have permission to update"
-			);
 		}
 
 		// Destructure links from the data and validate them
 		const { links, ...hackathonData } = data;
 
 		const updatedHackathon = await prisma.hackathon.update({
-			where: { id: hackathonId },
+			where: { id: hackathonId, portfolioId },
 			data: {
 				...hackathonData,
 				updatedAt: new Date(),
 				links: {
-					// Handle nested updates for links
 					upsert: links.map((link) => ({
 						where: { id: link.id || "" },
 						create: {
@@ -127,47 +133,37 @@ export async function editHackathon(hackathonId, data) {
 							icon: link.icon || null,
 						},
 					})),
-					// Remove links not included in the updated data
 					deleteMany: {
 						id: { notIn: links.map((link) => link.id) },
 					},
 				},
 			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedHackathon;
+		return hackathonSchema.parse(updatedHackathon);
 	});
 }
 
-export async function deleteHackathon(hackathonId) {
+export async function deleteHackathon(hackathonId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a hackathon"
 			);
 		}
 
-		const existingHackathon = await prisma.hackathon.findUnique({
-			where: { id: hackathonId, userId },
-		});
-
-		if (!existingHackathon) {
-			throw new Error(
-				"Hackathon not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedHackathon = await prisma.hackathon.delete({
-			where: { id: hackathonId },
+		await prisma.hackathon.delete({
+			where: { id: hackathonId, portfolioId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedHackathon;
+		return { hackathonId, portfolioId };
 	});
 }

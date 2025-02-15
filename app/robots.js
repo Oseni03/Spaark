@@ -3,7 +3,7 @@ export default function robots() {
 		rules: {
 			userAgent: "*",
 			allow: "/",
-			disallow: "/bulder/",
+			disallow: "/bulder/, /studio/, /dashboard/",
 		},
 		sitemap: `${process.env.NEXT_PUBLIC_APP_URL}/sitemap.xml`,
 	};

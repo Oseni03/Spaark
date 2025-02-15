@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { getUserByUsername } from "@/services/user";
 import { siteConfig } from "@/config/site";
 import { logger } from "@/lib/utils";
 import ContactNotification from "@/emails/templates/contact-notification";
+import { getPortfolio } from "@/services/portfolio";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -11,9 +11,9 @@ export async function POST(request) {
 	try {
 		// Parse and validate the request body
 		const reqData = await request.json();
-		const { username, subject, props } = reqData;
+		const { subdomain, subject, props } = reqData;
 
-		if (!username || !subject || !props) {
+		if (!subdomain || !subject || !props) {
 			return new NextResponse(
 				{ error: "All field required" },
 				{ status: 400 }
@@ -21,7 +21,7 @@ export async function POST(request) {
 		}
 		logger.info("Request data: ", reqData);
 
-		const resp = await getUserByUsername(username);
+		const resp = await getPortfolio(subdomain);
 
 		// Check if user exists
 		if (!resp.success) {
@@ -33,11 +33,11 @@ export async function POST(request) {
 		logger.info("User resp: ", resp);
 
 		// Get the user's primary email address
-		const userEmail = resp?.data?.email;
+		const userEmail = resp?.data?.basics?.email;
 
 		if (!userEmail) {
 			return new NextResponse(
-				{ error: "User email not found" },
+				{ error: "Portfolio email not found" },
 				{ status: 400 }
 			);
 		}

@@ -1,37 +1,37 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/builder(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/builder(.*)", "/dashboard(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-	// Check if the route is protected and enforce authentication if it is
+	const { nextUrl: url, headers } = req;
+	const { pathname, search } = url;
+
+	// Enforce authentication for protected routes
 	if (isProtectedRoute(req)) auth.protect();
 
-	const url = req.nextUrl;
-	const pathname = url.pathname;
-	const searchParams = url.search;
-
-	// Get hostname (e.g., 'mike.com', 'test.mike.com')
-	const hostname = req.headers.get("host");
-
-	let currentHost;
-	if (process.env.NODE_ENV === "production") {
-		// Production logic remains the same
-		const baseDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-		currentHost = hostname?.replace(`.${baseDomain}`, "");
-	} else {
-		// Updated development logic
-		console.log("Splitted: ", hostname?.split(":")[0]);
-		currentHost = hostname?.split(":")[0].replace(".localhost", "");
+	// Redirect specific paths to "/dashboard/portfolios"
+	if (["/dashboard", "/builder"].includes(pathname)) {
+		return NextResponse.redirect(new URL("/dashboard/portfolios", req.url));
 	}
-	// If there's no currentHost, likely accessing the root domain, handle accordingly
+
+	// Determine the domain based on the environment
+	const hostname = headers.get("host");
+	const domain =
+		process.env.NODE_ENV === "production"
+			? hostname.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
+			: hostname
+					.split(":")[0]
+					.replace(".localhost", "")
+					.replace("adequate-adequately-husky.ngrok-free.app", "");
+
+	// Handle subdomains and API requests
 	if (
-		!currentHost ||
-		currentHost === "localhost" ||
-		currentHost === "www" ||
-		currentHost === process.env.NEXT_PUBLIC_ROOT_DOMAIN
+		!domain ||
+		["localhost", "www", process.env.NEXT_PUBLIC_ROOT_DOMAIN].includes(
+			domain
+		)
 	) {
-		// Continue to the next middleware or serve the root content
 		return NextResponse.next();
 	}
 
@@ -42,17 +42,18 @@ export default clerkMiddleware(async (auth, req) => {
 		let newURL;
 
 		if (process.env.NODE_ENV === "production") {
-			newURL = `https://${mainDomain}${url.pathname}${searchParams}`;
+			newURL = `https://${mainDomain}${pathname}${search}`;
 		} else {
-			newURL = `http://${mainDomain}${url.pathname}${searchParams}`;
+			newURL = `http://${mainDomain}${pathname}${search}`;
 		}
 		return NextResponse.rewrite(new URL(newURL, req.url));
 	}
 
-	return NextResponse.rewrite(new URL(`/${currentHost}${pathname}`, req.url));
+	// Pass the domain to the dynamic route
+	return NextResponse.rewrite(new URL(`/${domain}${pathname}`, req.url));
 });
 
-// Define which paths the middleware should run for
+// Define paths for middleware execution
 export const config = {
 	matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

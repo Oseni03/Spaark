@@ -6,19 +6,23 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { certificationSchema } from "@/schema/sections";
 
-export async function getUserCertifications(userId) {
+const certificationSelect = {
+	id: true,
+	visible: true,
+	name: true,
+	issuer: true,
+	date: true,
+	summary: true,
+	url: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
+export async function getCertifications(portfolioId) {
 	return withErrorHandling(async () => {
 		const certifications = await prisma.certification.findMany({
-			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				issuer: true,
-				date: true,
-				summary: true,
-				url: true,
-			},
+			where: { portfolioId },
+			select: certificationSelect,
 		});
 		if (certifications.length > 0) {
 			return certifications.map((item) =>
@@ -29,87 +33,63 @@ export async function getUserCertifications(userId) {
 	});
 }
 
-export async function createCertification(data) {
+export async function createCertification({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create certification with additional metadata
 		const certification = await prisma.certification.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
+			select: certificationSelect,
 		});
 
-		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return certification;
+		return certificationSchema.parse(certification);
 	});
 }
 
-export async function editCertification(certificationId, data) {
+export async function editCertification(
+	certificationId,
+	{ portfolioId, ...data }
+) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
-
-		const existingCertification = await prisma.certification.findUnique({
-			where: { id: certificationId, userId },
-		});
-
-		if (!existingCertification) {
-			throw new Error(
-				"Certification not found or you do not have permission to update"
-			);
+		if (!certificationId || !portfolioId) {
+			throw new Error("Certification Id required");
 		}
 
 		const updatedCertification = await prisma.certification.update({
-			where: { id: certificationId },
+			where: { id: certificationId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: certificationSelect,
 		});
 
-		// Revalidate relevant paths
 		revalidatePath("/builder");
-
-		return updatedCertification;
+		return certificationSchema.parse(updatedCertification);
 	});
 }
 
-export async function deleteCertification(certificationId) {
+export async function deleteCertification(certificationId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a certification"
-			);
+		if (!certificationId || !portfolioId) {
+			throw new Error("Certification Id required");
 		}
 
-		const existingCertification = await prisma.certification.findUnique({
-			where: { id: certificationId, userId },
-		});
-
-		if (!existingCertification) {
-			throw new Error(
-				"Certification not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedCertification = await prisma.certification.delete({
-			where: { id: certificationId },
+		await prisma.certification.delete({
+			where: { id: certificationId, portfolioId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedCertification;
+		return { certificationId, portfolioId };
 	});
 }

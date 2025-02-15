@@ -6,20 +6,23 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { educationSchema } from "@/schema/sections";
 
-export async function getUserEducations(userId) {
+const educationSelect = {
+	id: true,
+	visible: true,
+	institution: true,
+	studyType: true,
+	date: true,
+	summary: true,
+	logo: true,
+	url: true,
+	portfolioId: true,
+};
+
+export async function getEducations(portfolioId) {
 	return withErrorHandling(async () => {
 		const educations = await prisma.education.findMany({
-			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				institution: true,
-				studyType: true,
-				date: true,
-				summary: true,
-				logo: true,
-				url: true,
-			},
+			where: { portfolioId },
+			select: educationSelect,
 		});
 		if (educations.length > 0) {
 			return educations.map((item) => educationSchema.parse(item));
@@ -28,11 +31,11 @@ export async function getUserEducations(userId) {
 	});
 }
 
-export async function createEducation(data) {
+export async function createEducation({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -40,75 +43,57 @@ export async function createEducation(data) {
 		const edu = await prisma.education.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
+			select: educationSelect,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return edu;
+		return educationSchema.parse(edu);
 	});
 }
 
-export async function editEducation(educationId, data) {
+export async function editEducation(educationId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		const existingEdu = await prisma.education.findUnique({
-			where: { id: educationId, userId },
-		});
-
-		if (!existingEdu) {
-			throw new Error(
-				"Education not found or you do not have permission to update"
-			);
-		}
-
 		const updatedEdu = await prisma.education.update({
-			where: { id: educationId },
+			where: { id: educationId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
 			},
+			select: educationSelect,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedEdu;
+		return educationSchema.parse(updatedEdu);
 	});
 }
 
-export async function deleteEducation(educationId) {
+export async function deleteEducation(educationId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a education"
 			);
 		}
 
-		const existingEdu = await prisma.education.findUnique({
-			where: { id: educationId, userId },
-		});
-
-		if (!existingEdu) {
-			throw new Error(
-				"Education not found or you do not have permission to delete"
-			);
-		}
-
-		const deletedEdu = await prisma.education.delete({
-			where: { id: educationId },
+		await prisma.education.delete({
+			where: { id: educationId, portfolioId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedEdu;
+		return { educationId, portfolioId };
 	});
 }

@@ -1,94 +1,67 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
-import { notFound } from "next/navigation";
-import DefaultTemplate from "@/components/templates/main/default-template";
-import PortfolioNavbar from "@/components/templates/shared/navbar";
+import { useState, useEffect } from "react";
+import { TemplateWrapper } from "@/components/templates/template-wrapper";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
-import { useUser } from "@/context/UserContext";
+import { usePortfolio } from "@/context/PortfolioContext";
 import { logger } from "@/lib/utils";
 
-const INITIAL_STATE = {
-	basics: {},
-	experience: [],
-	education: [],
-	skill: [],
-	certification: [],
-	project: [],
-	hackathon: [],
-	profile: [],
-};
-
-export default function Page({ params }) {
-	const { user } = useUser();
-	const resolvedParams = use(params);
-	const { subdomain } = resolvedParams;
+export default function Page() {
+	const { portfolio } = usePortfolio();
 	const [isLoading, setIsLoading] = useState(true);
-	const [portfolioData, setPortfolioData] = useState(INITIAL_STATE);
-	logger.info("User: ", user);
-	logger.info("params: ", params);
 
 	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				if (!user) {
-					notFound();
-				}
+		if (portfolio) {
+			setIsLoading(false);
+		}
+	}, [portfolio]);
 
-				logger.info(`Fetching portfolio data for ${subdomain}`);
-				const response = await fetch(
-					`/api/get-portfolio?userId=${user.id}`
-				);
-
-				if (!response.ok) throw new Error("Failed to fetch portfolio");
-
-				const data = await response.json();
-
-				if (!data.basics?.data)
-					throw new Error("No portfolio data found");
-
-				setPortfolioData({
-					basics: data.basics?.data || {},
-					experience: data.experiences?.data || [],
-					education: data.educations?.data || [],
-					skill: data.skills?.data || [],
-					certification: data.certifications?.data || [],
-					project: data.projects?.data || [],
-					hackathon: data.hackathons?.data || [],
-					profile: data.profiles?.data || [],
-				});
-				setIsLoading(false);
-			} catch (error) {
-				logger.error(error);
-				notFound();
-			}
-		};
-
-		fetchData();
-	}, [subdomain, user]);
-
-	if (isLoading)
+	if (isLoading) {
 		return (
 			<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
 				<PortfolioSkeleton />
 			</div>
 		);
+	}
+
+	const portfolioData = {
+		basics: portfolio?.basics || defaultBasics,
+		experiences: (portfolio?.experiences?.items || []).filter(
+			(item) => item.visible
+		),
+		projects: (portfolio?.projects?.items || []).filter(
+			(item) => item.visible
+		),
+		educations: (portfolio?.educations?.items || []).filter(
+			(item) => item.visible
+		),
+		skills: (portfolio?.skills?.items || []).filter((item) => item.visible),
+		hackathons: (portfolio?.hackathons?.items || []).filter(
+			(item) => item.visible
+		),
+		certifications: (portfolio?.certifications?.items || []).filter(
+			(item) => item.visible
+		),
+		testimonials: (portfolio?.testimonials?.items || []).filter(
+			(item) => item.visible
+		),
+		teams: (portfolio?.teams?.items || []).filter((item) => item.visible),
+		profiles: portfolio?.profiles?.items || [],
+		blogEnabled: portfolio?.blogEnabled || false,
+	};
+
 	logger.info("Portfolio data: ", portfolioData);
 
-	const filterVisible = (items) => items.filter((item) => item?.visible);
+	// Determine the template to use
+	const templateToUse = portfolio.template || "default";
 
 	return (
-		<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
-			<DefaultTemplate
-				{...portfolioData}
-				projects={filterVisible(portfolioData.project)}
-				experiences={filterVisible(portfolioData.experience)}
-				educations={filterVisible(portfolioData.education)}
-				skills={filterVisible(portfolioData.skill)}
-				hackathons={filterVisible(portfolioData.hackathon)}
-				certifications={filterVisible(portfolioData.certification)}
+		<div className="mx-auto w-full max-w-2xl h-[calc(100vh-48px)]">
+			<TemplateWrapper
+				template={templateToUse}
+				data={portfolioData}
+				className="h-full py-12 sm:py-24"
 			/>
-			<PortfolioNavbar profile={portfolioData.profile} />
 		</div>
 	);
 }

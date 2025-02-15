@@ -18,14 +18,77 @@ export function AccordionComponent() {
 				<AccordionItem value="item-1">
 					<AccordionTrigger>
 						<span className="font-medium">
-							Do I get access to this landing page in the starter
-							kit?
+							How does Spaark work?
 						</span>
 					</AccordionTrigger>
 					<AccordionContent>
 						<p>
-							Yes, this page isn&apos;t even a real landing page
-							more so a template for you to build on
+							Spaark simplifies portfolio creation into three easy
+							steps: select a template, fill in your details, and
+							choose whether to enable a blog. Once done, your
+							portfolio goes live instantly.
+						</p>
+					</AccordionContent>
+				</AccordionItem>
+				<AccordionItem value="item-2">
+					<AccordionTrigger>
+						<span className="font-medium">
+							What are the subscription options?
+						</span>
+					</AccordionTrigger>
+					<AccordionContent>
+						<p>
+							We offer flexible plans starting at $3/week for
+							individual accounts. Choose between weekly, monthly
+							($10), or yearly ($96) billing. Team plans start at
+							$25/month or $240/year with enhanced collaboration
+							features.
+						</p>
+					</AccordionContent>
+				</AccordionItem>
+				<AccordionItem value="item-3">
+					<AccordionTrigger>
+						<span className="font-medium">
+							Can I use a custom domain?
+						</span>
+					</AccordionTrigger>
+					<AccordionContent>
+						<p>
+							Yes! All subscription plans include custom domain
+							support. You can easily connect your own domain to
+							your Spaark portfolio.
+						</p>
+					</AccordionContent>
+				</AccordionItem>
+				<AccordionItem value="item-4">
+					<AccordionTrigger>
+						<span className="font-medium">
+							What&apos;s included in the team plan?
+						</span>
+					</AccordionTrigger>
+					<AccordionContent>
+						<p>
+							Team plans include all individual features plus team
+							collaboration, shared templates, and custom branding
+							options. Individual features include template
+							options, custom domain support, project showcase,
+							skills visualization, built-in blog, and contact
+							form functionality.
+						</p>
+					</AccordionContent>
+				</AccordionItem>
+				<AccordionItem value="item-5">
+					<AccordionTrigger>
+						<span className="font-medium">
+							Can I switch templates later?
+						</span>
+					</AccordionTrigger>
+					<AccordionContent>
+						<p>
+							Yes, you can switch between available templates at
+							any time without losing your content. All your
+							information will automatically adapt to the new
+							template layout.
 						</p>
 					</AccordionContent>
 				</AccordionItem>

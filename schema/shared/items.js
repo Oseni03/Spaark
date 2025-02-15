@@ -7,10 +7,12 @@ import { createId } from "@paralleldrive/cuid2";
 export const itemSchema = z.object({
 	id: idSchema,
 	visible: z.boolean(),
+	portfolioId: z.string(),
 });
 
 // Defaults
 export const defaultItem = {
 	id: createId(),
 	visible: true,
+	portfolioId: "",
 };

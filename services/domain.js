@@ -1,57 +1,37 @@
-"use server";
+import { updatePortfolioInDatabase } from "@/redux/thunks/portfolio";
+import {
+	addDomainToVercel,
+	removeDomainFromVercelProject,
+} from "@/lib/domains";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { z } from "zod";
-import { withErrorHandling } from "./shared";
-import { logger } from "@/lib/utils";
-
-// Input validation schema
-const DomainSchema = z
-	.string()
-	.min(3, "Domain must be at least 3 characters")
-	.max(255, "Domain is too long")
-	.regex(/^[a-zA-Z0-9.-]+$/, "Invalid domain format");
-
-export async function readPortfolioDomain(domain) {
-	return withErrorHandling(async () => {
-		// Validate input
-		const validatedDomain = DomainSchema.parse(domain);
-
-		// Retrieve users with the specified domain
-		const { users } = await clerkClient.users.getUserList({
-			// Filter users based on metadata
-			query: {
-				publicMetadata: {
-					domain: validatedDomain,
-				},
-			},
-		});
-
-		// Log and return users
-		logger.info("Domain users: ", users);
-		return users.data;
-	});
-}
-
-export async function addPortfolioDomain(domain) {
-	return withErrorHandling(async () => {
-		// Validate input
-		const validatedDomain = DomainSchema.parse(domain);
-
-		// Get authenticated user
-		const { userId } = auth();
-		if (!userId) {
-			throw new Error("User not authenticated");
+export async function updateDomain({
+	portfolioId,
+	domain,
+	dispatch,
+	portfolio,
+}) {
+	try {
+		// Add domain to Vercel
+		if (domain) {
+			await addDomainToVercel(domain);
 		}
 
-		// Update user metadata
-		const updatedUser = await clerkClient.users.updateUser(userId, {
-			publicMetadata: {
-				domain: validatedDomain,
-			},
-		});
+		// If there's an existing domain and it's different, remove it
+		if (portfolio.customDomain && portfolio.customDomain !== domain) {
+			await removeDomainFromVercelProject(portfolio.customDomain);
+		}
 
-		logger.info("Updated user: ", updatedUser);
-		return updatedUser;
-	});
+		// Update portfolio in database
+		await dispatch(
+			updatePortfolioInDatabase({
+				id: portfolioId,
+				data: { ...portfolio, customDomain: domain },
+			})
+		).unwrap();
+
+		return { success: true };
+	} catch (error) {
+		console.error("Error updating domain:", error);
+		return { success: false, error: error.message };
+	}
 }

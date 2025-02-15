@@ -1,6 +1,4 @@
-import { FileCode, Share2, Brush } from "lucide-react";
-import { FaBusinessTime } from "react-icons/fa";
-import { HomeIcon, NotebookIcon } from "lucide-react";
+import { FileCode, Code, Globe, Book } from "lucide-react";
 // import MediaImage from "@/public/illustartions/media.png";
 // import ChannelImage from "@/public/illustartions/channels.png";
 // import CloudImage from "@/public/illustartions/cloud.png";
@@ -9,7 +7,7 @@ export const siteConfig = {
 	name: "Spaark",
 	heroIntro: "Create your professional portfolio in minutes",
 	description:
-		"Build stunning developer portfolio effortlessly with our intuitive portfolio builder. Showcase your projects, connect with potential clients, and personalize your site—all without writing a single line of code. Elevate your online presence today!",
+		"Choose from our beautiful templates, fill in your details, and get your portfolio live in minutes.",
 	keywords: [
 		"portfolio builder",
 		"developer portfolio",
@@ -21,6 +19,14 @@ export const siteConfig = {
 		"developer showcase",
 		"portfolio template",
 		"personal website",
+		"wix alternatives",
+		"wix pricing",
+		"webflow alternatives",
+		"webflow pricing",
+		"squarespace alternatives",
+		"squarespace pricing",
+		"wordpress alternatives",
+		"wordpress pricing",
 	],
 	author: "github.com/Oseni03",
 	github: "https://github.com/Oseni03/Spaark",
@@ -30,33 +36,32 @@ export const siteConfig = {
 	twitterHandle: "@Oseni03",
 	features: [
 		{
-			name: "Showcase Projects",
+			name: "Stunning Portfolio Templates",
 			description:
-				"Description: Display your work with customizable, professional templates designed for developers.",
+				"Launch your professional tech portfolio in minutes with our mobile-responsive, SEO-optimized templates designed specifically for developers and tech professionals.",
 			icon: FileCode,
-			// image: MediaImage,
-			id: "instant-audio",
+			id: "templates",
 		},
 		{
-			name: "Connect Easily",
+			name: "Professional Domain Setup",
 			description:
-				"Description: Link your GitHub, LinkedIn, and more, with a built-in contact form for easy communication.",
-			icon: Share2,
-			className: "lg:flex-row-reverse",
-			// image: ChannelImage,
-			id: "channel-monitoring",
+				"Stand out with a custom domain that matches your personal brand. Easy setup with full SSL security and fast global CDN included.",
+			icon: Globe,
+			id: "domain",
 		},
 		{
-			name: "Simple Customization",
+			name: "Built-in Tech Blog",
 			description:
-				"Description: Personalize colors, fonts, and layouts effortlessly, or unlock advanced customization options.",
-			icon: Brush,
-			// image: CloudImage,
-			id: "cloud-integration",
+				"Boost your personal brand with an integrated technical blog. Share your expertise, attract recruiters, and establish thought leadership in your field.",
+			icon: Book,
+			id: "blog",
 		},
-	],
-	navbar: [
-		{ href: "/", icon: HomeIcon, label: "Home" },
-		// { href: "/blog", icon: NotebookIcon, label: "Blog" },
+		{
+			name: "Developer-Focused Features",
+			description:
+				"Showcase your GitHub projects, tech stack, and coding achievements with dedicated sections that highlight your technical expertise.",
+			icon: Code,
+			id: "tech-features",
+		},
 	],
 };

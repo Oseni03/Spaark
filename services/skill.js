@@ -6,16 +6,20 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { skillSchema } from "@/schema/sections";
 
-export async function getUserSkills(userId) {
+const select = {
+	id: true,
+	visible: true,
+	name: true,
+	description: true,
+	portfolioId: true,
+	// Exclude createdAt and updatedAt
+};
+
+export async function getSkills(portfolioId) {
 	return withErrorHandling(async () => {
 		const skills = await prisma.skill.findMany({
-			where: { userId },
-			select: {
-				id: true,
-				visible: true,
-				name: true,
-				description: true,
-			},
+			where: { portfolioId },
+			select,
 		});
 		if (skills.length > 0) {
 			return skills.map((item) => skillSchema.parse(item));
@@ -24,11 +28,11 @@ export async function getUserSkills(userId) {
 	});
 }
 
-export async function createSkill(data) {
+export async function createSkill({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -36,26 +40,27 @@ export async function createSkill(data) {
 		const skill = await prisma.skill.create({
 			data: {
 				...data,
-				user: { connect: { id: userId } },
+				portfolio: { connect: { id: portfolioId } },
 			},
+			select,
 		});
 
 		// Revalidate multiple potential paths
 		revalidatePath("/builder");
-		return skill;
+		return skillSchema.parse(skill);
 	});
 }
 
-export async function editSkill(skillId, data) {
+export async function editSkill(skillId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
 		const existingSkill = await prisma.skill.findUnique({
-			where: { id: skillId, userId },
+			where: { id: skillId, portfolioId },
 		});
 
 		if (!existingSkill) {
@@ -70,26 +75,27 @@ export async function editSkill(skillId, data) {
 				...data,
 				updatedAt: new Date(),
 			},
+			select,
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return updatedSkill;
+		return skillSchema.parse(updatedSkill);
 	});
 }
 
-export async function deleteSkill(skillId) {
+export async function deleteSkill(skillId, portfolioId) {
 	return withErrorHandling(async () => {
 		const { userId } = await auth();
-		if (!userId) {
+		if (!userId || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a skill"
 			);
 		}
 
 		const existingSkill = await prisma.skill.findUnique({
-			where: { id: skillId, userId },
+			where: { id: skillId, portfolioId },
 		});
 
 		if (!existingSkill) {
@@ -98,13 +104,13 @@ export async function deleteSkill(skillId) {
 			);
 		}
 
-		const deletedSkill = await prisma.skill.delete({
+		await prisma.skill.delete({
 			where: { id: skillId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return deletedSkill;
+		return { skillId, portfolioId };
 	});
 }

@@ -1,47 +1,49 @@
 "use server";
 
-import { basicsSchema } from "@/schema/basics";
 import { prisma } from "@/lib/db"; // Assume this is your database connection
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { defaultBasics } from "@/schema/basics";
 import { withErrorHandling } from "./shared";
+import { userSchema } from "@/schema/user";
+
+const userSelect = {
+	id: true,
+	username: true,
+	email: true,
+	subscribed: true,
+	userType: true,
+	createdAt: true,
+	updatedAt: true,
+	subscription: {
+		select: {
+			id: true,
+			type: true,
+			frequency: true,
+			status: true,
+			priceId: true,
+			startDate: true,
+			endDate: true,
+		},
+	},
+};
 
 export async function getUserByUsername(username) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { username },
-			select: {
-				id: true,
-				username: true,
-				email: true,
-				subscribed: true,
-				basics: true,
-				subscribed: true,
-				createdAt: true,
-			},
+			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
 export async function getUserByEmail(email) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { email },
-			select: {
-				id: true,
-				username: true,
-				email: true,
-				subscribed: true,
-				basics: true,
-				subscribed: true,
-				createdAt: true,
-			},
+			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -62,25 +64,17 @@ export async function getUsers() {
 				},
 			},
 		});
-		return users;
+		return users.map((user) => userSchema.parse(user));
 	});
 }
 
 export async function getUser(userId) {
 	return withErrorHandling(async () => {
-		// Fetch the userId based on the username
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
-			select: {
-				id: true,
-				email: true,
-				username: true,
-				subscribed: true,
-				createdAt: true,
-				updatedAt: true,
-			},
+			select: userSelect,
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -91,12 +85,9 @@ export async function createUser(userId, username, email) {
 				id: userId,
 				username,
 				email,
-				basics: {
-					create: defaultBasics,
-				},
 			},
 		});
-		return user;
+		return userSchema.parse(user);
 	});
 }
 
@@ -113,12 +104,13 @@ export async function updateUser(data) {
 				...data,
 				updatedAt: new Date(), // Ensure updated timestamp is set
 			},
+			select: userSelect,
 		});
 
 		// Revalidate the path to update cached data
 		revalidatePath("/builder");
 
-		return updatedUser;
+		return userSchema.parse(updatedUser);
 	});
 }
 
@@ -129,92 +121,6 @@ export async function deleteUser(userId) {
 				id: userId,
 			},
 		});
-		return user;
-	});
-}
-
-export async function createUserBasics(userId, data = defaultBasics) {
-	return withErrorHandling(async () => {
-		if (!userId) {
-			throw new Error("User ID is required");
-		}
-		const userExists = await prisma.user.findUnique({
-			where: { id: userId },
-		});
-
-		if (!userExists) {
-			throw new Error("User does not exist");
-		}
-		// Create User with Basics
-		// Upsert basics with provided or default data
-		const basics = await prisma.basics.upsert({
-			where: { userId },
-			update: {
-				...data,
-				userId,
-			},
-			create: {
-				...data,
-				userId,
-			},
-		});
-		return basics;
-	});
-}
-
-// Update user basics server action
-export async function updateUserBasics(data) {
-	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
-
-		// Update user in database
-		const updatedBasics = await prisma.basics.update({
-			where: { userId },
-			data: {
-				...data,
-				updatedAt: new Date(), // Ensure updated timestamp is set
-			},
-		});
-
-		// Revalidate the path to update cached data
-		revalidatePath("/builder");
-
-		return updatedBasics;
-	});
-}
-
-// Fetch user basics server action
-export async function getUserBasics(userId) {
-	return withErrorHandling(async () => {
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
-
-		// Fetch user from database
-		const userData = await prisma.basics.findUnique({
-			where: { userId },
-			select: {
-				name: true,
-				headline: true,
-				email: true,
-				phone: true,
-				location: true,
-				url: true,
-				picture: true,
-				summary: true,
-				about: true,
-			},
-		});
-
-		if (!userData) {
-			throw new Error("User not found");
-		}
-
-		// Validate the fetched data against the schema
-		return basicsSchema.parse(userData);
+		return { userId };
 	});
 }
