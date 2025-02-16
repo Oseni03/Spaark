@@ -38,7 +38,7 @@ export function DomainConfiguration({ domain }) {
 	}, [domain]);
 
 	return (
-		<div className="border-t border-stone-200 px-10 pb-5 pt-7 dark:border-stone-700">
+		<div className="border-t border-stone-200 px-5 py-3">
 			<div className="mb-4 flex items-center space-x-2">
 				{status === "Pending Verification" ? (
 					<AlertCircle className="text-yellow-500" />
@@ -52,58 +52,54 @@ export function DomainConfiguration({ domain }) {
 				<p className="text-sm text-red-500 mb-4">{error}</p>
 			) : (
 				<div>
-					<div className="flex justify-start space-x-4">
+					<div className="flex space-x-4 mb-4">
 						<button
 							type="button"
 							onClick={() => setRecordType("A")}
-							className={cn(
-								"border-b-2 pb-1 text-sm transition-all duration-150",
+							className={`pb-1 border-b-2 transition-all ${
 								recordType === "A"
-									? "border-black text-black dark:border-white dark:text-white"
-									: "border-transparent text-stone-400"
-							)}
+									? "border-primary text-primary"
+									: "border-transparent text-muted-foreground"
+							}`}
 						>
 							A Record (recommended)
 						</button>
 						<button
 							type="button"
 							onClick={() => setRecordType("CNAME")}
-							className={cn(
-								"border-b-2 pb-1 text-sm transition-all duration-150",
+							className={`pb-1 border-b-2 transition-all ${
 								recordType === "CNAME"
-									? "border-black text-black dark:border-white dark:text-white"
-									: "border-transparent text-stone-400"
-							)}
+									? "border-primary text-primary"
+									: "border-transparent text-muted-foreground"
+							}`}
 						>
 							CNAME Record
 						</button>
 					</div>
 
-					<div className="mt-4">
-						<div className="flex items-start justify-start space-x-10 rounded-md bg-stone-50 p-4 dark:bg-stone-800">
+					<div className="bg-muted p-4 rounded-md">
+						<div className="grid grid-cols-4 gap-4">
 							<div>
-								<p className="text-sm font-bold">Type</p>
-								<p className="mt-2 font-mono text-sm">
-									{recordType}
-								</p>
+								<p className="font-medium mb-2">Type</p>
+								<p className="font-mono">{recordType}</p>
 							</div>
 							<div>
-								<p className="text-sm font-bold">Name</p>
-								<p className="mt-2 font-mono text-sm">
+								<p className="font-medium mb-2">Name</p>
+								<p className="font-mono">
 									{recordType === "A" ? "@" : "www"}
 								</p>
 							</div>
 							<div>
-								<p className="text-sm font-bold">Value</p>
-								<p className="mt-2 font-mono text-sm">
+								<p className="font-medium mb-2">Value</p>
+								<p className="font-mono">
 									{recordType === "A"
 										? "76.76.21.21"
 										: `cname.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`}
 								</p>
 							</div>
 							<div>
-								<p className="text-sm font-bold">TTL</p>
-								<p className="mt-2 font-mono text-sm">86400</p>
+								<p className="font-medium mb-2">TTL</p>
+								<p className="font-mono">86400</p>
 							</div>
 						</div>
 					</div>

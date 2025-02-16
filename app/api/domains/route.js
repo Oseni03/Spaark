@@ -1,22 +1,27 @@
 import {
 	addDomainToVercel,
 	removeDomainFromVercelProject,
+	validDomainRegex,
 } from "@/lib/domains";
+import { logger } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { validDomainRegex } from "@/lib/domains";
 
 export async function POST(req) {
 	try {
+		// Get auth token and validate
 		const { userId } = auth();
 		if (!userId) {
-			return new NextResponse("Unauthorized", { status: 401 });
+			return NextResponse.json(
+				{ success: false, error: "Unauthorized" },
+				{ status: 401 }
+			);
 		}
 
-		const { domain, portfolioId } = await req.json();
+		const { domain } = await req.json();
 
-		if (!domain || !portfolioId) {
-			return new NextResponse("Missing required fields", { status: 400 });
+		if (!domain) {
+			return new NextResponse("Missing domain", { status: 400 });
 		}
 
 		if (domain.includes(process.env.NEXT_PUBLIC_ROOT_DOMAIN)) {
@@ -31,26 +36,37 @@ export async function POST(req) {
 		}
 
 		// Add domain to Vercel
-		await addDomainToVercel(domain);
+		const vercelResponse = await addDomainToVercel(domain);
+		if (vercelResponse.error) {
+			return NextResponse.json(
+				{ success: false, error: vercelResponse.error.message },
+				{ status: 400 }
+			);
+		}
 
-		// Update portfolio with custom domain
-		const response = await prisma.portfolio.update({
-			where: { id: portfolioId },
-			data: { customDomain: domain },
-		});
-
-		return NextResponse.json(response);
+		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("[DOMAINS_POST]", error);
-		return new NextResponse("Internal error", { status: 500 });
+		logger.error("[DOMAINS_POST]", error);
+		return NextResponse.json(
+			{ 
+				success: false, 
+				error: error.message || "Internal error",
+				details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+			},
+			{ status: error.status || 500 }
+		);
 	}
 }
 
 export async function DELETE(req) {
 	try {
+		// Get auth token and validate
 		const { userId } = auth();
 		if (!userId) {
-			return new NextResponse("Unauthorized", { status: 401 });
+			return NextResponse.json(
+				{ success: false, error: "Unauthorized" },
+				{ status: 401 }
+			);
 		}
 
 		const { searchParams } = new URL(req.url);
