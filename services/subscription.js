@@ -24,7 +24,17 @@ export async function initializeSubscription({
 			throw new Error("UserId or OrgId has to be provided");
 		}
 
-		const subscription = await prisma.subscription.create({
+		const whereClause = {
+			OR: [{ userId }],
+		};
+
+		// Add organization condition if orgId exists
+		if (orgId) {
+			whereClause.OR.push({ organizationId: orgId });
+		}
+
+		const subscription = await prisma.subscription.upsert({
+			where: whereClause,
 			data: {
 				userId: userId || null,
 				organizationId: orgId || null,
