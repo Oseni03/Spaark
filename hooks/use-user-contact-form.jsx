@@ -86,6 +86,9 @@ export const useUserContactForm = () => {
 		});
 
 		try {
+			if (!subdomain) {
+				throw new Error("Can't send contact email from builder page");
+			}
 			const response = await fetch("/api/send-user-contact-email", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

@@ -20,7 +20,7 @@ export function BlogSettings() {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { ...portfolio, blogEnabled: !portfolio.blogEnabled },
+				data: { blogEnabled: !portfolio.blogEnabled },
 			})
 		);
 	};

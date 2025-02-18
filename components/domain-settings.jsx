@@ -64,7 +64,7 @@ export function DomainSettings() {
 				const result = await dispatch(
 					updatePortfolioInDatabase({
 						id: portfolioId,
-						data: { ...portfolio, customDomain: newDomain },
+						data: { customDomain: newDomain },
 					})
 				).unwrap();
 
@@ -101,7 +101,7 @@ export function DomainSettings() {
 			const result = await dispatch(
 				updatePortfolioInDatabase({
 					id: portfolioId,
-					data: { ...portfolio, customDomain: null },
+					data: { customDomain: null },
 				})
 			).unwrap();
 

@@ -71,7 +71,7 @@ export function TemplateSection() {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { ...portfolio, template: templateId },
+				data: { template: templateId },
 			})
 		);
 
@@ -114,7 +114,7 @@ export function TemplateSection() {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { ...portfolio, isLive: !portfolio.isLive },
+				data: { isLive: !portfolio.isLive },
 			})
 		);
 

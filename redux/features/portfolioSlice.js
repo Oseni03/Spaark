@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { portfolioSchema, defaultPortfolio } from "@/schema/sections";
 import {
 	addPortfolioInDatabase,
 	updatePortfolioInDatabase,

@@ -13,14 +13,11 @@ const select = {
 	description: true,
 	date: true,
 	technologies: true,
-	url: true,
+	website: true,
+	source: true,
 	image: true,
 	video: true,
-	links: {
-		select: { id: true, label: true, url: true, icon: true },
-	},
 	portfolioId: true,
-	// Exclude createdAt and updatedAt
 };
 
 export async function getProjects(portfolioId) {
@@ -38,33 +35,19 @@ export async function getProjects(portfolioId) {
 
 export async function createProject({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
 		if (!userId) {
 			throw new Error("Unauthorized");
 		}
 
-		// Destructure links from the data and exclude it from the project data
-		const { links, ...projectData } = data;
-
-		// Create the project with nested links
 		const project = await prisma.project.create({
 			data: {
-				...projectData,
+				...data,
 				portfolio: { connect: { id: portfolioId } },
-				links: {
-					create: links.map((link) => ({
-						id: link.id,
-						label: link.label,
-						url: link.url,
-						icon: link.icon || null,
-					})),
-				},
 			},
 			select,
 		});
 
-		// Revalidate multiple potential paths
 		revalidatePath("/builder");
 		return projectSchema.parse(project);
 	});
@@ -72,55 +55,27 @@ export async function createProject({ portfolioId, ...data }) {
 
 export async function editProject(projectId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		const { userId } = await auth();
 		if (!userId || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
-		// Destructure links from the data and validate them
-		const { links, ...projectData } = data;
-
-		// Perform the update, including nested operations for links
 		const updatedProject = await prisma.project.update({
 			where: { id: projectId, portfolioId },
 			data: {
-				...projectData,
+				...data,
 				updatedAt: new Date(),
-				links: {
-					// Handle nested updates for links
-					upsert: links.map((link) => ({
-						where: { id: link.id || "" },
-						create: {
-							label: link.label,
-							url: link.url,
-							icon: link.icon || null,
-						},
-						update: {
-							label: link.label,
-							url: link.url,
-							icon: link.icon || null,
-						},
-					})),
-					// Remove links not included in the updated data
-					deleteMany: {
-						id: { notIn: links.map((link) => link.id) },
-					},
-				},
 			},
 			select,
 		});
 
-		// Revalidate relevant paths
 		revalidatePath("/builder");
-
 		return projectSchema.parse(updatedProject);
 	});
 }
 
 export async function deleteProject(projectId, portfolioId) {
 	return withErrorHandling(async () => {
-		// Authenticate user
 		const { userId } = await auth();
 		if (!userId || !portfolioId) {
 			throw new Error(
@@ -128,12 +83,10 @@ export async function deleteProject(projectId, portfolioId) {
 			);
 		}
 
-		// Delete the project and its associated links
 		await prisma.project.delete({
 			where: { id: projectId, portfolioId },
 		});
 
-		// Revalidate relevant paths to reflect changes
 		revalidatePath("/builder");
 
 		return { projectId, portfolioId };

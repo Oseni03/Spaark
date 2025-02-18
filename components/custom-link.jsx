@@ -18,7 +18,7 @@ const LinkInput = ({ field, onChange, onRemove }) => {
 
 	return (
 		<motion.div
-			className="flex space-x-1 items-center"
+			className="flex space-x-1 items-start"
 			initial={{ opacity: 0, scale: 0.95 }}
 			animate={{ opacity: 1, scale: 1 }}
 			exit={{ opacity: 0, scale: 0.95 }}
@@ -34,9 +34,11 @@ const LinkInput = ({ field, onChange, onRemove }) => {
 						/>
 					)}
 					<Input
-						value={field.icon || ""}
+						value={field.icon || ""} // Handle null value
 						placeholder="Icon name (e.g., github)"
-						onChange={(e) => handleChange("icon", e.target.value)}
+						onChange={(e) =>
+							handleChange("icon", e.target.value || null)
+						} // Set to null if empty
 					/>
 				</div>
 				<p className="text-sm text-muted-foreground">

@@ -71,13 +71,21 @@ export async function createPortfolio(data) {
 			throw new Error("Unauthorized");
 		}
 
+		const { portfolioId, ...basicsData } = defaultBasics;
+
 		const portfolio = await prisma.portfolio.create({
 			data: {
 				...data,
-				organizationId: orgId || null,
 				user: { connect: { id: userId } },
+				...(orgId && {
+					organization: {
+						connect: { id: orgId },
+					},
+				}),
 				basics: {
-					create: defaultBasics,
+					create: {
+						...basicsData,
+					},
 				},
 			},
 			select: portfolioSelect,
@@ -125,23 +133,8 @@ export async function editPortfolio(id, data) {
 			whereClause.OR.push({ organizationId: orgId });
 		}
 
-		// Extract main portfolio fields
-		const {
-			basics,
-			profiles,
-			experiences,
-			educations,
-			skills,
-			certifications,
-			projects,
-			hackathons,
-			testimonials,
-			teams,
-			...portfolioData
-		} = data;
-
-		// Remove id from portfolioData if it exists
-		delete portfolioData.id;
+		// Extract main portfolio fields and remove organizationId
+		const { organizationId, id: portfolioId, ...portfolioData } = data;
 
 		// Update the portfolio with only top-level fields
 		const updatedPortfolio = await prisma.portfolio.update({
@@ -149,13 +142,10 @@ export async function editPortfolio(id, data) {
 			data: {
 				...portfolioData,
 				updatedAt: new Date(),
-				// Update basics if provided
-				...(basics && {
-					basics: {
-						update: {
-							...getValidBasicsUpdateFields(basics),
-							updatedAt: new Date(),
-						},
+				// Update organization if organizationId is provided
+				...(organizationId && {
+					organization: {
+						connect: { id: organizationId },
 					},
 				}),
 			},

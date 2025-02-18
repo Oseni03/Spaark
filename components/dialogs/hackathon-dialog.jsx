@@ -16,6 +16,7 @@ import {
 } from "@/redux/thunks/hackathon";
 import { PictureSection } from "../sections/picture/section";
 import { CustomLink } from "@/components/custom-link";
+import { logger } from "@/lib/utils";
 
 export const HackathonDialog = ({
 	form,
@@ -28,6 +29,7 @@ export const HackathonDialog = ({
 	const { reset, handleSubmit, control, setValue } = form;
 
 	const onSubmit = (data) => {
+		logger.info("Hackathon data submitted:", data);
 		if (currentHackathon) {
 			dispatch(
 				updateHackathonInDatabase({

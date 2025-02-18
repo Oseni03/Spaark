@@ -4,21 +4,13 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Tooltip } from "./ui/tooltip";
-import React, { forwardRef, useMemo, useState } from "react";
+import React, { forwardRef, useState } from "react";
 
 export const URLInput = forwardRef(function URLInput(
 	{ id, field, placeholder, onChange },
 	ref
 ) {
 	const [touched, setTouched] = useState(false);
-
-	// Validate if the URL is correct
-	const validationResult = useMemo(
-		() => urlSchema.safeParse(field?.url),
-		[field?.url]
-	);
-	const hasError = touched && !validationResult.success;
-	const errorMessage = validationResult.error?.issues?.[0]?.message;
 
 	return (
 		<div>
@@ -28,7 +20,7 @@ export const URLInput = forwardRef(function URLInput(
 					ref={ref}
 					id={id}
 					value={field?.url || ""}
-					className={`flex-1 ${hasError ? "border-red-500" : ""}`}
+					className={`flex-1`}
 					placeholder={placeholder || "https://example.com"}
 					onChange={(event) => onChange("url", event.target.value)}
 					onBlur={() => setTouched(true)} // Mark field as touched on blur
@@ -58,13 +50,6 @@ export const URLInput = forwardRef(function URLInput(
 					</PopoverContent>
 				</Popover>
 			</div>
-
-			{/* Error Message */}
-			{hasError && (
-				<small className="text-red-500 opacity-75">
-					{errorMessage || "Invalid URL"}
-				</small>
-			)}
 		</div>
 	);
 });

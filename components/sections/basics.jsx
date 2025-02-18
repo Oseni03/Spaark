@@ -10,9 +10,11 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
 import { updateBasicsInDatabase } from "@/redux/thunks/basics";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RichInput } from "@/components/ui/rich-input";
 import { logger } from "@/lib/utils";
+import { Spinner } from "../ui/Spinner";
+import { toast } from "sonner";
 
 export const BasicsSection = () => {
 	const { portfolioId } = useParams();
@@ -20,6 +22,7 @@ export const BasicsSection = () => {
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 	const dispatch = useDispatch();
+	const [loading, setLoading] = useState(false);
 	const {
 		handleSubmit,
 		control,
@@ -37,9 +40,19 @@ export const BasicsSection = () => {
 		}
 	}, [errors, defaultValues]);
 
-	const onSubmit = (data) => {
-		dispatch(updateBasicsInDatabase({ portfolioId, ...data }));
-		logger.info("Form Submitted:", data);
+	const onSubmit = async (data) => {
+		setLoading(true);
+		try {
+			await dispatch(
+				updateBasicsInDatabase({ portfolioId, ...data })
+			).unwrap();
+			logger.info("User basics updated");
+			toast.success("Basics information updated")
+		} catch (error) {
+			logger.error("Error updating basics:", error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -212,8 +225,19 @@ export const BasicsSection = () => {
 						)}
 					/>
 
-					<Button type="submit" className="w-full">
-						Save
+					<Button
+						type="submit"
+						className="w-full relative"
+						disabled={loading}
+					>
+						{loading ? (
+							<>
+								<Spinner className="mr-2" />
+								Saving...
+							</>
+						) : (
+							"Save"
+						)}
 					</Button>
 				</form>
 			</main>

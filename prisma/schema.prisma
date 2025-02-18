@@ -249,11 +249,10 @@ model Project {
   description  String
   date         String
   technologies String[]
-  url          String?
+  website      String?
+  source       String?
   image        String?
-  github       String?
   video        String?
-  links        Link[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
 
@@ -270,11 +269,10 @@ model Link {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
-  Team        Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  projectId   String?
   hackathonId String?
+
+  Team        Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
   teamId      String?
 }
 

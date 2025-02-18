@@ -8,7 +8,7 @@ export const linkSchema = z.object({
 	id: idSchema,
 	label: z.string(),
 	url: z.string().url("Invalid URL"),
-	icon: z.literal("").or(z.string()).nullable(), // Allow empty string or null
+	icon: z.string().nullable(), // Changed to properly handle null values
 });
 
 // Defaults
@@ -16,5 +16,5 @@ export const defaultLink = {
 	id: createId(),
 	label: "",
 	url: "",
-	icon: "",
+	icon: null, // Changed from empty string to null
 };

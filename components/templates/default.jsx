@@ -140,22 +140,18 @@ const ResumeCard = ({
 
 const ProjectCard = ({
 	title,
-	href,
 	description,
 	dates,
 	tags,
-	link,
+	website,
+	source,
 	image,
 	video,
-	links,
 	className,
 }) => {
 	return (
 		<Card className="flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full">
-			<Link
-				href={href || "#"}
-				className={cn("block cursor-pointer", className)}
-			>
+			<div className={cn("block cursor-pointer", className)}>
 				{video && (
 					<video
 						src={video}
@@ -175,17 +171,11 @@ const ProjectCard = ({
 						className="h-40 w-full overflow-hidden object-cover object-top"
 					/>
 				)}
-			</Link>
+			</div>
 			<CardHeader className={image || video ? "px-2" : "px-4"}>
 				<div className="space-y-1">
 					<CardTitle className="mt-1 text-base">{title}</CardTitle>
 					<time className="font-sans text-xs">{dates}</time>
-					<div className="hidden font-sans text-xs underline print:visible">
-						{link
-							?.replace("https://", "")
-							.replace("www.", "")
-							.replace("/", "")}
-					</div>
 					{description}
 				</div>
 			</CardHeader>
@@ -205,27 +195,24 @@ const ProjectCard = ({
 				)}
 			</CardContent>
 			<CardFooter className="px-2 pb-2">
-				{links && links.length > 0 && (
-					<div className="flex flex-row flex-wrap items-start gap-1">
-						{links?.map((link, idx) => (
-							<Link href={link?.url} key={idx} target="_blank">
-								<Badge
-									key={idx}
-									className="flex gap-2 px-2 py-1 text-[10px]"
-								>
-									<Image
-										src={`https://cdn.simpleicons.org/${link.icon}`}
-										alt={link.label}
-										width={20}
-										height={20}
-										className="w-5 h-5"
-									/>
-									{link.label}
-								</Badge>
-							</Link>
-						))}
-					</div>
-				)}
+				<div className="flex flex-row flex-wrap items-start gap-1">
+					{website && (
+						<Link href={website} target="_blank">
+							<Badge className="flex gap-2 px-2 py-1 text-[10px]">
+								<Globe className="w-4 h-4" />
+								Demo
+							</Badge>
+						</Link>
+					)}
+					{source && (
+						<Link href={source} target="_blank">
+							<Badge className="flex gap-2 px-2 py-1 text-[10px]">
+								<GithubLogo className="w-4 h-4" />
+								Source
+							</Badge>
+						</Link>
+					)}
+				</div>
 			</CardFooter>
 		</Card>
 	);
@@ -311,7 +298,7 @@ const CertificationCard = ({ name, issuer, date, summary, url }) => {
 				{date && (
 					<time
 						className="text-xs text-muted-foreground"
-						dateTime={new Date(date).toISOString()}
+						dateTime={date}
 					>
 						{date}
 					</time>
@@ -371,6 +358,7 @@ const ContactCard = () => {
 							isSubmitting={isSubmitting}
 							handleChange={handleChange}
 							handleSubmit={handleSubmit}
+							revert={true}
 						/>
 					</CardItem>
 				</div>
@@ -820,16 +808,16 @@ export default function DefaultTemplate({
 										delay={BLUR_FADE_DELAY * 12 + id * 0.05}
 									>
 										<ProjectCard
-											href={project.url}
-											key={project.id}
 											title={project.name}
 											description={HTMLReactParser(
 												project.description || ""
 											)}
 											dates={project.date}
 											tags={project.technologies}
+											website={project.website}
+											source={project.source}
 											image={project.image}
-											links={project.links}
+											video={project.video}
 										/>
 									</BlurFade>
 								))}

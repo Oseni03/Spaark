@@ -46,7 +46,6 @@ export const PortfolioDialog = ({
 					updatePortfolioInDatabase({
 						id: currentPortfolio.id,
 						data: {
-							...currentPortfolio,
 							...data,
 							organizationId: organization?.id || null,
 						},

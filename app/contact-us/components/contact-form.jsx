@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export const ContactForm = ({
 	formData,
@@ -10,6 +11,7 @@ export const ContactForm = ({
 	isSubmitting,
 	handleChange,
 	handleSubmit,
+	revert = false,
 }) => {
 	return (
 		<form onSubmit={handleSubmit} className="grid space-y-3">
@@ -20,7 +22,10 @@ export const ContactForm = ({
 					name="email"
 					value={formData.email}
 					onChange={handleChange}
-					className={errors.email ? "border-red-500" : ""}
+					className={cn(
+						errors.email ? "border-red-500" : "",
+						revert ? "text-black dark:text-white" : ""
+					)}
 				/>
 				{errors.email && <p className="text-red-500">{errors.email}</p>}
 			</div>
@@ -32,7 +37,10 @@ export const ContactForm = ({
 					name="full_name"
 					value={formData.full_name}
 					onChange={handleChange}
-					className={errors.full_name ? "border-red-500" : ""}
+					className={cn(
+						errors.full_name ? "border-red-500" : "",
+						revert ? "text-black dark:text-white" : ""
+					)}
 				/>
 				{errors.full_name && (
 					<p className="text-red-500">{errors.full_name}</p>
@@ -46,7 +54,10 @@ export const ContactForm = ({
 					value={formData.message}
 					onChange={handleChange}
 					placeholder="Your message"
-					className={errors.message ? "border-red-500" : ""}
+					className={cn(
+						errors.message ? "border-red-500" : "",
+						revert ? "text-black dark:text-white" : ""
+					)}
 					rows={4}
 				/>
 				{errors.message && (

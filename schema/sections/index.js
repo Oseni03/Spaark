@@ -19,7 +19,6 @@ export const sectionSchema = z.object({
 	visible: z.boolean().default(true),
 });
 
-// Schema
 export const portfolioSchema = z.object({
 	id: idSchema,
 	name: z.string().min(1).max(255),
@@ -28,6 +27,10 @@ export const portfolioSchema = z.object({
 	blogEnabled: z.boolean().default(false),
 	isPrimary: z.boolean().default(false),
 	template: z.string().default("default"),
+});
+
+// Schema
+export const mainSchema = portfolioSchema.extend({
 	customDomain: z.string().optional(),
 	// Add organization fields
 	organizationId: z.string().optional(),
@@ -87,6 +90,11 @@ export const defaultPortfolio = {
 	blogEnabled: false,
 	isPrimary: false,
 	template: "default",
+};
+
+export const defaultMain = {
+	...defaultPortfolio,
+	customDomain: "",
 	organizationId: null,
 	basics: {
 		...defaultSection,

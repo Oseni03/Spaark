@@ -84,11 +84,9 @@ export async function createHackathon({ portfolioId, ...data }) {
 				...safeHackathonData,
 				portfolio: { connect: { id: portfolioId } },
 				links: {
-					create: links.map((link) => ({
-						id: link.id || undefined,
-						label: link.label,
-						url: link.url,
-						icon: link.icon || null,
+					create: links.map(({ id, ...link }) => ({
+						...link,
+						// Exclude the id field when creating new links
 					})),
 				},
 			},
@@ -114,28 +112,21 @@ export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 		// Destructure links from the data and validate them
 		const { links, ...hackathonData } = data;
 
+		// First, delete all existing links
+		await prisma.link.deleteMany({
+			where: { hackathonId },
+		});
+
 		const updatedHackathon = await prisma.hackathon.update({
 			where: { id: hackathonId, portfolioId },
 			data: {
 				...hackathonData,
 				updatedAt: new Date(),
 				links: {
-					upsert: links.map((link) => ({
-						where: { id: link.id || "" },
-						create: {
-							label: link.label,
-							url: link.url,
-							icon: link.icon || null,
-						},
-						update: {
-							label: link.label,
-							url: link.url,
-							icon: link.icon || null,
-						},
+					create: links.map(({ id, ...link }) => ({
+						...link,
+						// Exclude the id field when creating new links
 					})),
-					deleteMany: {
-						id: { notIn: links.map((link) => link.id) },
-					},
 				},
 			},
 			select,

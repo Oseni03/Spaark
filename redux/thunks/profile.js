@@ -18,8 +18,8 @@ export const addProfileInDatabase = createAsyncThunk(
 			}
 
 			const state = getState();
-			const existingProfiles = state.portfolio?.items || [];
-			const portfolio = existingProfiles.find(
+			const portfolios = state.portfolios?.items || [];
+			const portfolio = portfolios.find(
 				(p) => p.id === profileData.portfolioId
 			);
 

@@ -37,6 +37,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { defaultPortfolio, portfolioSchema } from "@/schema/sections";
 import { useOrganizationContext } from "@/context/OrganizationContext";
+import { logger } from "@/lib/utils";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
@@ -81,7 +82,7 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(
 			updatePortfolioInDatabase({
 				id: portfolio.id,
-				data: { ...portfolio, isPrimary: !portfolio.isPrimary },
+				data: { isPrimary: !portfolio.isPrimary },
 			})
 		);
 	};

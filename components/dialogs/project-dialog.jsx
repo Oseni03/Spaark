@@ -18,7 +18,6 @@ import {
 	addProjectInDatabase,
 	updateProjectInDatabase,
 } from "@/redux/thunks/project";
-import { CustomLink } from "@/components/custom-link";
 import Uploader from "../sections/picture/uploader";
 import { logger } from "@/lib/utils";
 
@@ -96,14 +95,32 @@ export const ProjectDialog = ({
 								)}
 							/>
 							<Controller
-								name="url"
+								name="website"
 								control={control}
 								render={({ field, fieldState }) => (
 									<div>
-										<label>Project URL</label>
+										<label>Live Website</label>
 										<Input
 											{...field}
-											placeholder="Enter project URL (if applicable)"
+											placeholder="https://project-demo.com"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+							<Controller
+								name="source"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Source URL</label>
+										<Input
+											{...field}
+											placeholder="https://github.com/user/project"
 										/>
 										{fieldState.error && (
 											<small className="text-red-500 opacity-75">
@@ -231,14 +248,6 @@ export const ProjectDialog = ({
 								</div>
 							)}
 						/>
-
-						<div>
-							<label>Links</label>
-							<CustomLink
-								setValue={setValue}
-								links={currentProject?.links || []}
-							/>
-						</div>
 
 						<div className="flex justify-end space-x-2">
 							<Button

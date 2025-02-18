@@ -48,10 +48,13 @@ export async function POST(req) {
 	} catch (error) {
 		logger.error("[DOMAINS_POST]", error);
 		return NextResponse.json(
-			{ 
-				success: false, 
+			{
+				success: false,
 				error: error.message || "Internal error",
-				details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+				details:
+					process.env.NODE_ENV === "development"
+						? error.stack
+						: undefined,
 			},
 			{ status: error.status || 500 }
 		);
