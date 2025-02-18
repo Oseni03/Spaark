@@ -32,6 +32,8 @@ export default function Uploader({ defaultValue, defaultName, setValue }) {
 				name = "video";
 			}
 
+			const loadingToast = toast.loading("Uploading file...");
+
 			try {
 				const response = await fetch("/api/file-upload", {
 					method: "POST",
@@ -45,10 +47,12 @@ export default function Uploader({ defaultValue, defaultName, setValue }) {
 				const { blob } = await response.json();
 				setMedia(blob.url);
 				setValue(name, blob.url);
+				toast.dismiss(loadingToast);
 				toast.success("File uploaded successfully");
 				logger.info("File uploaded: ", name, blob.url);
 			} catch (error) {
 				logger.error("Upload error:", error);
+				toast.dismiss(loadingToast);
 				toast.error("Failed to upload file");
 			}
 		}

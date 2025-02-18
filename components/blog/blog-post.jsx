@@ -12,16 +12,16 @@ export const BlogPost = ({
 	return (
 		<article className="max-w-4xl mx-auto px-6 py-12">
 			<div className="text-center mb-12">
+				<h1 className="text-4xl font-bold mb-6">{title}</h1>
 				{featuredImage && (
-					<div className="inline-block mb-6">
+					<div className="mt-6 aspect-video w-full">
 						<img
 							src={featuredImage}
-							alt="Post icon"
-							className="w-12 h-12"
+							alt={title}
+							className="w-full h-full object-cover rounded-lg"
 						/>
 					</div>
 				)}
-				<h1 className="text-4xl font-bold mb-6">{title}</h1>
 			</div>
 
 			<div className="mb-4">

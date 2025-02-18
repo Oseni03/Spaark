@@ -31,6 +31,8 @@ export const FeaturedImage = ({ image, setImage }) => {
 			return;
 		}
 
+		const loadingToast = toast.loading("Uploading image...");
+
 		try {
 			const response = await fetch("/api/file-upload", {
 				method: "POST",
@@ -43,10 +45,12 @@ export const FeaturedImage = ({ image, setImage }) => {
 
 			const { blob } = await response.json();
 			setImage(blob.url);
+			toast.dismiss(loadingToast);
 			toast.success("Image uploaded successfully");
 			logger.info("Image uploaded:", blob.url);
 		} catch (error) {
 			logger.error("Upload error:", error);
+			toast.dismiss(loadingToast);
 			toast.error("Failed to upload image");
 		}
 	};
