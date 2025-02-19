@@ -3,6 +3,7 @@ import axios from "axios";
 import {
 	createTransaction,
 	initializeSubscription,
+	handlePaymentFailure,
 } from "@/services/subscription";
 import { logger } from "@/lib/utils";
 import { getSubscriptionData } from "@/utils/subscription-plans";
@@ -20,6 +21,23 @@ export async function POST(request) {
 			orgId,
 		} = body;
 
+		// Validate all required fields
+		if (!type || !frequency || !userEmail || !userId) {
+			const missingFields = [];
+			if (!type) missingFields.push("type");
+			if (!frequency) missingFields.push("frequency");
+			if (!userEmail) missingFields.push("userEmail");
+			if (!userId) missingFields.push("userId");
+
+			logger.error("Missing required fields", { missingFields });
+			return NextResponse.json(
+				{
+					message: `Missing required fields: ${missingFields.join(", ")}`,
+				},
+				{ status: 400 }
+			);
+		}
+
 		logger.info("Starting checkout process", {
 			type,
 			frequency,
@@ -27,19 +45,6 @@ export async function POST(request) {
 			userId,
 			orgId,
 		});
-
-		if (!type || !frequency || !userEmail || !userId) {
-			logger.error("Missing required fields", {
-				type,
-				frequency,
-				userEmail,
-				userId,
-			});
-			return NextResponse.json(
-				{ message: "Missing required fields" },
-				{ status: 400 }
-			);
-		}
 
 		let subscriptionData;
 		try {
@@ -60,23 +65,39 @@ export async function POST(request) {
 
 		const { price, priceId, portfolioLimit } = subscriptionData;
 
+		if (!priceId) {
+			logger.error("Invalid price configuration", {
+				type,
+				frequency,
+			});
+			return NextResponse.json(
+				{ message: "Invalid subscription configuration" },
+				{ status: 400 }
+			);
+		}
+
 		logger.info("Initializing subscription");
-		const subscription = await initializeSubscription({
+		const subscriptionResult = await initializeSubscription({
 			userId,
-			orgId,
+			orgId: orgId || null, // Make orgId optional
 			portfolioLimit,
 			type: type.toUpperCase(),
 			frequency,
 			priceId,
 		});
 
-		if (!subscription) {
-			logger.error("Subscription creation failed");
+		if (!subscriptionResult.success) {
+			logger.error(
+				"Subscription creation failed",
+				subscriptionResult.error
+			);
 			return NextResponse.json(
-				{ message: "Unable to create subscription" },
+				{ message: subscriptionResult.error },
 				{ status: 400 }
 			);
 		}
+
+		const subscription = subscriptionResult.data;
 		logger.info("Subscription initialized", {
 			subscriptionId: subscription.id,
 		});
@@ -92,51 +113,104 @@ export async function POST(request) {
 		});
 		logger.info("Transaction created", { transactionId: txn.data.id });
 
-		logger.info("Initiating Flutterwave payment");
-		const flutterwaveResponse = await axios.post(
-			"https://api.flutterwave.com/v3/payments",
-			{
-				tx_ref: txn.data.id,
-				amount: price,
-				currency: "USD",
-				payment_options: "card",
-				redirect_url: returnUrl || process.env.NEXT_PUBLIC_APP_URL,
-				customer: {
-					email: userEmail,
-					name: username || "Unknown User",
-				},
-				meta: {
-					subscriptionId: subscription.id,
-					type,
-					frequency,
-					orgId,
-				},
-				customizations: {
-					title: `${type} Subscription`,
-					description: `${frequency} subscription payment`,
-				},
-			},
-			{
-				headers: {
-					Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
-				},
-			}
-		);
-		logger.info("Flutterwave payment initiated", {
-			paymentLink: flutterwaveResponse.data.data.link,
-		});
+		// Validate Flutterwave API key and redirect URL
+		const flutterwaveKey = process.env.FLW_SECRET_KEY;
+		const redirectUrl =
+			returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/success`;
 
-		return NextResponse.json({
-			link: flutterwaveResponse.data.data.link,
-			status: "success",
-		});
+		if (!flutterwaveKey) {
+			logger.error("Flutterwave API key is missing");
+			return NextResponse.json(
+				{ message: "Payment service configuration error" },
+				{ status: 500 }
+			);
+		}
+
+		if (!redirectUrl) {
+			logger.error("Redirect URL is missing");
+			return NextResponse.json(
+				{ message: "Invalid redirect configuration" },
+				{ status: 400 }
+			);
+		}
+
+		logger.info("Initiating Flutterwave payment");
+		try {
+			const flutterwaveResponse = await axios.post(
+				"https://api.flutterwave.com/v3/payments",
+				{
+					tx_ref: txn.data.id,
+					currency: "USD",
+					payment_options: "card", // Restricted to card for subscriptions
+					redirect_url: redirectUrl,
+					payment_plan: priceId, // Use payment plan instead of amount
+					customer: {
+						email: userEmail,
+						name: username || "Unknown User",
+					},
+					meta: {
+						subscriptionId: subscription.id,
+						type,
+						frequency,
+						orgId,
+					},
+					customizations: {
+						title: `${type} Subscription`,
+						description: `${frequency} subscription payment`,
+					},
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${flutterwaveKey}`,
+						"Content-Type": "application/json",
+					},
+				}
+			);
+
+			if (!flutterwaveResponse.data?.data?.link) {
+				throw new Error("Invalid payment link received");
+			}
+
+			logger.info("Flutterwave payment initiated", {
+				paymentLink: flutterwaveResponse.data.data.link,
+				transactionRef: txn.data.id,
+			});
+
+			return NextResponse.json({
+				link: flutterwaveResponse.data.data.link,
+				status: "success",
+				transactionId: txn.data.id,
+			});
+		} catch (flwError) {
+			logger.error("Flutterwave API error:", {
+				error: flwError.message,
+				response: flwError.response?.data,
+				status: flwError.response?.status,
+			});
+
+			// Handle the failed transaction
+			await handlePaymentFailure({ transactionId: txn.data.id });
+
+			return NextResponse.json(
+				{
+					message: "Payment service error",
+					details:
+						flwError.response?.data?.message || flwError.message,
+					transactionId: txn.data.id,
+				},
+				{ status: flwError.response?.status || 500 }
+			);
+		}
 	} catch (error) {
 		logger.error("Checkout process failed:", {
 			error: error.message,
 			stack: error.stack,
 		});
 		return NextResponse.json(
-			{ message: error.message || "Payment initialization failed" },
+			{
+				message: "Payment initialization failed",
+				details: error.message,
+			},
 			{ status: 500 }
 		);
 	}

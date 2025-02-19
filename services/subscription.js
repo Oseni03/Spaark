@@ -11,32 +11,40 @@ export async function initializeSubscription({
 	frequency,
 	priceId,
 }) {
-	try {
-		logger.info("Initializing subscription", {
-			userId,
-			orgId,
-			type,
-			frequency,
-			priceId,
-		});
-
-		if (!userId && !orgId) {
-			throw new Error("UserId or OrgId has to be provided");
+	return withErrorHandling(async () => {
+		if (!userId || !type || !frequency || !priceId) {
+			throw new Error(
+				"Missing required fields for subscription initialization"
+			);
 		}
 
-		const whereClause = {
-			OR: [{ userId }],
+		const getEndDate = (frequency) => {
+			const now = Date.now();
+			switch (frequency.toUpperCase()) {
+				case "WEEKLY":
+					return new Date(now + 7 * 24 * 60 * 60 * 1000); // 7 days
+				case "MONTHLY":
+					return new Date(now + 30 * 24 * 60 * 60 * 1000); // 30 days
+				case "YEARLY":
+					return new Date(now + 365 * 24 * 60 * 60 * 1000); // 365 days
+				default:
+					throw new Error(`Invalid frequency: ${frequency}`);
+			}
 		};
 
-		// Add organization condition if orgId exists
-		if (orgId) {
-			whereClause.OR.push({ organizationId: orgId });
-		}
-
 		const subscription = await prisma.subscription.upsert({
-			where: whereClause,
-			data: {
-				userId: userId || null,
+			where: { userId },
+			update: {
+				status: "pending",
+				portfolioLimit,
+				type,
+				frequency,
+				priceId,
+				startDate: new Date(),
+				endDate: getEndDate(frequency),
+			},
+			create: {
+				userId,
 				organizationId: orgId || null,
 				status: "pending",
 				portfolioLimit,
@@ -44,18 +52,16 @@ export async function initializeSubscription({
 				frequency,
 				priceId,
 				startDate: new Date(),
-				endDate: null,
+				endDate: getEndDate(frequency),
 			},
 		});
 
-		logger.info("Subscription initialized successfully", {
-			subscriptionId: subscription.id,
-		});
+		if (!subscription) {
+			throw new Error("Failed to create subscription record");
+		}
+
 		return subscription;
-	} catch (error) {
-		logger.error("Failed to initialize subscription:", error);
-		throw error;
-	}
+	});
 }
 
 export async function createTransaction({
