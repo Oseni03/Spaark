@@ -42,10 +42,6 @@ export const updatePortfolioInDatabase = createAsyncThunk(
 			const response = await editPortfolio(id, data);
 			logger.info("Portfolio updated successfully:", response);
 			return response;
-			const validatedData = portfolioSchema.safeParse(data);
-			if (validatedData.success) {
-			}
-			logger.error("Invalid portfolio data: ", validatedData);
 		} catch (error) {
 			logger.error("Error updating portfolio:", error);
 			if (error instanceof z.ZodError) {

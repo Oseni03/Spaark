@@ -25,7 +25,6 @@ export const portfolioSchema = z.object({
 	slug: z.string().min(1).max(255),
 	isLive: z.boolean().default(false),
 	blogEnabled: z.boolean().default(false),
-	isPrimary: z.boolean().default(false),
 	template: z.string().default("default"),
 });
 
@@ -88,7 +87,6 @@ export const defaultPortfolio = {
 	slug: "",
 	isLive: false,
 	blogEnabled: false,
-	isPrimary: false,
 	template: "default",
 };
 

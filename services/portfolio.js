@@ -13,7 +13,6 @@ const portfolioSelect = {
 	slug: true,
 	isLive: true,
 	blogEnabled: true,
-	isPrimary: true,
 	customDomain: true,
 	organizationId: true,
 	template: true,

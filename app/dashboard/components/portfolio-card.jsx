@@ -35,7 +35,7 @@ import { useState, useEffect } from "react";
 import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { defaultPortfolio, portfolioSchema } from "@/schema/sections";
+import { portfolioSchema } from "@/schema/sections";
 import { useOrganizationContext } from "@/context/OrganizationContext";
 import { logger } from "@/lib/utils";
 
@@ -76,15 +76,6 @@ export const PortfolioCard = ({ portfolio }) => {
 			slug: `${portfolio.slug}-copy`,
 		};
 		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
-	};
-
-	const onPrimaryChange = () => {
-		dispatch(
-			updatePortfolioInDatabase({
-				id: portfolio.id,
-				data: { isPrimary: !portfolio.isPrimary },
-			})
-		);
 	};
 
 	const onDelete = () => {
@@ -137,10 +128,12 @@ export const PortfolioCard = ({ portfolio }) => {
 
 						<div className="space-y-2 text-sm text-muted-foreground">
 							<p>Template: {portfolio.template || "Default"}</p>
-							<p>
-								Last updated:{" "}
-								{lastUpdated.format("MMMM D, YYYY")}
-							</p>
+							{lastUpdated && (
+								<p>
+									Last updated:{" "}
+									{lastUpdated.format("MMMM D, YYYY")}
+								</p>
+							)}
 							<div className="flex items-center gap-2">
 								<FileText className="w-4 h-4" />
 								Blog:{" "}
@@ -176,16 +169,6 @@ export const PortfolioCard = ({ portfolio }) => {
 					<ContextMenuItem onClick={onDuplicate}>
 						<CopySimple size={14} className="mr-2" />
 						{`Duplicate`}
-					</ContextMenuItem>
-					<ContextMenuItem onClick={onPrimaryChange}>
-						{portfolio.isPrimary ? (
-							<Star size={14} className="mr-2" />
-						) : (
-							<StarOff size={14} className="mr-2" />
-						)}
-						{portfolio.isPrimary
-							? `Unset Primary`
-							: `Set as Primary`}
 					</ContextMenuItem>
 					<ContextMenuSeparator />
 					<ContextMenuItem className="text-error" onClick={onDelete}>
