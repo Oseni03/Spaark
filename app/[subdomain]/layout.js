@@ -75,7 +75,8 @@ export default async function PortfolioLayout({ params, children }) {
 				<body
 					className={cn(
 						"mx-auto max-w-7xl px-6 lg:px-8",
-						"scrollbar-hide"
+						"scrollbar-hide",
+						"overflow-y-auto" // Add this to enable scrolling
 					)}
 				>
 					<PortfolioProvider

@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { PORTFOLIO_TAILWIND_CLASS } from "@/utils/constants";
+import {
+	PORTFOLIO_TAILWIND_CLASS,
+	CONTAINER_CLASS,
+	CONTENT_CLASS,
+} from "@/utils/constants";
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -37,9 +41,9 @@ function BuilderLayoutContent({ children }) {
 			<div className="relative h-screen overflow-hidden">
 				<ResizablePanelGroup direction="horizontal">
 					<ResizablePanel
-						defaultSize={25}
+						defaultSize={20}
 						minSize={0}
-						maxSize={40}
+						maxSize={30}
 						collapsible={true}
 						collapsedSize={0}
 						onCollapse={() => setLeftCollapsed(true)}
@@ -54,8 +58,8 @@ function BuilderLayoutContent({ children }) {
 					<ResizableHandle withHandle />
 					<ResizablePanel>
 						<div className="flex h-full flex-col">
-							<header className="flex h-14 shrink-0 items-center gap-2">
-								<div className="flex flex-1 items-center gap-2 px-3">
+							<header className="flex h-14 shrink-0 items-center gap-2 px-4 sm:px-6 lg:px-8">
+								<div className="flex flex-1 items-center gap-2">
 									<Button
 										variant="ghost"
 										size="icon"
@@ -79,7 +83,7 @@ function BuilderLayoutContent({ children }) {
 										</BreadcrumbList>
 									</Breadcrumb>
 								</div>
-								<div className="ml-auto flex items-center gap-2 px-3">
+								<div className="ml-auto flex items-center gap-2">
 									<NavActions />
 									<Button
 										variant="ghost"
@@ -98,19 +102,19 @@ function BuilderLayoutContent({ children }) {
 							</header>
 							<main
 								className={cn(
-									"flex-1 overflow-auto scrollbar-hide p-4",
-									PORTFOLIO_TAILWIND_CLASS
+									"flex-1 overflow-auto",
+									CONTAINER_CLASS
 								)}
 							>
-								{children}
+								<div className={CONTENT_CLASS}>{children}</div>
 							</main>
 						</div>
 					</ResizablePanel>
 					<ResizableHandle withHandle />
 					<ResizablePanel
-						defaultSize={25}
+						defaultSize={20}
 						minSize={0}
-						maxSize={40}
+						maxSize={30}
 						collapsible={true}
 						collapsedSize={0}
 						onCollapse={() => setRightCollapsed(true)}
@@ -128,19 +132,16 @@ function BuilderLayoutContent({ children }) {
 	}
 
 	return (
-		<div className="relative">
+		<div className="relative min-h-screen">
 			<Sheet open={leftOpen} onOpenChange={setLeftOpen}>
-				<SheetContent
-					side="left"
-					className="w-[80vw] sm:w-[50vw] md:w-[40vw] p-0"
-				>
+				<SheetContent side="left" className="w-[80vw] sm:w-[350px] p-0">
 					<LeftAppSidebar />
 				</SheetContent>
 			</Sheet>
 
 			<div className="flex min-h-screen flex-col">
-				<header className="flex h-14 shrink-0 items-center gap-2">
-					<div className="flex flex-1 items-center gap-2 px-3">
+				<header className="flex h-14 shrink-0 items-center gap-2 px-4">
+					<div className="flex flex-1 items-center gap-2">
 						<Button
 							variant="ghost"
 							size="icon"
@@ -158,7 +159,7 @@ function BuilderLayoutContent({ children }) {
 							</BreadcrumbList>
 						</Breadcrumb>
 					</div>
-					<div className="ml-auto flex items-center gap-2 px-3">
+					<div className="ml-auto flex items-center gap-2">
 						<NavActions />
 						<Button
 							variant="ghost"
@@ -169,15 +170,15 @@ function BuilderLayoutContent({ children }) {
 						</Button>
 					</div>
 				</header>
-				<main className={cn("flex-1 p-4", PORTFOLIO_TAILWIND_CLASS)}>
-					{children}
+				<main className={cn("flex-1", CONTAINER_CLASS)}>
+					<div className={CONTENT_CLASS}>{children}</div>
 				</main>
 			</div>
 
 			<Sheet open={rightOpen} onOpenChange={setRightOpen}>
 				<SheetContent
 					side="right"
-					className="w-[80vw] sm:w-[50vw] md:w-[40vw] p-0"
+					className="w-[80vw] sm:w-[350px] p-0"
 				>
 					<RightSidebar />
 				</SheetContent>

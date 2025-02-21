@@ -5,6 +5,8 @@ import { TemplateWrapper } from "@/components/templates/template-wrapper";
 import PortfolioSkeleton from "./components/portfolio-skeleton";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { logger } from "@/lib/utils";
+import { CONTAINER_CLASS, CONTENT_CLASS } from "@/utils/constants";
+import { cn } from "@/lib/utils";
 
 export default function Page() {
 	const { portfolio } = usePortfolio();
@@ -18,8 +20,10 @@ export default function Page() {
 
 	if (isLoading) {
 		return (
-			<div className="mx-auto w-full max-w-2xl py-12 sm:py-24 px-6">
-				<PortfolioSkeleton />
+			<div className={cn(CONTAINER_CLASS, "py-12")}>
+				<div className={CONTENT_CLASS}>
+					<PortfolioSkeleton />
+				</div>
 			</div>
 		);
 	}
@@ -56,12 +60,14 @@ export default function Page() {
 	const templateToUse = portfolio.template || "default";
 
 	return (
-		<div className="mx-auto w-full max-w-2xl h-[calc(100vh-48px)]">
-			<TemplateWrapper
-				template={templateToUse}
-				data={portfolioData}
-				className="h-full py-12 sm:py-24"
-			/>
+		<div className={cn(CONTAINER_CLASS, "min-h-screen")}>
+			<div className={CONTENT_CLASS}>
+				<TemplateWrapper
+					template={templateToUse}
+					data={portfolioData}
+					className="py-12 sm:py-16 lg:py-24"
+				/>
+			</div>
 		</div>
 	);
 }

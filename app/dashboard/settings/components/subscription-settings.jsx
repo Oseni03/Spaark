@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
 import { Card } from "@/components/ui/card";
 import { CreditCard, Package } from "@phosphor-icons/react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogTrigger,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import Pricing from "@/components/homepage/pricing";
 import { Separator } from "@/components/ui/separator";
 
@@ -41,6 +47,11 @@ export function SubscriptionSettings() {
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+								<DialogHeader>
+									<DialogTitle>
+										Manage Your Subscription
+									</DialogTitle>
+								</DialogHeader>
 								<Pricing
 									isDialog={true}
 									returnUrl={window.location.href}

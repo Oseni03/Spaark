@@ -99,41 +99,44 @@ export const FeaturedImage = ({ image, setImage }) => {
 				</DialogTrigger>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Add feature image</DialogTitle>
-						<div>
-							<label
-								className="group relative flex cursor-pointer flex-col items-center justify-center aspect-video max-w-screen-lg border-gray-300 bg-white hover:border-gray-400 transition-colors shadow-sm"
-								htmlFor="featured-image"
-							>
-								<div
-									className="absolute z-[5] h-full w-full rounded-md"
-									onDragEnter={handleDrag}
-									onDragLeave={handleDrag}
-									onDragOver={handleDrag}
-									onDrop={handleDrop}
-								/>
-								<div
-									className={`${isDragging ? "border-blue-500 bg-blue-50" : ""} 
-						absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all`}
-								>
-									<Camera className="w-12 h-12 text-gray-400 mb-4" />
-
-									<p className="mt-2 text-center text-sm text-gray-500">
-										Drag and drop or click to upload.
-									</p>
-								</div>
-							</label>
-							<div className="mt-1 flex rounded-md shadow-sm">
-								<input
-									type="file"
-									className="hidden"
-									accept="image/*"
-									onChange={handleFileSelect}
-									id="featured-image"
-								/>
-							</div>
-						</div>
+						<DialogTitle>Upload Feature Image</DialogTitle>
+						<DialogDescription>
+							Drag and drop an image or click to select a file.
+						</DialogDescription>
 					</DialogHeader>
+					<div>
+						<label
+							className="group relative flex cursor-pointer flex-col items-center justify-center aspect-video max-w-screen-lg border-gray-300 bg-white hover:border-gray-400 transition-colors shadow-sm"
+							htmlFor="featured-image"
+						>
+							<div
+								className="absolute z-[5] h-full w-full rounded-md"
+								onDragEnter={handleDrag}
+								onDragLeave={handleDrag}
+								onDragOver={handleDrag}
+								onDrop={handleDrop}
+							/>
+							<div
+								className={`${isDragging ? "border-blue-500 bg-blue-50" : ""} 
+						absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all`}
+							>
+								<Camera className="w-12 h-12 text-gray-400 mb-4" />
+
+								<p className="mt-2 text-center text-sm text-gray-500">
+									Drag and drop or click to upload.
+								</p>
+							</div>
+						</label>
+						<div className="mt-1 flex rounded-md shadow-sm">
+							<input
+								type="file"
+								className="hidden"
+								accept="image/*"
+								onChange={handleFileSelect}
+								id="featured-image"
+							/>
+						</div>
+					</div>
 				</DialogContent>
 			</Dialog>
 		);

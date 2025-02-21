@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { CONTAINER_CLASS } from "@/utils/constants";
 
 // Import templates
 import DefaultTemplate from "./default";
@@ -29,23 +30,20 @@ export const TemplateWrapper = ({
 	const Template = getTemplate(template);
 
 	return (
-		<div
-			className={cn(
-				"w-full h-full overflow-auto scrollbar-hide px-6 py-8",
-				className
-			)}
-		>
-			<AnimatePresence>
-				<motion.div
-					layout
-					initial={{ opacity: 0, x: -200, y: 0 }}
-					animate={{ opacity: 1, x: 0 }}
-					exit={{ opacity: 0, x: -200 }}
-					className="pointer-events-auto w-full"
-				>
-					<Template {...data} />
-				</motion.div>
-			</AnimatePresence>
+		<div className={cn("relative w-full min-h-screen", className)}>
+			<div className={cn(CONTAINER_CLASS, "py-6 md:py-8 lg:py-12")}>
+				<AnimatePresence>
+					<motion.div
+						layout
+						initial={{ opacity: 0, x: -20, y: 0 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -20 }}
+						className="w-full"
+					>
+						<Template {...data} />
+					</motion.div>
+				</AnimatePresence>
+			</div>
 		</div>
 	);
 };
