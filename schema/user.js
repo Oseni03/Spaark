@@ -21,7 +21,6 @@ export const userSchema = z.object({
 		.string()
 		.default(createId())
 		.describe("Unique identifier for the item in Cuid2 format"),
-	username: z.literal("").or(z.string().min(3).max(255)),
 	email: z.string().email(),
 	subscribed: z.boolean().default(false),
 	userType: z.literal("").or(z.string().min(3).max(255)),
@@ -32,7 +31,6 @@ export const userSchema = z.object({
 
 export const defaultUser = {
 	id: createId(),
-	username: "",
 	email: "",
 	subscribed: false,
 	userType: "INDIVIDUAL",

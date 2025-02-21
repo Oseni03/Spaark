@@ -54,7 +54,7 @@ export async function POST(req) {
 	logger.info("webhook evt data: ", evt.data);
 
 	if (evt.type === "user.created") {
-		const { id, username } = evt.data;
+		const { id } = evt.data;
 		if (!id) {
 			return new Response("Error: User ID not found", {
 				status: 400,
@@ -64,7 +64,6 @@ export async function POST(req) {
 		logger.info("userId:", id);
 		const user = await createUser(
 			id,
-			username,
 			evt.data?.email_addresses[0]?.email_address
 		);
 
@@ -72,7 +71,7 @@ export async function POST(req) {
 			logger.info("User creation successsful: ", user.data);
 		}
 	} else if (evt.type === "user.updated") {
-		const { id, username } = evt.data;
+		const { id } = evt.data;
 		if (!id) {
 			return new Response("Error: User ID not found", {
 				status: 400,
@@ -81,7 +80,6 @@ export async function POST(req) {
 
 		const user = await updateUser({
 			id,
-			username,
 			email: evt.data?.email_addresses[0]?.email_address,
 		});
 

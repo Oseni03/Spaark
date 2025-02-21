@@ -165,7 +165,6 @@ export default function Pricing({
 				frequency: billing.toUpperCase(),
 				userId: user.id,
 				userEmail: user.emailAddresses[0].emailAddress,
-				username: user.username || user.fullName,
 				returnUrl, // Add returnUrl to the payload
 				orgId: organization?.id,
 			});

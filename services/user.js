@@ -8,7 +8,6 @@ import { userSchema } from "@/schema/user";
 
 const userSelect = {
 	id: true,
-	username: true,
 	email: true,
 	subscribed: true,
 	userType: true,
@@ -27,16 +26,6 @@ const userSelect = {
 	},
 };
 
-export async function getUserByUsername(username) {
-	return withErrorHandling(async () => {
-		const user = await prisma.user.findUnique({
-			where: { username },
-			select: userSelect,
-		});
-		return userSchema.parse(user);
-	});
-}
-
 export async function getUserByEmail(email) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.findUnique({
@@ -53,15 +42,9 @@ export async function getUsers() {
 			select: {
 				id: true,
 				email: true,
-				username: true,
 				subscribed: true,
 				createdAt: true,
 				updatedAt: true,
-			},
-			where: {
-				username: {
-					not: null,
-				},
 			},
 		});
 		return users.map((user) => userSchema.parse(user));
@@ -78,12 +61,11 @@ export async function getUser(userId) {
 	});
 }
 
-export async function createUser(userId, username, email) {
+export async function createUser(userId, email) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.create({
 			data: {
 				id: userId,
-				username,
 				email,
 			},
 		});

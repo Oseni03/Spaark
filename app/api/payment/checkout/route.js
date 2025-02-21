@@ -11,15 +11,7 @@ import { getSubscriptionData } from "@/utils/subscription-plans";
 export async function POST(request) {
 	try {
 		const body = await request.json();
-		const {
-			type,
-			frequency,
-			userEmail,
-			username,
-			userId,
-			returnUrl,
-			orgId,
-		} = body;
+		const { type, frequency, userEmail, userId, returnUrl, orgId } = body;
 
 		// Validate all required fields
 		if (!type || !frequency || !userEmail || !userId) {
@@ -146,7 +138,6 @@ export async function POST(request) {
 					payment_plan: priceId, // Use payment plan instead of amount
 					customer: {
 						email: userEmail,
-						name: username || "Unknown User",
 					},
 					meta: {
 						subscriptionId: subscription.id,
