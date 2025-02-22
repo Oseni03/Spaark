@@ -15,18 +15,20 @@ function PaymentStatusContent() {
 	// Get all required parameters
 	const status = searchParams.get("status");
 	const tx_ref = searchParams.get("tx_ref");
+	const transaction_id = searchParams.get("transaction_id");
 
 	useEffect(() => {
 		const verifyPayment = async () => {
 			logger.info("Starting payment verification", {
 				tx_ref,
 				status,
-				status,
+				transaction_id,
 			});
 
-			if (!tx_ref || !status) {
+			if ((!tx_ref && !transaction_id) || !status) {
 				logger.error("Missing verification parameters", {
 					tx_ref,
+					transaction_id,
 					status,
 				});
 				toast.error("Invalid payment verification data");
@@ -42,6 +44,7 @@ function PaymentStatusContent() {
 					body: JSON.stringify({
 						tx_ref,
 						status,
+						transaction_id,
 					}),
 				});
 
@@ -83,7 +86,7 @@ function PaymentStatusContent() {
 		};
 
 		verifyPayment();
-	}, [status, tx_ref]);
+	}, [status, tx_ref, transaction_id]);
 
 	if (isProcessing) {
 		return (

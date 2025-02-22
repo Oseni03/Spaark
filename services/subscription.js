@@ -35,6 +35,7 @@ export async function initializeSubscription({
 		const subscription = await prisma.subscription.upsert({
 			where: { userId },
 			update: {
+				organizationId: orgId || null,
 				status: "pending",
 				portfolioLimit,
 				type,
@@ -72,7 +73,7 @@ export async function createTransaction({
 	amount,
 	priceId,
 }) {
-	try {
+	return withErrorHandling(async () => {
 		logger.info("Creating transaction", {
 			userId,
 			orgId,
@@ -96,21 +97,19 @@ export async function createTransaction({
 			},
 		});
 
+		if (!transaction) {
+			throw new Error("Failed to create transaction record");
+		}
+
 		logger.info("Transaction created successfully", {
 			transactionId: transaction.id,
 		});
-		return {
-			success: true,
-			data: transaction,
-		};
-	} catch (error) {
-		logger.error("Failed to create transaction:", error);
-		throw error;
-	}
+		return transaction;
+	});
 }
 
 export async function handlePaymentFailure({ transactionId }) {
-	try {
+	return withErrorHandling(async () => {
 		logger.info("Processing failed payment", { transactionId });
 
 		const result = await prisma.$transaction(async (prisma) => {
@@ -130,37 +129,24 @@ export async function handlePaymentFailure({ transactionId }) {
 			return transaction;
 		});
 
-		logger.info("Failed payment processed", { transactionId });
+		if (!result) {
+			throw new Error("Failed process failed payment");
+		}
+
+		logger.info("Failed payment processed successfully", {
+			transactionId: result.id,
+		});
 		return result;
-	} catch (error) {
-		logger.error("Failed to process payment failure:", error);
-		throw error;
-	}
+	});
 }
 
 export async function handlePaymentSuccess({ transactionId }) {
-	try {
+	return withErrorHandling(async () => {
 		logger.info("Processing successful payment", { transactionId });
-
-		const transaction = await prisma.transaction.findUnique({
-			where: { id: transactionId },
-			include: { subscription: true },
-		});
-
-		if (!transaction) {
-			throw new Error("Transaction not found");
-		}
-
-		if (transaction.status === "cancelled") {
-			logger.info("Transaction already cancelled, skipping update", {
-				transactionId,
-			});
-			return transaction;
-		}
 
 		const result = await prisma.$transaction(async (prisma) => {
 			const updatedTransaction = await prisma.transaction.update({
-				where: { id: transactionId },
+				where: { id: transactionId, status: { not: "cancelled" } },
 				data: { status: "completed" },
 				include: { subscription: true },
 			});
@@ -177,10 +163,7 @@ export async function handlePaymentSuccess({ transactionId }) {
 
 		logger.info("Payment processed successfully", { transactionId });
 		return result;
-	} catch (error) {
-		logger.error("Failed to process payment:", error);
-		throw error;
-	}
+	});
 }
 
 export async function updateTransaction({ tx_ref, status }) {

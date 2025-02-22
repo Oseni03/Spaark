@@ -103,6 +103,12 @@ export async function POST(request) {
 			amount: price,
 			priceId,
 		});
+
+		if (!txn.success) {
+			logger.error("Transaction creation failed", txn.error);
+			return NextResponse.json({ message: txn.error }, { status: 400 });
+		}
+
 		logger.info("Transaction created", { transactionId: txn.data.id });
 
 		// Validate Flutterwave API key and redirect URL
@@ -132,8 +138,9 @@ export async function POST(request) {
 				"https://api.flutterwave.com/v3/payments",
 				{
 					tx_ref: txn.data.id,
+					amount: price, // Add the amount field - this is required
 					currency: "USD",
-					payment_options: "card", // Restricted to card for subscriptions
+					payment_options: "card",
 					redirect_url: redirectUrl,
 					payment_plan: priceId, // Use payment plan instead of amount
 					customer: {
@@ -159,6 +166,9 @@ export async function POST(request) {
 			);
 
 			if (!flutterwaveResponse.data?.data?.link) {
+				logger.error("Invalid Flutterwave response", {
+					response: flutterwaveResponse.data,
+				});
 				throw new Error("Invalid payment link received");
 			}
 
@@ -171,12 +181,19 @@ export async function POST(request) {
 				link: flutterwaveResponse.data.data.link,
 				status: "success",
 				transactionId: txn.data.id,
+				transaction_id: flutterwaveResponse.data.data?.transaction_id, // Add this line
 			});
 		} catch (flwError) {
 			logger.error("Flutterwave API error:", {
 				error: flwError.message,
 				response: flwError.response?.data,
 				status: flwError.response?.status,
+				data: {
+					amount: price,
+					currency: "USD",
+					email: userEmail,
+					transactionRef: txn.data.id,
+				},
 			});
 
 			// Handle the failed transaction
