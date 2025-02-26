@@ -48,6 +48,10 @@ export const postType = defineType({
 			],
 		}),
 		defineField({
+			name: "keywords",
+			type: "string",
+		}),
+		defineField({
 			name: "publishedAt",
 			type: "datetime",
 		}),

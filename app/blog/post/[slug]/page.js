@@ -38,6 +38,7 @@ export async function generateMetadata({ params }, parent) {
 				.height(630)
 				.url()
 		: undefined;
+	const keywords = post?.keywords.split(",").map(kw => kw.trim());
 
 	return {
 		title: post.title,
@@ -46,6 +47,7 @@ export async function generateMetadata({ params }, parent) {
 		openGraph: {
 			images: imageUrl ? [imageUrl, ...previousImages] : previousImages,
 		},
+		keywords: [...keywords, post.title]
 	};
 }
 
