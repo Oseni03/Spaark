@@ -32,12 +32,12 @@ function Posts({ posts = [] }) {
 		date: new Date(post._createdAt).toLocaleDateString(),
 		datetime: post._createdAt,
 		author: {
-			name: post.authorName,
+			name: "@Oseni03",
 			role: "Founder",
-			href: "#",
-			imageUrl: "/images/blog/elie-profile.jpg",
+			href: "https://x.com/Oseni03",
+			// imageUrl: "/images/blog/elie-profile.jpg",
 		},
-		imageUrl: post.imageURL ?? "/images/reach-inbox-zero.png",
+		imageUrl: post.imageURL ?? "/og.png",
 	}));
 
 	return (
@@ -76,13 +76,16 @@ function PostCard({ post }) {
 						{post.description}
 					</p>
 					<div className="flex items-center gap-x-4">
-						<Image
-							src={post.author.imageUrl}
-							alt={post.title}
-							className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800"
-							width={32}
-							height={32}
-						/>
+						{post.author?.imageUrl && (
+							<Image
+								src={post.author.imageUrl}
+								alt={post.title}
+								className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800"
+								width={32}
+								height={32}
+							/>
+						)}
+
 						<div className="text-sm">
 							<p className="font-semibold text-gray-900 dark:text-gray-100">
 								{post.author.name}

@@ -13,7 +13,31 @@ export async function POST(request) {
 	try {
 		const { tx_ref, status, transaction_id } = await request.json();
 
-		if (status === "cancelled") {
+		// Verify payment with Flutterwave
+		const response = await axios.get(
+			`https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${tx_ref}`,
+			{
+				headers: {
+					accept: "application/json",
+					Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
+					"Content-Type": "application/json",
+				},
+			}
+		);
+		const { data } = response.data;
+		if (!(data.status === status) || !(data.tx_ref === tx_ref)) {
+			await handlePaymentFailure({
+				transactionId: tx_ref,
+			});
+
+			return NextResponse.json({
+				success: false,
+				message: "Payment was cancelled",
+				status: "cancelled",
+			});
+		}
+
+		if (data.status === "cancelled") {
 			await handlePaymentFailure({
 				transactionId: tx_ref,
 			});
@@ -26,31 +50,7 @@ export async function POST(request) {
 		}
 
 		// Verify that the transaction was successful
-		if (status === "successful") {
-			// Verify payment with Flutterwave
-			const response = await axios.get(
-				`https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${tx_ref}`,
-				{
-					headers: {
-						accept: "application/json",
-						Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			const { data } = response.data;
-			if (!(data.status === status) || !(data.tx_ref === tx_ref)) {
-				await handlePaymentFailure({
-					transactionId: tx_ref,
-				});
-
-				return NextResponse.json({
-					success: false,
-					message: "Payment was cancelled",
-					status: "cancelled",
-				});
-			}
-
+		if (data.status === "successful") {
 			await handlePaymentSuccess({
 				transactionId: tx_ref,
 			});

@@ -2,7 +2,7 @@ import { sanityFetch } from "@/sanity/lib/live";
 import { postPathsQuery, postQuery } from "@/sanity/lib/queries";
 import { client } from "@/sanity/lib/client";
 import imageUrlBuilder from "@sanity/image-url";
-import { Post } from "@/app/blog/post/[slug]/Post";
+import { Post } from "./Post";
 import { logger } from "@/lib/utils";
 
 export const revalidate = 60;
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }, parent) {
 				.height(630)
 				.url()
 		: undefined;
-	const keywords = post?.keywords.split(",").map(kw => kw.trim());
+	const keywords = post?.keywords.split(",");
 
 	return {
 		title: post.title,
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }, parent) {
 		openGraph: {
 			images: imageUrl ? [imageUrl, ...previousImages] : previousImages,
 		},
-		keywords: [...keywords, post.title]
+		keywords: [...keywords, post.title],
 	};
 }
 
