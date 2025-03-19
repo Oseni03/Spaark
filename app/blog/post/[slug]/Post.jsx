@@ -1,14 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LinkIcon } from "lucide-react";
-import { PortableText } from "@portabletext/react";
+import { PortableText } from "@/components/blog/porttable-text";
 import { client } from "@/sanity/lib/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { Prose } from "@/app/blog/components/Prose";
 import { TableOfContents } from "@/app/blog/components/TableOfContents";
 import { Card, CardContent } from "@/components/ui/card";
-import { extractTextFromPortableTextBlock, slugify } from "@/utils/text";
 import { TryProduct } from "../../components/TryProduct";
 import { ReadMore } from "@/app/blog/components/ReadMore";
 import { BlogWrapper } from "@/components/wrapper/blog-wrapper";
@@ -16,6 +14,7 @@ import { BlogWrapper } from "@/components/wrapper/blog-wrapper";
 const builder = imageUrlBuilder(client);
 
 export function Post({ post }) {
+	const content = PortableText(post.body);
 	return (
 		<BlogWrapper>
 			<article className="mx-auto grid w-full max-w-screen-xl gap-5 px-0 pt-16 md:grid-cols-4 md:pt-24 lg:gap-4 lg:px-20 mb-10">
@@ -27,7 +26,7 @@ export function Post({ post }) {
 									{post.title}
 								</h1>
 								<p>{post.description}</p>
-								{post.mainImage ? (
+								{post.mainImage && (
 									<div className="-mx-10 my-8">
 										<Image
 											src={builder
@@ -35,111 +34,17 @@ export function Post({ post }) {
 												.width(1200)
 												.height(675)
 												.url()}
-											alt={post?.mainImage?.alt || ""}
+											alt={
+												post?.mainImage?.alt ||
+												post.title
+											}
 											width={1200}
 											height={675}
 											className="h-auto w-full"
 										/>
 									</div>
-								) : null}
-								{post.body ? (
-									<PortableText
-										value={post.body}
-										components={{
-											block: {
-												h2: createHeadingComponent(
-													"h2"
-												),
-												h3: createHeadingComponent(
-													"h3"
-												),
-											},
-											types: {
-												image: ({ value }) => {
-													// https://www.sanity.io/answers/how-to-get-the-width-height-or-dimensions-of-uploaded-image-with-sanity-and-next-js-to-prevent-cls
-													const pattern =
-														/^image-([a-f\d]+)-(\d+x\d+)-(\w+)$/;
-
-													const decodeAssetId = (
-														id
-													) => {
-														const match =
-															pattern.exec(id);
-														if (!match) {
-															console.error(
-																`Invalid asset ID: ${id}`
-															);
-															return null;
-														}
-														const [
-															,
-															assetId,
-															dimensions,
-															format,
-														] = match;
-														const [width, height] =
-															dimensions
-																.split("x")
-																.map((v) =>
-																	Number.parseInt(
-																		v,
-																		10
-																	)
-																);
-
-														return {
-															assetId,
-															dimensions: {
-																width,
-																height,
-															},
-															format,
-														};
-													};
-
-													const { dimensions } =
-														decodeAssetId(
-															value.asset?._id
-														) || {};
-
-													return (
-														<Image
-															src={builder
-																.image(value)
-																.width(800)
-																.url()}
-															alt={
-																value.alt || ""
-															}
-															width={
-																dimensions?.width ||
-																800
-															}
-															height={
-																dimensions?.height ||
-																600
-															}
-															className="h-auto w-full"
-														/>
-													);
-												},
-											},
-											marks: {
-												link: ({ children, value }) => {
-													const href = value?.href;
-													return (
-														<Link
-															href={href}
-															className="font-semibold text-blue-600 hover:underline"
-														>
-															{children}
-														</Link>
-													);
-												},
-											},
-										}}
-									/>
-								) : null}
+								)}
+								{content}
 							</Prose>
 						</CardContent>
 					</Card>
@@ -175,15 +80,23 @@ export function Post({ post }) {
 									)}
 									<div>
 										<p className="font-medium">
-											{post.authorName}
+											{post.authorName ?? "Oseni03"}
 										</p>
-										{post.authorTwitter && (
+										{post.authorTwitter ? (
 											<Link
 												href={`https://twitter.com/${post.authorTwitter}`}
 												className="text-sm text-gray-500"
 												target="_blank"
 											>
 												@{post.authorTwitter}
+											</Link>
+										) : (
+											<Link
+												href={`https://twitter.com/Oseni03`}
+												className="text-sm text-gray-500"
+												target="_blank"
+											>
+												@{"Oseni03"}
 											</Link>
 										)}
 									</div>
@@ -204,24 +117,3 @@ export function Post({ post }) {
 		</BlogWrapper>
 	);
 }
-
-const createHeadingComponent = (Tag) => {
-	const HeadingComponent = ({ children, value }) => {
-		const text = extractTextFromPortableTextBlock(value);
-		const id = slugify(text);
-
-		return (
-			<Tag id={id} className="group relative flex items-center">
-				<Link href={`#${id}`} className="flex items-center">
-					<span className="absolute left-0 -translate-x-full pr-2 opacity-0 transition-opacity group-hover:opacity-100">
-						<LinkIcon className="size-4" />
-					</span>
-					{children}
-				</Link>
-			</Tag>
-		);
-	};
-
-	HeadingComponent.displayName = `Heading${Tag}`;
-	return HeadingComponent;
-};

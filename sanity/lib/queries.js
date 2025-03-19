@@ -5,6 +5,7 @@ export const postsQuery = groq`*[_type == "post"] | order(_createdAt desc) {
   _createdAt,
   title,
   description,
+  body,
   slug,
   keywords,
   mainImage,
@@ -45,7 +46,6 @@ export const recentPostsQuery = groq`*[_type == "post"] | order(date desc) [0...
   description,
   keywords,
   date,
-  "image": mainImage.asset->url
 }`;
 
 export const postSlugsQuery = groq`*[_type == "post"] {

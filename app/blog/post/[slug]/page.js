@@ -38,11 +38,12 @@ export async function generateMetadata({ params }, parent) {
 				.height(630)
 				.url()
 		: undefined;
-	const keywords = post?.keywords.split(",");
+	const keywords = post.data.keywords?.split(",");
+	logger.info("Keywords:", keywords);
 
 	return {
-		title: post.title,
-		description: post.description ?? "",
+		title: post.data.title,
+		description: post.data.description ?? "",
 		alternates: { canonical: `/blog/post/${slug}` },
 		openGraph: {
 			images: imageUrl ? [imageUrl, ...previousImages] : previousImages,

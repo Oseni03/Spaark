@@ -28,16 +28,8 @@ function Posts({ posts = [] }) {
 	const allPosts = posts.map((post) => ({
 		title: post.title,
 		file: post.slug.current,
-		description: post.description ?? "",
 		date: new Date(post._createdAt).toLocaleDateString(),
 		datetime: post._createdAt,
-		author: {
-			name: "@Oseni03",
-			role: "Founder",
-			href: "https://x.com/Oseni03",
-			// imageUrl: "/images/blog/elie-profile.jpg",
-		},
-		imageUrl: post.imageURL ?? "/og.png",
 	}));
 
 	return (
@@ -46,60 +38,26 @@ function Posts({ posts = [] }) {
 				<h2 className="mb-8 font-cal text-3xl tracking-tight text-gray-900 dark:text-white sm:text-4xl">
 					From the blog
 				</h2>
-				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="divide-y divide-gray-200 dark:divide-gray-700">
 					{allPosts.map((post) => (
-						<PostCard key={post.title} post={post} />
+						<Link
+							key={post.title}
+							href={`/blog/post/${post.file}`}
+							className="block py-4 px-4 hover:bg-gray-50 dark:hover:bg-gray-800"
+						>
+							<h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+								{post.title}
+							</h3>
+							<time
+								dateTime={post.datetime}
+								className="text-sm text-gray-500"
+							>
+								{post.date}
+							</time>
+						</Link>
 					))}
 				</div>
 			</div>
 		</div>
-	);
-}
-
-function PostCard({ post }) {
-	return (
-		<Card className="overflow-hidden transition-transform duration-300 hover:scale-105">
-			<Link href={`/blog/post/${post.file}`}>
-				<div className="relative h-48 w-full">
-					<Image
-						src={post.imageUrl}
-						alt={post.title}
-						layout="fill"
-						objectFit="cover"
-					/>
-				</div>
-				<CardContent className="pt-4">
-					<h3 className="mb-2 font-cal text-lg leading-6 text-gray-900 group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">
-						{post.title}
-					</h3>
-					<p className="mb-4 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
-						{post.description}
-					</p>
-					<div className="flex items-center gap-x-4">
-						{post.author?.imageUrl && (
-							<Image
-								src={post.author.imageUrl}
-								alt={post.title}
-								className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800"
-								width={32}
-								height={32}
-							/>
-						)}
-
-						<div className="text-sm">
-							<p className="font-semibold text-gray-900 dark:text-gray-100">
-								{post.author.name}
-							</p>
-							<time
-								dateTime={post.datetime}
-								className="text-gray-500"
-							>
-								{post.date}
-							</time>
-						</div>
-					</div>
-				</CardContent>
-			</Link>
-		</Card>
 	);
 }
