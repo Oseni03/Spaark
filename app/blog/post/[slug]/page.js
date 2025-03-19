@@ -4,6 +4,7 @@ import { client } from "@/sanity/lib/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { Post } from "./Post";
 import { logger } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
 
 export const revalidate = 60;
 
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }, parent) {
 				.height(630)
 				.url()
 		: undefined;
-	const keywords = post.data.keywords?.split(",");
+	const keywords = post.data.keywords?.split(",") || [];
 	logger.info("Keywords:", keywords);
 
 	return {
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }, parent) {
 		openGraph: {
 			images: imageUrl ? [imageUrl, ...previousImages] : previousImages,
 		},
-		keywords: [...keywords, post.title],
+		keywords: [...keywords, ...siteConfig.keywords, post.title],
 	};
 }
 
