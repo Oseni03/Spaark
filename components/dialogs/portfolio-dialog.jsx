@@ -16,7 +16,6 @@ import {
 } from "@/redux/thunks/portfolio";
 import { defaultPortfolio } from "@/schema/sections";
 import { useEffect, useState } from "react";
-import { useOrganizationContext } from "@/context/OrganizationContext";
 import { logger } from "@/lib/utils";
 
 export const PortfolioDialog = ({
@@ -27,7 +26,6 @@ export const PortfolioDialog = ({
 }) => {
 	const dispatch = useDispatch();
 	const { reset, handleSubmit, control } = form;
-	const { organization, canManagePortfolios } = useOrganizationContext();
 
 	// Initialize form with default values when dialog opens
 	useEffect(() => {
@@ -47,7 +45,6 @@ export const PortfolioDialog = ({
 						id: currentPortfolio.id,
 						data: {
 							...data,
-							organizationId: organization?.id || null,
 						},
 					})
 				);
@@ -56,7 +53,6 @@ export const PortfolioDialog = ({
 					addPortfolioInDatabase({
 						...defaultPortfolio,
 						...data,
-						organizationId: organization?.id || null,
 					})
 				);
 			}
@@ -68,11 +64,6 @@ export const PortfolioDialog = ({
 			toast.error(error.message);
 		}
 	};
-
-	// Disable form if user can't manage portfolios
-	if (organization && !canManagePortfolios) {
-		return <div>You don&apos;t have permission to manage portfolios</div>;
-	}
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>

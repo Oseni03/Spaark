@@ -12,7 +12,6 @@ import {
 	SidebarMenuItem,
 	SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import {
 	IconArrowLeft,
 	IconBrandTabler,
@@ -21,6 +20,8 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/app/dashboard/layout";
+import { UserDropdown } from "./user-dropdown";
+import { useAuth } from "@/context/auth-context";
 
 const links = [
 	{
@@ -48,30 +49,14 @@ const links = [
 
 export function DashboardSidebar() {
 	const pathname = usePathname();
+	const { user, signOut } = useAuth();
 
 	return (
 		<Sidebar>
 			<SidebarHeader>
 				<div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
 					<div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
-						<OrganizationSwitcher
-							afterCreateOrganizationUrl="/dashboard/portfolios"
-							afterLeaveOrganizationUrl="/dashboard/portfolios"
-							afterSelectOrganizationUrl="/dashboard/portfolios"
-							// createOrganizationMode={
-							// 	isIndividualAccount ? "none" : "modal"
-							// }
-							// hidePersonal={false}
-							appearance={{
-								elements: {
-									rootBox: "w-full",
-									organizationSwitcherTrigger: cn(
-										"w-full flex justify-between items-center",
-										"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
-									),
-								},
-							}}
-						/>
+						<Logo />
 					</div>
 				</div>
 			</SidebarHeader>
@@ -102,16 +87,13 @@ export function DashboardSidebar() {
 			</SidebarContent>
 			<SidebarFooter>
 				<div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
-					<UserButton
-						appearance={{
-							elements: {
-								rootBox: "w-full",
-								userButtonTrigger: cn(
-									"w-full flex justify-between items-center",
-									"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
-								),
-							},
-						}}
+					<UserDropdown
+						user={user}
+						signOut={signOut}
+						className={cn(
+							"w-full flex justify-between items-center",
+							"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
+						)}
 					/>
 				</div>
 			</SidebarFooter>

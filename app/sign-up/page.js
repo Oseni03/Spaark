@@ -1,11 +1,14 @@
+import AuthPage from "@/components/auth-page";
 import FormWrapper from "@/components/wrapper/form-wrapper";
-import { SignUp } from "@clerk/nextjs";
 import React from "react";
 
 function Page() {
 	return (
 		<FormWrapper>
-			<SignUp signInUrl="/sign-in" />
+			<AuthPage
+				actionText={"Sign up"}
+				redirectPath={"/dashboard/portfolios"}
+			/>
 		</FormWrapper>
 	);
 }

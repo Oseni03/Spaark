@@ -11,7 +11,7 @@ import { getSubscriptionData } from "@/utils/subscription-plans";
 export async function POST(request) {
 	try {
 		const body = await request.json();
-		const { type, frequency, userEmail, userId, returnUrl, orgId } = body;
+		const { type, frequency, userEmail, userId, returnUrl } = body;
 
 		// Validate all required fields
 		if (!type || !frequency || !userEmail || !userId) {
@@ -35,7 +35,6 @@ export async function POST(request) {
 			frequency,
 			userEmail,
 			userId,
-			orgId,
 		});
 
 		let subscriptionData;
@@ -71,7 +70,6 @@ export async function POST(request) {
 		logger.info("Initializing subscription");
 		const subscriptionResult = await initializeSubscription({
 			userId,
-			orgId: orgId || null, // Make orgId optional
 			portfolioLimit,
 			type: type.toUpperCase(),
 			frequency,
@@ -97,7 +95,6 @@ export async function POST(request) {
 		logger.info("Creating transaction record");
 		const txn = await createTransaction({
 			userId,
-			orgId,
 			title: `${type} Subscription - ${frequency}`,
 			subscriptionId: subscription.id,
 			amount: price,
@@ -150,7 +147,6 @@ export async function POST(request) {
 						subscriptionId: subscription.id,
 						type,
 						frequency,
-						orgId,
 					},
 					customizations: {
 						title: `${type} Subscription`,

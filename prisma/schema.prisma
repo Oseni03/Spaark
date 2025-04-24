@@ -32,7 +32,7 @@ enum Permission {
 }
 
 model User {
-  id         String    @id @default(cuid())
+  id         String    @id // Remove @default(cuid()) since we'll use Firebase UID
   email      String    @unique
   userType   UserType  @default(INDIVIDUAL)
   subscribed Boolean?  @default(false)

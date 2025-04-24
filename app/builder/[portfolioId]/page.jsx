@@ -10,6 +10,7 @@ import { defaultBasics } from "@/schema/sections/basics";
 import { useState } from "react";
 import { CONTAINER_CLASS, CONTENT_CLASS } from "@/utils/constants";
 import { cn } from "@/lib/utils";
+import ProtectedRoute from "@/app/protected-route";
 
 export default function Page() {
 	const { portfolioId } = useParams();
@@ -46,40 +47,42 @@ export default function Page() {
 	};
 
 	return (
-		<div className="min-h-screen w-full">
-			{!(user?.subscription?.status === "active") && showBanner && (
-				<div className={cn(CONTAINER_CLASS, "mb-6")}>
-					<div className="relative bg-blue-50 dark:bg-blue-900/50 px-4 sm:px-6 py-4 flex items-center justify-between rounded-lg border border-blue-100 dark:border-blue-800">
-						<div className="flex items-center gap-x-3">
-							<p className="text-sm text-blue-700 dark:text-blue-100">
-								You do not have an active subscription!{" "}
-								<Link
-									href="/#pricing"
-									className="font-medium underline hover:text-blue-600 dark:hover:text-blue-400"
-								>
-									Subscribe now
-								</Link>
-							</p>
+		<ProtectedRoute>
+			<div className="min-h-screen w-full">
+				{!(user?.subscription?.status === "active") && showBanner && (
+					<div className={cn(CONTAINER_CLASS, "mb-6")}>
+						<div className="relative bg-blue-50 dark:bg-blue-900/50 px-4 sm:px-6 py-4 flex items-center justify-between rounded-lg border border-blue-100 dark:border-blue-800">
+							<div className="flex items-center gap-x-3">
+								<p className="text-sm text-blue-700 dark:text-blue-100">
+									You do not have an active subscription!{" "}
+									<Link
+										href="/#pricing"
+										className="font-medium underline hover:text-blue-600 dark:hover:text-blue-400"
+									>
+										Subscribe now
+									</Link>
+								</p>
+							</div>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8 hover:bg-blue-100/50 dark:hover:bg-blue-800/50"
+								onClick={() => setShowBanner(false)}
+							>
+								<X className="h-4 w-4" />
+							</Button>
 						</div>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 hover:bg-blue-100/50 dark:hover:bg-blue-800/50"
-							onClick={() => setShowBanner(false)}
-						>
-							<X className="h-4 w-4" />
-						</Button>
 					</div>
-				</div>
-			)}
+				)}
 
-			<div className={CONTENT_CLASS}>
-				<TemplateWrapper
-					template={portfolio?.template || "default"}
-					data={templateData}
-					className="h-[calc(100vh-120px)]"
-				/>
+				<div className={CONTENT_CLASS}>
+					<TemplateWrapper
+						template={portfolio?.template || "default"}
+						data={templateData}
+						className="h-[calc(100vh-120px)]"
+					/>
+				</div>
 			</div>
-		</div>
+		</ProtectedRoute>
 	);
 }

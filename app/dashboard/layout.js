@@ -9,7 +9,6 @@ import { setPortfolios } from "@/redux/features/portfolioSlice";
 import { setBlogs } from "@/redux/features/blogSlice";
 import { logger } from "@/lib/utils";
 import { setUser } from "@/redux/features/userSlice";
-import { OrganizationProvider } from "@/context/OrganizationContext";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
@@ -23,6 +22,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import ProtectedRoute from "../protected-route";
 
 const generateBreadcrumbs = (pathname) => {
 	const paths = pathname.split("/").filter(Boolean);
@@ -129,7 +129,7 @@ const DashboardLayoutContent = ({ children }) => {
 
 	logger.info("Rendering dashboard layout");
 	return (
-		<OrganizationProvider>
+		<ProtectedRoute>
 			<SidebarProvider>
 				<DashboardSidebar />
 				<main className="flex flex-1 min-h-screen">
@@ -181,7 +181,7 @@ const DashboardLayoutContent = ({ children }) => {
 					</div>
 				</main>
 			</SidebarProvider>
-		</OrganizationProvider>
+		</ProtectedRoute>
 	);
 };
 

@@ -96,6 +96,18 @@ export async function updateUser(data) {
 	});
 }
 
+export async function upsertUser({ id, email }) {
+	return withErrorHandling(async () => {
+		const user = await prisma.user.upsert({
+			where: { email },
+			update: { id },
+			create: { id, email },
+			select: userSelect,
+		});
+		return userSchema.parse(user);
+	});
+}
+
 export async function deleteUser(userId) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.delete({

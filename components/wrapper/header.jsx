@@ -11,12 +11,14 @@ import { Menu, MoveRight, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import ModeToggle from "../mode-toggle";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { siteConfig } from "@/config/site";
+import { UserDropdown } from "../user-dropdown";
+import { useAuth } from "@/context/auth-context";
 
 export const Header1 = () => {
 	const [isOpen, setOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
+	const { user, loading, signOut } = useAuth();
 
 	const navItems = useMemo(
 		() => [
@@ -90,20 +92,25 @@ export const Header1 = () => {
 				<div className="flex items-center gap-4">
 					<ModeToggle />
 					<div className="border-r hidden md:inline"></div>
-					<SignedIn>
-						<UserButton />
-						<Link href={"/dashboard/portfolios"}>
-							<Button size="sm">Dashboard</Button>
-						</Link>
-					</SignedIn>
-					<SignedOut>
-						<Link href={"/sign-in"}>
-							<Button variant="outline">Sign in</Button>
-						</Link>
-						<Link href={"/sign-up"}>
-							<Button>Get started</Button>
-						</Link>
-					</SignedOut>
+					{loading ? (
+						<div className="w-8 h-8 rounded-full bg-secondary animate-pulse" />
+					) : user ? (
+						<>
+							<UserDropdown user={user} signOut={signOut} />
+							<Link href={"/dashboard/portfolios"}>
+								<Button size="sm">Dashboard</Button>
+							</Link>
+						</>
+					) : (
+						<>
+							<Link href={"/sign-in"}>
+								<Button variant="outline">Sign in</Button>
+							</Link>
+							<Link href={"/sign-up"}>
+								<Button>Get started</Button>
+							</Link>
+						</>
+					)}
 					<div className="flex lg:hidden">
 						<Button
 							variant="ghost"

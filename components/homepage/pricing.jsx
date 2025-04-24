@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useOrganization, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import axios from "axios";
 import { Spinner } from "../ui/Spinner";
@@ -12,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { logger } from "@/lib/utils";
 import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
+import { useAuth } from "@/context/auth-context";
 
 const PricingHeader = ({ title, subtitle }) => (
 	<section className="text-center">
@@ -122,8 +122,7 @@ export default function Pricing({
 	returnUrl = process.env.NEXT_PUBLIC_APP_URL,
 }) {
 	const router = useRouter();
-	const { user } = useUser();
-	const { organization } = useOrganization();
+	const { user } = useAuth();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [individualBilling, setIndividualBilling] = useState("monthly");
 	const [teamBilling, setTeamBilling] = useState("monthly");
@@ -135,20 +134,6 @@ export default function Pricing({
 			logger.info("Checkout blocked", { isProcessing, hasUser: !!user });
 			router.push("/sign-in");
 			toast("Sign in to subscribe!");
-			return;
-		}
-
-		if (organization && !(type.toUpperCase() === "TEAM")) {
-			toast.error(
-				"Organization account can only subscribe to TEAM plan."
-			);
-			return;
-		}
-
-		if (!organization && !(type.toUpperCase() === "INDIVIDUAL")) {
-			toast.error(
-				"Individual account can only subscribe to INDIVIDUAL plan."
-			);
 			return;
 		}
 
@@ -166,7 +151,6 @@ export default function Pricing({
 				userId: user.id,
 				userEmail: user.emailAddresses[0].emailAddress,
 				returnUrl, // Add returnUrl to the payload
-				orgId: organization?.id,
 			});
 
 			logger.info("Checkout response received", {

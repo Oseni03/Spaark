@@ -71,6 +71,7 @@
 		"clsx": "^2.1.1",
 		"cors": "^2.8.5",
 		"dayjs": "^1.11.13",
+		"firebase": "^11.6.0",
 		"framer-motion": "^11.16.1",
 		"gray-matter": "^4.0.3",
 		"html-react-parser": "^5.2.0",

@@ -67,7 +67,6 @@ export async function initializeSubscription({
 
 export async function createTransaction({
 	userId,
-	orgId,
 	title,
 	subscriptionId,
 	amount,
@@ -76,19 +75,17 @@ export async function createTransaction({
 	return withErrorHandling(async () => {
 		logger.info("Creating transaction", {
 			userId,
-			orgId,
 			subscriptionId,
 			amount,
 		});
 
-		if (!userId && !orgId) {
-			throw new Error("UserId or OrgId has to be provided");
+		if (!userId) {
+			throw new Error("UserId has to be provided");
 		}
 
 		const transaction = await prisma.transaction.create({
 			data: {
 				userId,
-				organizationId: orgId || null,
 				title,
 				status: "pending",
 				amount,

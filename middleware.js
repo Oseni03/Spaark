@@ -1,22 +1,48 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isProtectedRoute = createRouteMatcher(["/builder(.*)", "/dashboard(.*)"]);
+const isProtectedRoute = (pathname) => {
+	return pathname.startsWith("/builder") || pathname.startsWith("/dashboard");
+};
 
-export default clerkMiddleware(async (auth, req) => {
-	const { nextUrl: url, headers } = req;
-	const { pathname, search } = url;
+// Define paths that should be redirected if user is already authenticated
+const authPaths = ["/sign-in", "/sign-up"];
 
-	// Enforce authentication for protected routes
-	if (isProtectedRoute(req)) auth.protect();
+export async function middleware(request) {
+	const { nextUrl: url, headers } = request;
+	const { pathname, search } = request.nextUrl;
+
+	// Get the auth cookie. In a real app, you'd verify this token with Firebase Admin SDK
+	// For production, you should use Firebase Admin SDK server-side verification
+	// This is a simplistic example
+	const authCookie = request.cookies.get("authToken")?.value;
+	const isAuthenticated = !!authCookie;
+
+	// Check if the path is an auth path
+	const isAuthPath = authPaths.some((path) => pathname === path);
+
+	// If the path is protected and the user is not authenticated, redirect to login
+	if (isProtectedRoute(pathname) && !isAuthenticated) {
+		const url = new URL("/sign-in", request.url);
+		url.searchParams.set("callbackUrl", pathname);
+		return NextResponse.redirect(url);
+	}
+
+	// If the user is authenticated and trying to access an auth page, redirect to dashboard
+	if (isAuthPath && isAuthenticated) {
+		return NextResponse.redirect(
+			new URL("/dashboard/portfolios", request.url)
+		);
+	}
 
 	// Redirect specific paths to "/dashboard/portfolios"
 	if (["/dashboard", "/builder"].includes(pathname)) {
-		return NextResponse.redirect(new URL("/dashboard/portfolios", req.url));
+		return NextResponse.redirect(
+			new URL("/dashboard/portfolios", request.url)
+		);
 	}
 
 	// Determine the domain based on the environment
-	const hostname = headers.get("host");
+	const hostname = request.headers.get("host");
 	const domain =
 		process.env.NODE_ENV === "production"
 			? hostname.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
@@ -51,9 +77,8 @@ export default clerkMiddleware(async (auth, req) => {
 
 	// Pass the domain to the dynamic route
 	return NextResponse.rewrite(new URL(`/${domain}${pathname}`, req.url));
-});
+}
 
-// Define paths for middleware execution
 export const config = {
 	matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

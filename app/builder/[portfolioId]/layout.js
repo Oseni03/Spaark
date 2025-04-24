@@ -27,6 +27,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
 import { useVerifyPayment } from "@/hooks/use-verify-payment";
+import { useAuth } from "@/context/auth-context";
 
 function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
@@ -35,6 +36,7 @@ function BuilderLayoutContent({ children }) {
 	const [rightOpen, setRightOpen] = React.useState(false);
 	const [leftCollapsed, setLeftCollapsed] = React.useState(false);
 	const [rightCollapsed, setRightCollapsed] = React.useState(true);
+	const { user, signOut } = useAuth();
 
 	if (isDesktop) {
 		return (
@@ -84,7 +86,7 @@ function BuilderLayoutContent({ children }) {
 									</Breadcrumb>
 								</div>
 								<div className="ml-auto flex items-center gap-2">
-									<NavActions />
+									<NavActions user={user} signOut={signOut} />
 									<Button
 										variant="ghost"
 										size="icon"
@@ -160,7 +162,7 @@ function BuilderLayoutContent({ children }) {
 						</Breadcrumb>
 					</div>
 					<div className="ml-auto flex items-center gap-2">
-						<NavActions />
+						<NavActions user={user} signOut={signOut} />
 						<Button
 							variant="ghost"
 							size="icon"

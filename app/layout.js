@@ -1,4 +1,3 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import localFont from "next/font/local";
 import CustomProvider from "@/redux/provider";
 import { ThemeProvider, CSPostHogProvider } from "./providers";
@@ -10,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
 import { SanityLive } from "@/sanity/lib/live";
 import Script from "next/script";
+import { AuthProvider } from "../context/auth-context";
 
 const fontSans = FontSans({
 	subsets: ["latin"],
@@ -53,7 +53,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
 	return (
-		<ClerkProvider>
+		<AuthProvider>
 			<html lang="en" suppressHydrationWarning>
 				<head>
 					<Script
@@ -93,6 +93,6 @@ export default function RootLayout({ children }) {
 					</body>
 				</CSPostHogProvider>
 			</html>
-		</ClerkProvider>
+		</AuthProvider>
 	);
 }

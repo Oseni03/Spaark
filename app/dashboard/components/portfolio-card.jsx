@@ -36,14 +36,12 @@ import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { portfolioSchema } from "@/schema/sections";
-import { useOrganizationContext } from "@/context/OrganizationContext";
 import { logger } from "@/lib/utils";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
 	const [isOpen, setIsOpen] = useState(false);
 	const dispatch = useDispatch();
-	const { organization, canManagePortfolios } = useOrganizationContext();
 
 	const form = useForm({
 		resolver: zodResolver(portfolioSchema),
@@ -81,9 +79,6 @@ export const PortfolioCard = ({ portfolio }) => {
 	const onDelete = () => {
 		dispatch(removePortfolioFromDatabase(portfolio.id));
 	};
-
-	// Only show edit/delete options if user has permission
-	const showManageOptions = !organization || canManagePortfolios;
 
 	return (
 		<ContextMenu>
@@ -156,27 +151,25 @@ export const PortfolioCard = ({ portfolio }) => {
 				setIsOpen={setIsOpen}
 			/>
 
-			{showManageOptions && (
-				<ContextMenuContent>
-					<ContextMenuItem onClick={onOpen}>
-						<FolderOpen size={14} className="mr-2" />
-						{`Open`}
-					</ContextMenuItem>
-					<ContextMenuItem onClick={() => setIsOpen(true)}>
-						<PencilSimple size={14} className="mr-2" />
-						{`Rename`}
-					</ContextMenuItem>
-					<ContextMenuItem onClick={onDuplicate}>
-						<CopySimple size={14} className="mr-2" />
-						{`Duplicate`}
-					</ContextMenuItem>
-					<ContextMenuSeparator />
-					<ContextMenuItem className="text-error" onClick={onDelete}>
-						<TrashSimple size={14} className="mr-2" />
-						{`Delete`}
-					</ContextMenuItem>
-				</ContextMenuContent>
-			)}
+			<ContextMenuContent>
+				<ContextMenuItem onClick={onOpen}>
+					<FolderOpen size={14} className="mr-2" />
+					{`Open`}
+				</ContextMenuItem>
+				<ContextMenuItem onClick={() => setIsOpen(true)}>
+					<PencilSimple size={14} className="mr-2" />
+					{`Rename`}
+				</ContextMenuItem>
+				<ContextMenuItem onClick={onDuplicate}>
+					<CopySimple size={14} className="mr-2" />
+					{`Duplicate`}
+				</ContextMenuItem>
+				<ContextMenuSeparator />
+				<ContextMenuItem className="text-error" onClick={onDelete}>
+					<TrashSimple size={14} className="mr-2" />
+					{`Delete`}
+				</ContextMenuItem>
+			</ContextMenuContent>
 		</ContextMenu>
 	);
 };
