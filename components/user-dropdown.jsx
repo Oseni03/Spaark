@@ -35,11 +35,11 @@ export const UserDropdown = ({ user, signOut, className }) => {
 				>
 					<Avatar>
 						<AvatarImage
-							src={user.photoURL || undefined}
-							alt={user.displayName || "User avatar"}
+							src={user?.photoURL || undefined}
+							alt={user?.displayName || "User avatar"}
 						/>
 						<AvatarFallback>
-							{(user.displayName?.[0] || "U").toUpperCase()}
+							{(user?.displayName?.[0] || "U").toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 				</Button>

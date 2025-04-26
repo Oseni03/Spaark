@@ -659,8 +659,6 @@ export default function DefaultTemplate({
 	hackathons,
 	certifications,
 	profiles = [],
-	testimonials = [],
-	teams = [], // Add this new prop
 	blogEnabled = false,
 }) {
 	return (
@@ -841,38 +839,6 @@ export default function DefaultTemplate({
 						</section>
 					)}
 
-					{testimonials.length > 0 && (
-						<section
-							id="testimonials"
-							className="space-y-6 md:space-y-8 py-8 md:py-12"
-						>
-							<BlurFade delay={BLUR_FADE_DELAY * 11}>
-								<div className="flex flex-col items-center justify-center space-y-4 text-center">
-									<div className="space-y-2">
-										<div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-											Testimonials
-										</div>
-										<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-											What people say
-										</h2>
-										<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[800px] mx-auto">
-											I&rsquo;ve had the pleasure of
-											working with amazing people
-											throughout my career. Here&rsquo;s
-											what some of them have to say about
-											our collaboration.
-										</p>
-									</div>
-								</div>
-							</BlurFade>
-							<BlurFade delay={BLUR_FADE_DELAY * 12}>
-								<TestimonialCarousel
-									testimonials={testimonials}
-								/>
-							</BlurFade>
-						</section>
-					)}
-
 					{certifications.length > 0 && (
 						<section
 							id="certifications"
@@ -988,53 +954,6 @@ export default function DefaultTemplate({
 											</BlurFade>
 										))}
 									</ul>
-								</BlurFade>
-							</div>
-						</section>
-					)}
-
-					{teams.length > 0 && (
-						<section
-							id="team"
-							className="space-y-6 md:space-y-8 py-8 md:py-12"
-						>
-							<div className="space-y-12 w-full py-12">
-								<BlurFade delay={BLUR_FADE_DELAY * 13}>
-									<div className="flex flex-col items-center justify-center space-y-4 text-center">
-										<div className="space-y-2">
-											<div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-												Our Team
-											</div>
-											<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-												Save your time and money by
-												choosing our team
-											</h2>
-											<p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[800px] mx-auto">
-												Meet our talented team of
-												professionals dedicated to
-												bringing your vision to life
-											</p>
-										</div>
-									</div>
-								</BlurFade>
-								<BlurFade delay={BLUR_FADE_DELAY * 14}>
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-										{teams.map((member, id) => (
-											<BlurFade
-												key={member.id}
-												delay={
-													BLUR_FADE_DELAY * 15 +
-													id * 0.05
-												}
-											>
-												<TeamMemberCard
-													name={member.name}
-													role={member.role}
-													avatar={member.avatar}
-												/>
-											</BlurFade>
-										))}
-									</div>
 								</BlurFade>
 							</div>
 						</section>

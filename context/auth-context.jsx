@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
 						email: dbUser.email,
 						emailVerified: firebaseUser.emailVerified,
 						displayName: firebaseUser.displayName || undefined,
-						photoURL: firebaseUser.photoURL || undefined,
+						photoURL: firebaseUser.photoURL || "",
 					});
 
 					logger.info("User authenticated:", {

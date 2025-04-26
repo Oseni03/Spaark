@@ -26,8 +26,6 @@ const portfolioSelect = {
 	certifications: true,
 	projects: true,
 	hackathons: true,
-	testimonials: true,
-	teams: true,
 };
 
 export async function getAllPortfolios() {
