@@ -20,7 +20,7 @@ const actionCodeSettings = {
 	handleCodeInApp: true,
 };
 
-export default function AuthPage({ redirectPath = "/" }) {
+export default function AuthPage({ actionText, redirectPath = "/" }) {
 	const [email, setEmail] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -86,7 +86,7 @@ export default function AuthPage({ redirectPath = "/" }) {
 				<div className="text-center">
 					<h1 className="text-2xl font-semibold">Welcome back</h1>
 					<p className="mt-2 text-sm text-muted-foreground">
-						Sign in to continue building your portfolio
+						{actionText} to continue building your portfolio
 					</p>
 				</div>
 
@@ -120,7 +120,7 @@ export default function AuthPage({ redirectPath = "/" }) {
 									fill="#EA4335"
 								/>
 							</svg>
-							Sign in with Google
+							{actionText} with Google
 						</Button>
 
 						<div className="relative">
@@ -152,7 +152,7 @@ export default function AuthPage({ redirectPath = "/" }) {
 								className="w-full"
 								disabled={isLoading}
 							>
-								Sign in with Email
+								{actionText} with Email
 							</Button>
 						</form>
 					</CardContent>

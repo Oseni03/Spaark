@@ -4,13 +4,16 @@ import {
 	validDomainRegex,
 } from "@/lib/domains";
 import { logger } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { NextResponse } from "next/server";
+import { COOKIE_NAME } from "@/utils/constants";
 
 export async function POST(req) {
 	try {
-		// Get auth token and validate
-		const { userId } = auth();
+		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
+
 		if (!userId) {
 			return NextResponse.json(
 				{ success: false, error: "Unauthorized" },
@@ -63,8 +66,10 @@ export async function POST(req) {
 
 export async function DELETE(req) {
 	try {
-		// Get auth token and validate
-		const { userId } = auth();
+		const authToken = req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
+
 		if (!userId) {
 			return NextResponse.json(
 				{ success: false, error: "Unauthorized" },

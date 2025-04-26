@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { experienceSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const experienceSelect = {
 	id: true,
@@ -36,8 +38,10 @@ export async function getExperiences(portfolioId) {
 export async function createExperience({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
@@ -61,8 +65,10 @@ export async function createExperience({ portfolioId, ...data }) {
 export async function editExperience(experienceId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
@@ -87,11 +93,11 @@ export async function editExperience(experienceId, { portfolioId, ...data }) {
 
 export async function deleteExperience(experienceId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete an experience"
-			);
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
 		}
 
 		await prisma.experience.delete({

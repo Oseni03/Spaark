@@ -1,11 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -57,9 +59,10 @@ export async function createHackathon({ portfolioId, ...data }) {
 		}
 
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
-			logger.error("No authenticated user found");
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
@@ -104,8 +107,10 @@ export async function createHackathon({ portfolioId, ...data }) {
 export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
@@ -141,11 +146,11 @@ export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 
 export async function deleteHackathon(hackathonId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a hackathon"
-			);
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
 		}
 
 		await prisma.hackathon.delete({

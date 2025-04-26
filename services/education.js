@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { educationSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const educationSelect = {
 	id: true,
@@ -33,9 +35,10 @@ export async function getEducations(portfolioId) {
 
 export async function createEducation({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -56,9 +59,10 @@ export async function createEducation({ portfolioId, ...data }) {
 
 export async function editEducation(educationId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -80,8 +84,10 @@ export async function editEducation(educationId, { portfolioId, ...data }) {
 
 export async function deleteEducation(educationId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a education"
 			);

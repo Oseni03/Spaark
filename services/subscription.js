@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/db";
 import { withErrorHandling } from "./shared";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { logger } from "@/lib/utils";
+import { COOKIE_NAME } from "@/utils/constants";
 
 export async function initializeSubscription({
 	userId,
-	orgId,
 	portfolioLimit,
 	type,
 	frequency,
@@ -35,7 +36,6 @@ export async function initializeSubscription({
 		const subscription = await prisma.subscription.upsert({
 			where: { userId },
 			update: {
-				organizationId: orgId || null,
 				status: "pending",
 				portfolioLimit,
 				type,
@@ -46,7 +46,6 @@ export async function initializeSubscription({
 			},
 			create: {
 				userId,
-				organizationId: orgId || null,
 				status: "pending",
 				portfolioLimit,
 				type,
@@ -165,12 +164,10 @@ export async function handlePaymentSuccess({ transactionId }) {
 
 export async function updateTransaction({ tx_ref, status }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
 		if (!tx_ref || !status) {
 			throw new Error("Missing required parameter");
 		}
 
-		// Create skill with additional metadata
 		const trxn = await prisma.transaction.update({
 			where: { id: tx_ref },
 			data: {
@@ -186,22 +183,21 @@ export async function updateTransaction({ tx_ref, status }) {
 			},
 		});
 
-		// Revalidate multiple potential paths
 		return trxn;
 	});
 }
 
 export async function updateSubscription() {
 	return withErrorHandling(async () => {
-		const { userId } = auth();
-
-		if (!userId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create skill with additional metadata
 		const user = await prisma.user.update({
-			where: { userId },
+			where: { id: decodedToken.uid },
 			data: {
 				subscribed: true,
 				updatedAt: new Date(),

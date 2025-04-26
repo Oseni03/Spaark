@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 
-export default function EmailLinkHandler() {
+export default function Page() {
 	const [isProcessing, setIsProcessing] = useState(true);
 	const [error, setError] = useState(null);
 	const router = useRouter();

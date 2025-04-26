@@ -6,7 +6,6 @@ import { getEducations } from "@/services/education";
 import { getExperiences } from "@/services/experience";
 import { getProfiles } from "@/services/profile";
 import { getSkills } from "@/services/skill";
-import { auth } from "@clerk/nextjs/server";
 import { getProjects } from "@/services/project";
 import { getHackathons } from "@/services/hackathon";
 import { logger } from "@/lib/utils";

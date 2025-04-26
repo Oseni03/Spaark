@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { verifyAuthToken } from "@/lib/firebase/admin";
+import { COOKIE_NAME } from "@/utils/constants";
 
-export async function GET(request, { params }) {
+export async function GET(req, { params }) {
 	try {
-		const { userId } = auth();
+		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
 		const { orgId } = params;
 
 		if (!userId || !orgId) {

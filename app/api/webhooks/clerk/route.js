@@ -1,11 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { createUser, updateUser, deleteUser } from "@/services/user";
-import {
-	createOrganization,
-	deleteOrganization,
-	updateOrganization,
-} from "@/services/organization";
 import { logger } from "@/lib/utils";
 
 export async function POST(req) {
@@ -100,38 +95,6 @@ export async function POST(req) {
 		if (!user_id) return;
 
 		logger.info("User logged in: ", user_id);
-	} else if (evt.type === "organization.created") {
-		const { id, created_by } = evt.data;
-		if (!id || !created_by) {
-			return new Response("Error: Missing organization data", {
-				status: 400,
-			});
-		}
-
-		const org = await createOrganization(evt.data, created_by);
-		if (org.success) {
-			logger.info("Organization creation successful:", org.data);
-		}
-	} else if (evt.type === "organization.deleted") {
-		const { deleted, id } = evt.data;
-		if (deleted && id) {
-			const result = await deleteOrganization(id);
-			if (result.success) {
-				logger.info(`Organization ${id} deleted successfully`);
-			}
-		}
-	} else if (evt.type === "organization.updated") {
-		const { id } = evt.data;
-		if (!id) {
-			return new Response("Error: Missing organization ID", {
-				status: 400,
-			});
-		}
-
-		const result = await updateOrganization(evt.data);
-		if (result.success) {
-			logger.info(`Organization ${id} updated successfully`);
-		}
 	}
 
 	return new Response("Webhook received", { status: 200 });

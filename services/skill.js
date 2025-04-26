@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { skillSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -30,9 +32,10 @@ export async function getSkills(portfolioId) {
 
 export async function createSkill({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -53,9 +56,10 @@ export async function createSkill({ portfolioId, ...data }) {
 
 export async function editSkill(skillId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -87,8 +91,10 @@ export async function editSkill(skillId, { portfolioId, ...data }) {
 
 export async function deleteSkill(skillId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a skill"
 			);

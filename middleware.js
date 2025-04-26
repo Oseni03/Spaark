@@ -4,31 +4,27 @@ const isProtectedRoute = (pathname) => {
 	return pathname.startsWith("/builder") || pathname.startsWith("/dashboard");
 };
 
-// Define paths that should be redirected if user is already authenticated
 const authPaths = ["/sign-in", "/sign-up"];
 
 export async function middleware(request) {
-	const { nextUrl: url, headers } = request;
+	const { nextUrl: url } = request;
 	const { pathname, search } = request.nextUrl;
 
-	// Get the auth cookie. In a real app, you'd verify this token with Firebase Admin SDK
-	// For production, you should use Firebase Admin SDK server-side verification
-	// This is a simplistic example
-	const authCookie = request.cookies.get("authToken")?.value;
-	const isAuthenticated = !!authCookie;
+	// Get Firebase auth token from cookie
+	const hasAuthToken = request.cookies.has("firebaseAuthToken");
 
 	// Check if the path is an auth path
 	const isAuthPath = authPaths.some((path) => pathname === path);
 
-	// If the path is protected and the user is not authenticated, redirect to login
-	if (isProtectedRoute(pathname) && !isAuthenticated) {
+	// If the path is protected and no token exists, redirect to login
+	if (isProtectedRoute(pathname) && !hasAuthToken) {
 		const url = new URL("/sign-in", request.url);
 		url.searchParams.set("callbackUrl", pathname);
 		return NextResponse.redirect(url);
 	}
 
-	// If the user is authenticated and trying to access an auth page, redirect to dashboard
-	if (isAuthPath && isAuthenticated) {
+	// If there's a token and trying to access an auth page, redirect to dashboard
+	if (isAuthPath && hasAuthToken) {
 		return NextResponse.redirect(
 			new URL("/dashboard/portfolios", request.url)
 		);
@@ -41,7 +37,7 @@ export async function middleware(request) {
 		);
 	}
 
-	// Determine the domain based on the environment
+	// Handle subdomains
 	const hostname = request.headers.get("host");
 	const domain =
 		process.env.NODE_ENV === "production"
@@ -51,7 +47,6 @@ export async function middleware(request) {
 					.replace(".localhost", "")
 					.replace("adequate-adequately-husky.ngrok-free.app", "");
 
-	// Handle subdomains and API requests
 	if (
 		!domain ||
 		["localhost", "www", process.env.NEXT_PUBLIC_ROOT_DOMAIN].includes(
@@ -61,22 +56,17 @@ export async function middleware(request) {
 		return NextResponse.next();
 	}
 
-	// If it's an API request from a subdomain
+	// Handle API requests from subdomains
 	if (url.pathname.startsWith("/api/")) {
-		// Rewrite to the main domain's API
 		const mainDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-		let newURL;
-
-		if (process.env.NODE_ENV === "production") {
-			newURL = `https://${mainDomain}${pathname}${search}`;
-		} else {
-			newURL = `http://${mainDomain}${pathname}${search}`;
-		}
-		return NextResponse.rewrite(new URL(newURL, req.url));
+		const protocol =
+			process.env.NODE_ENV === "production" ? "https" : "http";
+		const newURL = `${protocol}://${mainDomain}${pathname}${search}`;
+		return NextResponse.rewrite(new URL(newURL));
 	}
 
 	// Pass the domain to the dynamic route
-	return NextResponse.rewrite(new URL(`/${domain}${pathname}`, req.url));
+	return NextResponse.rewrite(new URL(`/${domain}${pathname}`, request.url));
 }
 
 export const config = {

@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { teamSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const teamSelect = {
 	id: true,
@@ -31,8 +33,10 @@ export async function getTeamMembers(portfolioId) {
 
 export async function createTeamMember({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -63,8 +67,10 @@ export async function createTeamMember({ portfolioId, ...data }) {
 
 export async function editTeamMember(teamId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -108,8 +114,10 @@ export async function editTeamMember(teamId, { portfolioId, ...data }) {
 
 export async function deleteTeamMember(teamId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 

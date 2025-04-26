@@ -1,11 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -76,9 +78,13 @@ export async function getBlog(blogId, portfolioId) {
 
 export async function createBlog({ portfolioId, data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) throw new Error("Unauthorized");
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) throw new Error("Unauthorized");
 		if (!portfolioId) throw new Error("Portfolio ID is required");
+
+		const userId = decodedToken.uid;
 
 		// Separate tags from main data
 		const { tags = [], ...blogData } = data;
@@ -110,8 +116,10 @@ export async function createBlog({ portfolioId, data }) {
 
 export async function updateBlog({ blogId, portfolioId, data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) throw new Error("Unauthorized");
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) throw new Error("Unauthorized");
 
 		// Separate tags from main data
 		const { tags = [], ...blogData } = data;
@@ -146,10 +154,10 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 
 export async function deleteBlog({ blogId, portfolioId }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId) {
-			throw new Error("Unauthorized");
-		}
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) throw new Error("Unauthorized");
 
 		await prisma.blog.delete({
 			where: {

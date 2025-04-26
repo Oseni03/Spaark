@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/db"; // Assume this is your database connection
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { userSchema } from "@/schema/user";
@@ -84,14 +83,12 @@ export async function updateUser(data) {
 			where: { id: data.id },
 			data: {
 				...data,
-				updatedAt: new Date(), // Ensure updated timestamp is set
+				updatedAt: new Date(),
 			},
 			select: userSelect,
 		});
 
-		// Revalidate the path to update cached data
 		revalidatePath("/builder");
-
 		return userSchema.parse(updatedUser);
 	});
 }

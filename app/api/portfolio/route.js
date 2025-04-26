@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getPortfolios } from "@/services/portfolio";
-import { auth } from "@clerk/nextjs/server";
 import { logger } from "@/lib/utils";
 import { getUser } from "@/services/user";
+import { verifyAuthToken } from "@/lib/firebase/admin";
+import { COOKIE_NAME } from "@/utils/constants";
 
 // Helper function to get CORS headers
 const getCorsHeaders = (origin) => {
@@ -60,14 +61,15 @@ export async function GET(req) {
 		const { searchParams } = new URL(req.url);
 		let userId = searchParams.get("userId");
 
-		// Get both userId and orgId from auth
-		const { userId: authenticatedUserId, orgId } = await auth();
+		// Get Firebase auth token from cookie
+		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const authenticatedUserId = decodedToken?.uid;
 
 		logger.info("Auth details", {
 			requestId,
 			userId,
 			authenticatedUserId,
-			orgId,
 		});
 
 		if (!userId && !authenticatedUserId) {
@@ -80,11 +82,10 @@ export async function GET(req) {
 		logger.info("Fetching data", {
 			requestId,
 			userId,
-			orgId,
 		});
 
-		// Get portfolios for both user and organization if available
-		const portfoliosPromise = getPortfolios(userId, orgId);
+		// Get portfolios for user
+		const portfoliosPromise = getPortfolios(userId);
 		const userPromise = getUser(userId);
 
 		const [user, portfolios] = await Promise.all([
@@ -152,6 +153,6 @@ export async function OPTIONS(req) {
 export const config = {
 	api: {
 		bodyParser: false, // Disable body parsing, consume as stream
-		externalResolver: true, // Enable external resolving for Clerk auth
+		externalResolver: true, // Enable external resolving for Firebase auth
 	},
 };

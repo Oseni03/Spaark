@@ -1,11 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
 import { transformPortfolio } from "@/lib/utils";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const portfolioSelect = {
 	id: true,
@@ -65,22 +67,20 @@ export async function getPortfolios(userId, orgId = null) {
 
 export async function createPortfolio(data) {
 	return withErrorHandling(async () => {
-		const { userId, orgId } = await auth();
-		if (!userId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
+		const userId = decodedToken.uid;
 		const { portfolioId, ...basicsData } = defaultBasics;
 
 		const portfolio = await prisma.portfolio.create({
 			data: {
 				...data,
 				user: { connect: { id: userId } },
-				...(orgId && {
-					organization: {
-						connect: { id: orgId },
-					},
-				}),
 				basics: {
 					create: {
 						...basicsData,
@@ -118,35 +118,26 @@ const getValidBasicsUpdateFields = (basics) => {
 
 export async function editPortfolio(id, data) {
 	return withErrorHandling(async () => {
-		const { userId, orgId } = await auth();
-		if (!userId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
-		const whereClause = {
-			id,
-			OR: [{ userId }],
-		};
+		const userId = decodedToken.uid;
 
-		if (orgId) {
-			whereClause.OR.push({ organizationId: orgId });
-		}
+		// Extract main portfolio fields
+		const { id: portfolioId, ...portfolioData } = data;
 
-		// Extract main portfolio fields and remove organizationId
-		const { organizationId, id: portfolioId, ...portfolioData } = data;
-
-		// Update the portfolio with only top-level fields
 		const updatedPortfolio = await prisma.portfolio.update({
-			where: whereClause,
+			where: {
+				id,
+				userId,
+			},
 			data: {
 				...portfolioData,
 				updatedAt: new Date(),
-				// Update organization if organizationId is provided
-				...(organizationId && {
-					organization: {
-						connect: { id: organizationId },
-					},
-				}),
 			},
 			select: portfolioSelect,
 		});

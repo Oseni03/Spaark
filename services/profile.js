@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { profileSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -31,8 +33,10 @@ export async function getProfiles(portfolioId) {
 
 export async function createProfile({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -52,8 +56,10 @@ export async function createProfile({ portfolioId, ...data }) {
 
 export async function editProfile(profileId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -73,8 +79,10 @@ export async function editProfile(profileId, { portfolioId, ...data }) {
 
 export async function deleteProfile(profileId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error(
 				"Unauthorized: Must be logged in to delete a profile"
 			);

@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { testimonialSchema } from "@/schema/sections";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const testimonialSelect = {
 	id: true,
@@ -30,8 +32,10 @@ export async function getTestimonials(portfolioId) {
 
 export async function createTestimonial({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -50,8 +54,10 @@ export async function createTestimonial({ portfolioId, ...data }) {
 
 export async function editTestimonial(testimonialId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 
@@ -71,8 +77,10 @@ export async function editTestimonial(testimonialId, { portfolioId, ...data }) {
 
 export async function deleteTestimonial(testimonialId, portfolioId) {
 	return withErrorHandling(async () => {
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error("Unauthorized");
 		}
 

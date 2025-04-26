@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics, basicsSchema } from "@/schema/sections/basics";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -54,9 +56,10 @@ export async function createBasics(portfolioId, data = defaultBasics) {
 
 export async function updatePortfolioBasics({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		// Get the authenticated user
-		const { userId } = await auth();
-		if (!userId || !portfolioId) {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
 			throw new Error("Unauthorized");
 		}
 
@@ -65,14 +68,12 @@ export async function updatePortfolioBasics({ portfolioId, ...data }) {
 			where: { portfolioId },
 			data: {
 				...data,
-				updatedAt: new Date(), // Ensure updated timestamp is set
+				updatedAt: new Date(),
 			},
 			select,
 		});
 
-		// Revalidate the path to update cached data
 		revalidatePath("/builder");
-
 		return basicsSchema.parse(updatedBasics);
 	});
 }

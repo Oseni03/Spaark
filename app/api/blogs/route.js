@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { logger } from "@/lib/utils";
 import { getBlogs } from "@/services/blog";
+import { verifyAuthToken } from "@/lib/firebase/admin";
+import { COOKIE_NAME } from "@/utils/constants";
 
 const getCorsHeaders = (origin) => {
 	const allowedOrigins = [
@@ -53,7 +54,9 @@ export async function GET(req) {
 	try {
 		const { searchParams } = new URL(req.url);
 		const portfolioId = searchParams.get("portfolioId");
-		const { userId } = await auth();
+		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
 
 		if (!userId) {
 			logger.error("Unauthorized request", { requestId });
