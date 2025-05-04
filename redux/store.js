@@ -10,7 +10,6 @@ import {
 	REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
-import userReducer from "./features/userSlice";
 import portfolioReducer from "./features/portfolioSlice";
 import blogReducer from "./features/blogSlice";
 
@@ -18,12 +17,11 @@ import blogReducer from "./features/blogSlice";
 const persistConfig = {
 	key: "root",
 	storage,
-	whitelist: ["user", "portfolios", "blogs"], // Add the reducers you want to persist
+	whitelist: ["portfolios", "blogs"], // Add the reducers you want to persist
 };
 
 // Root Reducer
 const rootReducer = combineReducers({
-	user: userReducer,
 	portfolios: portfolioReducer,
 	blogs: blogReducer,
 });

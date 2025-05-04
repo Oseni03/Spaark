@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  //directUrl = env("DIRECT_URL")
 }
 
 enum UserType {
@@ -129,8 +129,6 @@ model Portfolio {
   projects       Project[]
   hackathons     Hackathon[]
   blogs          Blog[]
-  testimonials   Testimonial[]
-  teams          Team[] // Add this line
 
   @@index([userId])
   @@index([organizationId])
@@ -269,9 +267,6 @@ model Link {
 
   Hackathon   Hackathon? @relation(fields: [hackathonId], references: [id], onDelete: Cascade)
   hackathonId String?
-
-  Team        Team?      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId      String?
 }
 
 model Hackathon {
@@ -407,41 +402,6 @@ model Comment {
 
   @@index([blogId])
   @@index([authorId])
-}
-
-model Testimonial {
-  id          String   @id @default(cuid())
-  portfolioId String
-  visible     Boolean  @default(true)
-  name        String
-  role        String
-  company     String?
-  message     String
-  avatar      String?
-  rating      Int?     @default(5)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-
-  @@index([portfolioId])
-}
-
-model Team {
-  id          String   @id @default(cuid())
-  portfolioId String
-  visible     Boolean  @default(true)
-  name        String
-  role        String
-  bio         String?
-  avatar      String?
-  links       Link[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-
-  @@index([portfolioId])
 }
 
 model Newsletter {

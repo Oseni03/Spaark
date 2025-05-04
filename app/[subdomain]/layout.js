@@ -6,6 +6,7 @@ import { logger, transformPortfolio } from "@/lib/utils";
 import NotFound from "../not-found";
 import { cn } from "@/lib/utils";
 import { PortfolioProvider } from "@/context/PortfolioContext";
+import { BuildWithButton } from "@/components/build-with-button";
 
 // Input validation schema
 const ParamsSchema = z.object({
@@ -74,11 +75,11 @@ export default async function PortfolioLayout({ params, children }) {
 				</head>
 				<body
 					className={cn(
-						"mx-auto max-w-7xl px-6 lg:px-8",
 						"scrollbar-hide",
 						"overflow-y-auto" // Add this to enable scrolling
 					)}
 				>
+					<BuildWithButton />
 					<PortfolioProvider
 						portfolio={portfolio}
 						metaTags={metaTags}

@@ -43,7 +43,6 @@ import {
 	XLogo,
 	YoutubeLogo,
 } from "@phosphor-icons/react";
-import { BuildWithButton } from "../build-with-button";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -469,7 +468,7 @@ const Navbar = ({ profile, blogEnabled }) => {
 	);
 };
 
-export const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
+const TestimonialCarousel = ({ testimonials = [], className = "" }) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 	const [isPaused, setIsPaused] = useState(false);
@@ -663,7 +662,6 @@ export default function DefaultTemplate({
 }) {
 	return (
 		<>
-			<BuildWithButton />
 			<main className="flex flex-col min-h-[100dvh] overflow-auto scrollbar-hide">
 				<div className="container mx-auto px-4 md:px-6 space-y-8 md:space-y-10 max-w-4xl">
 					<section id="hero" className="pt-6 md:pt-10">

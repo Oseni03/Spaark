@@ -85,21 +85,21 @@ export async function GET(req) {
 		});
 
 		// Get portfolios for user
-		const portfoliosPromise = getPortfolios(userId);
-		const userPromise = getUser(userId);
+		const portfolios = await getPortfolios(userId);
+		// const userPromise = getUser(userId);
 
-		const [user, portfolios] = await Promise.all([
-			userPromise,
-			portfoliosPromise,
-		]);
+		// const [user, portfolios] = await Promise.all([
+		// 	userPromise,
+		// 	portfoliosPromise,
+		// ]);
 
-		if (!user) {
-			logger.error("User not found", {
-				requestId,
-				userId,
-			});
-			return createErrorResponse(404, "User not found", origin);
-		}
+		// if (!user) {
+		// 	logger.error("User not found", {
+		// 		requestId,
+		// 		userId,
+		// 	});
+		// 	return createErrorResponse(404, "User not found", origin);
+		// }
 
 		if (!portfolios.success) {
 			logger.error("Portfolio fetch failed", {
@@ -118,7 +118,7 @@ export async function GET(req) {
 			portfolioCount: portfolios.data?.length,
 		});
 
-		return new NextResponse(JSON.stringify({ portfolios, user }), {
+		return new NextResponse(JSON.stringify({ portfolios }), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",

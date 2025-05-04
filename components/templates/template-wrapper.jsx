@@ -7,15 +7,11 @@ import { CONTAINER_CLASS } from "@/utils/constants";
 
 // Import templates
 import DefaultTemplate from "./default";
-// import MinimalTemplate from "./minimal";
-// import ModernTemplate from "./modern";
-// import ClassicTemplate from "./classic";
+import VioletVista from "./violet-vista";
 
 const TEMPLATES = {
 	default: DefaultTemplate,
-	// minimal: MinimalTemplate,
-	// modern: ModernTemplate,
-	// classic: ClassicTemplate,
+	violetvista: VioletVista,
 };
 
 export const getTemplate = (template) => {

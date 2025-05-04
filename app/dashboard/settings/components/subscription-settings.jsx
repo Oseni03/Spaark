@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useSelector } from "react-redux";
 import { Card } from "@/components/ui/card";
 import { CreditCard, Package } from "@phosphor-icons/react";
 import {
@@ -13,9 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import Pricing from "@/components/homepage/pricing";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/auth-context";
 
 export function SubscriptionSettings() {
-	const subscription = useSelector((state) => state.user.subscription);
+	const { user } = useAuth();
+	const subscription = user.subscription;
 
 	return (
 		<Card>

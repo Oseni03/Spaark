@@ -1,6 +1,7 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useRef, useState, useEffect } from "react";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { LeftAppSidebar } from "@/components/left-app-sidebar";
 import { RightSidebar } from "@/components/right-app-sidebar";
 import { NavActions } from "@/components/nav-actions";
@@ -9,6 +10,7 @@ import {
 	BreadcrumbItem,
 	BreadcrumbList,
 	BreadcrumbPage,
+	BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -25,9 +27,28 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, PanelRight } from "lucide-react";
+import {
+	PanelLeft,
+	PanelRight,
+	ZoomIn,
+	ZoomOut,
+	Maximize2,
+	Eye,
+	Save,
+	Settings,
+} from "lucide-react";
 import { useVerifyPayment } from "@/hooks/use-verify-payment";
 import { useAuth } from "@/context/auth-context";
+import Link from "next/link";
+import { X } from "lucide-react";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRouter, useParams } from "next/navigation";
+import { toast } from "sonner";
 
 function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
@@ -36,7 +57,96 @@ function BuilderLayoutContent({ children }) {
 	const [rightOpen, setRightOpen] = React.useState(false);
 	const [leftCollapsed, setLeftCollapsed] = React.useState(false);
 	const [rightCollapsed, setRightCollapsed] = React.useState(true);
+	const [wheelPanning, setWheelPanning] = useState(true);
+	const [scale, setScale] = useState(0.8);
+	const transformRef = useRef(null);
 	const { user, signOut } = useAuth();
+	const [showBanner, setShowBanner] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
+
+	const handleZoomIn = () => {
+		transformRef.current?.zoomIn(0.2);
+		setScale((prev) => Math.min(prev + 0.2, 2));
+	};
+
+	const handleZoomOut = () => {
+		transformRef.current?.zoomOut(0.2);
+		setScale((prev) => Math.max(prev - 0.2, 0.4));
+	};
+
+	const handleReset = () => {
+		transformRef.current?.resetTransform(0);
+		setScale(0.8);
+		setTimeout(() => transformRef.current?.centerView(0.8, 0), 10);
+	};
+
+	const handleSave = async () => {
+		try {
+			setIsSaving(true);
+			// Add your save logic here
+			toast("Changes saved", {
+				description: "Your portfolio has been updated successfully.",
+			});
+		} catch (error) {
+			toast("Error saving changes", {
+				variant: "destructive",
+				description: error.message,
+			});
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const SubscriptionBanner = () =>
+		user?.subscription?.status !== "active" &&
+		showBanner && (
+			<div className={cn(CONTAINER_CLASS, "mb-6")}>
+				<div className="relative bg-blue-50 dark:bg-blue-900/50 px-4 sm:px-6 py-4 flex items-center justify-between rounded-lg border border-blue-100 dark:border-blue-800">
+					<div className="flex items-center gap-x-3">
+						<p className="text-sm text-blue-700 dark:text-blue-100">
+							You do not have an active subscription!{" "}
+							<Link
+								href="/#pricing"
+								className="font-medium underline hover:text-blue-600 dark:hover:text-blue-400"
+							>
+								Subscribe now
+							</Link>
+						</p>
+					</div>
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-8 w-8 hover:bg-blue-100/50 dark:hover:bg-blue-800/50"
+						onClick={() => setShowBanner(false)}
+					>
+						<X className="h-4 w-4" />
+					</Button>
+				</div>
+			</div>
+		);
+
+	useEffect(() => {
+		const handleMessage = (event) => {
+			if (event.origin !== window.location.origin) return;
+
+			if (event.data.type === "ZOOM_IN")
+				transformRef.current?.zoomIn(0.2);
+			if (event.data.type === "ZOOM_OUT")
+				transformRef.current?.zoomOut(0.2);
+			if (event.data.type === "CENTER_VIEW")
+				transformRef.current?.centerView();
+			if (event.data.type === "RESET_VIEW") {
+				transformRef.current?.resetTransform(0);
+				setTimeout(() => transformRef.current?.centerView(0.8, 0), 10);
+			}
+			if (event.data.type === "TOGGLE_PAN_MODE") {
+				setWheelPanning(event.data.panMode);
+			}
+		};
+
+		window.addEventListener("message", handleMessage);
+		return () => window.removeEventListener("message", handleMessage);
+	}, [transformRef]);
 
 	if (isDesktop) {
 		return (
@@ -78,6 +188,11 @@ function BuilderLayoutContent({ children }) {
 									<Breadcrumb>
 										<BreadcrumbList>
 											<BreadcrumbItem>
+												<BreadcrumbLink href="/dashboard/portfolio">
+													Dashboard
+												</BreadcrumbLink>
+											</BreadcrumbItem>
+											<BreadcrumbItem>
 												<BreadcrumbPage className="line-clamp-1">
 													Portfolio Builder
 												</BreadcrumbPage>
@@ -86,6 +201,76 @@ function BuilderLayoutContent({ children }) {
 									</Breadcrumb>
 								</div>
 								<div className="ml-auto flex items-center gap-2">
+									<TooltipProvider>
+										<div className="flex items-center gap-1 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-1 rounded-lg border">
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={handleZoomOut}
+														disabled={scale <= 0.4}
+													>
+														<ZoomOut className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>
+													Zoom Out
+												</TooltipContent>
+											</Tooltip>
+											<span className="text-sm text-muted-foreground min-w-[40px] text-center">
+												{Math.round(scale * 100)}%
+											</span>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={handleZoomIn}
+														disabled={scale >= 2}
+													>
+														<ZoomIn className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>
+													Zoom In
+												</TooltipContent>
+											</Tooltip>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={handleReset}
+													>
+														<Maximize2 className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>
+													Reset View
+												</TooltipContent>
+											</Tooltip>
+										</div>
+									</TooltipProvider>
+									<TooltipProvider>
+										<div className="flex items-center gap-1">
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={handleSave}
+														disabled={isSaving}
+													>
+														<Save className="h-4 w-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>
+													Save Changes
+												</TooltipContent>
+											</Tooltip>
+										</div>
+									</TooltipProvider>
 									<NavActions user={user} signOut={signOut} />
 									<Button
 										variant="ghost"
@@ -103,12 +288,30 @@ function BuilderLayoutContent({ children }) {
 								</div>
 							</header>
 							<main
-								className={cn(
-									"flex-1 overflow-auto",
-									CONTAINER_CLASS
-								)}
+								className={
+									"flex-1 overflow-auto w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-6 md:py-8 lg:py-12 space-y-8 md:space-y-10"
+								}
 							>
-								<div className={CONTENT_CLASS}>{children}</div>
+								<SubscriptionBanner />
+								<TransformWrapper
+									ref={transformRef}
+									centerOnInit
+									maxScale={2}
+									minScale={0.4}
+									initialScale={0.8}
+									limitToBounds={false}
+									wheel={{ wheelDisabled: wheelPanning }}
+									panning={{ wheelPanning: wheelPanning }}
+								>
+									<TransformComponent
+										wrapperClass="w-full h-full"
+										contentClass="flex items-center justify-center"
+									>
+										<div className={CONTENT_CLASS}>
+											{children}
+										</div>
+									</TransformComponent>
+								</TransformWrapper>
 							</main>
 						</div>
 					</ResizablePanel>
@@ -154,6 +357,11 @@ function BuilderLayoutContent({ children }) {
 						<Breadcrumb>
 							<BreadcrumbList>
 								<BreadcrumbItem>
+									<BreadcrumbLink href="/dashboard">
+										Dashboard
+									</BreadcrumbLink>
+								</BreadcrumbItem>
+								<BreadcrumbItem>
 									<BreadcrumbPage className="line-clamp-1">
 										Portfolio Builder
 									</BreadcrumbPage>
@@ -173,7 +381,24 @@ function BuilderLayoutContent({ children }) {
 					</div>
 				</header>
 				<main className={cn("flex-1", CONTAINER_CLASS)}>
-					<div className={CONTENT_CLASS}>{children}</div>
+					<SubscriptionBanner />
+					<TransformWrapper
+						ref={transformRef}
+						centerOnInit
+						maxScale={2}
+						minScale={0.4}
+						initialScale={0.8}
+						limitToBounds={false}
+						wheel={{ wheelDisabled: wheelPanning }}
+						panning={{ wheelPanning: wheelPanning }}
+					>
+						<TransformComponent
+							wrapperClass="w-full h-full"
+							contentClass="flex items-center justify-center"
+						>
+							<div className={CONTENT_CLASS}>{children}</div>
+						</TransformComponent>
+					</TransformWrapper>
 				</main>
 			</div>
 

@@ -8,7 +8,6 @@ import { useDispatch } from "react-redux";
 import { setPortfolios } from "@/redux/features/portfolioSlice";
 import { setBlogs } from "@/redux/features/blogSlice";
 import { logger } from "@/lib/utils";
-import { setUser } from "@/redux/features/userSlice";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
@@ -56,10 +55,9 @@ const DashboardLayoutContent = ({ children }) => {
 					throw new Error("Failed to fetch user data");
 				}
 
-				const { portfolios, user } = await response.json();
+				const { portfolios } = await response.json();
 				logger.info("Data received from API", {
 					portfoliosCount: portfolios?.data?.length,
-					hasUser: !!user,
 				});
 
 				if (portfolios?.data) {
@@ -103,13 +101,6 @@ const DashboardLayoutContent = ({ children }) => {
 					});
 
 					dispatch(setBlogs(flattenedBlogs));
-				}
-
-				if (user) {
-					logger.info("Updating user in store", {
-						userId: user.id,
-					});
-					dispatch(setUser(user));
 				}
 
 				const endTime = performance.now();

@@ -32,6 +32,11 @@ const templates = [
 		name: "Default",
 		preview: "/templates/default.png",
 	},
+	{
+		id: "violetvista",
+		name: "Violet Vista",
+		preview: "/templates/violetvista.png",
+	},
 	// Add more templates as needed
 ];
 
@@ -39,9 +44,8 @@ export function TemplateSection() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
 	const [showPricingDialog, setShowPricingDialog] = useState(false);
-	const isSubscribed = useSelector(
-		(state) => state.user.subscription?.status === "active"
-	);
+	const { user } = useAuth();
+	const isSubscribed = user?.subscription?.status === "active";
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)

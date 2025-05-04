@@ -53,7 +53,6 @@ export function LeftAppSidebar() {
 			<Separator />
 			<Project />
 			<Separator />
-			<Separator />
 			<Hackathon />
 		</div>
 	);

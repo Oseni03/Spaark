@@ -36,8 +36,9 @@ export function AuthProvider({ children }) {
 
 					// Combine Firebase user with database user data
 					setUser({
-						id: dbUser.id,
-						email: dbUser.email,
+						id: dbUser.data.id,
+						email: dbUser.data.email,
+						subscription: dbUser.data?.subscription,
 						emailVerified: firebaseUser.emailVerified,
 						displayName: firebaseUser.displayName || undefined,
 						photoURL: firebaseUser.photoURL || "",
