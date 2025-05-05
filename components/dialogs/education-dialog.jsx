@@ -133,26 +133,45 @@ export const EducationDialog = ({
 									</div>
 								)}
 							/>
-						</div>
 
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Website</label>
-									<Input
-										{...field}
-										placeholder="Enter institution website"
-									/>
-									{fieldState.error && (
-										<small className="text-red-500 opacity-75">
-											{fieldState.error?.message}
-										</small>
-									)}
-								</div>
-							)}
-						/>
+							<Controller
+								name="url"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Website</label>
+										<Input
+											{...field}
+											placeholder="Enter institution website"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="location"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Location</label>
+										<Input
+											{...field}
+											placeholder="Enter location"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+						</div>
 
 						<Controller
 							name="summary"

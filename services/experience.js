@@ -18,6 +18,7 @@ const experienceSelect = {
 	summary: true,
 	picture: true,
 	url: true,
+	technologies: true,
 	portfolioId: true,
 	// Exclude createdAt and updatedAt
 };

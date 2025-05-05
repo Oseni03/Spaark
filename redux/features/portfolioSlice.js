@@ -304,41 +304,41 @@ const portfolioSlice = createSlice({
 					);
 			}
 		},
-		// Profile
-		addProfile: (state, action) => {
-			const { portfolioId, ...profile } = action.payload;
+		// Social
+		addSocial: (state, action) => {
+			const { portfolioId, ...social } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
 			);
 			if (portfolio) {
-				portfolio.profiles.items.push(profile);
+				portfolio.socials.items.push(social);
 			}
 		},
-		updateProfile: (state, action) => {
-			const { portfolioId, ...profile } = action.payload;
+		updateSocial: (state, action) => {
+			const { portfolioId, ...social } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
 			);
 			if (portfolio) {
-				const index = portfolio.profiles.items.findIndex(
-					(c) => c.id === profile.id
+				const index = portfolio.socials.items.findIndex(
+					(c) => c.id === social.id
 				);
 				if (index !== -1) {
-					portfolio.profiles.items[index] = {
-						...profile,
+					portfolio.socials.items[index] = {
+						...social,
 						portfolioId,
 					};
 				}
 			}
 		},
-		removeProfile: (state, action) => {
-			const { portfolioId, profileId } = action.payload;
+		removeSocial: (state, action) => {
+			const { portfolioId, socialId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
 			);
 			if (portfolio) {
-				portfolio.profiles.items = portfolio.profiles.items.filter(
-					(c) => c.id !== profileId
+				portfolio.socials.items = portfolio.socials.items.filter(
+					(c) => c.id !== socialId
 				);
 			}
 		},
@@ -461,10 +461,10 @@ export const {
 	addCertification,
 	updateCertification,
 	removeCertification,
-	// Profile
-	addProfile,
-	updateProfile,
-	removeProfile,
+	// Social
+	addSocial,
+	updateSocial,
+	removeSocial,
 } = portfolioSlice.actions;
 
 export default portfolioSlice.reducer;

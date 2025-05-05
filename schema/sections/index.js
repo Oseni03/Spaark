@@ -3,7 +3,7 @@ import { z } from "zod";
 import { certificationSchema } from "./certification";
 import { educationSchema } from "./education";
 import { experienceSchema } from "./experience";
-import { profileSchema } from "./profile";
+import { socialSchema } from "./social";
 import { projectSchema } from "./project";
 import { skillSchema } from "./skill";
 import { hackathonSchema } from "./hackathon";
@@ -46,9 +46,9 @@ export const mainSchema = portfolioSchema.extend({
 		id: z.literal("hackathon"),
 		items: z.array(hackathonSchema),
 	}),
-	profiles: sectionSchema.extend({
-		id: z.literal("profile"),
-		items: z.array(profileSchema),
+	socials: sectionSchema.extend({
+		id: z.literal("social"),
+		items: z.array(socialSchema),
 	}),
 	projects: sectionSchema.extend({
 		id: z.literal("project"),
@@ -109,10 +109,10 @@ export const defaultMain = {
 		name: "Experiences",
 		items: [],
 	},
-	profiles: {
+	socials: {
 		...defaultSection,
-		id: "profiles",
-		name: "Profiles",
+		id: "socials",
+		name: "Socials",
 		items: [],
 	},
 	projects: {
@@ -129,6 +129,6 @@ export * from "./education";
 export * from "./experience";
 export * from "./hackathon";
 export * from "./language";
-export * from "./profile";
+export * from "./social";
 export * from "./project";
 export * from "./skill";

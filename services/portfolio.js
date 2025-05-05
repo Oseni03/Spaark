@@ -19,7 +19,7 @@ const portfolioSelect = {
 	// organizationId: true,
 	template: true,
 	basics: true,
-	profiles: true,
+	socials: true,
 	experiences: true,
 	educations: true,
 	skills: true,
@@ -177,7 +177,7 @@ export async function getPortfolioBySlug(slug) {
 			where: { slug },
 			select: portfolioSelect,
 		});
-		return portfolio;
+		return transformPortfolio(portfolio);
 	});
 }
 
@@ -191,7 +191,7 @@ export async function getPortfolio(domain) {
 			select: portfolioSelect,
 		});
 
-		return portfolio;
+		return transformPortfolio(portfolio);
 	});
 }
 
@@ -225,7 +225,7 @@ export async function updatePortfolioWithSections(id, data) {
 			educations,
 			projects,
 			certifications,
-			profiles,
+			socials,
 			hackathons,
 			...portfolioData
 		} = data;
@@ -340,12 +340,12 @@ export async function updatePortfolioWithSections(id, data) {
 								})),
 							}
 						: undefined,
-				// Update profiles if provided
-				profiles:
-					profiles?.items?.length > 0
+				// Update socials if provided
+				socials:
+					socials?.items?.length > 0
 						? {
 								deleteMany: {},
-								create: profiles.items.map((prof) => ({
+								create: socials.items.map((prof) => ({
 									network: prof.network,
 									username: prof.username,
 									url: prof.url,

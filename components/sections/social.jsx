@@ -5,32 +5,32 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import {
-	addProfile,
-	removeProfile,
-	updateProfile,
+	addSocial,
+	removeSocial,
+	updateSocial,
 } from "@/redux/features/portfolioSlice";
-import { ProfilesDialog } from "@/components/dialogs/profile-dialog";
+import { SocialsDialog } from "@/components/dialogs/social-dialog";
 import { useForm } from "react-hook-form";
-import { defaultProfile } from "@/schema/sections";
-import { profileSchema } from "@/schema/sections";
+import { defaultSocial } from "@/schema/sections";
+import { socialSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { createId } from "@paralleldrive/cuid2";
 import { logger } from "@/lib/utils";
 import { useParams } from "next/navigation";
 
-export const Profile = () => {
+export const Social = () => {
 	const { portfolioId } = useParams();
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 	const dispatch = useDispatch();
-	const [currentProfile, setCurrentProfile] = useState(null);
+	const [currentSocial, setCurrentSocial] = useState(null);
 	const [isOpen, setIsOpen] = useState(false);
 
 	const form = useForm({
-		resolver: zodResolver(profileSchema),
-		defaultValues: defaultProfile,
+		resolver: zodResolver(socialSchema),
+		defaultValues: defaultSocial,
 	});
 	const {
 		reset,
@@ -45,29 +45,29 @@ export const Profile = () => {
 	}, [errors, defaultValues]);
 
 	// Access the specific section from the Redux state
-	const section = portfolio?.profiles;
+	const section = portfolio?.socials;
 	if (!section) return null;
 
 	// CRUD handlers
 	const openCreateDialog = () => {
-		reset({ ...defaultProfile, id: createId() });
-		setCurrentProfile(null);
+		reset({ ...defaultSocial, id: createId() });
+		setCurrentSocial(null);
 		setIsOpen(true);
 	};
-	const openUpdateDialog = (profile) => {
-		reset(profile);
-		setCurrentProfile(profile);
+	const openUpdateDialog = (social) => {
+		reset(social);
+		setCurrentSocial(social);
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(addProfile({ ...item, id: createId(), portfolioId }));
+		dispatch(addSocial({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(removeProfile({ portfolioId, profileId: item.id }));
+		dispatch(removeSocial({ portfolioId, socialId: item.id }));
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateProfile({
+			updateSocial({
 				...item,
 				visible: !item.visible,
 				portfolioId,
@@ -77,7 +77,7 @@ export const Profile = () => {
 
 	return (
 		<motion.section
-			id={"profile"}
+			id={"social"}
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			exit={{ opacity: 0 }}
@@ -85,7 +85,7 @@ export const Profile = () => {
 		>
 			<header className="flex items-center justify-between">
 				<div className="flex items-center gap-x-4">
-					<h2 className="line-clamp-1 text-3xl font-bold">Profile</h2>
+					<h2 className="line-clamp-1 text-3xl font-bold">Social</h2>
 				</div>
 			</header>
 
@@ -95,10 +95,10 @@ export const Profile = () => {
 					!section?.visible && "opacity-50"
 				)}
 			>
-				<ProfilesDialog
+				<SocialsDialog
 					portfolioId={portfolioId}
 					form={form}
-					currentProfile={currentProfile}
+					currentSocial={currentSocial}
 					isOpen={isOpen}
 					setIsOpen={setIsOpen}
 				/>

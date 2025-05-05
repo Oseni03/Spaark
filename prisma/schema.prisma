@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   //directUrl = env("DIRECT_URL")
 }
 
@@ -52,16 +52,16 @@ model User {
 }
 
 model Organization {
-  id         String    @id @default(cuid())
+  id        String    @id @default(cuid())
   // clerkOrgId String    @unique
-  name       String
-  slug       String    @unique
-  industry   String?
-  size       String?
-  logo       String?
-  website    String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime? @updatedAt
+  name      String
+  slug      String    @unique
+  industry  String?
+  size      String?
+  logo      String?
+  website   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   // Organization settings
   allowMemberInvites Boolean @default(false)
@@ -69,14 +69,14 @@ model Organization {
   defaultRole        Role    @default(MEMBER)
 
   // Relations
-  ownerId       String
-  owner         User                 @relation(fields: [ownerId], references: [id])
-  members       OrganizationMember[]
-  portfolios    Portfolio[]
-  transactions  Transaction[]
+  ownerId      String
+  owner        User                 @relation(fields: [ownerId], references: [id])
+  members      OrganizationMember[]
+  portfolios   Portfolio[]
+  transactions Transaction[]
 
   // Add new subscription relation
-  subscription   Subscription?
+  subscription Subscription?
 
   @@index([ownerId])
 }
@@ -121,7 +121,7 @@ model Portfolio {
 
   // Portfolio content
   basics         Basics?
-  profiles       Profile[] // Social profiles
+  socials        Social[]
   experiences    Experience[]
   educations     Education[]
   skills         Skill[]
@@ -143,6 +143,7 @@ model Basics {
   location    String
   url         String?
   picture     String?
+  years       Int?
   summary     String
   about       String
   portfolioId String    @unique
@@ -153,7 +154,7 @@ model Basics {
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }
 
-model Profile {
+model Social {
   id          String    @id @default(cuid())
   portfolioId String
   visible     Boolean   @default(true)
@@ -170,18 +171,19 @@ model Profile {
 }
 
 model Experience {
-  id          String   @id @default(cuid())
-  portfolioId String
-  visible     Boolean  @default(true) // Visibility status of the profile
-  company     String
-  position    String
-  location    String?
-  date        String
-  summary     String
-  picture     String?
-  url         String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  portfolioId  String
+  visible      Boolean  @default(true)
+  company      String
+  position     String
+  location     String?
+  date         String
+  summary      String
+  picture      String?
+  url          String?
+  technologies String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
@@ -198,6 +200,7 @@ model Education {
   summary     String?
   logo        String?
   url         String?
+  location    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -212,6 +215,7 @@ model Skill {
   visible     Boolean  @default(true)
   name        String
   description String?
+  level       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -249,6 +253,7 @@ model Project {
   source       String?
   image        String?
   video        String?
+  type         String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime? @updatedAt
 
@@ -324,7 +329,7 @@ model Subscription {
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
-  organization Organization?  @relation(fields: [organizationId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
 
   @@index([userId])
   @@index([organizationId])
@@ -405,8 +410,8 @@ model Comment {
 }
 
 model Newsletter {
-  id          String   @id @default(cuid())
-  email       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

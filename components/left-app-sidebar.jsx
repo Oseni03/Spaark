@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "./ui/separator";
 import { BasicsSection } from "@/components/sections/basics";
-import { Profile } from "@/components/sections/profile";
+import { Social } from "@/components/sections/social";
 import { Experience } from "@/components/sections/experience";
 import { Education } from "@/components/sections/education";
 import { Skill } from "@/components/sections/skill";
@@ -41,7 +41,7 @@ export function LeftAppSidebar() {
 			</button>
 			<BasicsSection />
 			<Separator />
-			<Profile />
+			<Social />
 			<Separator />
 			<Experience />
 			<Separator />

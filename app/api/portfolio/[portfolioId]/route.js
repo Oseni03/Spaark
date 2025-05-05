@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { getPortfolios } from "@/services/portfolio";
 import { getBasics } from "@/services/basics";
 import { getCertifications } from "@/services/certification";
 import { getEducations } from "@/services/education";
 import { getExperiences } from "@/services/experience";
-import { getProfiles } from "@/services/profile";
+import { getSocials } from "@/services/social";
 import { getSkills } from "@/services/skill";
 import { getProjects } from "@/services/project";
 import { getHackathons } from "@/services/hackathon";
@@ -58,7 +57,7 @@ export async function GET(req, { params }) {
 	try {
 		const results = await Promise.allSettled([
 			getBasics(portfolioId),
-			getProfiles(portfolioId),
+			getSocials(portfolioId),
 			getExperiences(portfolioId),
 			getEducations(portfolioId),
 			getCertifications(portfolioId),
@@ -69,7 +68,7 @@ export async function GET(req, { params }) {
 
 		const [
 			basics,
-			profiles,
+			socials,
 			experiences,
 			educations,
 			certifications,
@@ -82,7 +81,7 @@ export async function GET(req, { params }) {
 
 		const portfolioData = {
 			basics,
-			profiles,
+			socials,
 			experiences,
 			educations,
 			certifications,

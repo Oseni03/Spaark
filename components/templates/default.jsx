@@ -370,7 +370,7 @@ const ContactCard = () => {
 	);
 };
 
-const Navbar = ({ profile, blogEnabled }) => {
+const Navbar = ({ social, blogEnabled }) => {
 	const navbar = [
 		{ href: "/", icon: HomeIcon, label: "Home" },
 		{
@@ -410,7 +410,7 @@ const Navbar = ({ profile, blogEnabled }) => {
 				))}
 
 				<Separator orientation="vertical" className="h-full" />
-				{Object.entries(profile)
+				{Object.entries(social)
 					.filter(([_, social]) => social.visible)
 					.map(([network, social]) => (
 						<DockIcon key={network}>
@@ -657,7 +657,7 @@ export default function DefaultTemplate({
 	projects,
 	hackathons,
 	certifications,
-	profiles = [],
+	socials = [],
 	blogEnabled = false,
 }) {
 	return (
@@ -983,7 +983,7 @@ export default function DefaultTemplate({
 					</section>
 				</div>
 			</main>
-			<Navbar profile={profiles} blogEnabled={blogEnabled} />
+			<Navbar social={socials} blogEnabled={blogEnabled} />
 		</>
 	);
 }

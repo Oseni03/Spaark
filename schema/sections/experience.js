@@ -11,6 +11,7 @@ export const experienceSchema = itemSchema.extend({
 	summary: z.string(),
 	picture: z.literal("").or(z.string().url("Invalid image URL")),
 	url: z.literal("").or(z.string().url()),
+	technologies: z.array(z.string()).default([]),
 });
 
 // Defaults
@@ -23,4 +24,5 @@ export const defaultExperience = {
 	summary: "",
 	picture: "",
 	url: "",
+	technologies: [],
 };

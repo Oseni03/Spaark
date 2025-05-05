@@ -32,7 +32,7 @@ import { logger } from "@/lib/utils";
 export const SectionOptions = ({ id }) => {
 	const dispatch = useDispatch(); // Get dispatch from Redux store
 
-	const section = useSelector((state) => state.portfolio.profiles); // Get section from Redux store
+	const section = useSelector((state) => state.portfolio.socials); // Get section from Redux store
 
 	const hasItems = useMemo(() => "items" in section, [section]);
 	const isCustomSection = useMemo(() => id.startsWith("custom"), [id]);

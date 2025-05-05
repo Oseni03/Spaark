@@ -19,6 +19,7 @@ const select = {
 	source: true,
 	image: true,
 	video: true,
+	type: true,
 	portfolioId: true,
 };
 

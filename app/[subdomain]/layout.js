@@ -35,7 +35,7 @@ export default async function PortfolioLayout({ params, children }) {
 		}
 
 		// Transform the portfolio data
-		const portfolio = transformPortfolio(portfolioResult.data);
+		const portfolio = portfolioResult.data;
 
 		// Extract portfolio details for meta tags
 		const name = portfolio.basics?.name || portfolioSlug;

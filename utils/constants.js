@@ -8,6 +8,16 @@ export const socialNetworks = [
 	{ value: "x", label: `X` },
 	{ value: "youtube", label: `Youtube` },
 ];
+export const skillLevels = [
+	{ value: "Beginner", label: `Beginner` },
+	{ value: "Intermediate", label: `Intermediate` },
+	{ value: "Expert", label: `Expert` },
+];
+export const projectTypes = [
+	{ value: "Web application", label: `Web application` },
+	{ value: "Mobile application", label: `Mobile application` },
+	{ value: "Web design", label: `Web design` },
+];
 
 export const defaultTiltProps = {
 	scale: 1.05,

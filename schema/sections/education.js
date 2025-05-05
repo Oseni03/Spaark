@@ -9,6 +9,7 @@ export const educationSchema = itemSchema.extend({
 	summary: z.string().optional(),
 	logo: z.literal("").or(z.string().url()).nullable(),
 	url: z.literal("").or(z.string().url()),
+	location: z.literal("").or(z.string()),
 });
 
 // Defaults
@@ -20,4 +21,5 @@ export const defaultEducation = {
 	summary: "",
 	logo: "",
 	url: "",
+	location: "",
 };

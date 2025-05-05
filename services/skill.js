@@ -13,6 +13,7 @@ const select = {
 	visible: true,
 	name: true,
 	description: true,
+	level: true,
 	portfolioId: true,
 	// Exclude createdAt and updatedAt
 };

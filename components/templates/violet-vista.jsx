@@ -29,7 +29,7 @@ export default function VioletVista({
 	projects = defaultMain.projects,
 	hackathons = defaultMain.hackathons,
 	certifications = defaultMain.certifications,
-	profiles = defaultMain.profiles,
+	socials = defaultMain.socials,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
 	const [activeSection, setActiveSection] = useState("home");

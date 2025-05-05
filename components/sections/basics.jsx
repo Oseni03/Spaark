@@ -164,6 +164,25 @@ export const BasicsSection = () => {
 							)}
 						/>
 						<Controller
+							name="years"
+							control={control}
+							render={({ field, fieldState }) => (
+								<div>
+									<label>Years of Experience</label>
+									<Input
+										{...field}
+										placeholder="Years of experience"
+										type="number"
+									/>
+									{fieldState.error && (
+										<p className="text-red-500 text-sm">
+											{fieldState.error.message}
+										</p>
+									)}
+								</div>
+							)}
+						/>
+						<Controller
 							name="url"
 							control={control}
 							render={({ field, fieldState }) => (

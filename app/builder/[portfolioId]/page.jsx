@@ -27,7 +27,7 @@ export default function Page() {
 		skills: [],
 		hackathons: [],
 		certifications: [],
-		profiles: [],
+		socials: [],
 		blogEnabled: false,
 	});
 
@@ -61,7 +61,7 @@ export default function Page() {
 					certifications: (
 						portfolio?.certifications?.items || []
 					).filter((item) => item.visible),
-					profiles: portfolio?.profiles?.items || [],
+					socials: portfolio?.socials?.items || [],
 					blogEnabled: portfolio?.blogEnabled || false,
 				});
 			} catch (err) {

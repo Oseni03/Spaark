@@ -12,6 +12,14 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { addSkill, updateSkill } from "@/redux/features/portfolioSlice";
 import { logger } from "@/lib/utils";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { skillLevels } from "@/utils/constants";
 
 export const SkillDialog = ({
 	portfolioId,
@@ -54,24 +62,61 @@ export const SkillDialog = ({
 						onSubmit={handleSubmit(onSubmit)}
 						className="space-y-4 pr-3"
 					>
-						<Controller
-							name="name"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Skill Name</label>
-									<Input
-										{...field}
-										placeholder="Enter skill name"
-									/>
-									{fieldState.error && (
-										<small className="text-red-500 opacity-75">
-											{fieldState.error?.message}
-										</small>
-									)}
-								</div>
-							)}
-						/>
+						<div className="grid md:grid-cols-2 space-y-4 md:space-y-0 gap-2">
+							<Controller
+								name="name"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Skill Name</label>
+										<Input
+											{...field}
+											placeholder="Enter skill name"
+										/>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+
+							<Controller
+								name="level"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Level</label>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Select skill level" />
+											</SelectTrigger>
+											<SelectContent>
+												{skillLevels.map(
+													(level, idx) => (
+														<SelectItem
+															key={idx}
+															value={level.value}
+														>
+															{level.label}
+														</SelectItem>
+													)
+												)}
+											</SelectContent>
+										</Select>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+						</div>
 
 						<Controller
 							name="description"

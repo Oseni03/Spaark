@@ -17,6 +17,14 @@ import { RichInput } from "@/components/ui/rich-input";
 import { addProject, updateProject } from "@/redux/features/portfolioSlice";
 import Uploader from "../sections/picture/uploader";
 import { logger } from "@/lib/utils";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { projectTypes } from "@/utils/constants";
 
 export const ProjectDialog = ({
 	portfolioId,
@@ -91,6 +99,42 @@ export const ProjectDialog = ({
 									</div>
 								)}
 							/>
+
+							<Controller
+								name="type"
+								control={control}
+								render={({ field, fieldState }) => (
+									<div>
+										<label>Project Type</label>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Select project type" />
+											</SelectTrigger>
+											<SelectContent>
+												{projectTypes.map(
+													(type, idx) => (
+														<SelectItem
+															key={idx}
+															value={type.value}
+														>
+															{type.label}
+														</SelectItem>
+													)
+												)}
+											</SelectContent>
+										</Select>
+										{fieldState.error && (
+											<small className="text-red-500 opacity-75">
+												{fieldState.error?.message}
+											</small>
+										)}
+									</div>
+								)}
+							/>
+
 							<Controller
 								name="website"
 								control={control}

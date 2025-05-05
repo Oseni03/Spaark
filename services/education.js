@@ -17,6 +17,7 @@ const educationSelect = {
 	summary: true,
 	logo: true,
 	url: true,
+	location: true,
 	portfolioId: true,
 };
 

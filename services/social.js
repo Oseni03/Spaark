@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
-import { profileSchema } from "@/schema/sections";
+import { socialSchema } from "@/schema/sections";
 import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
@@ -18,20 +18,20 @@ const select = {
 	// Exclude createdAt and updatedAt
 };
 
-export async function getProfiles(portfolioId) {
+export async function getSocials(portfolioId) {
 	return withErrorHandling(async () => {
-		const profiles = await prisma.profile.findMany({
+		const socials = await prisma.social.findMany({
 			where: { portfolioId },
 			select,
 		});
-		if (profiles.length > 0) {
-			return profiles.map((item) => profileSchema.parse(item));
+		if (socials.length > 0) {
+			return socials.map((item) => socialSchema.parse(item));
 		}
 		return [];
 	});
 }
 
-export async function createProfile({ portfolioId, ...data }) {
+export async function createSocial({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		const cookieStore = await cookies();
 		const authToken = cookieStore.get(COOKIE_NAME)?.value;
@@ -40,8 +40,8 @@ export async function createProfile({ portfolioId, ...data }) {
 			throw new Error("Unauthorized");
 		}
 
-		// Create profile with additional metadata
-		const profile = await prisma.profile.create({
+		// Create social with additional metadata
+		const social = await prisma.social.create({
 			data: {
 				...data,
 				portfolio: { connect: { id: portfolioId } },
@@ -50,11 +50,11 @@ export async function createProfile({ portfolioId, ...data }) {
 		});
 
 		revalidatePath("/builder");
-		return profileSchema.parse(profile);
+		return socialSchema.parse(social);
 	});
 }
 
-export async function editProfile(profileId, { portfolioId, ...data }) {
+export async function editSocial(socialId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		const cookieStore = await cookies();
 		const authToken = cookieStore.get(COOKIE_NAME)?.value;
@@ -63,8 +63,8 @@ export async function editProfile(profileId, { portfolioId, ...data }) {
 			throw new Error("Unauthorized");
 		}
 
-		const updatedProfile = await prisma.profile.update({
-			where: { id: profileId, portfolioId },
+		const updatedSocial = await prisma.social.update({
+			where: { id: socialId, portfolioId },
 			data: {
 				...data,
 				updatedAt: new Date(),
@@ -73,28 +73,28 @@ export async function editProfile(profileId, { portfolioId, ...data }) {
 		});
 
 		revalidatePath("/builder");
-		return profileSchema.parse(updatedProfile);
+		return socialSchema.parse(updatedSocial);
 	});
 }
 
-export async function deleteProfile(profileId, portfolioId) {
+export async function deleteSocial(socialId, portfolioId) {
 	return withErrorHandling(async () => {
 		const cookieStore = await cookies();
 		const authToken = cookieStore.get(COOKIE_NAME)?.value;
 		const decodedToken = await verifyAuthToken(authToken);
 		if (!decodedToken?.uid || !portfolioId) {
 			throw new Error(
-				"Unauthorized: Must be logged in to delete a profile"
+				"Unauthorized: Must be logged in to delete a social"
 			);
 		}
 
-		await prisma.profile.delete({
-			where: { id: profileId, portfolioId },
+		await prisma.social.delete({
+			where: { id: socialId, portfolioId },
 		});
 
 		// Revalidate relevant paths
 		revalidatePath("/builder");
 
-		return { portfolioId, profileId };
+		return { portfolioId, socialId };
 	});
 }

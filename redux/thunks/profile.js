@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { z } from "zod";
-import { createProfile, editProfile, deleteProfile } from "@/services/profile";
-import { profileSchema } from "@/schema/sections";
+import { createSocial, editSocial, deleteSocial } from "@/services/social";
+import { socialSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 
 export const addProfileInDatabase = createAsyncThunk(
@@ -9,7 +9,7 @@ export const addProfileInDatabase = createAsyncThunk(
 	async (profileData, { getState, rejectWithValue }) => {
 		try {
 			logger.info("Adding profile:", profileData);
-			const validatedData = profileSchema.safeParse(profileData);
+			const validatedData = socialSchema.safeParse(profileData);
 			if (!validatedData.success) {
 				logger.error("Profile validation failed:", validatedData.error);
 				return rejectWithValue({
@@ -43,7 +43,7 @@ export const addProfileInDatabase = createAsyncThunk(
 				});
 			}
 
-			const response = await createProfile(validatedData.data);
+			const response = await createSocial(validatedData.data);
 			logger.info("Profile created successfully:", response);
 			return response;
 		} catch (error) {
@@ -64,9 +64,9 @@ export const updateProfileInDatabase = createAsyncThunk(
 		try {
 			logger.info("Updating profile:", data);
 			// Validate input before sending to service
-			const validatedData = profileSchema.safeParse(data);
+			const validatedData = socialSchema.safeParse(data);
 			if (validatedData.success) {
-				const response = await editProfile(data.id, validatedData.data);
+				const response = await editSocial(data.id, validatedData.data);
 				logger.info("Profile updated successfully:", response);
 				return response;
 			}
@@ -89,7 +89,7 @@ export const removeProfileFromDatabase = createAsyncThunk(
 	async ({ profileId, portfolioId }, { rejectWithValue }) => {
 		try {
 			logger.info("Removing profile:", { profileId, portfolioId });
-			await deleteProfile(profileId, portfolioId);
+			await deleteSocial(profileId, portfolioId);
 			logger.info("Profile removed successfully:", {
 				profileId,
 				portfolioId,

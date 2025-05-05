@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
-import { addProfile, updateProfile } from "@/redux/features/portfolioSlice";
+import { addSocial, updateSocial } from "@/redux/features/portfolioSlice";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/select";
 import { socialNetworks } from "@/utils/constants";
 
-export const ProfilesDialog = ({
+export const SocialsDialog = ({
 	portfolioId,
 	form,
-	currentProfile,
+	currentSocial,
 	isOpen,
 	setIsOpen,
 }) => {
@@ -29,16 +29,16 @@ export const ProfilesDialog = ({
 	const { reset, handleSubmit, control } = form;
 
 	const onSubmit = (data) => {
-		if (currentProfile) {
+		if (currentSocial) {
 			dispatch(
-				updateProfile({
-					id: currentProfile.id,
+				updateSocial({
+					id: currentSocial.id,
 					...data,
 					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addProfile({ ...data, portfolioId }));
+			dispatch(addSocial({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();
@@ -50,9 +50,7 @@ export const ProfilesDialog = ({
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
-							{currentProfile
-								? "Edit Profile"
-								: "Add New Profile"}
+							{currentSocial ? "Edit Social" : "Add New Social"}
 						</DialogTitle>
 					</DialogHeader>
 
@@ -146,9 +144,7 @@ export const ProfilesDialog = ({
 								Cancel
 							</Button>
 							<Button type="submit">
-								{currentProfile
-									? "Update Profile"
-									: "Add Profile"}
+								{currentSocial ? "Update Social" : "Add Social"}
 							</Button>
 						</div>
 					</form>
