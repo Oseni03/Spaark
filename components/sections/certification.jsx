@@ -9,10 +9,10 @@ import { certificationSchema, defaultCertification } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addCertificationInDatabase,
-	removeCertificationFromDatabase,
-	updateCertificationnInDatabase,
-} from "@/redux/thunks/certifications";
+	addCertification,
+	removeCertification,
+	updateCertification,
+} from "@/redux/features/portfolioSlice";
 import { CertificationDialog } from "@/components/dialogs/certification-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
@@ -59,13 +59,11 @@ export const Certification = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addCertificationInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addCertification({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
-			removeCertificationFromDatabase({
+			removeCertification({
 				certificationId: item.id,
 				portfolioId,
 			})
@@ -73,7 +71,7 @@ export const Certification = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateCertificationnInDatabase({
+			updateCertificationn({
 				...item,
 				visible: !item.visible,
 				portfolioId,

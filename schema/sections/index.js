@@ -10,8 +10,6 @@ import { hackathonSchema } from "./hackathon";
 import { createId } from "@paralleldrive/cuid2";
 import { basicsSchema, defaultBasics } from "./basics";
 import { idSchema } from "../shared/id";
-import { testimonialSchema } from "./testimonial";
-import { teamSchema } from "./team"; // Add this line
 
 // Schema
 export const sectionSchema = z.object({
@@ -31,8 +29,6 @@ export const portfolioSchema = z.object({
 // Schema
 export const mainSchema = portfolioSchema.extend({
 	customDomain: z.string().optional(),
-	// Add organization fields
-	organizationId: z.string().optional(),
 	basics: sectionSchema.extend(basicsSchema),
 	certifications: sectionSchema.extend({
 		id: z.literal("certification"),
@@ -62,15 +58,6 @@ export const mainSchema = portfolioSchema.extend({
 		id: z.literal("skill"),
 		items: z.array(skillSchema),
 	}),
-	testimonials: sectionSchema.extend({
-		id: z.literal("testimonial"),
-		items: z.array(testimonialSchema),
-	}),
-	teams: sectionSchema.extend({
-		// Add this section
-		id: z.literal("team"),
-		items: z.array(teamSchema),
-	}),
 });
 
 // Defaults
@@ -93,7 +80,6 @@ export const defaultPortfolio = {
 export const defaultMain = {
 	...defaultPortfolio,
 	customDomain: "",
-	organizationId: null,
 	basics: {
 		...defaultSection,
 		...defaultBasics,
@@ -136,19 +122,6 @@ export const defaultMain = {
 		items: [],
 	},
 	skills: { ...defaultSection, id: "skills", name: "Skills", items: [] },
-	testimonials: {
-		...defaultSection,
-		id: "testimonial",
-		name: "Testimonials",
-		items: [],
-	},
-	teams: {
-		// Add this section
-		...defaultSection,
-		id: "team",
-		name: "Team",
-		items: [],
-	},
 };
 
 export * from "./certification";
@@ -159,5 +132,3 @@ export * from "./language";
 export * from "./profile";
 export * from "./project";
 export * from "./skill";
-export * from "./testimonial";
-export * from "./team"; // Add this line

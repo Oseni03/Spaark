@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
 import { SectionListItem } from "./shared/section-list-item";
 import {
-	addProfileInDatabase,
-	removeProfileFromDatabase,
-	updateProfileInDatabase,
-} from "@/redux/thunks/profile";
+	addProfile,
+	removeProfile,
+	updateProfile,
+} from "@/redux/features/portfolioSlice";
 import { ProfilesDialog } from "@/components/dialogs/profile-dialog";
 import { useForm } from "react-hook-form";
 import { defaultProfile } from "@/schema/sections";
@@ -60,18 +60,14 @@ export const Profile = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addProfileInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addProfile({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
-		dispatch(
-			removeProfileFromDatabase({ portfolioId, profileId: item.id })
-		);
+		dispatch(removeProfile({ portfolioId, profileId: item.id }));
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateProfileInDatabase({
+			updateProfile({
 				...item,
 				visible: !item.visible,
 				portfolioId,

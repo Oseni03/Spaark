@@ -1,9 +1,6 @@
 import { useDispatch } from "react-redux";
 import { Controller } from "react-hook-form";
-import {
-	addProfileInDatabase,
-	updateProfileInDatabase,
-} from "@/redux/thunks/profile";
+import { addProfile, updateProfile } from "@/redux/features/portfolioSlice";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,14 +31,14 @@ export const ProfilesDialog = ({
 	const onSubmit = (data) => {
 		if (currentProfile) {
 			dispatch(
-				updateProfileInDatabase({
+				updateProfile({
 					id: currentProfile.id,
 					...data,
 					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addProfileInDatabase({ ...data, portfolioId }));
+			dispatch(addProfile({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

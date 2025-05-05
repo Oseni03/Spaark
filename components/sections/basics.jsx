@@ -9,7 +9,7 @@ import { PictureSection } from "./picture/section";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import { updateBasicsInDatabase } from "@/redux/thunks/basics";
+import { updateBasics } from "@/redux/features/portfolioSlice";
 import { useEffect, useState } from "react";
 import { RichInput } from "@/components/ui/rich-input";
 import { logger } from "@/lib/utils";
@@ -43,11 +43,9 @@ export const BasicsSection = () => {
 	const onSubmit = async (data) => {
 		setLoading(true);
 		try {
-			await dispatch(
-				updateBasicsInDatabase({ portfolioId, ...data })
-			).unwrap();
+			await dispatch(updateBasics({ portfolioId, ...data })).unwrap();
 			logger.info("User basics updated");
-			toast.success("Basics information updated")
+			toast.success("Basics information updated");
 		} catch (error) {
 			logger.error("Error updating basics:", error);
 		} finally {

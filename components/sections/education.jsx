@@ -9,10 +9,10 @@ import { defaultEducation, educationSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addEducationInDatabase,
-	removeEducationFromDatabase,
-	updateEducationInDatabase,
-} from "@/redux/thunks/educations";
+	addEducation,
+	removeEducation,
+	updateEducation,
+} from "@/redux/features/portfolioSlice";
 import { EducationDialog } from "@/components/dialogs/education-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
@@ -58,13 +58,11 @@ export const Education = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addEducationInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addEducation({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
-			removeEducationFromDatabase({
+			removeEducation({
 				educationId: item.id,
 				portfolioId,
 			})
@@ -72,7 +70,7 @@ export const Education = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateEducationInDatabase({
+			updateEducation({
 				...item,
 				visible: !item.visible,
 				portfolioId,

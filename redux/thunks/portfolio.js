@@ -3,9 +3,10 @@ import { portfolioSchema } from "@/schema/sections";
 import {
 	createPortfolio,
 	deletePortfolio,
-	editPortfolio,
+	updatePortfolio,
 } from "@/services/portfolio";
 import { logger } from "@/lib/utils";
+import { z } from "zod";
 
 // Create Portfolio
 export const addPortfolioInDatabase = createAsyncThunk(
@@ -39,7 +40,7 @@ export const updatePortfolioInDatabase = createAsyncThunk(
 	async ({ id, data }, { rejectWithValue }) => {
 		try {
 			logger.info("Updating portfolio:", { id, data });
-			const response = await editPortfolio(id, data);
+			const response = await updatePortfolio(id, data);
 			logger.info("Portfolio updated successfully:", response);
 			return response;
 		} catch (error) {

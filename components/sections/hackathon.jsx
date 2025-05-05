@@ -11,13 +11,8 @@ import { useEffect, useState } from "react";
 import {
 	addHackathon,
 	removeHackathon,
-	toggleHackathonVisibility,
+	updateHackathon,
 } from "@/redux/features/portfolioSlice";
-import {
-	addHackathonInDatabase,
-	removeHackathonFromDatabase,
-	updateHackathonInDatabase,
-} from "@/redux/thunks/hackathon";
 import { HackathonDialog } from "@/components/dialogs/hackathon-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
@@ -64,13 +59,11 @@ export const Hackathon = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addHackathonInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addHackathon({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
-			removeHackathonFromDatabase({
+			removeHackathon({
 				hackathonId: item.id,
 				portfolioId,
 			})
@@ -78,7 +71,7 @@ export const Hackathon = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateHackathonInDatabase({
+			updateHackathon({
 				...item,
 				visible: !item.visible,
 				portfolioId,

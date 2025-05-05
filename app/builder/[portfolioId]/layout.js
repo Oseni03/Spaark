@@ -13,7 +13,7 @@ import {
 	BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 import {
 	PORTFOLIO_TAILWIND_CLASS,
 	CONTAINER_CLASS,
@@ -49,9 +49,12 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
+import { updatePortfolioWithSections } from "@/services/portfolio";
 
 function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
+	const { portfolioId } = useParams();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
 	const [rightOpen, setRightOpen] = React.useState(false);
@@ -63,6 +66,9 @@ function BuilderLayoutContent({ children }) {
 	const { user, signOut } = useAuth();
 	const [showBanner, setShowBanner] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
+	const portfolio = useSelector((state) =>
+		state.portfolios.items.find((item) => item.id === portfolioId)
+	);
 
 	const handleZoomIn = () => {
 		transformRef.current?.zoomIn(0.2);
@@ -83,14 +89,35 @@ function BuilderLayoutContent({ children }) {
 	const handleSave = async () => {
 		try {
 			setIsSaving(true);
-			// Add your save logic here
-			toast("Changes saved", {
+
+			if (!portfolio) {
+				throw new Error("No portfolio data found");
+			}
+
+			// Show loading toast
+			const loadingToast = toast.loading("Saving changes...", {
+				description: "Please wait while we save your portfolio.",
+			});
+
+			// Call the server function to update the portfolio
+			const result = await updatePortfolioWithSections(
+				portfolioId,
+				portfolio
+			);
+
+			if (result.error) {
+				throw new Error(result.error);
+			}
+
+			// Update loading toast to success
+			toast.dismiss(loadingToast);
+			toast.success("Changes saved", {
 				description: "Your portfolio has been updated successfully.",
 			});
 		} catch (error) {
-			toast("Error saving changes", {
-				variant: "destructive",
-				description: error.message,
+			logger.error("Error saving portfolio:", error);
+			toast.error("Error saving changes", {
+				description: error.message || "Failed to save changes",
 			});
 		} finally {
 			setIsSaving(false);

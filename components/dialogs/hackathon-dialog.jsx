@@ -10,10 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
-import {
-	addHackathonInDatabase,
-	updateHackathonInDatabase,
-} from "@/redux/thunks/hackathon";
+import { addHackathon, updateHackathon } from "@/redux/features/portfolioSlice";
 import { PictureSection } from "../sections/picture/section";
 import { CustomLink } from "@/components/custom-link";
 import { logger } from "@/lib/utils";
@@ -32,14 +29,14 @@ export const HackathonDialog = ({
 		logger.info("Hackathon data submitted:", data);
 		if (currentHackathon) {
 			dispatch(
-				updateHackathonInDatabase({
+				updateHackathon({
 					...data,
 					id: currentHackathon.id,
 					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addHackathonInDatabase({ ...data, portfolioId }));
+			dispatch(addHackathon({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

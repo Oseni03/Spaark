@@ -25,7 +25,7 @@ export async function updateDomain({
 		await dispatch(
 			updatePortfolioInDatabase({
 				id: portfolioId,
-				data: { ...portfolio, customDomain: domain },
+				data: { customDomain: domain },
 			})
 		).unwrap();
 

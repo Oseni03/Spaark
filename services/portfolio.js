@@ -16,7 +16,7 @@ const portfolioSelect = {
 	isLive: true,
 	blogEnabled: true,
 	customDomain: true,
-	organizationId: true,
+	// organizationId: true,
 	template: true,
 	basics: true,
 	profiles: true,
@@ -114,7 +114,7 @@ const getValidBasicsUpdateFields = (basics) => {
 		}, {});
 };
 
-export async function editPortfolio(id, data) {
+export async function updatePortfolio(id, data) {
 	return withErrorHandling(async () => {
 		const cookieStore = await cookies();
 		const authToken = cookieStore.get(COOKIE_NAME)?.value;
@@ -192,5 +192,185 @@ export async function getPortfolio(domain) {
 		});
 
 		return portfolio;
+	});
+}
+
+export async function updatePortfolioWithSections(id, data) {
+	return withErrorHandling(async () => {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
+		}
+
+		const userId = decodedToken.uid;
+
+		// First, get the existing portfolio to preserve createdAt
+		const existingPortfolio = await prisma.portfolio.findUnique({
+			where: { id },
+			select: { createdAt: true },
+		});
+
+		if (!existingPortfolio) {
+			throw new Error("Portfolio not found");
+		}
+
+		// Extract main portfolio fields and nested sections
+		const {
+			id: portfolioId,
+			basics,
+			skills,
+			experiences,
+			educations,
+			projects,
+			certifications,
+			profiles,
+			hackathons,
+			...portfolioData
+		} = data;
+
+		// Update the portfolio with nested data
+		const updatedPortfolio = await prisma.portfolio.update({
+			where: {
+				id,
+				userId,
+			},
+			data: {
+				...portfolioData,
+				createdAt: existingPortfolio.createdAt, // Preserve the original createdAt
+				updatedAt: new Date(),
+				// Update basics if provided
+				basics: basics
+					? {
+							upsert: {
+								create: {
+									name: basics.name,
+									headline: basics.headline,
+									email: basics.email,
+									phone: basics.phone,
+									location: basics.location,
+									url: basics.url,
+									picture: basics.picture,
+									summary: basics.summary,
+									about: basics.about,
+								},
+								update: {
+									name: basics.name,
+									headline: basics.headline,
+									email: basics.email,
+									phone: basics.phone,
+									location: basics.location,
+									url: basics.url,
+									picture: basics.picture,
+									summary: basics.summary,
+									about: basics.about,
+								},
+							},
+						}
+					: undefined,
+				// Update skills if provided
+				skills:
+					skills?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: skills.items.map((skill) => ({
+									name: skill.name,
+									description: skill.description,
+									visible: skill.visible,
+								})),
+							}
+						: undefined,
+				// Update experiences if provided
+				experiences:
+					experiences?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: experiences.items.map((exp) => ({
+									title: exp.title,
+									company: exp.company,
+									location: exp.location,
+									startDate: exp.startDate,
+									endDate: exp.endDate,
+									description: exp.description,
+									visible: exp.visible,
+								})),
+							}
+						: undefined,
+				// Update educations if provided
+				educations:
+					educations?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: educations.items.map((edu) => ({
+									institution: edu.institution,
+									area: edu.area,
+									studyType: edu.studyType,
+									startDate: edu.startDate,
+									endDate: edu.endDate,
+									score: edu.score,
+									visible: edu.visible,
+								})),
+							}
+						: undefined,
+				// Update projects if provided
+				projects:
+					projects?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: projects.items.map((proj) => ({
+									name: proj.name,
+									description: proj.description,
+									url: proj.url,
+									visible: proj.visible,
+								})),
+							}
+						: undefined,
+				// Update certifications if provided
+				certifications:
+					certifications?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: certifications.items.map((cert) => ({
+									name: cert.name,
+									issuer: cert.issuer,
+									date: cert.date,
+									url: cert.url,
+									visible: cert.visible,
+								})),
+							}
+						: undefined,
+				// Update profiles if provided
+				profiles:
+					profiles?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: profiles.items.map((prof) => ({
+									network: prof.network,
+									username: prof.username,
+									url: prof.url,
+									visible: prof.visible,
+								})),
+							}
+						: undefined,
+				// Update hackathons if provided
+				hackathons:
+					hackathons?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: hackathons.items.map((hack) => ({
+									name: hack.name,
+									description: hack.description,
+									date: hack.date,
+									url: hack.url,
+									visible: hack.visible,
+								})),
+							}
+						: undefined,
+			},
+			select: portfolioSelect,
+		});
+
+		return transformPortfolio(updatedPortfolio);
 	});
 }

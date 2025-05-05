@@ -10,10 +10,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	addSkillInDatabase,
-	updateSkillnInDatabase,
-} from "@/redux/thunks/skill";
+import { addSkill, updateSkill } from "@/redux/features/portfolioSlice";
 import { logger } from "@/lib/utils";
 
 export const SkillDialog = ({
@@ -31,14 +28,14 @@ export const SkillDialog = ({
 			logger.info("Update skill: ", currentSkill);
 			logger.info("Update data: ", data);
 			dispatch(
-				updateSkillnInDatabase({
+				updateSkill({
 					...data,
 					id: currentSkill.id,
 					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addSkillInDatabase({ ...data, portfolioId }));
+			dispatch(addSkill({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

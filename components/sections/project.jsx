@@ -9,10 +9,10 @@ import { defaultProject, projectSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addProjectInDatabase,
-	removeProjectFromDatabase,
-	updateProjectInDatabase,
-} from "@/redux/thunks/project";
+	addProject,
+	removeProject,
+	updateProject,
+} from "@/redux/features/portfolioSlice";
 import { ProjectDialog } from "@/components/dialogs/project-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
@@ -58,13 +58,11 @@ export const Project = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addProjectInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addProject({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
-			removeProjectFromDatabase({
+			removeProject({
 				projectId: item.id,
 				portfolioId,
 			})
@@ -72,7 +70,7 @@ export const Project = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateProjectInDatabase({
+			updateProject({
 				...item,
 				visible: !item.visible,
 				portfolioId,

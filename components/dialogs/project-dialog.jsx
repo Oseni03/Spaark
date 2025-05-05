@@ -14,10 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RichInput } from "@/components/ui/rich-input";
-import {
-	addProjectInDatabase,
-	updateProjectInDatabase,
-} from "@/redux/thunks/project";
+import { addProject, updateProject } from "@/redux/features/portfolioSlice";
 import Uploader from "../sections/picture/uploader";
 import { logger } from "@/lib/utils";
 
@@ -35,14 +32,14 @@ export const ProjectDialog = ({
 		logger.info("Project data:", data);
 		if (currentProject) {
 			dispatch(
-				updateProjectInDatabase({
+				updateProject({
 					id: currentProject.id,
 					...data,
 					portfolioId,
 				})
 			);
 		} else {
-			dispatch(addProjectInDatabase({ ...data, portfolioId }));
+			dispatch(addProject({ ...data, portfolioId }));
 		}
 		setIsOpen(false);
 		reset();

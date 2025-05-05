@@ -26,7 +26,6 @@ import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import {
-	updatePortfolioInDatabase,
 	removePortfolioFromDatabase,
 	addPortfolioInDatabase,
 } from "@/redux/thunks/portfolio";

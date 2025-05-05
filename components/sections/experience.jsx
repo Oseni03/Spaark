@@ -10,10 +10,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { ExperienceDialog } from "@/components/dialogs/experience-dialog";
 import {
-	addExperienceInDatabase,
-	removeExperienceFromDatabase,
-	updateExperienceInDatabase,
-} from "@/redux/thunks/experience";
+	addExperience,
+	removeExperience,
+	updateExperience,
+} from "@/redux/features/portfolioSlice";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
 
@@ -59,13 +59,11 @@ export const Experience = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(
-			addExperienceInDatabase({ ...item, id: createId(), portfolioId })
-		);
+		dispatch(addExperience({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		patch(
-			removeExperienceFromDatabase({
+			removeExperience({
 				experienceId: item.id,
 				portfolioId,
 			})
@@ -73,7 +71,7 @@ export const Experience = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateExperienceInDatabase({
+			updateExperience({
 				...item,
 				visible: !item.visible,
 				portfolioId,

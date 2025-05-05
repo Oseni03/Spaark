@@ -9,10 +9,10 @@ import { defaultSkill, skillSchema } from "@/schema/sections";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import {
-	addSkillInDatabase,
-	removeSkillFromDatabase,
-	updateSkillnInDatabase,
-} from "@/redux/thunks/skill";
+	addSkill,
+	updateSkill,
+	removeSkill,
+} from "@/redux/features/portfolioSlice";
 import { SkillDialog } from "@/components/dialogs/skill-dialog";
 import { createId } from "@paralleldrive/cuid2";
 import { useParams } from "next/navigation";
@@ -59,11 +59,11 @@ export const Skill = () => {
 		setIsOpen(true);
 	};
 	const onDuplicate = (item) => {
-		dispatch(addSkillInDatabase({ ...item, id: createId(), portfolioId }));
+		dispatch(addSkill({ ...item, id: createId(), portfolioId }));
 	};
 	const onDelete = (item) => {
 		dispatch(
-			removeSkillFromDatabase({
+			removeSkill({
 				skillId: item.id,
 				portfolioId,
 			})
@@ -71,7 +71,7 @@ export const Skill = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateSkillnInDatabase({
+			updateSkill({
 				...item,
 				visible: !item.visible,
 				portfolioId,
