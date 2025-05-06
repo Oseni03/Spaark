@@ -250,6 +250,7 @@ export async function updatePortfolioWithSections(id, data) {
 									email: basics.email,
 									phone: basics.phone,
 									location: basics.location,
+									years: basics.years,
 									url: basics.url,
 									picture: basics.picture,
 									summary: basics.summary,
@@ -261,6 +262,7 @@ export async function updatePortfolioWithSections(id, data) {
 									email: basics.email,
 									phone: basics.phone,
 									location: basics.location,
+									years: basics.years,
 									url: basics.url,
 									picture: basics.picture,
 									summary: basics.summary,
@@ -277,6 +279,7 @@ export async function updatePortfolioWithSections(id, data) {
 								create: skills.items.map((skill) => ({
 									name: skill.name,
 									description: skill.description,
+									level: skill.level,
 									visible: skill.visible,
 								})),
 							}
@@ -287,12 +290,14 @@ export async function updatePortfolioWithSections(id, data) {
 						? {
 								deleteMany: {},
 								create: experiences.items.map((exp) => ({
-									title: exp.title,
+									position: exp.position,
 									company: exp.company,
 									location: exp.location,
-									startDate: exp.startDate,
-									endDate: exp.endDate,
-									description: exp.description,
+									date: exp.date,
+									summary: exp.summary,
+									picture: exp.picture,
+									url: exp.url,
+									technologies: exp.technologies,
 									visible: exp.visible,
 								})),
 							}
@@ -304,11 +309,12 @@ export async function updatePortfolioWithSections(id, data) {
 								deleteMany: {},
 								create: educations.items.map((edu) => ({
 									institution: edu.institution,
-									area: edu.area,
+									location: edu.location,
 									studyType: edu.studyType,
-									startDate: edu.startDate,
-									endDate: edu.endDate,
-									score: edu.score,
+									date: edu.date,
+									summary: edu.summary,
+									logo: edu.logo,
+									url: edu.url,
 									visible: edu.visible,
 								})),
 							}
@@ -321,7 +327,13 @@ export async function updatePortfolioWithSections(id, data) {
 								create: projects.items.map((proj) => ({
 									name: proj.name,
 									description: proj.description,
-									url: proj.url,
+									date: proj.date,
+									technologies: proj.technologies,
+									website: proj.website,
+									source: proj.source,
+									image: proj.image,
+									video: proj.video,
+									type: proj.type,
 									visible: proj.visible,
 								})),
 							}
@@ -335,6 +347,7 @@ export async function updatePortfolioWithSections(id, data) {
 									name: cert.name,
 									issuer: cert.issuer,
 									date: cert.date,
+									summary: cert.summary,
 									url: cert.url,
 									visible: cert.visible,
 								})),
@@ -360,9 +373,12 @@ export async function updatePortfolioWithSections(id, data) {
 								deleteMany: {},
 								create: hackathons.items.map((hack) => ({
 									name: hack.name,
+									location: hack.location,
 									description: hack.description,
 									date: hack.date,
+									logo: hack.logo,
 									url: hack.url,
+									links: hack.links,
 									visible: hack.visible,
 								})),
 							}

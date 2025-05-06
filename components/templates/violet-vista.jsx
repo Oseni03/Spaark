@@ -392,12 +392,12 @@ export default function VioletVista({
 								</div>
 							)}
 
-							<div className="mt-12 flex justify-center">
+							{/* <div className="mt-12 flex justify-center">
 								<Button className="bg-[#1A1A1A] hover:bg-[#222222] text-white border border-[#333333]">
 									<Download className="mr-2 h-4 w-4" />
 									Download Resume
 								</Button>
-							</div>
+							</div> */}
 						</div>
 					</div>
 				</section>
@@ -453,9 +453,11 @@ export default function VioletVista({
 											)}
 											<div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent opacity-80"></div>
 											<div className="absolute bottom-0 left-0 p-6">
-												<Badge className="bg-[#FF4D4D]/20 text-[#FF4D4D] hover:bg-[#FF4D4D]/30">
-													Web Application
-												</Badge>
+												{project.type && (
+													<Badge className="bg-[#FF4D4D]/20 text-[#FF4D4D] hover:bg-[#FF4D4D]/30">
+														{project.type}
+													</Badge>
+												)}
 												<h3 className="text-2xl font-bold mt-2">
 													{project.name}
 												</h3>
@@ -532,12 +534,12 @@ export default function VioletVista({
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-6">
 									My Skills
 								</Badge>
-								<h2 className="text-4xl font-bold mb-6">
+								{/* <h2 className="text-4xl font-bold mb-6">
 									Technical Expertise
-								</h2>
+								</h2> */}
 								<p className="text-gray-300">
 									I specialize in a range of technologies
 									across the full stack development spectrum.
@@ -555,9 +557,9 @@ export default function VioletVista({
 											<div className="font-medium mb-2">
 												{skill.name}
 											</div>
-											{skill.description && (
+											{skill.level && (
 												<div className="text-sm text-gray-400">
-													{skill.description}
+													{skill.level}
 												</div>
 											)}
 										</div>
@@ -617,6 +619,26 @@ export default function VioletVista({
 															{experience.company}
 														</p>
 													</div>
+													{experience.technologies && (
+														<div className="flex flex-wrap gap-2">
+															{experience.technologies.map(
+																(
+																	item,
+																	index
+																) => (
+																	<Badge
+																		key={
+																			index
+																		}
+																		variant="outline"
+																		className="border-[#333333] text-gray-300"
+																	>
+																		{item}
+																	</Badge>
+																)
+															)}
+														</div>
+													)}
 												</div>
 												<div className="text-gray-300">
 													{HTMLReactParser(
@@ -667,9 +689,11 @@ export default function VioletVista({
 											<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20">
 												{education.date}
 											</Badge>
-											<div className="text-sm text-gray-400">
-												California, USA
-											</div>
+											{education.location && (
+												<div className="text-sm text-gray-400">
+													{education.location}
+												</div>
+											)}
 										</div>
 										<h3 className="text-xl font-bold mb-2">
 											{education.studyType}

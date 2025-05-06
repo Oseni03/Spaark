@@ -31,6 +31,14 @@ const portfolioSlice = createSlice({
 			);
 			state.items = transformedData;
 		},
+		updatePortfolio: (state, action) => {
+			const { id, data } = action.payload;
+			const portfolio = state.items.find((item) => item.id === id);
+			if (portfolio) {
+				const updatedData = { ...portfolio, ...data };
+				Object.assign(portfolio, updatedData);
+			}
+		},
 		// Basics
 		addBasics: (state, action) => {
 			const { portfolioId, ...basics } = action.payload;
@@ -433,6 +441,7 @@ const portfolioSlice = createSlice({
 
 export const {
 	setPortfolios,
+	updatePortfolio,
 	// Basics
 	addBasics,
 	updateBasics,

@@ -26,11 +26,27 @@ export async function withErrorHandling(action) {
 
 		// Specific error type handling
 		if (error instanceof z.ZodError) {
+			const formattedError = error.errors
+				.map((err) => {
+					// Handle union errors specially
+					if (err.code === "invalid_union") {
+						return `${err.path.join(".")}: Please provide a valid value`;
+					}
+					// Handle null/undefined values
+					if (
+						err.code === "invalid_type" &&
+						(err.received === "null" ||
+							err.received === "undefined")
+					) {
+						return `${err.path.join(".")}: This field cannot be empty`;
+					}
+					return `${err.path.join(".")}: ${err.message}`;
+				})
+				.join("; ");
+
 			return {
 				success: false,
-				error: error.errors
-					.map((e) => `${e.path.join(".")}: ${e.message}`)
-					.join("; "),
+				error: formattedError,
 			};
 		}
 

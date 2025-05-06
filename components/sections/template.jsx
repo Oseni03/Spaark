@@ -5,8 +5,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "next/navigation";
 import { cn, logger } from "@/lib/utils";
 import Image from "next/image";
-import { updatePortfolioInDatabase } from "@/redux/thunks/portfolio";
-import { SectionIcon } from "../section-icon";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { motion } from "framer-motion";
 import { ScrollArea } from "../ui/scroll-area";
@@ -25,6 +23,7 @@ import {
 	TooltipTrigger,
 } from "../ui/tooltip";
 import { useAuth } from "@/context/auth-context";
+import { updatePortfolio } from "@/redux/features/portfolioSlice";
 
 const templates = [
 	{
@@ -62,7 +61,7 @@ export function TemplateSection() {
 		if (!portfolio) return;
 
 		dispatch(
-			updatePortfolioInDatabase({
+			updatePortfolio({
 				id: portfolio.id,
 				data: { template: templateId },
 			})
@@ -87,7 +86,7 @@ export function TemplateSection() {
 
 		// If all checks pass, update the portfolio
 		dispatch(
-			updatePortfolioInDatabase({
+			updatePortfolio({
 				id: portfolio.id,
 				data: { isLive: !portfolio.isLive },
 			})
