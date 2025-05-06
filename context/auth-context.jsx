@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
 						subscription: dbUser.data?.subscription,
 						emailVerified: firebaseUser.emailVerified,
 						displayName: firebaseUser.displayName || undefined,
-						photoURL: firebaseUser.photoURL || "",
+						photoURL: firebaseUser.photoURL || undefined,
 					});
 
 					logger.info("User authenticated:", {
