@@ -36,6 +36,11 @@ const templates = [
 		name: "Violet Vista",
 		preview: "/templates/violetvista.png",
 	},
+	{
+		id: "mayday",
+		name: "MayDay",
+		preview: "/templates/mayday.png",
+	},
 	// Add more templates as needed
 ];
 
