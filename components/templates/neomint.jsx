@@ -17,12 +17,22 @@ import {
 	ChevronRight,
 	ArrowUpRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import HTMLReactParser from "html-react-parser";
+import Link from "next/link";
+import {
+	GithubLogo,
+	LinkedinLogo,
+	XLogo,
+	YoutubeLogo,
+} from "@phosphor-icons/react";
+import { useUserContactForm } from "@/hooks/use-user-contact-form";
+import { Spinner } from "../ui/Spinner";
+import { usePathname } from "next/navigation";
 
 export default function Portfolio({
 	basics = defaultMain.basics,
@@ -40,6 +50,11 @@ export default function Portfolio({
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 	const sectionsRef = useRef < HTMLDivElement > null;
+	const pathname = usePathname();
+	const isBlogActive = pathname === "/blog";
+
+	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
+		useUserContactForm();
 
 	const sections = useMemo(
 		() => [
@@ -172,7 +187,10 @@ export default function Portfolio({
 									<MoonStar className="h-5 w-5" />
 								)}
 							</Button>
-							<Button className="hidden md:flex">
+							<Button
+								className="hidden md:flex"
+								onClick={() => scrollToSection("contact")}
+							>
 								<Mail className="mr-2 h-4 w-4" />
 								Contact Me
 							</Button>
@@ -222,28 +240,113 @@ export default function Portfolio({
 									{section.id}
 								</button>
 							))}
+							{blogEnabled && (
+								<Link href={"/blog"}>
+									<button
+										className={cn(
+											"capitalize hover:text-primary transition-colors",
+											isBlogActive &&
+												"text-primary font-medium"
+										)}
+									>
+										blog
+									</button>
+								</Link>
+							)}
 							<div className="flex gap-4 mt-8">
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border"
-								>
-									<Github className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border"
-								>
-									<Linkedin className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border"
-								>
-									<Mail className="h-5 w-5" />
-								</Button>
+								{socials.map((social, index) => {
+									{
+										social.network == "github" && (
+											<Link
+												href={`https://www.github.com/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border"
+												)}
+											>
+												<GithubLogo className="h-5 w-5" />
+												<span className="sr-only">
+													GitHub
+												</span>
+											</Link>
+										);
+									}
+									{
+										social.network == "linkedin" && (
+											<Link
+												href={`https://www.linkedin.com/in/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border"
+												)}
+											>
+												<LinkedinLogo className="h-5 w-5" />
+												<span className="sr-only">
+													LinkedIn
+												</span>
+											</Link>
+										);
+									}
+									{
+										social.network == "youtube" && (
+											<Link
+												href={`https://www.youtube.com/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border"
+												)}
+											>
+												<YoutubeLogo className="h-5 w-5" />
+												<span className="sr-only">
+													YouTube
+												</span>
+											</Link>
+										);
+									}
+									{
+										social.network == "x" && (
+											<Link
+												href={`https://www.x.com/${social.username}`}
+											>
+												<Button
+													key={index}
+													variant="ghost"
+													size="icon"
+													className="rounded-full border border-border hover:border-primary hover:text-primary"
+												>
+													<XLogo className="h-5 w-5" />
+													<span className="sr-only">
+														X
+													</span>
+												</Button>
+											</Link>
+										);
+									}
+								})}
+								{basics.email && (
+									<Link
+										href={`mailto:${basics.email}`}
+										className={cn(
+											buttonVariants({
+												variant: "ghost",
+												size: "icon",
+											}),
+											"rounded-full border border-border"
+										)}
+									>
+										<Mail className="h-5 w-5" />
+										<span className="sr-only">Email</span>
+									</Link>
+								)}
 							</div>
 						</nav>
 					</motion.div>
@@ -307,27 +410,101 @@ export default function Portfolio({
 								</div>
 
 								<div className="flex items-center gap-6 mt-12">
-									<Button
-										variant="ghost"
-										size="icon"
-										className="rounded-full border border-border hover:border-primary hover:text-primary"
-									>
-										<Github className="h-5 w-5" />
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="rounded-full border border-border hover:border-primary hover:text-primary"
-									>
-										<Linkedin className="h-5 w-5" />
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="rounded-full border border-border hover:border-primary hover:text-primary"
-									>
-										<Mail className="h-5 w-5" />
-									</Button>
+									{socials.map((social, index) => {
+										{
+											social.network == "github" && (
+												<Link
+													href={`https://www.github.com/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full border border-border hover:border-primary hover:text-primary"
+													)}
+												>
+													<GithubLogo className="h-4 w-4" />
+													<span className="sr-only">
+														GitHub
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "linkedin" && (
+												<Link
+													href={`https://www.linkedin.com/in/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full border border-border hover:border-primary hover:text-primary"
+													)}
+												>
+													<LinkedinLogo className="h-4 w-4" />
+													<span className="sr-only">
+														LinkedIn
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "youtube" && (
+												<Link
+													href={`https://www.youtube.com/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full border border-border hover:border-primary hover:text-primary"
+													)}
+												>
+													<YoutubeLogo className="h-4 w-4" />
+													<span className="sr-only">
+														YouTube
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "x" && (
+												<Link
+													href={`https://www.x.com/${social.username}`}
+												>
+													<Button
+														key={index}
+														variant="ghost"
+														size="icon"
+														className="rounded-full border border-border hover:border-primary hover:text-primary"
+													>
+														<XLogo className="h-4 w-4" />
+														<span className="sr-only">
+															X
+														</span>
+													</Button>
+												</Link>
+											);
+										}
+									})}
+									{basics.email && (
+										<Link
+											href={`mailto:${basics.email}`}
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												"rounded-full border border-border hover:border-primary hover:text-primary"
+											)}
+										>
+											<Mail className="h-5 w-5" />
+											<span className="sr-only">
+												Email
+											</span>
+										</Link>
+									)}
 								</div>
 							</motion.div>
 
@@ -455,1629 +632,627 @@ export default function Portfolio({
 
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 								{/* Project 1 */}
-								<Card className="group overflow-hidden bg-card border-border hover:border-primary transition-colors">
-									<div className="relative h-56 w-full overflow-hidden">
-										<Image
-											src="/placeholder.svg?height=224&width=384"
-											alt="Project thumbnail"
-											fill
-											className="object-cover transition-transform duration-700 group-hover:scale-110"
-										/>
-									</div>
-									<CardContent className="p-6">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-3">
-											Web Application
-										</Badge>
-										<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-											Finance Dashboard
-										</h3>
-										<p className="text-muted-foreground mb-4 line-clamp-2">
-											A comprehensive financial dashboard
-											with real-time data visualization
-											and analytics.
-										</p>
-										<div className="flex flex-wrap gap-2 mb-6">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												React
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												TypeScript
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												D3.js
-											</Badge>
+								{projects.map((project, index) => (
+									<Card
+										key={index}
+										className="group overflow-hidden bg-card border-border hover:border-primary transition-colors"
+									>
+										<div className="relative h-56 w-full overflow-hidden">
+											{project.image && (
+												<Image
+													src={project.image}
+													alt={project.name}
+													fill
+													className="object-cover transition-transform duration-700 group-hover:scale-110"
+												/>
+											)}
+											{project.video && (
+												<video
+													src={project.video}
+													autoPlay
+													loop
+													muted
+													playsInline
+													className="pointer-events-none mx-auto h-32 md:h-40 w-full object-cover object-top"
+												/>
+											)}
 										</div>
-										<div className="flex gap-3">
-											<Button
-												variant="outline"
-												size="sm"
-												className="group/btn"
-											>
-												<Github className="mr-2 h-4 w-4" />
-												Code
-												<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-											</Button>
-											<Button size="sm">
-												<ExternalLink className="mr-2 h-4 w-4" />
-												Demo
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
-
-								{/* Project 2 */}
-								<Card className="group overflow-hidden bg-card border-border hover:border-primary transition-colors">
-									<div className="relative h-56 w-full overflow-hidden">
-										<Image
-											src="/placeholder.svg?height=224&width=384"
-											alt="Project thumbnail"
-											fill
-											className="object-cover transition-transform duration-700 group-hover:scale-110"
-										/>
-									</div>
-									<CardContent className="p-6">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-3">
-											E-commerce
-										</Badge>
-										<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-											Luxury Store
-										</h3>
-										<p className="text-muted-foreground mb-4 line-clamp-2">
-											A high-end e-commerce platform with
-											seamless checkout and product
-											management.
-										</p>
-										<div className="flex flex-wrap gap-2 mb-6">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Next.js
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Tailwind CSS
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Stripe
-											</Badge>
-										</div>
-										<div className="flex gap-3">
-											<Button
-												variant="outline"
-												size="sm"
-												className="group/btn"
-											>
-												<Github className="mr-2 h-4 w-4" />
-												Code
-												<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-											</Button>
-											<Button size="sm">
-												<ExternalLink className="mr-2 h-4 w-4" />
-												Demo
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
-
-								{/* Project 3 */}
-								<Card className="group overflow-hidden bg-card border-border hover:border-primary transition-colors">
-									<div className="relative h-56 w-full overflow-hidden">
-										<Image
-											src="/placeholder.svg?height=224&width=384"
-											alt="Project thumbnail"
-											fill
-											className="object-cover transition-transform duration-700 group-hover:scale-110"
-										/>
-									</div>
-									<CardContent className="p-6">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-3">
-											Mobile App
-										</Badge>
-										<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-											Fitness Tracker
-										</h3>
-										<p className="text-muted-foreground mb-4 line-clamp-2">
-											A mobile fitness application with
-											workout tracking and personalized
-											recommendations.
-										</p>
-										<div className="flex flex-wrap gap-2 mb-6">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												React Native
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Firebase
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Redux
-											</Badge>
-										</div>
-										<div className="flex gap-3">
-											<Button
-												variant="outline"
-												size="sm"
-												className="group/btn"
-											>
-												<Github className="mr-2 h-4 w-4" />
-												Code
-												<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-											</Button>
-											<Button size="sm">
-												<ExternalLink className="mr-2 h-4 w-4" />
-												Demo
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
+										<CardContent className="p-6">
+											{project.type && (
+												<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-3">
+													{project.type}
+												</Badge>
+											)}
+											<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+												{project.name}
+											</h3>
+											<div className="text-muted-foreground mb-4 line-clamp-2">
+												{HTMLReactParser(
+													project.description
+												)}
+											</div>
+											{project.technologies && (
+												<div className="flex flex-wrap gap-2 mb-6">
+													{project.technologies.map(
+														(tech, index) => (
+															<Badge
+																key={index}
+																variant="outline"
+																className="border-border text-muted-foreground"
+															>
+																{tech}
+															</Badge>
+														)
+													)}
+												</div>
+											)}
+											<div className="flex gap-3">
+												{project.source && (
+													<Link
+														href={project.source}
+														className={cn(
+															buttonVariants({
+																variant:
+																	"outline",
+																size: "sm",
+															}),
+															"group/btn"
+														)}
+													>
+														<GithubLogo className="mr-2 h-4 w-4" />
+														Code
+														<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+													</Link>
+												)}
+												{project.website && (
+													<Link
+														href={project.website}
+														className={cn(
+															buttonVariants({
+																size: "sm",
+															})
+														)}
+													>
+														<ExternalLink className="mr-2 h-4 w-4" />
+														Demo
+													</Link>
+												)}
+											</div>
+										</CardContent>
+									</Card>
+								))}
 							</div>
 
-							<div className="mt-12 text-center">
+							{/* <div className="mt-12 text-center">
 								<Button variant="outline" className="group">
 									View All Projects
 									<ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
 								</Button>
-							</div>
+							</div> */}
 						</div>
 					</section>
 				)}
 
 				{/* Skills Section */}
-				<section id="skills" className="py-20">
-					<div className="container mx-auto px-6">
-						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
-								My Skills
-							</Badge>
-							<h2 className="text-4xl font-bold mb-6">
-								Technical Expertise
-							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
-								I specialize in a range of technologies across
-								the full stack development spectrum.
-							</p>
-						</div>
+				{skills.length > 0 && (
+					<section id="skills" className="py-20">
+						<div className="container mx-auto px-6">
+							<div className="flex flex-col items-center text-center mb-12">
+								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+									My Skills
+								</Badge>
+								<h2 className="text-4xl font-bold mb-6">
+									Technical Expertise
+								</h2>
+								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
+								<p className="text-muted-foreground text-lg max-w-2xl">
+									I specialize in a range of technologies
+									across the full stack development spectrum.
+								</p>
+							</div>
 
-						<div className="max-w-5xl mx-auto">
-							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-								{/* Frontend */}
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												R
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											React
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												N
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Next.js
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												TS
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											TypeScript
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												TW
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Tailwind
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-
-								{/* Backend */}
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												N
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Node.js
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												Ex
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Express
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												M
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											MongoDB
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												PG
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											PostgreSQL
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Intermediate
-										</p>
-									</CardContent>
-								</Card>
-
-								{/* DevOps */}
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												D
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Docker
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Intermediate
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												K8s
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Kubernetes
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Intermediate
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												AWS
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											AWS
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												CI
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											CI/CD
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-
-								{/* Tools */}
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												G
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Git
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												F
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Figma
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Intermediate
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												VS
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											VS Code
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
-								<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-									<CardContent className="p-6 text-center">
-										<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-											<div className="text-primary text-xl font-bold">
-												JR
-											</div>
-										</div>
-										<h3 className="font-medium mb-1">
-											Jest/RTL
-										</h3>
-										<p className="text-xs text-muted-foreground">
-											Advanced
-										</p>
-									</CardContent>
-								</Card>
+							<div className="max-w-5xl mx-auto">
+								<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+									{/* Frontend */}
+									{skills.map((skill, index) => (
+										<Card
+											key={index}
+											className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+										>
+											<CardContent className="p-6 text-center">
+												<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+													<div className="text-primary text-xl font-bold">
+														{getInitials(
+															skill.name
+														)}
+													</div>
+												</div>
+												<h3 className="font-medium mb-1">
+													{skill.name}
+												</h3>
+												{skill.level && (
+													<p className="text-xs text-muted-foreground">
+														{skill.level}
+													</p>
+												)}
+											</CardContent>
+										</Card>
+									))}
+								</div>
 							</div>
 						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				{/* Experiences Section */}
-				<section id="experiences" className="py-20 bg-muted/30">
-					<div className="container mx-auto px-6">
-						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
-								Work History
-							</Badge>
-							<h2 className="text-4xl font-bold mb-6">
-								Professional Experience
-							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
-								My journey through various roles and companies
-								in the tech industry.
-							</p>
-						</div>
+				{experiences.length && (
+					<section id="experiences" className="py-20 bg-muted/30">
+						<div className="container mx-auto px-6">
+							<div className="flex flex-col items-center text-center mb-12">
+								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+									Work History
+								</Badge>
+								<h2 className="text-4xl font-bold mb-6">
+									Professional Experience
+								</h2>
+								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
+								<p className="text-muted-foreground text-lg max-w-2xl">
+									My journey through various roles and
+									companies in the tech industry.
+								</p>
+							</div>
 
-						<div className="max-w-4xl mx-auto">
-							<div className="relative">
-								{/* Timeline line */}
-								<div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2"></div>
-
-								{/* Experience 1 */}
-								<div className="relative mb-16">
-									<div className="flex flex-col md:flex-row items-center">
-										<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
-											<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-													2021 - Present
-												</Badge>
-												<h3 className="text-xl font-bold mb-1">
-													Lead Engineer
-												</h3>
-												<p className="text-muted-foreground mb-4">
-													Netflix
-												</p>
-												<p className="text-sm mb-4">
-													Led a team of 8 engineers to
-													develop and maintain
-													Netflix&rsquo;s internal
-													content management system.
-													Improved system performance
-													by 40% and reduced
-													deployment time by 60%
-													through CI/CD pipeline
-													optimizations.
-												</p>
-												<div className="flex flex-wrap gap-2">
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														React
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														Node.js
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														AWS
-													</Badge>
-												</div>
-											</div>
-										</div>
-										<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-											<div className="w-3 h-3 rounded-full bg-background"></div>
-										</div>
-										<div className="md:w-1/2 md:pl-12 md:pt-16">
-											<ul className="space-y-2 text-sm">
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Architected and
-														implemented a new
-														microservices
-														infrastructure
-													</span>
-												</li>
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Mentored junior
-														developers and
-														established coding
-														standards
-													</span>
-												</li>
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Collaborated with
-														product managers to
-														define technical
-														roadmaps
-													</span>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
-
-								{/* Experience 2 */}
-								<div className="relative mb-16">
-									<div className="flex flex-col md:flex-row items-center">
-										<div className="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
-											<ul className="space-y-2 text-sm">
-												<li className="flex items-start md:justify-end">
-													<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-														•
-													</span>
-													<span>
-														Developed key components
-														of the Cloud Console UI
-													</span>
-												</li>
-												<li className="flex items-start md:justify-end">
-													<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-														•
-													</span>
-													<span>
-														Reduced page load time
-														by 35% through code
-														optimization
-													</span>
-												</li>
-												<li className="flex items-start md:justify-end">
-													<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-														•
-													</span>
-													<span>
-														Implemented
-														accessibility
-														improvements across the
-														platform
-													</span>
-												</li>
-											</ul>
-										</div>
-										<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-											<div className="w-3 h-3 rounded-full bg-background"></div>
-										</div>
-										<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
-											<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-													2018 - 2021
-												</Badge>
-												<h3 className="text-xl font-bold mb-1">
-													Senior Developer
-												</h3>
-												<p className="text-muted-foreground mb-4">
-													Google
-												</p>
-												<p className="text-sm mb-4">
-													Worked on Google Cloud
-													Platform&rsquo;s developer
-													console, focusing on user
-													experience and performance
-													optimizations. Contributed
-													to the design and
-													implementation of new
-													features used by millions of
-													developers.
-												</p>
-												<div className="flex flex-wrap gap-2">
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														Angular
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														Go
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														GCP
-													</Badge>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								{/* Experience 3 */}
+							<div className="max-w-4xl mx-auto">
 								<div className="relative">
-									<div className="flex flex-col md:flex-row items-center">
-										<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
-											<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-													2016 - 2018
-												</Badge>
-												<h3 className="text-xl font-bold mb-1">
-													Frontend Developer
-												</h3>
-												<p className="text-muted-foreground mb-4">
-													Airbnb
-												</p>
-												<p className="text-sm mb-4">
-													Contributed to
-													Airbnb&rsquo;s frontend
-													architecture and component
-													library. Worked on the
-													booking flow and search
-													experience, improving
-													conversion rates and user
-													satisfaction.
-												</p>
-												<div className="flex flex-wrap gap-2">
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														React
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														Redux
-													</Badge>
-													<Badge
-														variant="outline"
-														className="border-border text-muted-foreground"
-													>
-														Jest
-													</Badge>
+									{/* Timeline line */}
+									<div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2"></div>
+
+									{/* Experience 1 */}
+									{experiences.map((experience, index) => (
+										<div
+											key={index}
+											className="relative mb-16"
+										>
+											<div className="flex flex-col md:flex-row items-center">
+												<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
+													<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
+														<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+															{experience.date}
+														</Badge>
+														<h3 className="text-xl font-bold mb-1">
+															{
+																experience.headline
+															}
+														</h3>
+														<p className="text-muted-foreground">
+															{experience.company}
+														</p>
+													</div>
+												</div>
+												<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
+													<div className="w-3 h-3 rounded-full bg-background"></div>
+												</div>
+												<div className="md:w-1/2 md:pl-12 md:pt-16">
+													<div className="text-sm mb-4">
+														{HTMLReactParser(
+															experience.summary
+														)}
+													</div>
+													{experience.technologies && (
+														<div className="flex flex-wrap gap-2">
+															{experience.technologies.map(
+																(
+																	tech,
+																	index
+																) => (
+																	<Badge
+																		key={
+																			index
+																		}
+																		variant="outline"
+																		className="border-border text-muted-foreground"
+																	>
+																		{tech}
+																	</Badge>
+																)
+															)}
+														</div>
+													)}
 												</div>
 											</div>
 										</div>
-										<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-											<div className="w-3 h-3 rounded-full bg-background"></div>
+									))}
+
+									{/* Experience 2 */}
+									<div className="relative mb-16">
+										<div className="flex flex-col md:flex-row items-center">
+											<div className="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
+												<ul className="space-y-2 text-sm">
+													<li className="flex items-start md:justify-end">
+														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
+															•
+														</span>
+														<span>
+															Developed key
+															components of the
+															Cloud Console UI
+														</span>
+													</li>
+													<li className="flex items-start md:justify-end">
+														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
+															•
+														</span>
+														<span>
+															Reduced page load
+															time by 35% through
+															code optimization
+														</span>
+													</li>
+													<li className="flex items-start md:justify-end">
+														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
+															•
+														</span>
+														<span>
+															Implemented
+															accessibility
+															improvements across
+															the platform
+														</span>
+													</li>
+												</ul>
+											</div>
+											<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
+												<div className="w-3 h-3 rounded-full bg-background"></div>
+											</div>
+											<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
+												<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
+													<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+														2018 - 2021
+													</Badge>
+													<h3 className="text-xl font-bold mb-1">
+														Senior Developer
+													</h3>
+													<p className="text-muted-foreground mb-4">
+														Google
+													</p>
+													<p className="text-sm mb-4">
+														Worked on Google Cloud
+														Platform&rsquo;s
+														developer console,
+														focusing on user
+														experience and
+														performance
+														optimizations.
+														Contributed to the
+														design and
+														implementation of new
+														features used by
+														millions of developers.
+													</p>
+													<div className="flex flex-wrap gap-2">
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															Angular
+														</Badge>
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															Go
+														</Badge>
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															GCP
+														</Badge>
+													</div>
+												</div>
+											</div>
 										</div>
-										<div className="md:w-1/2 md:pl-12 md:pt-16">
-											<ul className="space-y-2 text-sm">
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Redesigned the booking
-														confirmation process
-													</span>
-												</li>
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Built reusable
-														components for the
-														design system
-													</span>
-												</li>
-												<li className="flex items-start">
-													<span className="text-primary mr-2">
-														•
-													</span>
-													<span>
-														Implemented
-														comprehensive unit and
-														integration tests
-													</span>
-												</li>
-											</ul>
+									</div>
+
+									{/* Experience 3 */}
+									<div className="relative">
+										<div className="flex flex-col md:flex-row items-center">
+											<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
+												<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
+													<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+														2016 - 2018
+													</Badge>
+													<h3 className="text-xl font-bold mb-1">
+														Frontend Developer
+													</h3>
+													<p className="text-muted-foreground mb-4">
+														Airbnb
+													</p>
+													<p className="text-sm mb-4">
+														Contributed to
+														Airbnb&rsquo;s frontend
+														architecture and
+														component library.
+														Worked on the booking
+														flow and search
+														experience, improving
+														conversion rates and
+														user satisfaction.
+													</p>
+													<div className="flex flex-wrap gap-2">
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															React
+														</Badge>
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															Redux
+														</Badge>
+														<Badge
+															variant="outline"
+															className="border-border text-muted-foreground"
+														>
+															Jest
+														</Badge>
+													</div>
+												</div>
+											</div>
+											<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
+												<div className="w-3 h-3 rounded-full bg-background"></div>
+											</div>
+											<div className="md:w-1/2 md:pl-12 md:pt-16">
+												<ul className="space-y-2 text-sm">
+													<li className="flex items-start">
+														<span className="text-primary mr-2">
+															•
+														</span>
+														<span>
+															Redesigned the
+															booking confirmation
+															process
+														</span>
+													</li>
+													<li className="flex items-start">
+														<span className="text-primary mr-2">
+															•
+														</span>
+														<span>
+															Built reusable
+															components for the
+															design system
+														</span>
+													</li>
+													<li className="flex items-start">
+														<span className="text-primary mr-2">
+															•
+														</span>
+														<span>
+															Implemented
+															comprehensive unit
+															and integration
+															tests
+														</span>
+													</li>
+												</ul>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				{/* Education Section */}
-				<section id="education" className="py-20">
-					<div className="container mx-auto px-6">
-						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
-								Academic Background
-							</Badge>
-							<h2 className="text-4xl font-bold mb-6">
-								Education
-							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
-								My academic journey and qualifications that
-								built the foundation for my career.
-							</p>
+				{educations.length > 0 && (
+					<section id="education" className="py-20">
+						<div className="container mx-auto px-6">
+							<div className="flex flex-col items-center text-center mb-12">
+								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+									Academic Background
+								</Badge>
+								<h2 className="text-4xl font-bold mb-6">
+									Education
+								</h2>
+								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
+								<p className="text-muted-foreground text-lg max-w-2xl">
+									My academic journey and qualifications that
+									built the foundation for my career.
+								</p>
+							</div>
+
+							<div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+								{/* Education Item 1 */}
+								{educations.map((edu, index) => (
+									<Card
+										key={index}
+										className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+									>
+										<CardContent className="p-6">
+											<div className="flex items-center justify-between mb-4">
+												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+													{edu.date}
+												</Badge>
+												{edu.location && (
+													<div className="text-sm text-muted-foreground">
+														{edu.location}
+													</div>
+												)}
+											</div>
+											<h3 className="text-xl font-bold mb-1">
+												{edu.studyType}
+											</h3>
+											<p className="text-muted-foreground mb-4">
+												{edu.institution}
+											</p>
+											<div className="pt-4 border-t border-border text-sm mb-4">
+												{HTMLReactParser(edu.summary)}
+											</div>
+										</CardContent>
+									</Card>
+								))}
+							</div>
 						</div>
-
-						<div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-							{/* Education Item 1 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex items-center justify-between mb-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2016 - 2018
-										</Badge>
-										<div className="text-sm text-muted-foreground">
-											California, USA
-										</div>
-									</div>
-									<h3 className="text-xl font-bold mb-1">
-										MSc Software Engineering
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Massachusetts Institute of Technology
-									</p>
-									<div className="flex items-center justify-between mb-4">
-										<div className="text-sm">
-											GPA: 3.95/4.0
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											With Honors
-										</Badge>
-									</div>
-									<div className="pt-4 border-t border-border">
-										<h4 className="font-medium mb-2 text-sm">
-											Key Courses:
-										</h4>
-										<div className="flex flex-wrap gap-2">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Advanced Algorithms
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Distributed Systems
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Cloud Computing
-											</Badge>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Education Item 2 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex items-center justify-between mb-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2012 - 2016
-										</Badge>
-										<div className="text-sm text-muted-foreground">
-											California, USA
-										</div>
-									</div>
-									<h3 className="text-xl font-bold mb-1">
-										BSc Computer Science
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Stanford University
-									</p>
-									<div className="flex items-center justify-between mb-4">
-										<div className="text-sm">
-											GPA: 3.8/4.0
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Dean&rsquo;s List
-										</Badge>
-									</div>
-									<div className="pt-4 border-t border-border">
-										<h4 className="font-medium mb-2 text-sm">
-											Key Courses:
-										</h4>
-										<div className="flex flex-wrap gap-2">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Data Structures
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Web Development
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Database Systems
-											</Badge>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Education Item 3 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex items-center justify-between mb-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2020
-										</Badge>
-										<div className="text-sm text-muted-foreground">
-											Online
-										</div>
-									</div>
-									<h3 className="text-xl font-bold mb-1">
-										Advanced React Patterns
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Frontend Masters
-									</p>
-									<div className="pt-4 border-t border-border">
-										<h4 className="font-medium mb-2 text-sm">
-											Topics Covered:
-										</h4>
-										<div className="flex flex-wrap gap-2">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Compound Components
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Render Props
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Custom Hooks
-											</Badge>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Education Item 4 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex items-center justify-between mb-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2019
-										</Badge>
-										<div className="text-sm text-muted-foreground">
-											Online
-										</div>
-									</div>
-									<h3 className="text-xl font-bold mb-1">
-										Cloud Architecture
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										AWS Training
-									</p>
-									<div className="pt-4 border-t border-border">
-										<h4 className="font-medium mb-2 text-sm">
-											Topics Covered:
-										</h4>
-										<div className="flex flex-wrap gap-2">
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Serverless
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Microservices
-											</Badge>
-											<Badge
-												variant="outline"
-												className="border-border text-muted-foreground"
-											>
-												Infrastructure as Code
-											</Badge>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				{/* Hackathons Section */}
-				<section id="hackathons" className="py-20 bg-muted/30">
-					<div className="container mx-auto px-6">
-						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
-								Coding Competitions
-							</Badge>
-							<h2 className="text-4xl font-bold mb-6">
-								Hackathons
-							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
-								Competitions where I&rsquo;ve collaborated with
-								teams to build innovative solutions under time
-								constraints.
-							</p>
+				{hackathons.length > 0 && (
+					<section id="hackathons" className="py-20 bg-muted/30">
+						<div className="container mx-auto px-6">
+							<div className="flex flex-col items-center text-center mb-12">
+								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+									Coding Competitions
+								</Badge>
+								<h2 className="text-4xl font-bold mb-6">
+									Hackathons
+								</h2>
+								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
+								<p className="text-muted-foreground text-lg max-w-2xl">
+									Competitions where I&rsquo;ve collaborated
+									with teams to build innovative solutions
+									under time constraints.
+								</p>
+							</div>
+
+							<div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+								{/* Hackathon Item 1 */}
+								{hackathons.map((hackathon, index) => (
+									<Card
+										key={index}
+										className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden"
+									>
+										<div className="relative h-48 w-full overflow-hidden">
+											{hackathon.logo && (
+												<Image
+													src={`${hackathon.logo}?height=192&width=384`}
+													alt={hackathon.name}
+													fill
+													className="object-cover transition-transform duration-700 group-hover:scale-105"
+												/>
+											)}
+
+											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
+											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
+											<div className="absolute top-4 right-4">
+												<Badge className="bg-primary/60 text-primary-foreground">
+													Finalist
+												</Badge>
+											</div>
+											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
+											<div className="absolute top-4 right-4">
+												<Badge className="bg-primary/60 text-primary-foreground">
+													Finalist
+												</Badge>
+											</div>
+											<div className="absolute bottom-4 left-4">
+												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+													{hackathon.date}
+												</Badge>
+											</div>
+										</div>
+										<CardContent className="p-6">
+											<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+												{hackathon.name}
+											</h3>
+											<div className="text-muted-foreground mb-4 text-sm">
+												{HTMLReactParser(
+													hackathon.description
+												)}
+											</div>
+											{hackathon.technologies && (
+												<div className="flex flex-wrap gap-2 mb-4">
+													{hackathon.technologies.map(
+														(technology, index) => (
+															<Badge
+																key={index}
+																variant="outline"
+																className="border-border text-muted-foreground"
+															>
+																{technology}
+															</Badge>
+														)
+													)}
+												</div>
+											)}
+										</CardContent>
+									</Card>
+								))}
+							</div>
 						</div>
-
-						<div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-							{/* Hackathon Item 1 */}
-							<Card className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden">
-								<div className="relative h-48 w-full overflow-hidden">
-									<Image
-										src="/placeholder.svg?height=192&width=384"
-										alt="Hackathon event"
-										fill
-										className="object-cover transition-transform duration-700 group-hover:scale-105"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
-									<div className="absolute top-4 right-4">
-										<Badge className="bg-primary text-primary-foreground">
-											1st Place
-										</Badge>
-									</div>
-									<div className="absolute bottom-4 left-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2023
-										</Badge>
-									</div>
-								</div>
-								<CardContent className="p-6">
-									<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-										TechCrunch Disrupt Hackathon
-									</h3>
-									<p className="text-muted-foreground mb-4 text-sm">
-										Built an AI-powered accessibility tool
-										that converts speech to text in
-										real-time for hearing-impaired users.
-										Won first place among 120+ teams.
-									</p>
-									<div className="flex flex-wrap gap-2 mb-4">
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											React
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											TensorFlow.js
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											WebRTC
-										</Badge>
-									</div>
-									<div className="flex items-center justify-between text-muted-foreground text-xs">
-										<div className="flex items-center">
-											<span className="mr-1">Team:</span>
-											<span className="font-medium">
-												4 members
-											</span>
-										</div>
-										<div className="flex items-center">
-											<span className="mr-1">
-												Duration:
-											</span>
-											<span className="font-medium">
-												48 hours
-											</span>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Hackathon Item 2 */}
-							<Card className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden">
-								<div className="relative h-48 w-full overflow-hidden">
-									<Image
-										src="/placeholder.svg?height=192&width=384"
-										alt="Hackathon event"
-										fill
-										className="object-cover transition-transform duration-700 group-hover:scale-105"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
-									<div className="absolute top-4 right-4">
-										<Badge className="bg-primary/80 text-primary-foreground">
-											2nd Place
-										</Badge>
-									</div>
-									<div className="absolute bottom-4 left-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2022
-										</Badge>
-									</div>
-								</div>
-								<CardContent className="p-6">
-									<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-										Google DevFest Hackathon
-									</h3>
-									<p className="text-muted-foreground mb-4 text-sm">
-										Developed a sustainable living app that
-										helps users track and reduce their
-										carbon footprint through gamification
-										and community challenges.
-									</p>
-									<div className="flex flex-wrap gap-2 mb-4">
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Flutter
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Firebase
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Google Maps API
-										</Badge>
-									</div>
-									<div className="flex items-center justify-between text-muted-foreground text-xs">
-										<div className="flex items-center">
-											<span className="mr-1">Team:</span>
-											<span className="font-medium">
-												3 members
-											</span>
-										</div>
-										<div className="flex items-center">
-											<span className="mr-1">
-												Duration:
-											</span>
-											<span className="font-medium">
-												36 hours
-											</span>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Hackathon Item 3 */}
-							<Card className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden">
-								<div className="relative h-48 w-full overflow-hidden">
-									<Image
-										src="/placeholder.svg?height=192&width=384"
-										alt="Hackathon event"
-										fill
-										className="object-cover transition-transform duration-700 group-hover:scale-105"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
-									<div className="absolute top-4 right-4">
-										<Badge className="bg-primary/60 text-primary-foreground">
-											Finalist
-										</Badge>
-									</div>
-									<div className="absolute bottom-4 left-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2021
-										</Badge>
-									</div>
-								</div>
-								<CardContent className="p-6">
-									<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-										AWS Serverless Hackathon
-									</h3>
-									<p className="text-muted-foreground mb-4 text-sm">
-										Created a serverless application for
-										small businesses to manage inventory and
-										sales with real-time analytics and low
-										operational costs.
-									</p>
-									<div className="flex flex-wrap gap-2 mb-4">
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											AWS Lambda
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											DynamoDB
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											React
-										</Badge>
-									</div>
-									<div className="flex items-center justify-between text-muted-foreground text-xs">
-										<div className="flex items-center">
-											<span className="mr-1">Team:</span>
-											<span className="font-medium">
-												2 members
-											</span>
-										</div>
-										<div className="flex items-center">
-											<span className="mr-1">
-												Duration:
-											</span>
-											<span className="font-medium">
-												24 hours
-											</span>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Hackathon Item 4 */}
-							<Card className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden">
-								<div className="relative h-48 w-full overflow-hidden">
-									<Image
-										src="/placeholder.svg?height=192&width=384"
-										alt="Hackathon event"
-										fill
-										className="object-cover transition-transform duration-700 group-hover:scale-105"
-									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
-									<div className="absolute top-4 right-4">
-										<Badge className="bg-primary text-primary-foreground">
-											1st Place
-										</Badge>
-									</div>
-									<div className="absolute bottom-4 left-4">
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2020
-										</Badge>
-									</div>
-								</div>
-								<CardContent className="p-6">
-									<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-										Facebook Developer Circles Hackathon
-									</h3>
-									<p className="text-muted-foreground mb-4 text-sm">
-										Built a mental health support platform
-										that connects users with therapists and
-										provides AI-powered mood tracking and
-										personalized resources.
-									</p>
-									<div className="flex flex-wrap gap-2 mb-4">
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											React Native
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Node.js
-										</Badge>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											MongoDB
-										</Badge>
-									</div>
-									<div className="flex items-center justify-between text-muted-foreground text-xs">
-										<div className="flex items-center">
-											<span className="mr-1">Team:</span>
-											<span className="font-medium">
-												5 members
-											</span>
-										</div>
-										<div className="flex items-center">
-											<span className="mr-1">
-												Duration:
-											</span>
-											<span className="font-medium">
-												72 hours
-											</span>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				{/* Certifications Section */}
-				<section id="certifications" className="py-20">
-					<div className="container mx-auto px-6">
-						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
-								Professional Development
-							</Badge>
-							<h2 className="text-4xl font-bold mb-6">
-								Certifications
-							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
-								Professional certifications that validate my
-								expertise and knowledge in various technologies.
-							</p>
+				{certifications.length > 0 && (
+					<section id="certifications" className="py-20">
+						<div className="container mx-auto px-6">
+							<div className="flex flex-col items-center text-center mb-12">
+								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+									Professional Development
+								</Badge>
+								<h2 className="text-4xl font-bold mb-6">
+									Certifications
+								</h2>
+								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
+								<p className="text-muted-foreground text-lg max-w-2xl">
+									Professional certifications that validate my
+									expertise and knowledge in various
+									technologies.
+								</p>
+							</div>
+
+							<div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+								{/* Certification Item 1 */}
+								{certifications.map((certification, index) => (
+									<Card
+										key={index}
+										className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+									>
+										<CardContent className="p-6">
+											<div className="flex justify-between items-start mb-4">
+												<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														width="24"
+														height="24"
+														viewBox="0 0 24 24"
+														fill="none"
+														stroke="currentColor"
+														strokeWidth="2"
+														strokeLinecap="round"
+														strokeLinejoin="round"
+													>
+														<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+														<polyline points="22 4 12 14.01 9 11.01"></polyline>
+													</svg>
+												</div>
+												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+													{certification.date}
+												</Badge>
+											</div>
+											<h3 className="text-lg font-bold mb-1">
+												{certification.name}
+											</h3>
+											<p className="text-muted-foreground mb-4">
+												{certification.issuer}
+											</p>
+											<div className="text-sm text-muted-foreground">
+												{HTMLReactParser(
+													certification.summary
+												)}
+											</div>
+										</CardContent>
+									</Card>
+								))}
+							</div>
 						</div>
-
-						<div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-							{/* Certification Item 1 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-												<polyline points="22 4 12 14.01 9 11.01"></polyline>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2023
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										AWS Certified Solutions Architect
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Amazon Web Services
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Comprehensive understanding of AWS
-										architecture best practices, with
-										expertise in designing and deploying
-										scalable, highly available systems on
-										AWS.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: AWS-ASA-12345
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Professional
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Certification Item 2 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2022
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										Google Cloud Professional Developer
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Google Cloud
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Expertise in designing, building, and
-										managing applications on Google Cloud
-										Platform, with a focus on scalability,
-										reliability, and security.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: GCP-PD-67890
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Professional
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Certification Item 3 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2022
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										Certified Kubernetes Administrator
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Cloud Native Computing Foundation
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Proficiency in Kubernetes installation,
-										configuration, and management, with
-										skills in workload scheduling,
-										networking, security, and
-										troubleshooting.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: CKA-24680
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Professional
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Certification Item 4 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<rect
-													x="2"
-													y="3"
-													width="20"
-													height="14"
-													rx="2"
-													ry="2"
-												></rect>
-												<line
-													x1="8"
-													y1="21"
-													x2="16"
-													y2="21"
-												></line>
-												<line
-													x1="12"
-													y1="17"
-													x2="12"
-													y2="21"
-												></line>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2021
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										Microsoft Certified: Azure Developer
-										Associate
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Microsoft
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Skills in developing solutions on
-										Microsoft Azure, including compute,
-										storage, security, and cloud integration
-										services.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: AZ-204-13579
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Associate
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Certification Item 5 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2020
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										Certified Scrum Master
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										Scrum Alliance
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Expertise in Scrum methodology,
-										facilitating Scrum events, and coaching
-										teams in Agile practices for effective
-										product development.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: CSM-97531
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Professional
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Certification Item 6 */}
-							<Card className="bg-card border-border hover:border-primary hover:shadow-md transition-all">
-								<CardContent className="p-6">
-									<div className="flex justify-between items-start mb-4">
-										<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="24"
-												height="24"
-												viewBox="0 0 24 24"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="2"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											>
-												<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-												<line
-													x1="16"
-													y1="8"
-													x2="2"
-													y2="22"
-												></line>
-												<line
-													x1="17.5"
-													y1="15"
-													x2="9"
-													y2="15"
-												></line>
-											</svg>
-										</div>
-										<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-											2019
-										</Badge>
-									</div>
-									<h3 className="text-lg font-bold mb-1">
-										MongoDB Certified Developer
-									</h3>
-									<p className="text-muted-foreground mb-4">
-										MongoDB, Inc.
-									</p>
-									<div className="text-sm text-muted-foreground">
-										Proficiency in MongoDB database design,
-										query optimization, indexing strategies,
-										and application integration best
-										practices.
-									</div>
-									<div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-										<div className="text-xs text-muted-foreground">
-											Credential ID: MDB-DEV-86420
-										</div>
-										<Badge
-											variant="outline"
-											className="border-border text-muted-foreground"
-										>
-											Associate
-										</Badge>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-					</div>
-				</section>
+					</section>
+				)}
 
 				{/* Contact Section */}
 				<section id="contact" className="py-20 bg-muted/30">
@@ -2104,59 +1279,151 @@ export default function Portfolio({
 											Contact Information
 										</h3>
 										<div className="space-y-6">
-											<div>
-												<p className="text-muted-foreground mb-1 text-sm">
-													Email
-												</p>
-												<p className="font-medium">
-													jordan@chendev.com
-												</p>
-											</div>
-											<div>
-												<p className="text-muted-foreground mb-1 text-sm">
-													Location
-												</p>
-												<p className="font-medium">
-													San Francisco, CA
-												</p>
-											</div>
-											<div>
-												<p className="text-muted-foreground mb-1 text-sm">
-													Social Media
-												</p>
-												<div className="flex gap-3 mt-2">
-													<Button
-														variant="ghost"
-														size="icon"
-														className="rounded-full border border-border hover:border-primary hover:text-primary"
-													>
-														<Github className="h-4 w-4" />
-														<span className="sr-only">
-															GitHub
-														</span>
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon"
-														className="rounded-full border border-border hover:border-primary hover:text-primary"
-													>
-														<Linkedin className="h-4 w-4" />
-														<span className="sr-only">
-															LinkedIn
-														</span>
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon"
-														className="rounded-full border border-border hover:border-primary hover:text-primary"
-													>
-														<Mail className="h-4 w-4" />
-														<span className="sr-only">
-															Email
-														</span>
-													</Button>
+											{basics.email && (
+												<div>
+													<p className="text-muted-foreground mb-1 text-sm">
+														Email
+													</p>
+													<p className="font-medium">
+														{basics.email}
+													</p>
 												</div>
-											</div>
+											)}
+											{basics.location && (
+												<div>
+													<p className="text-muted-foreground mb-1 text-sm">
+														Location
+													</p>
+													<p className="font-medium">
+														{basics.location}
+													</p>
+												</div>
+											)}
+
+											{socials.length > 0 && (
+												<div>
+													<p className="text-muted-foreground mb-1 text-sm">
+														Social Media
+													</p>
+													<div className="flex gap-3 mt-2">
+														{socials.map(
+															(social, index) => {
+																{
+																	social.network ==
+																		"github" && (
+																		<Link
+																			href={`https://www.github.com/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full border border-border hover:border-primary hover:text-primary"
+																			)}
+																		>
+																			<GithubLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				GitHub
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"linkedin" && (
+																		<Link
+																			href={`https://www.linkedin.com/in/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full border border-border hover:border-primary hover:text-primary"
+																			)}
+																		>
+																			<LinkedinLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				LinkedIn
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"youtube" && (
+																		<Link
+																			href={`https://www.youtube.com/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full border border-border hover:border-primary hover:text-primary"
+																			)}
+																		>
+																			<YoutubeLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				YouTube
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"x" && (
+																		<Link
+																			href={`https://www.x.com/${social.username}`}
+																		>
+																			<Button
+																				key={
+																					index
+																				}
+																				variant="ghost"
+																				size="icon"
+																				className="rounded-full border border-border hover:border-primary hover:text-primary"
+																			>
+																				<XLogo className="h-4 w-4" />
+																				<span className="sr-only">
+																					X
+																				</span>
+																			</Button>
+																		</Link>
+																	);
+																}
+															}
+														)}
+														{basics.email && (
+															<Link
+																href={`mailto:${basics.email}`}
+																className={cn(
+																	buttonVariants(
+																		{
+																			variant:
+																				"ghost",
+																			size: "icon",
+																		}
+																	),
+																	"rounded-full border border-border hover:border-primary hover:text-primary"
+																)}
+															>
+																<Mail className="h-4 w-4" />
+																<span className="sr-only">
+																	Email
+																</span>
+															</Link>
+														)}
+													</div>
+												</div>
+											)}
 										</div>
 									</div>
 
@@ -2164,7 +1431,10 @@ export default function Portfolio({
 										<h3 className="text-xl font-bold mb-6">
 											Send a Message
 										</h3>
-										<div className="space-y-4">
+										<form
+											onSubmit={handleSubmit}
+											className="space-y-4"
+										>
 											<div className="grid grid-cols-2 gap-4">
 												<div className="space-y-2">
 													<label
@@ -2176,8 +1446,23 @@ export default function Portfolio({
 													<input
 														id="name"
 														type="text"
-														className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														name="full_name"
+														value={
+															formData.full_name
+														}
+														onChange={handleChange}
+														className={cn(
+															errors.full_name
+																? "border-red-500"
+																: "",
+															"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														)}
 													/>
+													{errors.full_name && (
+														<p className="text-red-500">
+															{errors.full_name}
+														</p>
+													)}
 												</div>
 												<div className="space-y-2">
 													<label
@@ -2189,8 +1474,21 @@ export default function Portfolio({
 													<input
 														id="email"
 														type="email"
-														className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														name="email"
+														value={formData.email}
+														onChange={handleChange}
+														className={cn(
+															errors.email
+																? "border-red-500"
+																: "",
+															"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														)}
 													/>
+													{errors.email && (
+														<p className="text-red-500">
+															{errors.email}
+														</p>
+													)}
 												</div>
 											</div>
 											<div className="space-y-2">
@@ -2203,8 +1501,21 @@ export default function Portfolio({
 												<input
 													id="subject"
 													type="text"
-													className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+													name="subject"
+													value={formData.subject}
+													onChange={handleChange}
+													className={cn(
+														errors.subject
+															? "border-red-500"
+															: "",
+														"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+													)}
 												/>
+												{errors.subject && (
+													<p className="text-red-500">
+														{errors.subject}
+													</p>
+												)}
 											</div>
 											<div className="space-y-2">
 												<label
@@ -2215,14 +1526,34 @@ export default function Portfolio({
 												</label>
 												<textarea
 													id="message"
+													name="message"
+													value={formData.message}
+													onChange={handleChange}
 													rows={4}
-													className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+													className={cn(
+														errors.message
+															? "border-red-500"
+															: "",
+														"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+													)}
 												></textarea>
+												{errors.message && (
+													<p className="text-red-500">
+														{errors.message}
+													</p>
+												)}
 											</div>
-											<Button className="w-full">
-												Send Message
+											<Button
+												type="submit"
+												className="w-full"
+												disabled={isSubmitting}
+											>
+												{isSubmitting && <Spinner />}
+												{isSubmitting
+													? "Sending..."
+													: "Send Message"}
 											</Button>
-										</div>
+										</form>
 									</div>
 								</div>
 							</Card>
@@ -2237,34 +1568,93 @@ export default function Portfolio({
 							<div className="flex items-center gap-2">
 								<div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-blue-500"></div>
 								<span className="text-xl font-bold">
-									Jordan.dev
+									{basics.name.split(" ")[0]}.dev
 								</span>
 							</div>
 							<div className="text-sm text-muted-foreground">
-								© 2025 Jordan Chen. All rights reserved.
+								© 2025 {basics.name}. All rights reserved.
 							</div>
 							<div className="flex gap-4">
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border hover:border-primary hover:text-primary"
-								>
-									<Github className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border hover:border-primary hover:text-primary"
-								>
-									<Linkedin className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full border border-border hover:border-primary hover:text-primary"
-								>
-									<Mail className="h-5 w-5" />
-								</Button>
+								{socials.map((social, index) => {
+									{
+										social.network == "github" && (
+											<Link
+												href={`https://www.github.com/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border hover:border-primary hover:text-primary"
+												)}
+											>
+												<GithubLogo className="h-5 w-5" />
+											</Link>
+										);
+									}
+									{
+										social.network == "linkedin" && (
+											<Link
+												href={`https://www.linkedin.com/in/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border hover:border-primary hover:text-primary"
+												)}
+											>
+												<LinkedinLogo className="h-5 w-5" />
+											</Link>
+										);
+									}
+									{
+										social.network == "youtube" && (
+											<Link
+												href={`https://www.youtube.com/${social.username}`}
+												className={cn(
+													buttonVariants({
+														variant: "ghost",
+														size: "icon",
+													}),
+													"rounded-full border border-border hover:border-primary hover:text-primary"
+												)}
+											>
+												<YoutubeLogo className="h-5 w-5" />
+											</Link>
+										);
+									}
+									{
+										social.network == "x" && (
+											<Link
+												href={`https://www.x.com/${social.username}`}
+											>
+												<Button
+													key={index}
+													variant="ghost"
+													size="icon"
+													className="rounded-full border border-border hover:border-primary hover:text-primary"
+												>
+													<XLogo className="h-5 w-5" />
+												</Button>
+											</Link>
+										);
+									}
+								})}
+								{basics.email && (
+									<Link
+										href={`mailto:${basics.email}`}
+										className={cn(
+											buttonVariants({
+												variant: "ghost",
+												size: "icon",
+											}),
+											"rounded-full border border-border hover:border-primary hover:text-primary"
+										)}
+									>
+										<Mail className="h-5 w-5" />
+									</Link>
+								)}
 							</div>
 						</div>
 					</div>

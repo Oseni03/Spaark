@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 
 const INITIAL_FORM_STATE = {
 	email: "",
+	subject: "",
 	full_name: "",
 	message: "",
 };
@@ -36,6 +37,13 @@ export const useUserContactForm = () => {
 			newErrors.full_name = "Full name is required";
 		} else if (formData.full_name.length < 2) {
 			newErrors.full_name = "Name must be at least 2 characters long";
+		}
+
+		// Subject validation
+		if (!formData.subject.trim()) {
+			newErrors.subject = "Subject is required";
+		} else if (formData.subject.length < 3) {
+			newErrors.subject = "Subject must be at least 3 characters long";
 		}
 
 		// Message validation
@@ -94,8 +102,9 @@ export const useUserContactForm = () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					subdomain,
-					subject: "New contact message",
+					subject: formData.subject,
 					props: {
+						subject: formData.subject,
 						name: formData.full_name,
 						email: formData.email,
 						message: formData.message,

@@ -48,6 +48,23 @@ export const ContactForm = ({
 			</div>
 
 			<div className="space-y-2">
+				<Label>Subject</Label>
+				<Input
+					type="text"
+					name="subject"
+					value={formData.subject}
+					onChange={handleChange}
+					className={cn(
+						errors.full_name ? "border-red-500" : "",
+						revert ? "text-black dark:text-white" : ""
+					)}
+				/>
+				{errors.subject && (
+					<p className="text-red-500">{errors.subject}</p>
+				)}
+			</div>
+
+			<div className="space-y-2">
 				<Label>Your Message</Label>
 				<Textarea
 					name="message"

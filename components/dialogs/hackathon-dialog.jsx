@@ -14,6 +14,10 @@ import { addHackathon, updateHackathon } from "@/redux/features/portfolioSlice";
 import { PictureSection } from "../sections/picture/section";
 import { CustomLink } from "@/components/custom-link";
 import { logger } from "@/lib/utils";
+import { BadgeInput } from "../ui/badge-input";
+import { AnimatePresence, motion } from "framer-motion";
+import { Badge } from "../ui/badge";
+import { X } from "@phosphor-icons/react";
 
 export const HackathonDialog = ({
 	form,
@@ -113,6 +117,79 @@ export const HackathonDialog = ({
 								)}
 							/>
 						</div>
+
+						<Controller
+							name="technologies"
+							control={control}
+							render={({ field, fieldState }) => (
+								<>
+									<div>
+										<label>Technologies</label>
+										<BadgeInput
+											value={field.value} // Bind keywords value
+											onChange={(newKeywords) =>
+												field.onChange(newKeywords)
+											} // Update keywords dynamically
+											placeholder="Enter keywords separated by commas"
+											error={fieldState.error?.message}
+										/>
+									</div>
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-3">
+										<AnimatePresence>
+											{field.value &&
+												field.value.map(
+													(item, index) => (
+														<motion.div
+															key={item}
+															layout
+															initial={{
+																opacity: 0,
+																y: -50,
+															}}
+															animate={{
+																opacity: 1,
+																y: 0,
+																transition: {
+																	delay:
+																		index *
+																		0.1,
+																},
+															}}
+															exit={{
+																opacity: 0,
+																x: -50,
+															}}
+														>
+															<Badge
+																className="cursor-pointer"
+																onClick={() => {
+																	field.onChange(
+																		field.value.filter(
+																			(
+																				v
+																			) =>
+																				v !==
+																				item
+																		)
+																	);
+																}}
+															>
+																<span className="mr-1">
+																	{item}
+																</span>
+																<X
+																	size={12}
+																	weight="bold"
+																/>
+															</Badge>
+														</motion.div>
+													)
+												)}
+										</AnimatePresence>
+									</div>
+								</>
+							)}
+						/>
 
 						<Controller
 							name="description"

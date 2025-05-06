@@ -141,7 +141,6 @@ model Basics {
   email       String
   phone       String?
   location    String
-  url         String?
   picture     String?
   years       Int?
   summary     String
@@ -160,7 +159,6 @@ model Social {
   visible     Boolean   @default(true)
   network     String // e.g., "github", "linkedin"
   username    String
-  url         String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
 
@@ -275,18 +273,19 @@ model Link {
 }
 
 model Hackathon {
-  id          String   @id @default(cuid())
-  portfolioId String
-  visible     Boolean  @default(true)
-  name        String
-  description String
-  date        String
-  location    String
-  url         String?
-  logo        String?
-  links       Link[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  portfolioId  String
+  visible      Boolean  @default(true)
+  name         String
+  description  String
+  date         String
+  location     String
+  url          String?
+  logo         String?
+  links        Link[]
+  technologies String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 

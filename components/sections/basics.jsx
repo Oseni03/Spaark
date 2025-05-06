@@ -182,26 +182,6 @@ export const BasicsSection = () => {
 								</div>
 							)}
 						/>
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label htmlFor="url">Website</label>
-									<Input
-										id="url"
-										{...field}
-										placeholder="https://yourwebsite.com"
-										type="url"
-									/>
-									{fieldState.error && (
-										<p className="text-red-500 text-sm">
-											{fieldState.error.message}
-										</p>
-									)}
-								</div>
-							)}
-						/>
 					</div>
 					<Controller
 						name="summary"

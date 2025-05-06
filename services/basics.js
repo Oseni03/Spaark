@@ -18,7 +18,6 @@ const select = {
 	phone: true,
 	years: true,
 	location: true,
-	url: true,
 	picture: true,
 	summary: true,
 	about: true,

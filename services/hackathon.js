@@ -27,6 +27,7 @@ const select = {
 			icon: true,
 		},
 	},
+	technologies: true,
 };
 
 export async function getHackathons(portfolioId) {

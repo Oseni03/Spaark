@@ -416,30 +416,66 @@ const Navbar = ({ social, blogEnabled }) => {
 						<DockIcon key={network}>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Link
-										href={social.url}
-										target="_blank"
-										className={cn(
-											buttonVariants({
-												variant: "ghost",
-												size: "icon",
-											}),
-											"size-12"
-										)}
-									>
-										{social.network === "github" && (
+									{social === "github" && (
+										<Link
+											href={`https://www.github.com/${social.username}`}
+											target="_blank"
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												"size-12"
+											)}
+										>
 											<GithubLogo size={4} />
-										)}
-										{social.network === "linkedin" && (
+										</Link>
+									)}
+									{social.network === "linkedin" && (
+										<Link
+											href={`https://www.linkedin.com/in/${social.username}`}
+											target="_blank"
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												"size-12"
+											)}
+										>
 											<LinkedinLogo size={4} />
-										)}
-										{social.network === "x" && (
+										</Link>
+									)}
+									{social.network === "x" && (
+										<Link
+											href={`https://www.x.com/${social.username}`}
+											target="_blank"
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												"size-12"
+											)}
+										>
 											<XLogo size={4} />
-										)}
-										{social.network === "youtube" && (
+										</Link>
+									)}
+									{social.network === "youtube" && (
+										<Link
+											href={`https://www.youtube.com/${social.username}`}
+											target="_blank"
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												"size-12"
+											)}
+										>
 											<YoutubeLogo size={4} />
-										)}
-									</Link>
+										</Link>
+									)}
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>

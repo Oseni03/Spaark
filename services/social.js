@@ -13,7 +13,6 @@ const select = {
 	visible: true,
 	network: true,
 	username: true,
-	url: true,
 	portfolioId: true,
 	// Exclude createdAt and updatedAt
 };

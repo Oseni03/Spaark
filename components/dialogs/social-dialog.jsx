@@ -116,25 +116,6 @@ export const SocialsDialog = ({
 							/>
 						</div>
 
-						<Controller
-							name="url"
-							control={control}
-							render={({ field, fieldState }) => (
-								<div>
-									<label>Website</label>
-									<Input
-										{...field}
-										placeholder="https://linkedin.com/in/johndoe"
-									/>
-									{fieldState.error && (
-										<small className="text-red-500 opacity-75">
-											{fieldState.error?.message}
-										</small>
-									)}
-								</div>
-							)}
-						/>
-
 						<div className="flex justify-end space-x-2">
 							<Button
 								type="button"

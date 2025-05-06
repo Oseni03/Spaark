@@ -11,9 +11,6 @@ export const basicsSchema = z.object({
 	phone: z.literal("").or(z.string().min(7, "Invalid phone number")),
 	location: z.literal("").or(z.string().min(2, "Must be more than 2 char")),
 	years: z.number().nullable(),
-	url: z
-		.literal("")
-		.or(z.string().url("Invalid personal or professional website URL")),
 	picture: z.literal("").or(z.string().url("Invalid image URL")),
 	summary: z.string().default(""),
 	about: z.string().default(""),
@@ -29,7 +26,6 @@ export const defaultBasics = {
 	phone: "",
 	location: "",
 	years: "",
-	url: "",
 	picture: "",
 	summary: "",
 	about: "",

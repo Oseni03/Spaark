@@ -45,7 +45,7 @@ export async function POST(request) {
 		const { data, error } = await resend.emails.send({
 			from: `${siteConfig.name} <onboarding@resend.dev>`,
 			to: [userEmail],
-			subject,
+			subject: `Spaark Portfolio - ${subject}`,
 			react: (
 				<ContactNotification
 					name={props.name}

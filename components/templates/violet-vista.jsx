@@ -4,22 +4,21 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import {
-	Github,
-	Mail,
-	Linkedin,
-	ExternalLink,
-	Menu,
-	X,
-	ArrowRight,
-	Download,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail, ExternalLink, Menu, X, ArrowRight } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import HTMLReactParser from "html-react-parser";
+import {
+	GithubLogo,
+	LinkedinLogo,
+	XLogo,
+	YoutubeLogo,
+} from "@phosphor-icons/react";
+import { useUserContactForm } from "@/hooks/use-user-contact-form";
+import { Spinner } from "../ui/Spinner";
 
 export default function VioletVista({
 	basics = defaultMain.basics,
@@ -36,6 +35,9 @@ export default function VioletVista({
 	const [menuOpen, setMenuOpen] = useState(false);
 	const pathname = usePathname();
 	const isBlogActive = pathname === "/blog";
+
+	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
+		useUserContactForm();
 
 	const sections = useMemo(
 		() => [
@@ -490,15 +492,17 @@ export default function VioletVista({
 													<Link
 														href={project.source}
 														target="_blank"
+														className={cn(
+															buttonVariants({
+																variant:
+																	"outline",
+																size: "sm",
+															}),
+															"border-[#333333] hover:bg-[#222222]"
+														)}
 													>
-														<Button
-															variant="outline"
-															size="sm"
-															className="border-[#333333] hover:bg-[#222222]"
-														>
-															<Github className="mr-2 h-4 w-4" />
-															Code
-														</Button>
+														<GithubLogo className="mr-2 h-4 w-4" />
+														Code
 													</Link>
 												)}
 
@@ -506,14 +510,15 @@ export default function VioletVista({
 													<Link
 														href={project.website}
 														target="_blank"
+														className={cn(
+															buttonVariants({
+																size: "sm",
+															}),
+															"bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
+														)}
 													>
-														<Button
-															size="sm"
-															className="bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
-														>
-															<ExternalLink className="mr-2 h-4 w-4" />
-															Live Demo
-														</Button>
+														<ExternalLink className="mr-2 h-4 w-4" />
+														Live Demo
 													</Link>
 												)}
 											</div>
@@ -879,57 +884,148 @@ export default function VioletVista({
 												Contact Information
 											</h3>
 											<div className="space-y-4">
-												<div>
-													<p className="text-gray-400 mb-1">
-														Email
-													</p>
-													<p className="text-white">
-														alex@morgandev.tech
-													</p>
-												</div>
-												<div>
-													<p className="text-gray-400 mb-1">
-														Location
-													</p>
-													<p className="text-white">
-														San Francisco, CA
-													</p>
-												</div>
+												{basics.email && (
+													<div>
+														<p className="text-gray-400 mb-1">
+															Email
+														</p>
+														<p className="text-white">
+															{basics.email}
+														</p>
+													</div>
+												)}
+												{basics.location && (
+													<div>
+														<p className="text-gray-400 mb-1">
+															Location
+														</p>
+														<p className="text-white">
+															{basics.location}
+														</p>
+													</div>
+												)}
 												<div>
 													<p className="text-gray-400 mb-1">
 														Social Media
 													</p>
 													<div className="flex gap-3 mt-2">
-														<Button
-															variant="ghost"
-															size="icon"
-															className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-														>
-															<Github className="h-4 w-4" />
-															<span className="sr-only">
-																GitHub
-															</span>
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon"
-															className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-														>
-															<Linkedin className="h-4 w-4" />
-															<span className="sr-only">
-																LinkedIn
-															</span>
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon"
-															className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-														>
-															<Mail className="h-4 w-4" />
-															<span className="sr-only">
-																Email
-															</span>
-														</Button>
+														{socials.map(
+															(social, index) => {
+																{
+																	social.network ==
+																		"github" && (
+																		<Link
+																			href={`https://www.github.com/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																			)}
+																		>
+																			<GithubLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				GitHub
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"linkedin" && (
+																		<Link
+																			href={`https://www.linkedin.com/in/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																			)}
+																		>
+																			<LinkedinLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				LinkedIn
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"youtube" && (
+																		<Link
+																			href={`https://www.youtube.com/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																			)}
+																		>
+																			<YoutubeLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				YouTube
+																			</span>
+																		</Link>
+																	);
+																}
+																{
+																	social.network ==
+																		"x" && (
+																		<Link
+																			href={`https://www.x.com/${social.username}`}
+																			className={cn(
+																				buttonVariants(
+																					{
+																						variant:
+																							"ghost",
+																						size: "icon",
+																					}
+																				),
+																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																			)}
+																		>
+																			<XLogo className="h-4 w-4" />
+																			<span className="sr-only">
+																				X
+																			</span>
+																		</Link>
+																	);
+																}
+															}
+														)}
+
+														{basics.email && (
+															<Link
+																href={`mailto:${basics.email}`}
+																className={cn(
+																	buttonVariants(
+																		{
+																			variant:
+																				"ghost",
+																			size: "icon",
+																		}
+																	),
+																	"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																)}
+															>
+																<Mail className="h-4 w-4" />
+																<span className="sr-only">
+																	Email
+																</span>
+															</Link>
+														)}
 													</div>
 												</div>
 											</div>
@@ -939,7 +1035,10 @@ export default function VioletVista({
 											<h3 className="text-xl font-bold mb-4">
 												Send a Message
 											</h3>
-											<div className="space-y-4">
+											<form
+												onSubmit={handleSubmit}
+												className="space-y-4"
+											>
 												<div className="grid grid-cols-2 gap-4">
 													<div className="space-y-2">
 														<label
@@ -951,8 +1050,27 @@ export default function VioletVista({
 														<input
 															id="name"
 															type="text"
-															className="w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															name="full_name"
+															value={
+																formData.full_name
+															}
+															onChange={
+																handleChange
+															}
+															className={cn(
+																errors.full_name
+																	? "border-red-500"
+																	: "",
+																"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															)}
 														/>
+														{errors.full_name && (
+															<p className="text-red-500">
+																{
+																	errors.full_name
+																}
+															</p>
+														)}
 													</div>
 													<div className="space-y-2">
 														<label
@@ -964,8 +1082,25 @@ export default function VioletVista({
 														<input
 															id="email"
 															type="email"
-															className="w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															name="email"
+															value={
+																formData.email
+															}
+															onChange={
+																handleChange
+															}
+															className={cn(
+																errors.email
+																	? "border-red-500"
+																	: "",
+																"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															)}
 														/>
+														{errors.email && (
+															<p className="text-red-500">
+																{errors.email}
+															</p>
+														)}
 													</div>
 												</div>
 												<div className="space-y-2">
@@ -978,8 +1113,21 @@ export default function VioletVista({
 													<input
 														id="subject"
 														type="text"
-														className="w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+														name="subject"
+														value={formData.subject}
+														onChange={handleChange}
+														className={cn(
+															errors.subject
+																? "border-red-500"
+																: "",
+															"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+														)}
 													/>
+													{errors.subject && (
+														<p className="text-red-500">
+															{errors.subject}
+														</p>
+													)}
 												</div>
 												<div className="space-y-2">
 													<label
@@ -990,14 +1138,36 @@ export default function VioletVista({
 													</label>
 													<textarea
 														id="message"
+														name="message"
+														value={formData.message}
+														onChange={handleChange}
 														rows={4}
-														className="w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+														className={cn(
+															errors.message
+																? "border-red-500"
+																: "",
+															"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+														)}
 													></textarea>
+													{errors.message && (
+														<p className="text-red-500">
+															{errors.message}
+														</p>
+													)}
 												</div>
-												<Button className="w-full bg-[#FF4D4D] hover:bg-[#FF3333] text-white">
-													Send Message
+												<Button
+													type="submit"
+													className="w-full bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
+													disabled={isSubmitting}
+												>
+													{isSubmitting && (
+														<Spinner />
+													)}
+													{isSubmitting
+														? "Sending..."
+														: "Send Message"}
 												</Button>
-											</div>
+											</form>
 										</div>
 									</div>
 								</CardContent>
@@ -1010,29 +1180,89 @@ export default function VioletVista({
 				<footer className="py-10 border-t border-[#222222] lg:hidden">
 					<div className="container mx-auto px-6">
 						<div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
-							<div className="flex gap-4">
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-								>
-									<Github className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-								>
-									<Linkedin className="h-5 w-5" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									className="rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-								>
-									<Mail className="h-5 w-5" />
-								</Button>
-							</div>
+							{socials.length > 0 && (
+								<div className="flex gap-4">
+									{socials.map((social, index) => {
+										{
+											social.network == "github" && (
+												<Link
+													href={`https://www.github.com/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+													)}
+												>
+													<GithubLogo className="h-4 w-4" />
+													<span className="sr-only">
+														GitHub
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "linkedin" && (
+												<Link
+													href={`https://www.linkedin.com/in/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+													)}
+												>
+													<LinkedinLogo className="h-4 w-4" />
+													<span className="sr-only">
+														LinkedIn
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "youtube" && (
+												<Link
+													href={`https://www.youtube.com/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+													)}
+												>
+													<YoutubeLogo className="h-4 w-4" />
+													<span className="sr-only">
+														YouTube
+													</span>
+												</Link>
+											);
+										}
+										{
+											social.network == "x" && (
+												<Link
+													href={`https://www.x.com/${social.username}`}
+													className={cn(
+														buttonVariants({
+															variant: "ghost",
+															size: "icon",
+														}),
+														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+													)}
+												>
+													<XLogo className="h-4 w-4" />
+													<span className="sr-only">
+														X
+													</span>
+												</Link>
+											);
+										}
+									})}
+								</div>
+							)}
+
 							<div className="text-sm text-gray-500">
 								© 2025 {basics.name}. All rights reserved.
 							</div>
