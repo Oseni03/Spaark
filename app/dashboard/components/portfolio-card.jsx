@@ -19,7 +19,7 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { cn } from "@/lib/utils";
+import { cn, generateRandomName } from "@/lib/utils";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { BaseCard } from "./base-card";
@@ -36,6 +36,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { portfolioSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
+import slugify from "@sindresorhus/slugify";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
@@ -66,11 +67,12 @@ export const PortfolioCard = ({ portfolio }) => {
 	};
 
 	const onDuplicate = () => {
+		const name = generateRandomName();
 		const duplicatedPortfolio = {
 			...portfolio,
 			id: createId(), // Remove ID to create a new one
-			name: `${portfolio.name} (Copy)`,
-			slug: `${portfolio.slug}-copy`,
+			name,
+			slug: slugify(name),
 		};
 		dispatch(addPortfolioInDatabase(duplicatedPortfolio));
 	};

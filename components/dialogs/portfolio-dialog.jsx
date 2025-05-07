@@ -11,12 +11,31 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
 	addPortfolioInDatabase,
+	createPortfolioWithSectionsThunks,
 	updatePortfolioInDatabase,
 } from "@/redux/thunks/portfolio";
 import { defaultPortfolio } from "@/schema/sections";
 import { useEffect, useState } from "react";
-import { logger } from "@/lib/utils";
+import { logger, generateRandomName } from "@/lib/utils";
+import slugify from "@sindresorhus/slugify";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import samplePortfolio from "@/lib/portfolio";
+import { createId } from "@paralleldrive/cuid2";
+import { MagicWand } from "@phosphor-icons/react";
 
 export const PortfolioDialog = ({
 	form,
@@ -65,6 +84,27 @@ export const PortfolioDialog = ({
 		}
 	};
 
+	const onGenerateRandomName = () => {
+		const name = generateRandomName();
+		form.setValue("name", name);
+		form.setValue("slug", slugify(name));
+	};
+
+	const onCreateSample = () => {
+		const name = generateRandomName();
+		const sample = {
+			...samplePortfolio,
+			id: createId(), // Remove ID to create a new one
+			name,
+			slug: slugify(name),
+		};
+		console.log("Sample portfolio", sample);
+		dispatch(createPortfolioWithSectionsThunks(sample));
+
+		setIsOpen(false);
+		reset();
+	};
+
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent>
@@ -86,10 +126,37 @@ export const PortfolioDialog = ({
 						render={({ field, fieldState }) => (
 							<div>
 								<label>Portfolio Name</label>
-								<Input
-									{...field}
-									placeholder="Enter portfolio name"
-								/>
+								<div className="flex items-center relative">
+									<Input
+										{...field}
+										placeholder="Enter portfolio name"
+										className="pr-10"
+									/>
+
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Button
+													type="button"
+													variant="ghost"
+													className="absolute right-0 h-full px-3"
+													size="sm"
+													onClick={
+														onGenerateRandomName
+													}
+												>
+													<MagicWand />
+												</Button>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>
+													Generate a random name for
+													your portfolio
+												</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+								</div>
 								{fieldState.error && (
 									<small className="text-red-500 opacity-75">
 										{fieldState.error?.message}
@@ -123,11 +190,34 @@ export const PortfolioDialog = ({
 						>
 							Cancel
 						</Button>
-						<Button type="submit">
-							{currentPortfolio
-								? "Update Portfolio"
-								: "Add Portfolio"}
-						</Button>
+
+						<div className="flex">
+							<Button type="submit">
+								{currentPortfolio
+									? "Update Portfolio"
+									: "Create"}
+							</Button>
+							{!currentPortfolio && (
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											type="button"
+											variant="default"
+											className="border-l-0 border-l-slate-300 border-l-solid px-2 rounded-l-none"
+										>
+											<ChevronDown className="h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end">
+										<DropdownMenuItem
+											onClick={onCreateSample}
+										>
+											Create Sample Portfolio
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							)}
+						</div>
 					</div>
 				</form>
 			</DialogContent>

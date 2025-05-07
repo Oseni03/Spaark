@@ -6,6 +6,7 @@ import {
 	addPortfolioInDatabase,
 	updatePortfolioInDatabase,
 	removePortfolioFromDatabase,
+	createPortfolioWithSectionsThunks,
 } from "../thunks/portfolio";
 
 // Initial State
@@ -386,13 +387,9 @@ const portfolioSlice = createSlice({
 					return;
 				}
 				try {
-					const transformedPortfolio = transformPortfolio(data);
-					state.items.push(transformedPortfolio);
+					state.items.push(data);
 					setFulfilled(state);
-					logger.info(
-						"Portfolio added successfully:",
-						transformedPortfolio
-					);
+					logger.info("Portfolio added successfully:", data);
 				} catch (error) {
 					setRejected(state, {
 						payload: { error: "Invalid portfolio data" },
@@ -401,6 +398,32 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(addPortfolioInDatabase.rejected, setRejected)
+			.addCase(createPortfolioWithSectionsThunks.pending, setPending)
+			.addCase(
+				createPortfolioWithSectionsThunks.fulfilled,
+				(state, action) => {
+					const { data, error } = action.payload;
+					if (error) {
+						setRejected(state, { payload: { error } });
+						logger.error("Error creating portfolio:", error);
+						return;
+					}
+					try {
+						state.items.push(data);
+						setFulfilled(state);
+						logger.info("Portfolio added successfully:", data);
+					} catch (error) {
+						setRejected(state, {
+							payload: { error: "Invalid portfolio data" },
+						});
+						logger.error(
+							"Error transforming portfolio data:",
+							error
+						);
+					}
+				}
+			)
+			.addCase(createPortfolioWithSectionsThunks.rejected, setRejected)
 			.addCase(updatePortfolioInDatabase.pending, setPending)
 			.addCase(updatePortfolioInDatabase.fulfilled, (state, action) => {
 				const { data, error } = action.payload;

@@ -25,7 +25,7 @@ export const defaultBasics = {
 	email: "",
 	phone: "",
 	location: "",
-	years: "",
+	years: null,
 	picture: "",
 	summary: "",
 	about: "",

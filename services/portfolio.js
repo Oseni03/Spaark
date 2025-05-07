@@ -146,21 +146,19 @@ export async function updatePortfolio(id, data) {
 
 export async function deletePortfolio(id) {
 	return withErrorHandling(async () => {
-		const { userId, orgId } = await auth();
-		if (!userId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a portfolio"
-			);
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
 		}
+
+		const userId = decodedToken.uid;
 
 		const whereClause = {
 			id,
 			OR: [{ userId }],
 		};
-
-		if (orgId) {
-			whereClause.OR.push({ organizationId: orgId });
-		}
 
 		const deletedPortfolio = await prisma.portfolio.delete({
 			where: whereClause,
@@ -367,6 +365,186 @@ export async function updatePortfolioWithSections(id, data) {
 							}
 						: undefined,
 				// Update hackathons if provided
+				hackathons:
+					hackathons?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: hackathons.items.map((hack) => ({
+									name: hack.name,
+									location: hack.location,
+									description: hack.description,
+									date: hack.date,
+									logo: hack.logo,
+									url: hack.url,
+									links: hack.links,
+									visible: hack.visible,
+								})),
+							}
+						: undefined,
+			},
+			select: portfolioSelect,
+		});
+
+		return transformPortfolio(updatedPortfolio);
+	});
+}
+
+export async function createPortfolioWithSections(data) {
+	return withErrorHandling(async () => {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
+		}
+
+		const userId = decodedToken.uid;
+
+		// Extract main portfolio fields and nested sections
+		const {
+			id: portfolioId,
+			basics,
+			skills,
+			experiences,
+			educations,
+			projects,
+			certifications,
+			socials,
+			hackathons,
+			...portfolioData
+		} = data;
+
+		// create the portfolio with nested data
+		const updatedPortfolio = await prisma.portfolio.create({
+			data: {
+				...portfolioData,
+				user: { connect: { id: userId } },
+				basics: basics
+					? {
+							upsert: {
+								create: {
+									name: basics.name,
+									headline: basics.headline,
+									email: basics.email,
+									phone: basics.phone,
+									location: basics.location,
+									years: basics.years,
+									url: basics.url,
+									picture: basics.picture,
+									summary: basics.summary,
+									about: basics.about,
+								},
+								update: {
+									name: basics.name,
+									headline: basics.headline,
+									email: basics.email,
+									phone: basics.phone,
+									location: basics.location,
+									years: basics.years,
+									url: basics.url,
+									picture: basics.picture,
+									summary: basics.summary,
+									about: basics.about,
+								},
+							},
+						}
+					: undefined,
+				// create skills if provided
+				skills:
+					skills?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: skills.items.map((skill) => ({
+									name: skill.name,
+									description: skill.description,
+									level: skill.level,
+									visible: skill.visible,
+								})),
+							}
+						: undefined,
+				// create experiences if provided
+				experiences:
+					experiences?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: experiences.items.map((exp) => ({
+									position: exp.position,
+									company: exp.company,
+									location: exp.location,
+									date: exp.date,
+									summary: exp.summary,
+									picture: exp.picture,
+									url: exp.url,
+									technologies: exp.technologies,
+									visible: exp.visible,
+								})),
+							}
+						: undefined,
+				// create educations if provided
+				educations:
+					educations?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: educations.items.map((edu) => ({
+									institution: edu.institution,
+									location: edu.location,
+									studyType: edu.studyType,
+									date: edu.date,
+									summary: edu.summary,
+									logo: edu.logo,
+									url: edu.url,
+									visible: edu.visible,
+								})),
+							}
+						: undefined,
+				// create projects if provided
+				projects:
+					projects?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: projects.items.map((proj) => ({
+									name: proj.name,
+									description: proj.description,
+									date: proj.date,
+									technologies: proj.technologies,
+									website: proj.website,
+									source: proj.source,
+									image: proj.image,
+									video: proj.video,
+									type: proj.type,
+									visible: proj.visible,
+								})),
+							}
+						: undefined,
+				// create certifications if provided
+				certifications:
+					certifications?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: certifications.items.map((cert) => ({
+									name: cert.name,
+									issuer: cert.issuer,
+									date: cert.date,
+									summary: cert.summary,
+									url: cert.url,
+									visible: cert.visible,
+								})),
+							}
+						: undefined,
+				// create socials if provided
+				socials:
+					socials?.items?.length > 0
+						? {
+								deleteMany: {},
+								create: socials.items.map((prof) => ({
+									network: prof.network,
+									username: prof.username,
+									url: prof.url,
+									visible: prof.visible,
+								})),
+							}
+						: undefined,
+				// create hackathons if provided
 				hackathons:
 					hackathons?.items?.length > 0
 						? {

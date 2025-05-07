@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { portfolioSchema } from "@/schema/sections";
 import {
 	createPortfolio,
+	createPortfolioWithSections,
 	deletePortfolio,
 	updatePortfolio,
 } from "@/services/portfolio";
@@ -17,6 +18,33 @@ export const addPortfolioInDatabase = createAsyncThunk(
 			const validatedData = portfolioSchema.safeParse(data);
 			if (validatedData.success) {
 				const response = await createPortfolio(validatedData.data);
+				logger.info("Portfolio created successfully:", response);
+				return response;
+			}
+		} catch (error) {
+			logger.error("Error creating portfolio:", error);
+			if (error instanceof z.ZodError) {
+				return rejectWithValue(error.errors[0].message);
+			}
+			return rejectWithValue(
+				error instanceof Error
+					? error.message
+					: "An unknown error occurred"
+			);
+		}
+	}
+);
+
+export const createPortfolioWithSectionsThunks = createAsyncThunk(
+	"portfolio/createPortfolioWithSections",
+	async (data, { rejectWithValue }) => {
+		try {
+			logger.info("Creating portfolio:", data);
+			const validatedData = portfolioSchema.safeParse(data);
+			if (validatedData.success) {
+				const response = await createPortfolioWithSections(
+					validatedData.data
+				);
 				logger.info("Portfolio created successfully:", response);
 				return response;
 			}
