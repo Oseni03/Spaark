@@ -394,8 +394,11 @@ export async function createPortfolioWithSections(data) {
 		const cookieStore = await cookies();
 		const authToken = cookieStore.get(COOKIE_NAME)?.value;
 		const decodedToken = await verifyAuthToken(authToken);
+
 		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
+			throw new UnauthorizedError(
+				"Missing or invalid authentication token"
+			);
 		}
 
 		const userId = decodedToken.uid;
@@ -414,157 +417,225 @@ export async function createPortfolioWithSections(data) {
 			...portfolioData
 		} = data;
 
-		// create the portfolio with nested data
-		const updatedPortfolio = await prisma.portfolio.create({
-			data: {
-				...portfolioData,
-				user: { connect: { id: userId } },
-				basics: basics
-					? {
-							upsert: {
-								create: {
-									name: basics.name,
-									headline: basics.headline,
-									email: basics.email,
-									phone: basics.phone,
-									location: basics.location,
-									years: basics.years,
-									url: basics.url,
-									picture: basics.picture,
-									summary: basics.summary,
-									about: basics.about,
-								},
-								update: {
-									name: basics.name,
-									headline: basics.headline,
-									email: basics.email,
-									phone: basics.phone,
-									location: basics.location,
-									years: basics.years,
-									url: basics.url,
-									picture: basics.picture,
-									summary: basics.summary,
-									about: basics.about,
-								},
-							},
-						}
-					: undefined,
-				// create skills if provided
-				skills:
-					skills?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: skills.items.map((skill) => ({
-									name: skill.name,
-									description: skill.description,
-									level: skill.level,
-									visible: skill.visible,
-								})),
-							}
-						: undefined,
-				// create experiences if provided
-				experiences:
-					experiences?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: experiences.items.map((exp) => ({
-									position: exp.position,
-									company: exp.company,
-									location: exp.location,
-									date: exp.date,
-									summary: exp.summary,
-									picture: exp.picture,
-									url: exp.url,
-									technologies: exp.technologies,
-									visible: exp.visible,
-								})),
-							}
-						: undefined,
-				// create educations if provided
-				educations:
-					educations?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: educations.items.map((edu) => ({
-									institution: edu.institution,
-									location: edu.location,
-									studyType: edu.studyType,
-									date: edu.date,
-									summary: edu.summary,
-									logo: edu.logo,
-									url: edu.url,
-									visible: edu.visible,
-								})),
-							}
-						: undefined,
-				// create projects if provided
-				projects:
-					projects?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: projects.items.map((proj) => ({
-									name: proj.name,
-									description: proj.description,
-									date: proj.date,
-									technologies: proj.technologies,
-									website: proj.website,
-									source: proj.source,
-									image: proj.image,
-									video: proj.video,
-									type: proj.type,
-									visible: proj.visible,
-								})),
-							}
-						: undefined,
-				// create certifications if provided
-				certifications:
-					certifications?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: certifications.items.map((cert) => ({
-									name: cert.name,
-									issuer: cert.issuer,
-									date: cert.date,
-									summary: cert.summary,
-									url: cert.url,
-									visible: cert.visible,
-								})),
-							}
-						: undefined,
-				// create socials if provided
-				socials:
-					socials?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: socials.items.map((prof) => ({
-									network: prof.network,
-									username: prof.username,
-									url: prof.url,
-									visible: prof.visible,
-								})),
-							}
-						: undefined,
-				// create hackathons if provided
-				hackathons:
-					hackathons?.items?.length > 0
-						? {
-								deleteMany: {},
-								create: hackathons.items.map((hack) => ({
-									name: hack.name,
-									location: hack.location,
-									description: hack.description,
-									date: hack.date,
-									logo: hack.logo,
-									url: hack.url,
-									links: hack.links,
-									visible: hack.visible,
-								})),
-							}
-						: undefined,
-			},
-			select: portfolioSelect,
-		});
+		// Create portfolio with all nested data in a single transaction
+		return await prisma.$transaction(async (tx) => {
+			// Create the portfolio first
+			const newPortfolio = await tx.portfolio.create({
+				data: {
+					...portfolioData,
+					user: { connect: { id: userId } },
+				},
+				select: { id: true },
+			});
 
-		return transformPortfolio(updatedPortfolio);
+			// Handle basics section if provided
+			if (basics) {
+				await tx.basics.create({
+					data: {
+						portfolioId: newPortfolio.id,
+						name: basics.name,
+						headline: basics.headline,
+						email: basics.email,
+						phone: basics.phone,
+						location: basics.location,
+						years: basics.years,
+						url: basics.url,
+						picture: basics.picture,
+						summary: basics.summary,
+						about: basics.about,
+					},
+				});
+			}
+
+			// Create section items using helper functions
+			if (skills?.items?.length > 0) {
+				await createSkills(tx, newPortfolio.id, skills.items);
+			}
+
+			if (experiences?.items?.length > 0) {
+				await createExperiences(tx, newPortfolio.id, experiences.items);
+			}
+
+			if (educations?.items?.length > 0) {
+				await createEducations(tx, newPortfolio.id, educations.items);
+			}
+
+			if (projects?.items?.length > 0) {
+				await createProjects(tx, newPortfolio.id, projects.items);
+			}
+
+			if (certifications?.items?.length > 0) {
+				await createCertifications(
+					tx,
+					newPortfolio.id,
+					certifications.items
+				);
+			}
+
+			if (socials?.items?.length > 0) {
+				await createSocials(tx, newPortfolio.id, socials.items);
+			}
+
+			if (hackathons?.items?.length > 0) {
+				await createHackathons(tx, newPortfolio.id, hackathons.items);
+			}
+
+			// Fetch complete portfolio with all relations
+			const completePortfolio = await tx.portfolio.findUnique({
+				where: { id: newPortfolio.id },
+				select: portfolioSelect,
+			});
+
+			return transformPortfolio(completePortfolio);
+		});
 	});
+}
+
+// Helper functions for creating section items
+async function createSkills(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.skill.create({
+				data: {
+					portfolioId,
+					name: item.name,
+					description: item.description,
+					level: item.level,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createExperiences(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.experience.create({
+				data: {
+					portfolioId,
+					position: item.position,
+					company: item.company,
+					location: item.location,
+					date: item.date,
+					summary: item.summary,
+					picture: item.picture,
+					url: item.url,
+					technologies: item.technologies,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createEducations(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.education.create({
+				data: {
+					portfolioId,
+					institution: item.institution,
+					location: item.location,
+					studyType: item.studyType,
+					date: item.date,
+					summary: item.summary,
+					logo: item.logo,
+					url: item.url,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createProjects(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.project.create({
+				data: {
+					portfolioId,
+					name: item.name,
+					description: item.description,
+					date: item.date,
+					technologies: item.technologies,
+					website: item.website,
+					source: item.source,
+					image: item.image,
+					video: item.video,
+					type: item.type,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createCertifications(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.certification.create({
+				data: {
+					portfolioId,
+					name: item.name,
+					issuer: item.issuer,
+					date: item.date,
+					summary: item.summary,
+					url: item.url,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createSocials(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.social.create({
+				data: {
+					portfolioId,
+					network: item.network,
+					username: item.username,
+					url: item.url,
+					visible: item.visible ?? true,
+				},
+			})
+		)
+	);
+}
+
+async function createHackathons(tx, portfolioId, items) {
+	await Promise.all(
+		items.map((item) =>
+			tx.hackathon.create({
+				data: {
+					portfolioId,
+					name: item.name,
+					location: item.location,
+					description: item.description,
+					date: item.date,
+					logo: item.logo,
+					url: item.url,
+					visible: item.visible ?? true,
+					links: {
+						create: (item.links || []).map((link) => ({
+							label: link.label,
+							url: link.url,
+							icon: link.icon,
+						})),
+					},
+				},
+			})
+		)
+	);
+}
+
+// Custom error classes for better error handling
+class UnauthorizedError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "UnauthorizedError";
+		this.statusCode = 401;
+	}
 }

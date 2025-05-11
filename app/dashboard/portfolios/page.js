@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { PortfolioCard } from "../components/portfolio-card";
 import { BaseCard } from "../components/base-card";
 import { CreatePortfolioCard } from "../components/create-portfolio-card";
+import { ImportPortfolioCard } from "../components/import-portfolio-card";
 
 function Page() {
 	const portfolios = useSelector((state) => state.portfolios.items);
@@ -17,6 +18,12 @@ function Page() {
 				animate={{ opacity: 1, x: 0 }}
 			>
 				<CreatePortfolioCard />
+			</motion.div>
+			<motion.div
+				initial={{ opacity: 0, x: -50 }}
+				animate={{ opacity: 1, x: 0 }}
+			>
+				<ImportPortfolioCard />
 			</motion.div>
 
 			{loading &&

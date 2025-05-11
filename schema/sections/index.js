@@ -28,36 +28,76 @@ export const portfolioSchema = z.object({
 
 // Schema
 export const mainSchema = portfolioSchema.extend({
-	customDomain: z.string().optional(),
-	basics: sectionSchema.extend(basicsSchema),
-	certifications: sectionSchema.extend({
-		id: z.literal("certification"),
-		items: z.array(certificationSchema),
-	}),
-	educations: sectionSchema.extend({
-		id: z.literal("education"),
-		items: z.array(educationSchema),
-	}),
-	experiences: sectionSchema.extend({
-		id: z.literal("experience"),
-		items: z.array(experienceSchema),
-	}),
-	hackathons: sectionSchema.extend({
-		id: z.literal("hackathon"),
-		items: z.array(hackathonSchema),
-	}),
-	socials: sectionSchema.extend({
-		id: z.literal("social"),
-		items: z.array(socialSchema),
-	}),
-	projects: sectionSchema.extend({
-		id: z.literal("project"),
-		items: z.array(projectSchema),
-	}),
-	skills: sectionSchema.extend({
-		id: z.literal("skill"),
-		items: z.array(skillSchema),
-	}),
+	customDomain: z.string().optional().nullable(),
+	basics: basicsSchema.omit({ id: true, portfolioId: true }).optional(),
+	certifications: z
+		.object({
+			id: z.literal("certification"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(certificationSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	educations: z
+		.object({
+			id: z.literal("education"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(educationSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	experiences: z
+		.object({
+			id: z.literal("experience"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(experienceSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	hackathons: z
+		.object({
+			id: z.literal("hackathon"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(hackathonSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	socials: z
+		.object({
+			id: z.literal("social"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(socialSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	projects: z
+		.object({
+			id: z.literal("project"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z
+				.array(projectSchema.omit({ portfolioId: true }))
+				.default([]),
+		})
+		.optional(),
+	skills: z
+		.object({
+			id: z.literal("skill"),
+			name: z.string(),
+			visible: z.boolean(),
+			items: z.array(skillSchema.omit({ portfolioId: true })).default([]),
+		})
+		.optional(),
 });
 
 // Defaults
@@ -111,7 +151,7 @@ export const defaultMain = {
 	},
 	socials: {
 		...defaultSection,
-		id: "socials",
+		id: "social",
 		name: "Socials",
 		items: [],
 	},

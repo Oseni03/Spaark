@@ -21,7 +21,7 @@ import {
 	createPortfolioWithSectionsThunks,
 	updatePortfolioInDatabase,
 } from "@/redux/thunks/portfolio";
-import { defaultPortfolio } from "@/schema/sections";
+import { defaultMain, defaultPortfolio } from "@/schema/sections";
 import { useEffect, useState } from "react";
 import { logger, generateRandomName } from "@/lib/utils";
 import slugify from "@sindresorhus/slugify";
@@ -93,12 +93,13 @@ export const PortfolioDialog = ({
 	const onCreateSample = () => {
 		const name = generateRandomName();
 		const sample = {
+			...defaultMain,
 			...samplePortfolio,
 			id: createId(), // Remove ID to create a new one
 			name,
 			slug: slugify(name),
 		};
-		console.log("Sample portfolio", sample);
+		logger.info("Sample portfolio", sample);
 		dispatch(createPortfolioWithSectionsThunks(sample));
 
 		setIsOpen(false);
@@ -192,7 +193,7 @@ export const PortfolioDialog = ({
 						</Button>
 
 						<div className="flex">
-							<Button type="submit">
+							<Button type="submit" className="rounded-r-none">
 								{currentPortfolio
 									? "Update Portfolio"
 									: "Create"}

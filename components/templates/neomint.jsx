@@ -807,240 +807,133 @@ export default function Portfolio({
 									{/* Timeline line */}
 									<div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-1/2"></div>
 
-									{/* Experience 1 */}
-									{experiences.map((experience, index) => (
-										<div
-											key={index}
-											className="relative mb-16"
-										>
-											<div className="flex flex-col md:flex-row items-center">
-												<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
-													<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-														<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-															{experience.date}
-														</Badge>
-														<h3 className="text-xl font-bold mb-1">
-															{
-																experience.headline
-															}
-														</h3>
-														<p className="text-muted-foreground">
-															{experience.company}
-														</p>
-													</div>
-												</div>
-												<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-													<div className="w-3 h-3 rounded-full bg-background"></div>
-												</div>
-												<div className="md:w-1/2 md:pl-12 md:pt-16">
-													<div className="text-sm mb-4">
-														{HTMLReactParser(
-															experience.summary
-														)}
-													</div>
-													{experience.technologies && (
-														<div className="flex flex-wrap gap-2">
-															{experience.technologies.map(
-																(
-																	tech,
-																	index
-																) => (
-																	<Badge
-																		key={
+									{experiences.map((experience, index) => {
+										const isEven = index % 2 === 0;
+
+										if (isEven) {
+											return (
+												<div
+													key={index}
+													className="relative mb-16"
+												>
+													<div className="flex flex-col md:flex-row items-center">
+														<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
+															<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
+																<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+																	{
+																		experience.date
+																	}
+																</Badge>
+																<h3 className="text-xl font-bold mb-1">
+																	{
+																		experience.headline
+																	}
+																</h3>
+																<p className="text-muted-foreground">
+																	{
+																		experience.company
+																	}
+																</p>
+															</div>
+														</div>
+														<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
+															<div className="w-3 h-3 rounded-full bg-background"></div>
+														</div>
+														<div className="md:w-1/2 md:pl-12 md:pt-16">
+															<div className="text-sm mb-4">
+																{HTMLReactParser(
+																	experience.summary
+																)}
+															</div>
+															{experience.technologies && (
+																<div className="flex flex-wrap gap-2">
+																	{experience.technologies.map(
+																		(
+																			tech,
 																			index
-																		}
-																		variant="outline"
-																		className="border-border text-muted-foreground"
-																	>
-																		{tech}
-																	</Badge>
-																)
+																		) => (
+																			<Badge
+																				key={
+																					index
+																				}
+																				variant="outline"
+																				className="border-border text-muted-foreground"
+																			>
+																				{
+																					tech
+																				}
+																			</Badge>
+																		)
+																	)}
+																</div>
 															)}
 														</div>
-													)}
-												</div>
-											</div>
-										</div>
-									))}
-
-									{/* Experience 2 */}
-									<div className="relative mb-16">
-										<div className="flex flex-col md:flex-row items-center">
-											<div className="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
-												<ul className="space-y-2 text-sm">
-													<li className="flex items-start md:justify-end">
-														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-															•
-														</span>
-														<span>
-															Developed key
-															components of the
-															Cloud Console UI
-														</span>
-													</li>
-													<li className="flex items-start md:justify-end">
-														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-															•
-														</span>
-														<span>
-															Reduced page load
-															time by 35% through
-															code optimization
-														</span>
-													</li>
-													<li className="flex items-start md:justify-end">
-														<span className="text-primary mr-2 md:order-2 md:ml-2 md:mr-0">
-															•
-														</span>
-														<span>
-															Implemented
-															accessibility
-															improvements across
-															the platform
-														</span>
-													</li>
-												</ul>
-											</div>
-											<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-												<div className="w-3 h-3 rounded-full bg-background"></div>
-											</div>
-											<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
-												<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-													<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-														2018 - 2021
-													</Badge>
-													<h3 className="text-xl font-bold mb-1">
-														Senior Developer
-													</h3>
-													<p className="text-muted-foreground mb-4">
-														Google
-													</p>
-													<p className="text-sm mb-4">
-														Worked on Google Cloud
-														Platform&rsquo;s
-														developer console,
-														focusing on user
-														experience and
-														performance
-														optimizations.
-														Contributed to the
-														design and
-														implementation of new
-														features used by
-														millions of developers.
-													</p>
-													<div className="flex flex-wrap gap-2">
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															Angular
-														</Badge>
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															Go
-														</Badge>
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															GCP
-														</Badge>
 													</div>
 												</div>
-											</div>
-										</div>
-									</div>
-
-									{/* Experience 3 */}
-									<div className="relative">
-										<div className="flex flex-col md:flex-row items-center">
-											<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
-												<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-													<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
-														2016 - 2018
-													</Badge>
-													<h3 className="text-xl font-bold mb-1">
-														Frontend Developer
-													</h3>
-													<p className="text-muted-foreground mb-4">
-														Airbnb
-													</p>
-													<p className="text-sm mb-4">
-														Contributed to
-														Airbnb&rsquo;s frontend
-														architecture and
-														component library.
-														Worked on the booking
-														flow and search
-														experience, improving
-														conversion rates and
-														user satisfaction.
-													</p>
-													<div className="flex flex-wrap gap-2">
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															React
-														</Badge>
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															Redux
-														</Badge>
-														<Badge
-															variant="outline"
-															className="border-border text-muted-foreground"
-														>
-															Jest
-														</Badge>
+											);
+										} else {
+											return (
+												<div
+													key={index}
+													className="relative mb-16"
+												>
+													<div className="flex flex-col md:flex-row items-center">
+														<div className="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
+															<div className="text-sm mb-4">
+																{HTMLReactParser(
+																	experience.summary
+																)}
+															</div>
+															{experience.technologies && (
+																<div className="flex flex-wrap gap-2 justify-end">
+																	{experience.technologies.map(
+																		(
+																			tech,
+																			index
+																		) => (
+																			<Badge
+																				key={
+																					index
+																				}
+																				variant="outline"
+																				className="border-border text-muted-foreground"
+																			>
+																				{
+																					tech
+																				}
+																			</Badge>
+																		)
+																	)}
+																</div>
+															)}
+														</div>
+														<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
+															<div className="w-3 h-3 rounded-full bg-background"></div>
+														</div>
+														<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
+															<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
+																<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+																	{
+																		experience.date
+																	}
+																</Badge>
+																<h3 className="text-xl font-bold mb-1">
+																	{
+																		experience.headline
+																	}
+																</h3>
+																<p className="text-muted-foreground">
+																	{
+																		experience.company
+																	}
+																</p>
+															</div>
+														</div>
 													</div>
 												</div>
-											</div>
-											<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-												<div className="w-3 h-3 rounded-full bg-background"></div>
-											</div>
-											<div className="md:w-1/2 md:pl-12 md:pt-16">
-												<ul className="space-y-2 text-sm">
-													<li className="flex items-start">
-														<span className="text-primary mr-2">
-															•
-														</span>
-														<span>
-															Redesigned the
-															booking confirmation
-															process
-														</span>
-													</li>
-													<li className="flex items-start">
-														<span className="text-primary mr-2">
-															•
-														</span>
-														<span>
-															Built reusable
-															components for the
-															design system
-														</span>
-													</li>
-													<li className="flex items-start">
-														<span className="text-primary mr-2">
-															•
-														</span>
-														<span>
-															Implemented
-															comprehensive unit
-															and integration
-															tests
-														</span>
-													</li>
-												</ul>
-											</div>
-										</div>
-									</div>
+											);
+										}
+									})}
 								</div>
 							</div>
 						</div>
