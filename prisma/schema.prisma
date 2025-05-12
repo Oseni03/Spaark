@@ -41,6 +41,7 @@ model User {
 
   // Relations
   portfolios    Portfolio[]
+  blogs         Blog[]
   memberships   OrganizationMember[]
   organizations Organization[] // Organizations owned by user
   transactions  Transaction[]
@@ -377,9 +378,10 @@ model Blog {
   // Relations
   portfolioId String
   portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  authorId    String // Clerk user ID
+  author      User      @relation(fields: [authorId], references: [id])
   tags        Tag[]
   comments    Comment[]
+  authorId    String
 
   @@index([portfolioId])
   @@index([authorId])

@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useEffect, Suspense } from "react";
+
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { siteConfig } from "@/config/site";
 import { useDispatch } from "react-redux";
 import { setPortfolios } from "@/redux/features/portfolioSlice";
-import { setBlogs } from "@/redux/features/blogSlice";
 import { logger } from "@/lib/utils";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
@@ -48,7 +48,7 @@ const DashboardLayoutContent = ({ children }) => {
 				const response = await fetch(`/api/portfolio`);
 
 				if (!response.ok) {
-					logger.error("API request failed", {
+					logger.error("Portfolio API request failed", {
 						status: response.status,
 						statusText: response.statusText,
 					});
@@ -56,8 +56,8 @@ const DashboardLayoutContent = ({ children }) => {
 				}
 
 				const { portfolios } = await response.json();
-				logger.info("Data received from API", {
-					portfoliosCount: portfolios?.data?.length,
+				logger.info("Portfolio data received from API", {
+					count: portfolios?.data?.length || 0,
 				});
 
 				if (portfolios?.data) {
@@ -65,42 +65,6 @@ const DashboardLayoutContent = ({ children }) => {
 						count: portfolios.data.length,
 					});
 					dispatch(setPortfolios(portfolios.data));
-
-					// Fetch blogs for each portfolio
-					const blogsPromises = portfolios.data.map(
-						async (portfolio) => {
-							try {
-								const blogResponse = await fetch(
-									`/api/blogs?portfolioId=${portfolio.id}`
-								);
-								if (!blogResponse.ok)
-									throw new Error(
-										`Failed to fetch blogs for portfolio ${portfolio.id}`
-									);
-								const { blogs } = await blogResponse.json();
-								return blogs?.data || [];
-							} catch (error) {
-								logger.error(
-									`Error fetching blogs for portfolio ${portfolio.id}:`,
-									error
-								);
-								return [];
-							}
-						}
-					);
-
-					// Wait for all blog fetches to complete
-					const allBlogs = await Promise.all(blogsPromises);
-					// Combine all blogs into a single array
-					const flattenedBlogs = allBlogs.flat();
-
-					logger.info("Updating blogs in store", {
-						totalBlogs: flattenedBlogs.length,
-						portfoliosCount: portfolios.data.length,
-						blogs: flattenedBlogs,
-					});
-
-					dispatch(setBlogs(flattenedBlogs));
 				}
 
 				const endTime = performance.now();

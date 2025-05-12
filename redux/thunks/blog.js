@@ -2,7 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { logger } from "@/lib/utils";
 import { blogSchema } from "@/schema/sections/blog";
 import {
-	getBlogs as getBlogsAction,
+	getBlogsByPortfolio as getBlogsAction,
 	getBlog as getBlogAction,
 	createBlog as createBlogAction,
 	updateBlog as updateBlogAction,

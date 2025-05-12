@@ -46,10 +46,21 @@ const processBlog = (blog) => {
 	return serializeDates(parsed);
 };
 
-export async function getBlogs(portfolioId) {
+export async function getBlogsByPortfolio(portfolioId) {
 	return withErrorHandling(async () => {
 		const blogs = await prisma.blog.findMany({
 			where: { portfolioId },
+			orderBy: { updatedAt: "desc" },
+			select,
+		});
+		return blogs.map(processBlog);
+	});
+}
+
+export async function getBlogsByAuthor(authorId) {
+	return withErrorHandling(async () => {
+		const blogs = await prisma.blog.findMany({
+			where: { authorId },
 			orderBy: { updatedAt: "desc" },
 			select,
 		});

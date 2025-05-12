@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/utils";
-import { getBlogs } from "@/services/blog";
+import { getBlogsByAuthor, getBlogsByPortfolio } from "@/services/blog";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { COOKIE_NAME } from "@/utils/constants";
 
@@ -58,14 +58,9 @@ export async function GET(req) {
 		const decodedToken = await verifyAuthToken(authToken);
 		const userId = decodedToken?.uid;
 
-		if (!userId) {
+		if (!portfolioId && !userId) {
 			logger.error("Unauthorized request", { requestId });
 			return createErrorResponse(401, "Unauthorized", origin);
-		}
-
-		if (!portfolioId) {
-			logger.error("Missing portfolioId", { requestId });
-			return createErrorResponse(400, "Portfolio ID is required", origin);
 		}
 
 		logger.info("Fetching blogs", {
@@ -74,7 +69,13 @@ export async function GET(req) {
 			userId,
 		});
 
-		const blogs = await getBlogs(portfolioId);
+		let blogs;
+
+		if (portfolioId) {
+			blogs = await getBlogsByPortfolio(portfolioId);
+		} else {
+			blogs = await getBlogsByAuthor(userId);
+		}
 
 		return new NextResponse(JSON.stringify({ blogs }), {
 			status: 200,
