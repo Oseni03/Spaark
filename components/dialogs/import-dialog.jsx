@@ -161,9 +161,7 @@ export const ImportDialog = ({ isOpen, setIsOpen }) => {
 
 			setIsOpen(false);
 		} catch (error) {
-			toast({
-				variant: "error",
-				title: `Oops, the server returned an error.`,
+			toast.error(`Oops, the server returned an error.`, {
 				description: error instanceof Error ? error.message : undefined,
 			});
 		}

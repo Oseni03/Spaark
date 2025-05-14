@@ -55,6 +55,7 @@ const ResumeCard = ({
 	badges,
 	period,
 	description,
+	technologies,
 }) => {
 	const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -131,6 +132,19 @@ const ResumeCard = ({
 							{description}
 						</motion.div>
 					)}
+					{technologies && (
+						<span className="inline-flex gap-x-1">
+							{technologies.map((tech, index) => (
+								<Badge
+									variant="secondary"
+									className="align-middle text-xs"
+									key={index}
+								>
+									{tech}
+								</Badge>
+							))}
+						</span>
+					)}
 				</div>
 			</Card>
 		</Link>
@@ -147,6 +161,7 @@ const ProjectCard = ({
 	image,
 	video,
 	className,
+	type,
 }) => {
 	return (
 		<Card className="flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full">
@@ -175,6 +190,7 @@ const ProjectCard = ({
 				className={cn(image || video ? "px-2" : "px-4", "py-2 md:py-4")}
 			>
 				<div className="space-y-1">
+					<p className="font-sans text-xs">{type}</p>
 					<CardTitle className="text-sm md:text-base">
 						{title}
 					</CardTitle>
@@ -228,6 +244,7 @@ const HackathonCard = ({
 	location,
 	image,
 	links,
+	technologies,
 }) => {
 	return (
 		<li className="relative ml-10 py-4">
@@ -261,6 +278,20 @@ const HackathonCard = ({
 				{/* Location */}
 				{location && (
 					<p className="text-sm text-muted-foreground">{location}</p>
+				)}
+
+				{technologies && (
+					<span className="inline-flex gap-x-1">
+						{technologies.map((tech, index) => (
+							<Badge
+								variant="secondary"
+								className="align-middle text-xs"
+								key={index}
+							>
+								{tech}
+							</Badge>
+						))}
+					</span>
 				)}
 
 				{/* Description */}
@@ -381,6 +412,27 @@ const Navbar = ({ social, blogEnabled }) => {
 		},
 	].filter((item) => !item.requiresBlog || blogEnabled);
 
+	const getSocialLink = (social) => {
+		if (social.network === "github") {
+			return `https://github.com/${social.username}`;
+		} else if (social.network === "linkedin") {
+			return `https://linkedin.com/in/${social.username}`;
+		} else if (social.network === "x") {
+			return `https://x.com/${social.username}`;
+		} else if (social.network === "youtube") {
+			return `https://youtube.com/${social.username}`;
+		}
+		return "";
+	};
+
+	const getSocialIcon = (social) => {
+		if (social.network === "github") return <GithubLogo size={4} />;
+		else if (social.network === "linkedin")
+			return <LinkedinLogo size={4} />;
+		else if (social.network === "x") return <XLogo size={4} />;
+		else if (social.network === "youtube") return <YoutubeLogo size={4} />;
+	};
+
 	return (
 		<div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-6 flex flex-col origin-bottom h-full max-h-14">
 			<div className="fixed bottom-0 inset-x-0 h-16 w-full bg-background to-transparent backdrop-blur-lg [-webkit-mask-image:linear-gradient(to_top,black,transparent)] dark:bg-background"></div>
@@ -416,66 +468,19 @@ const Navbar = ({ social, blogEnabled }) => {
 						<DockIcon key={network}>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									{social === "github" && (
-										<Link
-											href={`https://www.github.com/${social.username}`}
-											target="_blank"
-											className={cn(
-												buttonVariants({
-													variant: "ghost",
-													size: "icon",
-												}),
-												"size-12"
-											)}
-										>
-											<GithubLogo size={4} />
-										</Link>
-									)}
-									{social.network === "linkedin" && (
-										<Link
-											href={`https://www.linkedin.com/in/${social.username}`}
-											target="_blank"
-											className={cn(
-												buttonVariants({
-													variant: "ghost",
-													size: "icon",
-												}),
-												"size-12"
-											)}
-										>
-											<LinkedinLogo size={4} />
-										</Link>
-									)}
-									{social.network === "x" && (
-										<Link
-											href={`https://www.x.com/${social.username}`}
-											target="_blank"
-											className={cn(
-												buttonVariants({
-													variant: "ghost",
-													size: "icon",
-												}),
-												"size-12"
-											)}
-										>
-											<XLogo size={4} />
-										</Link>
-									)}
-									{social.network === "youtube" && (
-										<Link
-											href={`https://www.youtube.com/${social.username}`}
-											target="_blank"
-											className={cn(
-												buttonVariants({
-													variant: "ghost",
-													size: "icon",
-												}),
-												"size-12"
-											)}
-										>
-											<YoutubeLogo size={4} />
-										</Link>
-									)}
+									<Link
+										href={getSocialLink(social)}
+										target="_blank"
+										className={cn(
+											buttonVariants({
+												variant: "ghost",
+												size: "icon",
+											}),
+											"size-12"
+										)}
+									>
+										{getSocialIcon(social)}
+									</Link>
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>
@@ -697,8 +702,8 @@ export default function DefaultTemplate({
 	blogEnabled = false,
 }) {
 	return (
-		<>
-			<main className="flex flex-col min-h-[100dvh] overflow-auto scrollbar-hide">
+		<main>
+			<div className="flex flex-col min-h-[100dvh] overflow-auto scrollbar-hide">
 				<div className="container mx-auto px-4 md:px-6 space-y-8 md:space-y-10 max-w-4xl">
 					<section id="hero" className="pt-6 md:pt-10">
 						<div className="space-y-6 md:space-y-8">
@@ -773,6 +778,7 @@ export default function DefaultTemplate({
 											description={HTMLReactParser(
 												work.summary || ""
 											)}
+											technologies={work.technologies}
 										/>
 									</BlurFade>
 								))}
@@ -866,6 +872,7 @@ export default function DefaultTemplate({
 											source={project.source}
 											image={project.image}
 											video={project.video}
+											type={project.type}
 										/>
 									</BlurFade>
 								))}
@@ -984,6 +991,9 @@ export default function DefaultTemplate({
 													dates={project.date}
 													image={project.logo || null}
 													links={project.links}
+													technologies={
+														project.technologies
+													}
 												/>
 											</BlurFade>
 										))}
@@ -1018,8 +1028,8 @@ export default function DefaultTemplate({
 						</BlurFade>
 					</section>
 				</div>
-			</main>
+			</div>
 			<Navbar social={socials} blogEnabled={blogEnabled} />
-		</>
+		</main>
 	);
 }

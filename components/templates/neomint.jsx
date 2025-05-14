@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -34,7 +34,7 @@ import { useUserContactForm } from "@/hooks/use-user-contact-form";
 import { Spinner } from "../ui/Spinner";
 import { usePathname } from "next/navigation";
 
-export default function Portfolio({
+export default function Neomint({
 	basics = defaultMain.basics,
 	experiences = defaultMain.experiences,
 	educations = defaultMain.educations,

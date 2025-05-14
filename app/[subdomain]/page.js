@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TemplateWrapper } from "@/components/templates/template-wrapper";
-import PortfolioSkeleton from "./components/portfolio-skeleton";
+import PortfolioSkeleton from "@/components/portfolio-skeleton";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { logger } from "@/lib/utils";
 import { CONTAINER_CLASS, CONTENT_CLASS } from "@/utils/constants";
@@ -52,14 +52,11 @@ export default function Page() {
 
 	logger.info("Portfolio data: ", portfolioData);
 
-	// Determine the template to use
-	const templateToUse = portfolio.template || "default";
-
 	return (
 		<div className={cn(CONTAINER_CLASS, "min-h-screen")}>
 			<div className={CONTENT_CLASS}>
 				<TemplateWrapper
-					template={templateToUse}
+					template={portfolio.template || "default"}
 					data={portfolioData}
 					className="py-12 sm:py-16 lg:py-24"
 				/>

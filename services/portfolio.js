@@ -376,7 +376,18 @@ export async function updatePortfolioWithSections(id, data) {
 									date: hack.date,
 									logo: hack.logo,
 									url: hack.url,
-									links: hack.links,
+									links:
+										hack?.links?.length > 0
+											? {
+													deleteMany: {},
+													create: hack.links.map(
+														({ id, ...link }) => ({
+															...link,
+															// Exclude the id field when creating new links
+														})
+													),
+												}
+											: undefined,
 									visible: hack.visible,
 								})),
 							}

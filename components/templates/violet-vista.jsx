@@ -439,7 +439,7 @@ export default function VioletVista({
 													alt={project.name}
 													height={256}
 													width={512}
-													fill
+													// fill
 													className="object-cover transition-transform duration-700 group-hover:scale-110"
 												/>
 											)}

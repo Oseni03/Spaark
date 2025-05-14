@@ -32,6 +32,8 @@ const nextConfig = {
 			"images.unsplash.com",
 			"assets.aceternity.com",
 			"cdn.simpleicons.org",
+			"sftechhack.com",
+			"globalai-hackathon.com",
 		],
 	},
 };

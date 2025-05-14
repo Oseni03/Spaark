@@ -37,9 +37,9 @@ const templates = [
 		preview: "/templates/violetvista.png",
 	},
 	{
-		id: "mayday",
-		name: "MayDay",
-		preview: "/templates/mayday.png",
+		id: "neomint",
+		name: "Neomint",
+		preview: "/templates/noemint.png",
 	},
 	// Add more templates as needed
 ];
