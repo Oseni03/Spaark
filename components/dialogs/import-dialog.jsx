@@ -123,10 +123,7 @@ export const ImportDialog = ({ isOpen, setIsOpen }) => {
 					errors: error.toString(),
 				});
 
-				toast({
-					variant: "error",
-					title: `An error occurred while validating the file.`,
-				});
+				toast.error(`An error occurred while validating the file.`);
 			}
 		}
 	};

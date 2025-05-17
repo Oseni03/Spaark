@@ -133,7 +133,6 @@ export const defaultPortfolio = {
 	isLive: false,
 	blogEnabled: false,
 	metadata: defaultMetadata,
-	template: "default",
 };
 
 export const defaultMain = {

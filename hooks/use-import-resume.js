@@ -18,8 +18,7 @@ export const useImportResume = () => {
 					createPortfolioWithSectionsThunks(data)
 				);
 
-				toast({
-					title: "Resume imported successfully",
+				toast("Resume imported successfully", {
 					description:
 						"Your resume has been imported and is ready to edit",
 				});
@@ -27,9 +26,7 @@ export const useImportResume = () => {
 				return result;
 			} catch (error) {
 				setError(error);
-				toast({
-					variant: "error",
-					title: "Failed to import resume",
+				toast.error("Failed to import resume", {
 					description:
 						error instanceof Error
 							? error.message

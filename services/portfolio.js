@@ -204,15 +204,15 @@ export async function updatePortfolioWithSections(id, data) {
 
 		const userId = decodedToken.uid;
 
-		// First, get the existing portfolio to preserve createdAt
-		const existingPortfolio = await prisma.portfolio.findUnique({
-			where: { id },
-			select: { createdAt: true },
-		});
+		// // First, get the existing portfolio to preserve createdAt
+		// const existingPortfolio = await prisma.portfolio.findUnique({
+		// 	where: { id },
+		// 	select: { createdAt: true },
+		// });
 
-		if (!existingPortfolio) {
-			throw new Error("Portfolio not found");
-		}
+		// if (!existingPortfolio) {
+		// 	throw new Error("Portfolio not found");
+		// }
 
 		// Extract main portfolio fields and nested sections
 		const {
@@ -236,7 +236,7 @@ export async function updatePortfolioWithSections(id, data) {
 			},
 			data: {
 				...portfolioData,
-				createdAt: existingPortfolio.createdAt, // Preserve the original createdAt
+				// createdAt: existingPortfolio.createdAt, // Preserve the original createdAt
 				updatedAt: new Date(),
 				// Update basics if provided
 				basics: basics
