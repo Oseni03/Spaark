@@ -8,6 +8,7 @@ import { CONTENT_CLASS } from "@/utils/constants";
 import { logger } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import PortfolioSkeleton from "@/components/portfolio-skeleton";
+import { defaultMetadata } from "@/schema/sections";
 
 export default function Page() {
 	const { portfolioId } = useParams();
@@ -52,6 +53,7 @@ export default function Page() {
 			(item) => item.visible
 		),
 		socials: portfolio?.socials?.items || [],
+		metadata: JSON.parse(portfolio?.metadata) || defaultMetadata,
 		blogEnabled: portfolio?.blogEnabled || false,
 	};
 

@@ -123,7 +123,10 @@ export const PortfolioCard = ({ portfolio }) => {
 						</div>
 
 						<div className="space-y-2 text-sm text-muted-foreground">
-							<p>Template: {portfolio.template || "Default"}</p>
+							<p>
+								Template:{" "}
+								{portfolio?.metadata?.template || "Default"}
+							</p>
 							{lastUpdated && (
 								<p>
 									Last updated:{" "}

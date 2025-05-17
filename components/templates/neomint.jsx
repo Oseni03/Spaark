@@ -20,19 +20,15 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn, getInitials } from "@/lib/utils";
+import { cn, getInitials, getSocialIcon, getSocialLink } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import HTMLReactParser from "html-react-parser";
 import Link from "next/link";
-import {
-	GithubLogo,
-	LinkedinLogo,
-	XLogo,
-	YoutubeLogo,
-} from "@phosphor-icons/react";
+import { GithubLogo } from "@phosphor-icons/react";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
 import { Spinner } from "../ui/Spinner";
 import { usePathname } from "next/navigation";
+import { defaultMain } from "@/schema/sections";
 
 export default function Neomint({
 	basics = defaultMain.basics,
@@ -43,13 +39,14 @@ export default function Neomint({
 	hackathons = defaultMain.hackathons,
 	certifications = defaultMain.certifications,
 	socials = defaultMain.socials,
+	metadata = defaultMain.metadata,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
 	const { theme, setTheme } = useTheme();
 	const [activeSection, setActiveSection] = useState("home");
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
-	const sectionsRef = useRef < HTMLDivElement > null;
+	const sectionsRef = useRef(null);
 	const pathname = usePathname();
 	const isBlogActive = pathname === "/blog";
 
@@ -124,13 +121,15 @@ export default function Neomint({
 	};
 
 	return (
-		<div className="bg-background text-foreground min-h-screen">
+		<div
+			className={`bg-[${metadata.theme.background}] text-foreground min-h-screen`}
+		>
 			{/* Header */}
 			<header
 				className={cn(
 					"fixed top-0 left-0 right-0 z-40 transition-all duration-300",
 					scrolled
-						? "bg-background/80 backdrop-blur-md shadow-sm"
+						? `bg-[${metadata.theme.background}]/80 backdrop-blur-md shadow-sm`
 						: "bg-transparent"
 				)}
 			>
@@ -150,16 +149,16 @@ export default function Neomint({
 									key={section.id}
 									onClick={() => scrollToSection(section.id)}
 									className={cn(
-										"text-sm font-medium capitalize hover:text-primary transition-colors relative",
+										`text-sm font-medium capitalize hover:text-[${metadata.theme.primary}] transition-colors relative`,
 										activeSection === section.id &&
-											"text-primary"
+											`text-[${metadata.theme.primary}]`
 									)}
 								>
 									{section.id}
 									{activeSection === section.id && (
 										<motion.div
 											layoutId="activeSection"
-											className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+											className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-[${metadata.theme.primary}]`}
 											transition={{
 												type: "spring",
 												duration: 0.5,
@@ -215,7 +214,7 @@ export default function Neomint({
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -20 }}
 						transition={{ duration: 0.2 }}
-						className="fixed inset-0 bg-background z-50 pt-20"
+						className={`fixed inset-0 bg-[${metadata.theme.background}] z-50 pt-20`}
 					>
 						<div className="flex justify-end p-6 absolute top-0 right-0">
 							<Button
@@ -232,9 +231,9 @@ export default function Neomint({
 									key={section.id}
 									onClick={() => scrollToSection(section.id)}
 									className={cn(
-										"capitalize hover:text-primary transition-colors",
+										`capitalize hover:text-[${metadata.theme.primary}] transition-colors`,
 										activeSection === section.id &&
-											"text-primary font-medium"
+											`text-[${metadata.theme.primary}] font-medium`
 									)}
 								>
 									{section.id}
@@ -244,9 +243,9 @@ export default function Neomint({
 								<Link href={"/blog"}>
 									<button
 										className={cn(
-											"capitalize hover:text-primary transition-colors",
+											`capitalize hover:text-[${metadata.theme.primary}] transition-colors`,
 											isBlogActive &&
-												"text-primary font-medium"
+												`text-[${metadata.theme.primary}] font-medium`
 										)}
 									>
 										blog
@@ -254,84 +253,24 @@ export default function Neomint({
 								</Link>
 							)}
 							<div className="flex gap-4 mt-8">
-								{socials.map((social, index) => {
-									{
-										social.network == "github" && (
-											<Link
-												href={`https://www.github.com/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border"
-												)}
-											>
-												<GithubLogo className="h-5 w-5" />
-												<span className="sr-only">
-													GitHub
-												</span>
-											</Link>
-										);
-									}
-									{
-										social.network == "linkedin" && (
-											<Link
-												href={`https://www.linkedin.com/in/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border"
-												)}
-											>
-												<LinkedinLogo className="h-5 w-5" />
-												<span className="sr-only">
-													LinkedIn
-												</span>
-											</Link>
-										);
-									}
-									{
-										social.network == "youtube" && (
-											<Link
-												href={`https://www.youtube.com/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border"
-												)}
-											>
-												<YoutubeLogo className="h-5 w-5" />
-												<span className="sr-only">
-													YouTube
-												</span>
-											</Link>
-										);
-									}
-									{
-										social.network == "x" && (
-											<Link
-												href={`https://www.x.com/${social.username}`}
-											>
-												<Button
-													key={index}
-													variant="ghost"
-													size="icon"
-													className="rounded-full border border-border hover:border-primary hover:text-primary"
-												>
-													<XLogo className="h-5 w-5" />
-													<span className="sr-only">
-														X
-													</span>
-												</Button>
-											</Link>
-										);
-									}
-								})}
+								{socials.map((social, index) => (
+									<Link
+										key={index}
+										href={getSocialLink(social)}
+										className={cn(
+											buttonVariants({
+												variant: "ghost",
+												size: "icon",
+											}),
+											"rounded-full border border-border"
+										)}
+									>
+										{getSocialIcon(social)}
+										<span className="sr-only">
+											{social.network.toUpperCase()}
+										</span>
+									</Link>
+								))}
 								{basics.email && (
 									<Link
 										href={`mailto:${basics.email}`}
@@ -367,19 +306,25 @@ export default function Neomint({
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.5 }}
 							>
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									{basics.headline}
 								</Badge>
 								<h1 className="text-5xl md:text-6xl font-bold mb-6">
 									Hi, I&rsquo;m {basics.name.split(" ")[0]}{" "}
-									<span className="text-primary">
+									<span
+										className={`text-[${metadata.theme.primary}]`}
+									>
 										{basics.name
 											.split(" ")
 											.slice(1)
 											.join(" ")}
 									</span>
 								</h1>
-								<div className="text-xl text-muted-foreground mb-8 max-w-xl">
+								<div
+									className={`text-xl text-[${metadata.theme.text}] mb-8 max-w-xl`}
+								>
 									{HTMLReactParser(
 										basics.summary ||
 											`I build exceptional and accessible
@@ -410,84 +355,24 @@ export default function Neomint({
 								</div>
 
 								<div className="flex items-center gap-6 mt-12">
-									{socials.map((social, index) => {
-										{
-											social.network == "github" && (
-												<Link
-													href={`https://www.github.com/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full border border-border hover:border-primary hover:text-primary"
-													)}
-												>
-													<GithubLogo className="h-4 w-4" />
-													<span className="sr-only">
-														GitHub
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "linkedin" && (
-												<Link
-													href={`https://www.linkedin.com/in/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full border border-border hover:border-primary hover:text-primary"
-													)}
-												>
-													<LinkedinLogo className="h-4 w-4" />
-													<span className="sr-only">
-														LinkedIn
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "youtube" && (
-												<Link
-													href={`https://www.youtube.com/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full border border-border hover:border-primary hover:text-primary"
-													)}
-												>
-													<YoutubeLogo className="h-4 w-4" />
-													<span className="sr-only">
-														YouTube
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "x" && (
-												<Link
-													href={`https://www.x.com/${social.username}`}
-												>
-													<Button
-														key={index}
-														variant="ghost"
-														size="icon"
-														className="rounded-full border border-border hover:border-primary hover:text-primary"
-													>
-														<XLogo className="h-4 w-4" />
-														<span className="sr-only">
-															X
-														</span>
-													</Button>
-												</Link>
-											);
-										}
-									})}
+									{socials.map((social, index) => (
+										<Link
+											key={index}
+											href={getSocialLink(social)}
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
+											)}
+										>
+											{getSocialIcon(social)}
+											<span className="sr-only">
+												{social.network.toUpperCase()}
+											</span>
+										</Link>
+									))}
 									{basics.email && (
 										<Link
 											href={`mailto:${basics.email}`}
@@ -496,7 +381,7 @@ export default function Neomint({
 													variant: "ghost",
 													size: "icon",
 												}),
-												"rounded-full border border-border hover:border-primary hover:text-primary"
+												`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
 											)}
 										>
 											<Mail className="h-5 w-5" />
@@ -515,7 +400,9 @@ export default function Neomint({
 								className="relative"
 							>
 								<div className="relative w-full aspect-square max-w-md mx-auto">
-									<div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-xl"></div>
+									<div
+										className={`absolute inset-0 bg-gradient-to-br from-[${metadata.theme.primary}]/20 to-transparent rounded-full blur-xl`}
+									></div>
 									<div className="relative z-10 bg-card border border-border rounded-full overflow-hidden p-4">
 										<Image
 											src="/placeholder.svg?height=600&width=600"
@@ -536,14 +423,20 @@ export default function Neomint({
 					<div className="container mx-auto px-6">
 						<div className="max-w-3xl mx-auto">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									About Me
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									My Background
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg`}
+								>
 									Get to know more about me, my experience,
 									and what drives me as a developer.
 								</p>
@@ -554,7 +447,9 @@ export default function Neomint({
 									<h3 className="text-2xl font-bold mb-4">
 										My Story
 									</h3>
-									<p className="text-muted-foreground mb-6">
+									<p
+										className={`text-[${metadata.theme.text}] mb-6`}
+									>
 										{HTMLReactParser(basics.about || "")}
 									</p>
 									{/* <Button variant="outline" className="group">
@@ -567,40 +462,56 @@ export default function Neomint({
 								<div className="grid grid-cols-2 gap-4">
 									<Card className="bg-card border-border">
 										<CardContent className="p-6 text-center">
-											<div className="text-3xl font-bold text-primary mb-2">
+											<div
+												className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+											>
 												7+
 											</div>
-											<div className="text-muted-foreground">
+											<div
+												className={`text-[${metadata.theme.text}]`}
+											>
 												Years Experience
 											</div>
 										</CardContent>
 									</Card>
 									<Card className="bg-card border-border">
 										<CardContent className="p-6 text-center">
-											<div className="text-3xl font-bold text-primary mb-2">
+											<div
+												className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+											>
 												60+
 											</div>
-											<div className="text-muted-foreground">
+											<div
+												className={`text-[${metadata.theme.text}]`}
+											>
 												Projects Completed
 											</div>
 										</CardContent>
 									</Card>
 									<Card className="bg-card border-border">
 										<CardContent className="p-6 text-center">
-											<div className="text-3xl font-bold text-primary mb-2">
+											<div
+												className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+											>
 												25+
 											</div>
-											<div className="text-muted-foreground">
+											<div
+												className={`text-[${metadata.theme.text}]`}
+											>
 												Happy Clients
 											</div>
 										</CardContent>
 									</Card>
 									<Card className="bg-card border-border">
 										<CardContent className="p-6 text-center">
-											<div className="text-3xl font-bold text-primary mb-2">
+											<div
+												className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+											>
 												10+
 											</div>
-											<div className="text-muted-foreground">
+											<div
+												className={`text-[${metadata.theme.text}]`}
+											>
 												Awards Received
 											</div>
 										</CardContent>
@@ -616,14 +527,20 @@ export default function Neomint({
 					<section id="projects" className="py-20 bg-muted/30">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									My Work
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Featured Projects
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									Here are some of my recent projects that
 									showcase my skills and expertise in web
 									development and design.
@@ -635,7 +552,7 @@ export default function Neomint({
 								{projects.map((project, index) => (
 									<Card
 										key={index}
-										className="group overflow-hidden bg-card border-border hover:border-primary transition-colors"
+										className={`group overflow-hidden bg-card border-border hover:border-[${metadata.theme.primary}] transition-colors`}
 									>
 										<div className="relative h-56 w-full overflow-hidden">
 											{project.image && (
@@ -659,14 +576,20 @@ export default function Neomint({
 										</div>
 										<CardContent className="p-6">
 											{project.type && (
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-3">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-3`}
+												>
 													{project.type}
 												</Badge>
 											)}
-											<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+											<h3
+												className={`text-xl font-bold mb-2 group-hover:text-[${metadata.theme.primary}] transition-colors`}
+											>
 												{project.name}
 											</h3>
-											<div className="text-muted-foreground mb-4 line-clamp-2">
+											<div
+												className={`text-[${metadata.theme.text}] mb-4 line-clamp-2`}
+											>
 												{HTMLReactParser(
 													project.description
 												)}
@@ -678,7 +601,7 @@ export default function Neomint({
 															<Badge
 																key={index}
 																variant="outline"
-																className="border-border text-muted-foreground"
+																className={`border-border text-[${metadata.theme.text}]`}
 															>
 																{tech}
 															</Badge>
@@ -738,14 +661,20 @@ export default function Neomint({
 					<section id="skills" className="py-20">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									My Skills
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Technical Expertise
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									I specialize in a range of technologies
 									across the full stack development spectrum.
 								</p>
@@ -757,11 +686,15 @@ export default function Neomint({
 									{skills.map((skill, index) => (
 										<Card
 											key={index}
-											className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+											className={`bg-card border-border hover:border-[${metadata.theme.primary}] hover:shadow-md transition-all`}
 										>
 											<CardContent className="p-6 text-center">
-												<div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-													<div className="text-primary text-xl font-bold">
+												<div
+													className={`h-12 w-12 bg-[${metadata.theme.primary}]/10 rounded-full flex items-center justify-center mx-auto mb-4`}
+												>
+													<div
+														className={`text-[${metadata.theme.primary}] text-xl font-bold`}
+													>
 														{getInitials(
 															skill.name
 														)}
@@ -771,7 +704,9 @@ export default function Neomint({
 													{skill.name}
 												</h3>
 												{skill.level && (
-													<p className="text-xs text-muted-foreground">
+													<p
+														className={`text-xs text-[${metadata.theme.text}]`}
+													>
 														{skill.level}
 													</p>
 												)}
@@ -789,14 +724,20 @@ export default function Neomint({
 					<section id="experiences" className="py-20 bg-muted/30">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Work History
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Professional Experience
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									My journey through various roles and
 									companies in the tech industry.
 								</p>
@@ -818,8 +759,12 @@ export default function Neomint({
 												>
 													<div className="flex flex-col md:flex-row items-center">
 														<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
-															<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-																<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+															<div
+																className={`bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-[${metadata.theme.primary}] transition-colors`}
+															>
+																<Badge
+																	className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-2`}
+																>
 																	{
 																		experience.date
 																	}
@@ -829,15 +774,21 @@ export default function Neomint({
 																		experience.headline
 																	}
 																</h3>
-																<p className="text-muted-foreground">
+																<p
+																	className={`text-[${metadata.theme.text}]`}
+																>
 																	{
 																		experience.company
 																	}
 																</p>
 															</div>
 														</div>
-														<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-															<div className="w-3 h-3 rounded-full bg-background"></div>
+														<div
+															className={`absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-[${metadata.theme.primary}] flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10`}
+														>
+															<div
+																className={`w-3 h-3 rounded-full bg-[${metadata.theme.background}]`}
+															></div>
 														</div>
 														<div className="md:w-1/2 md:pl-12 md:pt-16">
 															<div className="text-sm mb-4">
@@ -857,7 +808,7 @@ export default function Neomint({
 																					index
 																				}
 																				variant="outline"
-																				className="border-border text-muted-foreground"
+																				className={`border-border text-[${metadata.theme.text}]`}
 																			>
 																				{
 																					tech
@@ -896,7 +847,7 @@ export default function Neomint({
 																					index
 																				}
 																				variant="outline"
-																				className="border-border text-muted-foreground"
+																				className={`border-border text-[${metadata.theme.text}]`}
 																			>
 																				{
 																					tech
@@ -907,12 +858,20 @@ export default function Neomint({
 																</div>
 															)}
 														</div>
-														<div className="absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-primary flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10">
-															<div className="w-3 h-3 rounded-full bg-background"></div>
+														<div
+															className={`absolute left-0 md:left-1/2 top-8 md:top-12 w-8 h-8 rounded-full bg-[${metadata.theme.primary}] flex items-center justify-center -translate-x-1/2 md:-translate-x-1/2 z-10`}
+														>
+															<div
+																className={`w-3 h-3 rounded-full bg-[${metadata.theme.background}]`}
+															></div>
 														</div>
 														<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
-															<div className="bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors">
-																<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-2">
+															<div
+																className={`*:bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-[${metadata.theme.primary}] transition-colors`}
+															>
+																<Badge
+																	className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-2`}
+																>
 																	{
 																		experience.date
 																	}
@@ -922,7 +881,9 @@ export default function Neomint({
 																		experience.headline
 																	}
 																</h3>
-																<p className="text-muted-foreground">
+																<p
+																	className={`text-[${metadata.theme.text}]`}
+																>
 																	{
 																		experience.company
 																	}
@@ -945,14 +906,20 @@ export default function Neomint({
 					<section id="education" className="py-20">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Academic Background
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Education
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									My academic journey and qualifications that
 									built the foundation for my career.
 								</p>
@@ -963,15 +930,19 @@ export default function Neomint({
 								{educations.map((edu, index) => (
 									<Card
 										key={index}
-										className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+										className={`bg-card border-border hover:border-[${metadata.theme.primary}] hover:shadow-md transition-all`}
 									>
 										<CardContent className="p-6">
 											<div className="flex items-center justify-between mb-4">
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+												>
 													{edu.date}
 												</Badge>
 												{edu.location && (
-													<div className="text-sm text-muted-foreground">
+													<div
+														className={`text-sm text-[${metadata.theme.text}]`}
+													>
 														{edu.location}
 													</div>
 												)}
@@ -979,7 +950,9 @@ export default function Neomint({
 											<h3 className="text-xl font-bold mb-1">
 												{edu.studyType}
 											</h3>
-											<p className="text-muted-foreground mb-4">
+											<p
+												className={`text-[${metadata.theme.text}] mb-4`}
+											>
 												{edu.institution}
 											</p>
 											<div className="pt-4 border-t border-border text-sm mb-4">
@@ -998,14 +971,20 @@ export default function Neomint({
 					<section id="hackathons" className="py-20 bg-muted/30">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Coding Competitions
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Hackathons
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									Competitions where I&rsquo;ve collaborated
 									with teams to build innovative solutions
 									under time constraints.
@@ -1017,7 +996,7 @@ export default function Neomint({
 								{hackathons.map((hackathon, index) => (
 									<Card
 										key={index}
-										className="group bg-card border-border hover:border-primary hover:shadow-md transition-all overflow-hidden"
+										className={`group bg-card border-border hover:border-[${metadata.theme.primary}] hover:shadow-md transition-all overflow-hidden`}
 									>
 										<div className="relative h-48 w-full overflow-hidden">
 											{hackathon.logo && (
@@ -1029,30 +1008,46 @@ export default function Neomint({
 												/>
 											)}
 
-											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
-											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
+											<div
+												className={`absolute inset-0 bg-gradient-to-t from-[${metadata.theme.background}]/90 to-[${metadata.theme.background}]/20`}
+											></div>
+											<div
+												className={`absolute inset-0 bg-gradient-to-t from-[${metadata.theme.background}]/90 to-[${metadata.theme.background}]/20`}
+											></div>
 											<div className="absolute top-4 right-4">
-												<Badge className="bg-primary/60 text-primary-foreground">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/60 text-[${metadata.theme.primary}]-foreground`}
+												>
 													Finalist
 												</Badge>
 											</div>
-											<div className="absolute inset-0 bg-gradient-to-t from-background/90 to-background/20"></div>
+											<div
+												className={`absolute inset-0 bg-gradient-to-t from-[${metadata.theme.background}]/90 to-[${metadata.theme.background}]/20`}
+											></div>
 											<div className="absolute top-4 right-4">
-												<Badge className="bg-primary/60 text-primary-foreground">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/60 text-[${metadata.theme.primary}]-foreground`}
+												>
 													Finalist
 												</Badge>
 											</div>
 											<div className="absolute bottom-4 left-4">
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+												>
 													{hackathon.date}
 												</Badge>
 											</div>
 										</div>
 										<CardContent className="p-6">
-											<h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+											<h3
+												className={`text-xl font-bold mb-2 group-hover:text-[${metadata.theme.primary}] transition-colors`}
+											>
 												{hackathon.name}
 											</h3>
-											<div className="text-muted-foreground mb-4 text-sm">
+											<div
+												className={`text-[${metadata.theme.text}] mb-4 text-sm`}
+											>
 												{HTMLReactParser(
 													hackathon.description
 												)}
@@ -1064,7 +1059,7 @@ export default function Neomint({
 															<Badge
 																key={index}
 																variant="outline"
-																className="border-border text-muted-foreground"
+																className={`border-border text-[${metadata.theme.text}]`}
 															>
 																{technology}
 															</Badge>
@@ -1085,14 +1080,20 @@ export default function Neomint({
 					<section id="certifications" className="py-20">
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
-								<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Professional Development
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
 									Certifications
 								</h2>
-								<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-								<p className="text-muted-foreground text-lg max-w-2xl">
+								<div
+									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+								></div>
+								<p
+									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+								>
 									Professional certifications that validate my
 									expertise and knowledge in various
 									technologies.
@@ -1104,11 +1105,13 @@ export default function Neomint({
 								{certifications.map((certification, index) => (
 									<Card
 										key={index}
-										className="bg-card border-border hover:border-primary hover:shadow-md transition-all"
+										className={`bg-card border-border hover:border-[${metadata.theme.primary}] hover:shadow-md transition-all`}
 									>
 										<CardContent className="p-6">
 											<div className="flex justify-between items-start mb-4">
-												<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+												<div
+													className={`h-12 w-12 rounded-full bg-[${metadata.theme.primary}]/10 flex items-center justify-center text-[${metadata.theme.primary}]`}
+												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
 														width="24"
@@ -1124,17 +1127,23 @@ export default function Neomint({
 														<polyline points="22 4 12 14.01 9 11.01"></polyline>
 													</svg>
 												</div>
-												<Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+												>
 													{certification.date}
 												</Badge>
 											</div>
 											<h3 className="text-lg font-bold mb-1">
 												{certification.name}
 											</h3>
-											<p className="text-muted-foreground mb-4">
+											<p
+												className={`text-[${metadata.theme.text}] mb-4`}
+											>
 												{certification.issuer}
 											</p>
-											<div className="text-sm text-muted-foreground">
+											<div
+												className={`text-sm text-[${metadata.theme.text}]`}
+											>
 												{HTMLReactParser(
 													certification.summary
 												)}
@@ -1151,14 +1160,20 @@ export default function Neomint({
 				<section id="contact" className="py-20 bg-muted/30">
 					<div className="container mx-auto px-6">
 						<div className="flex flex-col items-center text-center mb-12">
-							<Badge className="bg-primary/10 text-primary hover:bg-primary/20 mb-4">
+							<Badge
+								className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+							>
 								Get In Touch
 							</Badge>
 							<h2 className="text-4xl font-bold mb-6">
 								Let&rsquo;s Work Together
 							</h2>
-							<div className="w-20 h-1 bg-primary rounded-full mb-6"></div>
-							<p className="text-muted-foreground text-lg max-w-2xl">
+							<div
+								className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+							></div>
+							<p
+								className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+							>
 								Have a project in mind? Let&rsquo;s discuss how
 								I can help bring your ideas to life.
 							</p>
@@ -1167,14 +1182,18 @@ export default function Neomint({
 						<div className="max-w-4xl mx-auto">
 							<Card className="bg-card border-border overflow-hidden">
 								<div className="grid grid-cols-1 md:grid-cols-2">
-									<div className="p-8 bg-primary/5">
+									<div
+										className={`p-8 bg-[${metadata.theme.primary}]/5`}
+									>
 										<h3 className="text-xl font-bold mb-6">
 											Contact Information
 										</h3>
 										<div className="space-y-6">
 											{basics.email && (
 												<div>
-													<p className="text-muted-foreground mb-1 text-sm">
+													<p
+														className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+													>
 														Email
 													</p>
 													<p className="font-medium">
@@ -1184,7 +1203,9 @@ export default function Neomint({
 											)}
 											{basics.location && (
 												<div>
-													<p className="text-muted-foreground mb-1 text-sm">
+													<p
+														className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+													>
 														Location
 													</p>
 													<p className="font-medium">
@@ -1195,104 +1216,38 @@ export default function Neomint({
 
 											{socials.length > 0 && (
 												<div>
-													<p className="text-muted-foreground mb-1 text-sm">
+													<p
+														className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+													>
 														Social Media
 													</p>
 													<div className="flex gap-3 mt-2">
 														{socials.map(
-															(social, index) => {
-																{
-																	social.network ==
-																		"github" && (
-																		<Link
-																			href={`https://www.github.com/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full border border-border hover:border-primary hover:text-primary"
-																			)}
-																		>
-																			<GithubLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				GitHub
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"linkedin" && (
-																		<Link
-																			href={`https://www.linkedin.com/in/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full border border-border hover:border-primary hover:text-primary"
-																			)}
-																		>
-																			<LinkedinLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				LinkedIn
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"youtube" && (
-																		<Link
-																			href={`https://www.youtube.com/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full border border-border hover:border-primary hover:text-primary"
-																			)}
-																		>
-																			<YoutubeLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				YouTube
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"x" && (
-																		<Link
-																			href={`https://www.x.com/${social.username}`}
-																		>
-																			<Button
-																				key={
-																					index
-																				}
-																				variant="ghost"
-																				size="icon"
-																				className="rounded-full border border-border hover:border-primary hover:text-primary"
-																			>
-																				<XLogo className="h-4 w-4" />
-																				<span className="sr-only">
-																					X
-																				</span>
-																			</Button>
-																		</Link>
-																	);
-																}
-															}
+															(social, index) => (
+																<Link
+																	key={index}
+																	href={getSocialLink(
+																		social
+																	)}
+																	className={cn(
+																		buttonVariants(
+																			{
+																				variant:
+																					"ghost",
+																				size: "icon",
+																			}
+																		),
+																		`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
+																	)}
+																>
+																	{getSocialIcon(
+																		social
+																	)}
+																	<span className="sr-only">
+																		{social.network.toUpperCase()}
+																	</span>
+																</Link>
+															)
 														)}
 														{basics.email && (
 															<Link
@@ -1305,7 +1260,7 @@ export default function Neomint({
 																			size: "icon",
 																		}
 																	),
-																	"rounded-full border border-border hover:border-primary hover:text-primary"
+																	`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
 																)}
 															>
 																<Mail className="h-4 w-4" />
@@ -1348,7 +1303,7 @@ export default function Neomint({
 															errors.full_name
 																? "border-red-500"
 																: "",
-															"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+															`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
 														)}
 													/>
 													{errors.full_name && (
@@ -1374,7 +1329,7 @@ export default function Neomint({
 															errors.email
 																? "border-red-500"
 																: "",
-															"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+															`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
 														)}
 													/>
 													{errors.email && (
@@ -1401,7 +1356,7 @@ export default function Neomint({
 														errors.subject
 															? "border-red-500"
 															: "",
-														"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
 													)}
 												/>
 												{errors.subject && (
@@ -1427,7 +1382,7 @@ export default function Neomint({
 														errors.message
 															? "border-red-500"
 															: "",
-														"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+														`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
 													)}
 												></textarea>
 												{errors.message && (
@@ -1464,76 +1419,27 @@ export default function Neomint({
 									{basics.name.split(" ")[0]}.dev
 								</span>
 							</div>
-							<div className="text-sm text-muted-foreground">
+							<div
+								className={`text-sm text-[${metadata.theme.text}]`}
+							>
 								© 2025 {basics.name}. All rights reserved.
 							</div>
 							<div className="flex gap-4">
-								{socials.map((social, index) => {
-									{
-										social.network == "github" && (
-											<Link
-												href={`https://www.github.com/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border hover:border-primary hover:text-primary"
-												)}
-											>
-												<GithubLogo className="h-5 w-5" />
-											</Link>
-										);
-									}
-									{
-										social.network == "linkedin" && (
-											<Link
-												href={`https://www.linkedin.com/in/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border hover:border-primary hover:text-primary"
-												)}
-											>
-												<LinkedinLogo className="h-5 w-5" />
-											</Link>
-										);
-									}
-									{
-										social.network == "youtube" && (
-											<Link
-												href={`https://www.youtube.com/${social.username}`}
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"rounded-full border border-border hover:border-primary hover:text-primary"
-												)}
-											>
-												<YoutubeLogo className="h-5 w-5" />
-											</Link>
-										);
-									}
-									{
-										social.network == "x" && (
-											<Link
-												href={`https://www.x.com/${social.username}`}
-											>
-												<Button
-													key={index}
-													variant="ghost"
-													size="icon"
-													className="rounded-full border border-border hover:border-primary hover:text-primary"
-												>
-													<XLogo className="h-5 w-5" />
-												</Button>
-											</Link>
-										);
-									}
-								})}
+								{socials.map((social, index) => (
+									<Link
+										key={index}
+										href={getSocialLink(social)}
+										className={cn(
+											buttonVariants({
+												variant: "ghost",
+												size: "icon",
+											}),
+											`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
+										)}
+									>
+										{getSocialIcon(social)}
+									</Link>
+								))}
 								{basics.email && (
 									<Link
 										href={`mailto:${basics.email}`}
@@ -1542,7 +1448,7 @@ export default function Neomint({
 												variant: "ghost",
 												size: "icon",
 											}),
-											"rounded-full border border-border hover:border-primary hover:text-primary"
+											`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
 										)}
 									>
 										<Mail className="h-5 w-5" />

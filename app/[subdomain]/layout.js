@@ -76,7 +76,8 @@ export default async function PortfolioLayout({ params, children }) {
 				<body
 					className={cn(
 						"scrollbar-hide",
-						"overflow-y-auto" // Add this to enable scrolling
+						"overflow-y-auto",
+						`bg-[${portfolio.metadata.theme.backgroung}] text-[${portfolio.metadata.theme.text}]`
 					)}
 				>
 					<BuildWithButton />

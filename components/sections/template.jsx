@@ -24,6 +24,7 @@ import {
 } from "../ui/tooltip";
 import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
+import { defaultMetadata } from "@/schema/sections";
 
 const templates = [
 	{
@@ -43,6 +44,24 @@ const templates = [
 	},
 	// Add more templates as needed
 ];
+
+const templateTheme = {
+	default: {
+		text: "#0A0A0A", // text-muted-foreground
+		primary: "#171717",
+		background: "#FFFFFF",
+	},
+	violetvista: {
+		text: "#FFFFFF",
+		primary: "#FF4D4D",
+		background: "#111111",
+	},
+	neomint: {
+		text: "#0A0A0A", // text-muted-foreground
+		primary: "#171717",
+		background: "#FFFFFF",
+	},
+};
 
 export function TemplateSection() {
 	const { portfolioId } = useParams();
@@ -68,7 +87,11 @@ export function TemplateSection() {
 		dispatch(
 			updatePortfolio({
 				id: portfolio.id,
-				data: { template: templateId },
+				data: {
+					...defaultMetadata,
+					theme: templateTheme[templateId] || defaultMetadata.theme,
+					template: templateId,
+				},
 			})
 		);
 

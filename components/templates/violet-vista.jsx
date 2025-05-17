@@ -11,14 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import HTMLReactParser from "html-react-parser";
-import {
-	GithubLogo,
-	LinkedinLogo,
-	XLogo,
-	YoutubeLogo,
-} from "@phosphor-icons/react";
+import { GithubLogo } from "@phosphor-icons/react";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
 import { Spinner } from "../ui/Spinner";
+import { defaultMain } from "@/schema/sections";
+import { getSocialLink, getSocialIcon } from "@/lib/utils";
 
 export default function VioletVista({
 	basics = defaultMain.basics,
@@ -29,6 +26,7 @@ export default function VioletVista({
 	hackathons = defaultMain.hackathons,
 	certifications = defaultMain.certifications,
 	socials = defaultMain.socials,
+	metadata = defaultMain.metadata,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
 	const [activeSection, setActiveSection] = useState("home");
@@ -99,7 +97,9 @@ export default function VioletVista({
 	}, [sections]);
 
 	return (
-		<div className="bg-[#111111] text-white min-h-screen">
+		<div
+			className={`bg-[${metadata.theme.background}] text-[${metadata.theme.text}] min-h-screen`}
+		>
 			{/* Mobile Menu */}
 			<AnimatePresence>
 				{menuOpen && (
@@ -112,7 +112,7 @@ export default function VioletVista({
 							damping: 25,
 							stiffness: 300,
 						}}
-						className="fixed inset-0 bg-[#111111] z-50 lg:hidden"
+						className={`fixed inset-0 bg-[${metadata.theme.background}] z-50 lg:hidden`}
 					>
 						<div className="flex justify-end p-6">
 							<Button
@@ -132,9 +132,9 @@ export default function VioletVista({
 											href={`#${section.id}`}
 											onClick={() => setMenuOpen(false)}
 											className={cn(
-												"hover:text-[#FF4D4D] transition-colors",
+												`hover:text-[${metadata.theme.primary}] transition-colors`,
 												activeSection === section.id &&
-													"text-[#FF4D4D]"
+													`text-[${metadata.theme.primary}]`
 											)}
 										>
 											{section.id
@@ -149,8 +149,9 @@ export default function VioletVista({
 									href={`/blog`}
 									onClick={() => setMenuOpen(false)}
 									className={cn(
-										"hover:text-[#FF4D4D] transition-colors",
-										isBlogActive && "text-[#FF4D4D]"
+										`hover:text-[${metadata.theme.primary}] transition-colors`,
+										isBlogActive &&
+											`text-[${metadata.theme.primary}]`
 									)}
 								>
 									Blog
@@ -161,11 +162,13 @@ export default function VioletVista({
 				)}
 			</AnimatePresence>
 
-			<header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[#111111]/80 backdrop-blur-md border-b border-[#222222]">
+			<header
+				className={`lg:hidden fixed top-0 left-0 right-0 z-40 bg-[${metadata.theme.background}]/80 backdrop-blur-md border-b border-[#222222]`}
+			>
 				<div className="container mx-auto px-6 py-4 flex justify-between items-center">
 					<div className="text-2xl font-bold">
 						{basics?.name?.split(" ")[0]}{" "}
-						<span className="text-[#FF4D4D]">
+						<span className={`text-[${metadata.theme.primary}]`}>
 							{basics?.name.split(" ").slice(1).join(" ")}
 						</span>
 					</div>
@@ -188,8 +191,12 @@ export default function VioletVista({
 					className="min-h-screen pt-20 lg:pt-0 flex items-center relative"
 				>
 					<div className="absolute inset-0 z-0 overflow-hidden">
-						<div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#FF4D4D]/10 blur-[120px] rounded-full"></div>
-						<div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#FF4D4D]/5 blur-[100px] rounded-full"></div>
+						<div
+							className={`absolute top-0 right-0 w-1/2 h-1/2 bg-[${metadata.theme.primary}]/10 blur-[120px] rounded-full`}
+						></div>
+						<div
+							className={`absolute bottom-0 left-0 w-1/2 h-1/2 bg-[${metadata.theme.primary}]/5 blur-[100px] rounded-full`}
+						></div>
 					</div>
 
 					<div className="container mx-auto px-6 py-20 relative z-10">
@@ -199,12 +206,16 @@ export default function VioletVista({
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.5 }}
 							>
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									{basics.headline}
 								</Badge>
 								<h1 className="text-5xl md:text-7xl font-bold mb-6">
 									{basics.name.split(" ")[0]}{" "}
-									<span className="text-[#FF4D4D]">
+									<span
+										className={`text-[${metadata.theme.primary}]`}
+									>
 										{basics.name.split(" ").slice(1)}
 									</span>
 								</h1>
@@ -219,7 +230,7 @@ export default function VioletVista({
 								<div className="flex flex-col sm:flex-row gap-4">
 									<Button
 										size="lg"
-										className="bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
+										className={`bg-[${metadata.theme.primary}] hover:bg-[#FF3333] text-[${metadata.theme.text}]`}
 										onClick={() =>
 											document
 												.getElementById("projects")
@@ -234,7 +245,7 @@ export default function VioletVista({
 									<Button
 										size="lg"
 										variant="outline"
-										className="border-[#333333] text-white hover:bg-[#222222]"
+										className={`border-[#333333] text-[${metadata.theme.text}] hover:bg-[#222222]`}
 										onClick={() =>
 											document
 												.getElementById("contact")
@@ -259,7 +270,9 @@ export default function VioletVista({
 									className="relative"
 								>
 									<div className="relative w-full aspect-square max-w-md mx-auto">
-										<div className="absolute inset-0 bg-gradient-to-br from-[#FF4D4D]/20 to-transparent rounded-2xl blur-xl"></div>
+										<div
+											className={`absolute inset-0 bg-gradient-to-br from-[${metadata.theme.primary}]/20 to-transparent rounded-2xl blur-xl`}
+										></div>
 										<div className="relative z-10 bg-[#1A1A1A] border border-[#333333] rounded-2xl overflow-hidden p-4">
 											<Image
 												src={basics.picture}
@@ -282,12 +295,16 @@ export default function VioletVista({
 				{/* About Section */}
 				<section id="about" className="py-20 relative">
 					<div className="absolute inset-0 z-0 overflow-hidden">
-						<div className="absolute top-0 left-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+						<div
+							className={`absolute top-0 left-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+						></div>
 					</div>
 
 					<div className="container mx-auto px-6 relative z-10">
 						<div className="max-w-4xl mx-auto">
-							<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+							<Badge
+								className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+							>
 								About Me
 							</Badge>
 							<h2 className="text-4xl font-bold mb-6">
@@ -299,7 +316,9 @@ export default function VioletVista({
 
 							<div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
 								<div className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center">
-									<div className="text-3xl font-bold text-[#FF4D4D] mb-2">
+									<div
+										className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+									>
 										7+
 									</div>
 									<div className="text-gray-400">
@@ -307,7 +326,9 @@ export default function VioletVista({
 									</div>
 								</div>
 								<div className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center">
-									<div className="text-3xl font-bold text-[#FF4D4D] mb-2">
+									<div
+										className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+									>
 										60+
 									</div>
 									<div className="text-gray-400">
@@ -315,7 +336,9 @@ export default function VioletVista({
 									</div>
 								</div>
 								<div className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center">
-									<div className="text-3xl font-bold text-[#FF4D4D] mb-2">
+									<div
+										className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+									>
 										25+
 									</div>
 									<div className="text-gray-400">
@@ -323,7 +346,9 @@ export default function VioletVista({
 									</div>
 								</div>
 								<div className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center">
-									<div className="text-3xl font-bold text-[#FF4D4D] mb-2">
+									<div
+										className={`text-3xl font-bold text-[${metadata.theme.primary}] mb-2`}
+									>
 										10+
 									</div>
 									<div className="text-gray-400">
@@ -342,7 +367,9 @@ export default function VioletVista({
 											{educations.map(
 												(education, index) => (
 													<div key={index}>
-														<div className="text-[#FF4D4D] font-medium">
+														<div
+															className={`text-[${metadata.theme.primary}] font-medium`}
+														>
 															{education.date}
 														</div>
 														<div className="font-bold">
@@ -370,7 +397,9 @@ export default function VioletVista({
 												{experiences.map(
 													(experience, index) => (
 														<div key={index}>
-															<div className="text-[#FF4D4D] font-medium">
+															<div
+																className={`text-[${metadata.theme.primary}] font-medium`}
+															>
 																{
 																	experience.date
 																}
@@ -395,7 +424,7 @@ export default function VioletVista({
 							)}
 
 							{/* <div className="mt-12 flex justify-center">
-								<Button className="bg-[#1A1A1A] hover:bg-[#222222] text-white border border-[#333333]">
+								<Button className={`bg-[#1A1A1A] hover:bg-[#222222] text-[${metadata.theme.text}] border border-[#333333]`}>
 									<Download className="mr-2 h-4 w-4" />
 									Download Resume
 								</Button>
@@ -408,12 +437,16 @@ export default function VioletVista({
 				{projects.length > 0 && (
 					<section id="projects" className="py-20 relative">
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute bottom-0 right-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute bottom-0 right-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									My Work
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
@@ -456,7 +489,9 @@ export default function VioletVista({
 											<div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent opacity-80"></div>
 											<div className="absolute bottom-0 left-0 p-6">
 												{project.type && (
-													<Badge className="bg-[#FF4D4D]/20 text-[#FF4D4D] hover:bg-[#FF4D4D]/30">
+													<Badge
+														className={`bg-[${metadata.theme.primary}]/20 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/30`}
+													>
 														{project.type}
 													</Badge>
 												)}
@@ -514,7 +549,7 @@ export default function VioletVista({
 															buttonVariants({
 																size: "sm",
 															}),
-															"bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
+															`bg-[${metadata.theme.primary}] hover:bg-[#FF3333] text-[${metadata.theme.text}]`
 														)}
 													>
 														<ExternalLink className="mr-2 h-4 w-4" />
@@ -534,12 +569,16 @@ export default function VioletVista({
 				{skills.length > 0 && (
 					<section id="skills" className="py-20 relative">
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute top-0 right-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-6">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-6`}
+								>
 									My Skills
 								</Badge>
 								{/* <h2 className="text-4xl font-bold mb-6">
@@ -557,7 +596,7 @@ export default function VioletVista({
 									{skills.map((skill, index) => (
 										<div
 											key={index}
-											className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center hover:border-[#FF4D4D] transition-colors"
+											className={`bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 text-center hover:border-[${metadata.theme.primary}] transition-colors`}
 										>
 											<div className="font-medium mb-2">
 												{skill.name}
@@ -579,12 +618,16 @@ export default function VioletVista({
 				{experiences.length > 0 && (
 					<section id="experiences" className="py-20 relative">
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute top-0 left-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute top-0 left-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Work History
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
@@ -604,15 +647,23 @@ export default function VioletVista({
 										className="relative pl-8 md:pl-0"
 									>
 										<div className="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] bg-[#333333]"></div>
-										<div className="hidden md:flex absolute left-0 top-0 -translate-x-1/2 h-6 w-6 rounded-full bg-[#FF4D4D] items-center justify-center">
-											<div className="h-2 w-2 rounded-full bg-white"></div>
+										<div
+											className={`hidden md:flex absolute left-0 top-0 -translate-x-1/2 h-6 w-6 rounded-full bg-[${metadata.theme.primary}] items-center justify-center`}
+										>
+											<div
+												className={`h-2 w-2 rounded-full bg-[${metadata.theme.text}]`}
+											></div>
 										</div>
 
 										<div className="md:ml-12">
-											<div className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[#FF4D4D] transition-colors">
+											<div
+												className={`bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[${metadata.theme.primary}] transition-colors`}
+											>
 												<div className="flex md:items-center mb-4">
 													<div>
-														<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-2">
+														<Badge
+															className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-2`}
+														>
 															{experience.date}
 														</Badge>
 														<h3 className="text-xl font-bold">
@@ -666,12 +717,16 @@ export default function VioletVista({
 						className="py-20 bg-[#0D0D0D] relative"
 					>
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute bottom-0 right-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute bottom-0 right-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Academic Background
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
@@ -688,10 +743,12 @@ export default function VioletVista({
 								{educations.map((education, index) => (
 									<div
 										key={index}
-										className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[#FF4D4D] transition-colors"
+										className={`bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[${metadata.theme.primary}] transition-colors`}
 									>
 										<div className="flex items-center justify-between mb-4">
-											<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20">
+											<Badge
+												className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+											>
 												{education.date}
 											</Badge>
 											{education.location && (
@@ -722,12 +779,16 @@ export default function VioletVista({
 				{hackathons.length > 0 && (
 					<section id="hackathons" className="py-20 relative">
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute top-0 left-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute top-0 left-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Coding Competitions
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
@@ -745,7 +806,7 @@ export default function VioletVista({
 								{hackathons.map((hackathon, index) => (
 									<div
 										key={index}
-										className="group bg-[#1A1A1A] border border-[#333333] rounded-xl overflow-hidden hover:border-[#FF4D4D] transition-colors"
+										className={`group bg-[#1A1A1A] border border-[#333333] rounded-xl overflow-hidden hover:border-[${metadata.theme.primary}] transition-colors`}
 									>
 										<div className="relative h-48 w-full overflow-hidden">
 											{hackathon.logo && (
@@ -759,12 +820,16 @@ export default function VioletVista({
 
 											<div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] to-transparent opacity-80"></div>
 											<div className="absolute top-4 right-4">
-												<Badge className="bg-[#FF4D4D] text-white">
+												<Badge
+													className={`bg-[${metadata.theme.primary}] text-[${metadata.theme.text}]`}
+												>
 													{hackathon.location}
 												</Badge>
 											</div>
 											<div className="absolute bottom-4 left-4">
-												<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20">
+												<Badge
+													className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+												>
 													{hackathon.date}
 												</Badge>
 											</div>
@@ -793,12 +858,16 @@ export default function VioletVista({
 						className="py-20 bg-[#0D0D0D] relative"
 					>
 						<div className="absolute inset-0 z-0 overflow-hidden">
-							<div className="absolute bottom-0 right-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+							<div
+								className={`absolute bottom-0 right-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+							></div>
 						</div>
 
 						<div className="container mx-auto px-6 relative z-10">
 							<div className="max-w-4xl mx-auto text-center mb-16">
-								<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+								<Badge
+									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+								>
 									Professional Development
 								</Badge>
 								<h2 className="text-4xl font-bold mb-6">
@@ -816,10 +885,12 @@ export default function VioletVista({
 								{certifications.map((certificate, index) => (
 									<div
 										key={index}
-										className="bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[#FF4D4D] transition-colors"
+										className={`bg-[#1A1A1A] border border-[#333333] rounded-xl p-6 hover:border-[${metadata.theme.primary}] transition-colors`}
 									>
 										<div className="flex justify-between items-start mb-4">
-											<div className="h-12 w-12 rounded-full bg-[#FF4D4D]/10 flex items-center justify-center text-[#FF4D4D]">
+											<div
+												className={`h-12 w-12 rounded-full bg-[${metadata.theme.primary}]/10 flex items-center justify-center text-[${metadata.theme.primary}]`}
+											>
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													width="24"
@@ -835,7 +906,9 @@ export default function VioletVista({
 													<polyline points="22 4 12 14.01 9 11.01"></polyline>
 												</svg>
 											</div>
-											<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20">
+											<Badge
+												className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20`}
+											>
 												{certificate.date}
 											</Badge>
 										</div>
@@ -858,12 +931,16 @@ export default function VioletVista({
 				{/* Contact Section */}
 				<section id="contact" className="py-20 relative">
 					<div className="absolute inset-0 z-0 overflow-hidden">
-						<div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[#FF4D4D]/10 blur-[100px] rounded-full"></div>
+						<div
+							className={`absolute bottom-0 left-0 w-1/3 h-1/3 bg-[${metadata.theme.primary}]/10 blur-[100px] rounded-full`}
+						></div>
 					</div>
 
 					<div className="container mx-auto px-6 relative z-10">
 						<div className="max-w-4xl mx-auto text-center mb-16">
-							<Badge className="bg-[#FF4D4D]/10 text-[#FF4D4D] hover:bg-[#FF4D4D]/20 mb-4">
+							<Badge
+								className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+							>
 								Get In Touch
 							</Badge>
 							<h2 className="text-4xl font-bold mb-6">
@@ -889,7 +966,9 @@ export default function VioletVista({
 														<p className="text-gray-400 mb-1">
 															Email
 														</p>
-														<p className="text-white">
+														<p
+															className={`text-[${metadata.theme.text}]`}
+														>
 															{basics.email}
 														</p>
 													</div>
@@ -899,7 +978,9 @@ export default function VioletVista({
 														<p className="text-gray-400 mb-1">
 															Location
 														</p>
-														<p className="text-white">
+														<p
+															className={`text-[${metadata.theme.text}]`}
+														>
 															{basics.location}
 														</p>
 													</div>
@@ -910,100 +991,31 @@ export default function VioletVista({
 													</p>
 													<div className="flex gap-3 mt-2">
 														{socials.map(
-															(social, index) => {
-																{
-																	social.network ==
-																		"github" && (
-																		<Link
-																			href={`https://www.github.com/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-																			)}
-																		>
-																			<GithubLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				GitHub
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"linkedin" && (
-																		<Link
-																			href={`https://www.linkedin.com/in/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-																			)}
-																		>
-																			<LinkedinLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				LinkedIn
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"youtube" && (
-																		<Link
-																			href={`https://www.youtube.com/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-																			)}
-																		>
-																			<YoutubeLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				YouTube
-																			</span>
-																		</Link>
-																	);
-																}
-																{
-																	social.network ==
-																		"x" && (
-																		<Link
-																			href={`https://www.x.com/${social.username}`}
-																			className={cn(
-																				buttonVariants(
-																					{
-																						variant:
-																							"ghost",
-																						size: "icon",
-																					}
-																				),
-																				"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-																			)}
-																		>
-																			<XLogo className="h-4 w-4" />
-																			<span className="sr-only">
-																				X
-																			</span>
-																		</Link>
-																	);
-																}
-															}
+															(social, index) => (
+																<Link
+																	key={index}
+																	href={getSocialLink(
+																		social
+																	)}
+																	className={cn(
+																		buttonVariants(
+																			{
+																				variant:
+																					"ghost",
+																				size: "icon",
+																			}
+																		),
+																		`rounded-full bg-[#222222] hover:bg-[#333333] text-[${metadata.theme.text}]`
+																	)}
+																>
+																	{getSocialIcon(
+																		social
+																	)}
+																	<span className="sr-only">
+																		{social.network.toUpperCase()}
+																	</span>
+																</Link>
+															)
 														)}
 
 														{basics.email && (
@@ -1017,7 +1029,7 @@ export default function VioletVista({
 																			size: "icon",
 																		}
 																	),
-																	"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
+																	`rounded-full bg-[#222222] hover:bg-[#333333] text-[${metadata.theme.text}]`
 																)}
 															>
 																<Mail className="h-4 w-4" />
@@ -1061,7 +1073,7 @@ export default function VioletVista({
 																errors.full_name
 																	? "border-red-500"
 																	: "",
-																"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+																`w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}]`
 															)}
 														/>
 														{errors.full_name && (
@@ -1093,7 +1105,7 @@ export default function VioletVista({
 																errors.email
 																	? "border-red-500"
 																	: "",
-																"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+																`w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}]`
 															)}
 														/>
 														{errors.email && (
@@ -1120,7 +1132,7 @@ export default function VioletVista({
 															errors.subject
 																? "border-red-500"
 																: "",
-															"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															`w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}]`
 														)}
 													/>
 													{errors.subject && (
@@ -1146,7 +1158,7 @@ export default function VioletVista({
 															errors.message
 																? "border-red-500"
 																: "",
-															"w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF4D4D]"
+															`w-full p-2 bg-[#222222] border border-[#333333] rounded-lg focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}]`
 														)}
 													></textarea>
 													{errors.message && (
@@ -1157,7 +1169,7 @@ export default function VioletVista({
 												</div>
 												<Button
 													type="submit"
-													className="w-full bg-[#FF4D4D] hover:bg-[#FF3333] text-white"
+													className={`w-full bg-[${metadata.theme.primary}] hover:bg-[#FF3333] text-[${metadata.theme.text}]`}
 													disabled={isSubmitting}
 												>
 													{isSubmitting && (
@@ -1182,84 +1194,24 @@ export default function VioletVista({
 						<div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
 							{socials.length > 0 && (
 								<div className="flex gap-4">
-									{socials.map((social, index) => {
-										{
-											social.network == "github" && (
-												<Link
-													href={`https://www.github.com/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-													)}
-												>
-													<GithubLogo className="h-4 w-4" />
-													<span className="sr-only">
-														GitHub
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "linkedin" && (
-												<Link
-													href={`https://www.linkedin.com/in/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-													)}
-												>
-													<LinkedinLogo className="h-4 w-4" />
-													<span className="sr-only">
-														LinkedIn
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "youtube" && (
-												<Link
-													href={`https://www.youtube.com/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-													)}
-												>
-													<YoutubeLogo className="h-4 w-4" />
-													<span className="sr-only">
-														YouTube
-													</span>
-												</Link>
-											);
-										}
-										{
-											social.network == "x" && (
-												<Link
-													href={`https://www.x.com/${social.username}`}
-													className={cn(
-														buttonVariants({
-															variant: "ghost",
-															size: "icon",
-														}),
-														"rounded-full bg-[#222222] hover:bg-[#333333] text-white"
-													)}
-												>
-													<XLogo className="h-4 w-4" />
-													<span className="sr-only">
-														X
-													</span>
-												</Link>
-											);
-										}
-									})}
+									{socials.map((social, index) => (
+										<Link
+											key={index}
+											href={getSocialLink(social)}
+											className={cn(
+												buttonVariants({
+													variant: "ghost",
+													size: "icon",
+												}),
+												`rounded-full bg-[#222222] hover:bg-[#333333] text-[${metadata.theme.text}]`
+											)}
+										>
+											{getSocialIcon(social)}
+											<span className="sr-only">
+												{social.network.toUpperCase()}
+											</span>
+										</Link>
+									))}
 								</div>
 							)}
 

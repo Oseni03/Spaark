@@ -23,10 +23,10 @@ export const TemplateWrapper = ({
 }) => {
 	const Template = TEMPLATES[template] || TEMPLATES.default;
 	return (
-		<div className={cn("relative w-full min-h-screen", className)}>
-			<div className={cn(CONTAINER_CLASS, "py-6 md:py-8 lg:py-12")}>
-				<Template {...data} />
-			</div>
+		<div
+			className={cn(CONTAINER_CLASS, "py-6 md:py-8 lg:py-12", className)}
+		>
+			<Template {...data} />
 		</div>
 	);
 };

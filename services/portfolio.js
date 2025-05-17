@@ -17,7 +17,7 @@ const portfolioSelect = {
 	blogEnabled: true,
 	customDomain: true,
 	// organizationId: true,
-	template: true,
+	metadata: true,
 	basics: true,
 	socials: true,
 	experiences: true,
