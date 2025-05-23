@@ -11,7 +11,7 @@ import {
 	Layout,
 	FileText,
 } from "@phosphor-icons/react";
-import { StarOff } from "lucide-react";
+import { ExternalLink, StarOff } from "lucide-react";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -37,6 +37,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { portfolioSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 import slugify from "@sindresorhus/slugify";
+import Link from "next/link";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
@@ -60,7 +61,9 @@ export const PortfolioCard = ({ portfolio }) => {
 		}
 	}, [errors, defaultValues]);
 
-	const lastUpdated = dayjs(portfolio.updatedAt);
+	const portfolioLink =
+		portfolio.customDomain ||
+		`${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
 
 	const onOpen = () => {
 		router.push(`/builder/${portfolio.id}`);
@@ -116,9 +119,7 @@ export const PortfolioCard = ({ portfolio }) => {
 							</div>
 							<div className="flex items-center gap-2 text-sm text-muted-foreground">
 								<Globe className="w-4 h-4" />
-								<span>
-									{portfolio.customDomain || "No domain set"}
-								</span>
+								<span>{portfolioLink}</span>
 							</div>
 						</div>
 
@@ -127,11 +128,8 @@ export const PortfolioCard = ({ portfolio }) => {
 								Template:{" "}
 								{portfolio?.metadata?.template || "Default"}
 							</p>
-							{lastUpdated && (
-								<p>
-									Last updated:{" "}
-									{lastUpdated.format("MMMM D, YYYY")}
-								</p>
+							{portfolio.updatedAt && (
+								<p>Last updated: {portfolio.updatedAt}</p>
 							)}
 							<div className="flex items-center gap-2">
 								<FileText className="w-4 h-4" />
@@ -159,6 +157,12 @@ export const PortfolioCard = ({ portfolio }) => {
 				<ContextMenuItem onClick={onOpen}>
 					<FolderOpen size={14} className="mr-2" />
 					{`Open`}
+				</ContextMenuItem>
+				<ContextMenuItem asChild>
+					<Link href={portfolioLink} target="_blank">
+						<ExternalLink size={14} className="mr-2" />
+						{`View`}
+					</Link>
 				</ContextMenuItem>
 				<ContextMenuItem onClick={() => setIsOpen(true)}>
 					<PencilSimple size={14} className="mr-2" />
