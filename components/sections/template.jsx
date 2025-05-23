@@ -78,7 +78,7 @@ export function TemplateSection() {
 	logger.info("Current portfolio:", portfolio); // Debug log
 	logger.info("Available templates:", templates); // Debug log
 
-	const selectedTemplate = portfolio?.template || "default";
+	const selectedTemplate = portfolio?.metadata.template || "default";
 	logger.info("Selected template:", selectedTemplate); // Debug log
 
 	const handleTemplateSelect = (templateId) => {
@@ -88,9 +88,11 @@ export function TemplateSection() {
 			updatePortfolio({
 				id: portfolio.id,
 				data: {
-					...defaultMetadata,
-					theme: templateTheme[templateId] || defaultMetadata.theme,
-					template: templateId,
+					metadata: {
+						...portfolio.metadata,
+						theme: defaultMetadata.theme,
+						template: templateId,
+					},
 				},
 			})
 		);

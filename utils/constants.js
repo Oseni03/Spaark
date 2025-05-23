@@ -17,6 +17,7 @@ export const projectTypes = [
 	{ value: "Web application", label: `Web application` },
 	{ value: "Mobile application", label: `Mobile application` },
 	{ value: "Web design", label: `Web design` },
+	{ value: "Browser Extension", label: `Browser Extension` },
 ];
 
 export const defaultTiltProps = {
@@ -29,7 +30,7 @@ export const defaultTiltProps = {
 	glareColor: "#fafafa",
 };
 
-export const CONTAINER_CLASS = "w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl";
+export const CONTAINER_CLASS = "w-full mx-auto md:px-6 lg:px-8 max-w-6xl";
 export const CONTENT_CLASS = "max-w-4xl mx-auto";
 export const SECTION_SPACING = "space-y-6 md:space-y-8 lg:space-y-10";
 export const MOBILE_PADDING = "px-2 sm:px-6 lg:px-8";

@@ -54,62 +54,60 @@ export default async function PortfolioLayout({ params, children }) {
 		};
 
 		return (
-			<>
-				<head>
-					<title>{metaTags.title}</title>
-					<meta name="description" content={metaTags.description} />
-					<meta property="og:title" content={metaTags.title} />
-					<meta
-						property="og:description"
-						content={metaTags.description}
-					/>
-					<meta property="og:type" content="profile" />
-					<meta property="og:username" content={portfolioSlug} />
-					<meta name="twitter:card" content={summary} />
-					<meta name="twitter:title" content={metaTags.title} />
-					<meta name="twitter:description" content={summary} />
-					{metaTags.image && (
-						<meta property="og:image" content={metaTags.image} />
-					)}
-					<meta name="url" content={metaTags.url} />
-				</head>
-				<body
-					className={cn(
-						"scrollbar-hide",
-						"overflow-y-auto",
-						`bg-[${portfolio.metadata.theme.backgroung}] text-[${portfolio.metadata.theme.text}]`
-					)}
+			<div
+				className={cn(
+					"scrollbar-hide",
+					"overflow-y-auto",
+					portfolio.metadata.theme?.background &&
+						`bg-[${portfolio.metadata.theme.background}]`,
+					portfolio.metadata.theme?.text &&
+						`text-[${portfolio.metadata.theme.text}]`
+				)}
+			>
+				<BuildWithButton />
+				<PortfolioProvider
+					portfolio={portfolio}
+					metaTags={metaTags}
+					blogEnabled={portfolio.blogEnabled}
 				>
-					<BuildWithButton />
-					<PortfolioProvider
-						portfolio={portfolio}
-						metaTags={metaTags}
-						blogEnabled={portfolio.blogEnabled}
-					>
-						{children}
-					</PortfolioProvider>
-				</body>
-			</>
-		);
+					{children}
+				</PortfolioProvider>
+			</div>
+		)
 	} catch (error) {
 		logger.error(`Error loading portfolio for ${portfolioSlug}:`, error);
 		return NotFound();
 	}
 }
 
-// Generate metadata for SEO
+// Update the generateMetadata function to include all meta information
 export async function generateMetadata({ params }) {
 	const validatedParams = await Promise.resolve(params);
 	const { subdomain } = validatedParams;
 	const portfolio = await getPortfolio(subdomain);
+
 	const name = portfolio.data?.basics?.name || portfolio.data?.name;
 	const headline = portfolio.data?.basics?.headline;
+	const summary = portfolio.data?.basics?.summary;
+	const picture = portfolio.data?.basics?.picture;
 
 	return {
 		title: {
 			template: `%s | ${name}`,
 			default: headline ? `${name} - ${headline}` : name,
 		},
-		description: portfolio.data?.basics?.summary || `${name}'s Portfolio`,
+		description: summary || `${name}'s Portfolio`,
+		openGraph: {
+			title: headline ? `${name} - ${headline}` : name,
+			description: summary,
+			images: picture ? [picture] : [],
+			type: "profile",
+			username: subdomain,
+		},
+		twitter: {
+			card: "summary",
+			title: headline ? `${name} - ${headline}` : name,
+			description: summary,
+		},
 	};
 }

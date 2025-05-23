@@ -53,7 +53,7 @@ export default function Page() {
 			(item) => item.visible
 		),
 		socials: portfolio?.socials?.items || [],
-		metadata: JSON.parse(portfolio?.metadata) || defaultMetadata,
+		metadata: portfolio?.metadata || defaultMetadata,
 		blogEnabled: portfolio?.blogEnabled || false,
 	};
 
@@ -63,7 +63,7 @@ export default function Page() {
 		<div className="min-h-screen w-full">
 			<div className={CONTENT_CLASS}>
 				<TemplateWrapper
-					template={portfolio.template || "default"}
+					template={portfolio.metadata.template || "default"}
 					data={templateData}
 					className="h-[calc(100vh-120px)]"
 				/>

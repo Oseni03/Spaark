@@ -17,19 +17,11 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ChevronRightIcon, HomeIcon, NotebookIcon, Globe } from "lucide-react";
+import { ChevronRightIcon, Globe } from "lucide-react";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 import { ContactForm } from "@/app/contact-us/components/contact-form";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
-import { Dock, DockIcon } from "@/components/magicui/dock";
-import ModeToggle from "@/components/mode-toggle";
 import { buttonVariants } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { GithubLogo } from "@phosphor-icons/react";
 import { getSocialLink, getSocialIcon } from "@/lib/utils";
 import { Mail } from "lucide-react";
@@ -49,7 +41,6 @@ const ResumeCard = ({
 	period,
 	description,
 	technologies,
-	metadata = defaultMain.metadata,
 }) => {
 	const [isExpanded, setIsExpanded] = React.useState(false);
 
@@ -69,7 +60,7 @@ const ResumeCard = ({
 			<Card className="flex border border-hidden shadow-none">
 				<div className="flex-none">
 					<Avatar
-						className={`border size-12 m-auto bg-muted-[${metadata.theme.background}] dark:bg-foreground`}
+						className={`border size-12 m-auto bg-muted-background dark:bg-foreground`}
 					>
 						<AvatarImage
 							src={logoUrl}
@@ -105,7 +96,7 @@ const ResumeCard = ({
 								/>
 							</h3>
 							<div
-								className={`text-xs sm:text-sm tabular-nums text-[${metadata.theme.text}] text-right`}
+								className={`text-xs sm:text-sm tabular-nums text-muted-foreground text-right`}
 							>
 								{period}
 							</div>
@@ -131,7 +122,7 @@ const ResumeCard = ({
 						</motion.div>
 					)}
 					{technologies && (
-						<span className="inline-flex gap-x-1">
+						<span className="inline-flex flex-wrap gap-1">
 							{technologies.map((tech, index) => (
 								<Badge
 									variant="secondary"
@@ -149,40 +140,6 @@ const ResumeCard = ({
 	);
 };
 
-const ContactCard = () => {
-	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
-		useUserContactForm();
-
-	return (
-		<CardContainer className="inter-var">
-			<CardBody className="bg-black text-white relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-gray-50 dark:text-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border  ">
-				<CardItem translateZ="50" className="text-xl font-bold">
-					Send a message
-				</CardItem>
-				<CardItem
-					as="p"
-					translateZ="60"
-					className="text-sm max-w-sm mt-2"
-				>
-					Will get back to you in no time
-				</CardItem>
-				<div className="text-start">
-					<CardItem translateZ="60" className="w-full mt-4">
-						<ContactForm
-							formData={formData}
-							errors={errors}
-							isSubmitting={isSubmitting}
-							handleChange={handleChange}
-							handleSubmit={handleSubmit}
-							revert={true}
-						/>
-					</CardItem>
-				</div>
-			</CardBody>
-		</CardContainer>
-	);
-};
-
 export default function DefaultTemplate({
 	basics = defaultMain.basics,
 	experiences = defaultMain.experiences,
@@ -192,19 +149,8 @@ export default function DefaultTemplate({
 	hackathons = defaultMain.hackathons,
 	certifications = defaultMain.certifications,
 	socials = defaultMain.socials,
-	metadata = defaultMain.metadata,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
-	const navbar = [
-		{ href: "/", icon: HomeIcon, label: "Home" },
-		{
-			href: "/blog",
-			icon: NotebookIcon,
-			label: "Blog",
-			requiresBlog: true,
-		},
-	].filter((item) => !item.requiresBlog || blogEnabled);
-
 	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
 		useUserContactForm();
 	return (
@@ -230,7 +176,7 @@ export default function DefaultTemplate({
 							</div>
 							{basics.picture && (
 								<BlurFade delay={BLUR_FADE_DELAY}>
-									<Avatar className="size-20 md:size-28 border">
+									<Avatar className="size-20 md:size-28 border mt-2">
 										<AvatarImage
 											alt={basics?.name}
 											src={basics.picture}
@@ -252,7 +198,7 @@ export default function DefaultTemplate({
 					</BlurFade>
 					<BlurFade
 						delay={BLUR_FADE_DELAY * 4}
-						className={`prose max-w-full text-pretty font-sans text-sm text-[${metadata.theme.text}] dark:prose-invert`}
+						className={`prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert`}
 					>
 						{HTMLReactParser(basics?.about || "")}
 					</BlurFade>
@@ -284,7 +230,6 @@ export default function DefaultTemplate({
 											work.summary || ""
 										)}
 										technologies={work.technologies}
-										metadata={metadata}
 									/>
 								</BlurFade>
 							))}
@@ -311,7 +256,6 @@ export default function DefaultTemplate({
 										title={edu.institution}
 										subtitle={edu.studyType}
 										period={edu.date}
-										metadata={metadata}
 									/>
 								</BlurFade>
 							))}
@@ -348,7 +292,7 @@ export default function DefaultTemplate({
 								<div className="flex flex-col items-center justify-center space-y-4 text-center">
 									<div className="space-y-2">
 										<div
-											className={`inline-block rounded-lg bg-foreground text-[${metadata.theme.background}] px-3 py-1 text-xs md:text-sm`}
+											className={`inline-block rounded-lg bg-foreground text-background px-3 py-1 text-xs md:text-sm`}
 										>
 											My Projects
 										</div>
@@ -356,7 +300,7 @@ export default function DefaultTemplate({
 											Check out my latest work
 										</h2>
 										<p
-											className={`text-sm text-[${metadata.theme.text}] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
+											className={`text-sm text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
 										>
 											I&apos;ve worked on a variety of
 											projects, from simple websites to
@@ -391,8 +335,7 @@ export default function DefaultTemplate({
 											<Card className="flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full">
 												<div
 													className={cn(
-														"block cursor-pointer",
-														className
+														"block cursor-pointer"
 													)}
 												>
 													{video && (
@@ -508,7 +451,7 @@ export default function DefaultTemplate({
 								<div className="flex flex-col items-center justify-center space-y-4 text-center">
 									<div className="space-y-2">
 										<div
-											className={`inline-block rounded-lg bg-foreground text-[${metadata.theme.background}] px-3 py-1 text-sm`}
+											className={`inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm`}
 										>
 											Certifications
 										</div>
@@ -516,7 +459,7 @@ export default function DefaultTemplate({
 											I value learning
 										</h2>
 										<p
-											className={`text-[${metadata.theme.text}] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
+											className={`text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
 										>
 											Explore the professional
 											certifications I have earned
@@ -559,7 +502,7 @@ export default function DefaultTemplate({
 													<div className="flex flex-1 flex-col gap-1">
 														{date && (
 															<time
-																className={`text-xs text-[${metadata.theme.text}]`}
+																className={`text-xs text-muted-foreground`}
 																dateTime={date}
 															>
 																{date}
@@ -572,7 +515,7 @@ export default function DefaultTemplate({
 
 														{issuer && (
 															<p
-																className={`text-sm text-[${metadata.theme.text}]`}
+																className={`text-sm text-muted-foreground`}
 															>
 																Issued by{" "}
 																{issuer}
@@ -581,7 +524,7 @@ export default function DefaultTemplate({
 
 														{summary && (
 															<p
-																className={`prose dark:prose-invert text-sm text-[${metadata.theme.text}]`}
+																className={`prose dark:prose-invert text-sm text-muted-foreground`}
 															>
 																{HTMLReactParser(
 																	summary ||
@@ -615,12 +558,12 @@ export default function DefaultTemplate({
 
 				{hackathons.length > 0 && (
 					<section id="hackathons">
-						<div className="space-y-12 w-full py-12">
+						<div className="space-y-12 py-12">
 							<BlurFade delay={BLUR_FADE_DELAY * 13}>
 								<div className="flex flex-col items-center justify-center space-y-4 text-center">
 									<div className="space-y-2">
 										<div
-											className={`inline-block rounded-lg bg-foreground text-[${metadata.theme.background}] px-3 py-1 text-sm`}
+											className={`inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm`}
 										>
 											Hackathons
 										</div>
@@ -628,7 +571,7 @@ export default function DefaultTemplate({
 											I like building things
 										</h2>
 										<p
-											className={`text-[${metadata.theme.text}] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
+											className={`text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed`}
 										>
 											During my time in university, I
 											attended {hackathons.length}+
@@ -644,7 +587,7 @@ export default function DefaultTemplate({
 								</div>
 							</BlurFade>
 							<BlurFade delay={BLUR_FADE_DELAY * 14}>
-								<ul className="mb-4 ml-4 divide-y divide-dashed border-l">
+								<ul className="mb-4 ml-6 divide-y divide-dashed border-l">
 									{hackathons.map(
 										(
 											{
@@ -683,7 +626,7 @@ export default function DefaultTemplate({
 														{/* Date Display */}
 														{dates && (
 															<time
-																className={`text-xs text-[${metadata.theme.text}]`}
+																className={`text-xs text-muted-foreground`}
 																dateTime={dates}
 															>
 																{dates}
@@ -698,7 +641,7 @@ export default function DefaultTemplate({
 														{/* Location */}
 														{location && (
 															<p
-																className={`text-sm text-[${metadata.theme.text}]`}
+																className={`text-sm text-muted-foreground`}
 															>
 																{location}
 															</p>
@@ -730,7 +673,7 @@ export default function DefaultTemplate({
 														{/* Description */}
 														{description && (
 															<p
-																className={`prose dark:prose-invert text-sm text-[${metadata.theme.text}]`}
+																className={`prose dark:prose-invert text-sm text-muted-foreground`}
 															>
 																{HTMLReactParser(
 																	description ||
@@ -797,7 +740,7 @@ export default function DefaultTemplate({
 						<div className="container mx-auto px-6">
 							<div className="flex flex-col items-center text-center mb-12">
 								<Badge
-									className={`bg-[${metadata.theme.primary}]/10 text-[${metadata.theme.primary}] hover:bg-[${metadata.theme.primary}]/20 mb-4`}
+									className={`bg-primary/10 text-primary hover:bg-primary/20 mb-4`}
 								>
 									Get In Touch
 								</Badge>
@@ -805,10 +748,10 @@ export default function DefaultTemplate({
 									Let&rsquo;s Work Together
 								</h2>
 								<div
-									className={`w-20 h-1 bg-[${metadata.theme.primary}] rounded-full mb-6`}
+									className={`w-20 h-1 bg-primary rounded-full mb-6`}
 								></div>
 								<p
-									className={`text-[${metadata.theme.text}] text-lg max-w-2xl`}
+									className={`text-muted-foreground text-lg max-w-2xl`}
 								>
 									Have a project in mind? Let&rsquo;s discuss
 									how I can help bring your ideas to life.
@@ -818,9 +761,7 @@ export default function DefaultTemplate({
 							<div className="max-w-3xl mx-auto">
 								<Card className="bg-card border-border overflow-hidden">
 									<div className="grid grid-cols-1 md:grid-cols-2">
-										<div
-											className={`p-8 bg-[${metadata.theme.primary}]/5`}
-										>
+										<div className={`p-8 bg-primary/5`}>
 											<h3 className="text-xl font-bold mb-6">
 												Contact Information
 											</h3>
@@ -828,7 +769,7 @@ export default function DefaultTemplate({
 												{basics.email && (
 													<div>
 														<p
-															className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+															className={`text-muted-foreground mb-1 text-sm`}
 														>
 															Email
 														</p>
@@ -840,7 +781,7 @@ export default function DefaultTemplate({
 												{basics.location && (
 													<div>
 														<p
-															className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+															className={`text-muted-foreground mb-1 text-sm`}
 														>
 															Location
 														</p>
@@ -853,7 +794,7 @@ export default function DefaultTemplate({
 												{socials.length > 0 && (
 													<div>
 														<p
-															className={`text-[${metadata.theme.text}] mb-1 text-sm`}
+															className={`text-muted-foreground mb-1 text-sm`}
 														>
 															Social Media
 														</p>
@@ -878,7 +819,7 @@ export default function DefaultTemplate({
 																					size: "icon",
 																				}
 																			),
-																			`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
+																			`rounded-full border border-border hover:border-primary hover:text-primary`
 																		)}
 																	>
 																		{getSocialIcon(
@@ -901,7 +842,7 @@ export default function DefaultTemplate({
 																				size: "icon",
 																			}
 																		),
-																		`rounded-full border border-border hover:border-[${metadata.theme.primary}] hover:text-[${metadata.theme.primary}]`
+																		`rounded-full border border-border hover:border-primary hover:text-primary`
 																	)}
 																>
 																	<Mail className="h-4 w-4" />
@@ -946,7 +887,7 @@ export default function DefaultTemplate({
 																errors.full_name
 																	? "border-red-500"
 																	: "",
-																`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
+																`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
 															)}
 														/>
 														{errors.full_name && (
@@ -978,7 +919,7 @@ export default function DefaultTemplate({
 																errors.email
 																	? "border-red-500"
 																	: "",
-																`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
+																`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
 															)}
 														/>
 														{errors.email && (
@@ -1005,7 +946,7 @@ export default function DefaultTemplate({
 															errors.subject
 																? "border-red-500"
 																: "",
-															`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
+															`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
 														)}
 													/>
 													{errors.subject && (
@@ -1031,7 +972,7 @@ export default function DefaultTemplate({
 															errors.message
 																? "border-red-500"
 																: "",
-															`w-full p-2 bg-[${metadata.theme.background}] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[${metadata.theme.primary}] focus:border-transparent`
+															`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
 														)}
 													></textarea>
 													{errors.message && (
@@ -1061,87 +1002,6 @@ export default function DefaultTemplate({
 					</BlurFade>
 				</section>
 			</div>
-			<section id="navbar">
-				<div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 mx-auto mb-6 flex flex-col origin-bottom h-full max-h-14">
-					<div
-						className={`fixed bottom-0 inset-x-0 h-16 w-full bg-[${metadata.theme.background}] to-transparent backdrop-blur-lg [-webkit-mask-image:linear-gradient(to_top,black,transparent)] dark:bg-[${metadata.theme.background}]`}
-					></div>
-					<Dock
-						className={`z-50 pointer-events-auto relative mx-auto flex min-h-full h-full items-center px-1 bg-[${metadata.theme.background}] [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] transform-gpu dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] `}
-					>
-						{navbar.map((item, index) => (
-							<DockIcon key={index}>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Link
-											href={item.href}
-											className={cn(
-												buttonVariants({
-													variant: "ghost",
-													size: "icon",
-												}),
-												"size-12"
-											)}
-										>
-											<item.icon className="size-4" />
-										</Link>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p>{item.label}</p>
-									</TooltipContent>
-								</Tooltip>
-							</DockIcon>
-						))}
-
-						<Separator orientation="vertical" className="h-full" />
-						{Object.entries(socials)
-							.filter(([_, socials]) => socials.visible)
-							.map(([network, socials]) => (
-								<DockIcon key={network}>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Link
-												href={getSocialLink(socials)}
-												target="_blank"
-												className={cn(
-													buttonVariants({
-														variant: "ghost",
-														size: "icon",
-													}),
-													"size-12"
-												)}
-											>
-												{getSocialIcon(socials)}
-											</Link>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p>
-												{socials.network
-													.charAt(0)
-													.toLocaleUpperCase() +
-													socials.network.slice(1)}
-											</p>
-										</TooltipContent>
-									</Tooltip>
-								</DockIcon>
-							))}
-						<Separator
-							orientation="vertical"
-							className="h-full py-2"
-						/>
-						<DockIcon>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<ModeToggle />
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>Theme</p>
-								</TooltipContent>
-							</Tooltip>
-						</DockIcon>
-					</Dock>
-				</div>
-			</section>
 		</main>
 	);
 }

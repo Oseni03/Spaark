@@ -8,6 +8,7 @@ import { logger } from "@/lib/utils";
 import { CONTAINER_CLASS, CONTENT_CLASS } from "@/utils/constants";
 import { cn } from "@/lib/utils";
 import { defaultMetadata } from "@/schema/sections";
+import { Navbar } from "@/components/templates/navbar";
 
 export default function Page() {
 	const { portfolio } = usePortfolio();
@@ -21,7 +22,7 @@ export default function Page() {
 
 	if (isLoading) {
 		return (
-			<div className={cn(CONTAINER_CLASS, "py-12")}>
+			<div className={cn(CONTAINER_CLASS, "container", "py-12")}>
 				<div className={CONTENT_CLASS}>
 					<PortfolioSkeleton />
 				</div>
@@ -48,7 +49,7 @@ export default function Page() {
 			(item) => item.visible
 		),
 		socials: portfolio?.socials?.items || [],
-		metadata: JSON.parse(portfolio?.metadata) || defaultMetadata,
+		metadata: portfolio?.metadata || defaultMetadata,
 		blogEnabled: portfolio?.blogEnabled || false,
 	};
 
@@ -61,6 +62,11 @@ export default function Page() {
 					template={portfolio?.metadata?.template || "default"}
 					data={portfolioData}
 					// className="py-12 sm:py-16 lg:py-24"
+				/>
+				<Navbar
+					blogEnabled={portfolioData.blogEnabled}
+					socials={portfolioData.socials}
+					metadata={portfolioData.metadata}
 				/>
 			</div>
 		</div>
