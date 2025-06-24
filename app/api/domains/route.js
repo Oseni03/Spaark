@@ -7,6 +7,7 @@ import { logger } from "@/lib/utils";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { NextResponse } from "next/server";
 import { COOKIE_NAME } from "@/utils/constants";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req) {
 	try {
@@ -81,22 +82,57 @@ export async function DELETE(req) {
 		const domain = searchParams.get("domain");
 		const portfolioId = searchParams.get("portfolioId");
 
-		if (!domain || !portfolioId) {
-			return new NextResponse("Missing required fields", { status: 400 });
+		if (!domain) {
+			return NextResponse.json(
+				{ success: false, error: "Missing domain parameter" },
+				{ status: 400 }
+			);
 		}
 
 		// Remove domain from Vercel
-		await removeDomainFromVercelProject(domain);
+		const vercelResponse = await removeDomainFromVercelProject(domain);
 
-		// Remove custom domain from portfolio
-		const response = await prisma.portfolio.update({
-			where: { id: portfolioId },
-			data: { customDomain: null },
-		});
+		// Note: Vercel might return an error if domain doesn't exist, but we should still proceed
+		// to remove it from our database
+		if (
+			vercelResponse.error &&
+			vercelResponse.error.code !== "domain_not_found"
+		) {
+			logger.warn(
+				"[DOMAINS_DELETE] Vercel removal warning:",
+				vercelResponse.error
+			);
+		}
 
-		return NextResponse.json(response);
+		// Remove custom domain from portfolio if portfolioId is provided
+		if (portfolioId) {
+			try {
+				await prisma.portfolio.update({
+					where: { id: portfolioId },
+					data: { customDomain: null },
+				});
+			} catch (dbError) {
+				logger.error(
+					"[DOMAINS_DELETE] Database update error:",
+					dbError
+				);
+				// Don't fail the request if database update fails
+			}
+		}
+
+		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("[DOMAINS_DELETE]", error);
-		return new NextResponse("Internal error", { status: 500 });
+		logger.error("[DOMAINS_DELETE]", error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error.message || "Internal error",
+				details:
+					process.env.NODE_ENV === "development"
+						? error.stack
+						: undefined,
+			},
+			{ status: error.status || 500 }
+		);
 	}
 }
