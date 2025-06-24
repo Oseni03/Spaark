@@ -25,6 +25,7 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
 import { defaultMetadata } from "@/schema/sections";
+import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
 
 const templates = [
 	{
@@ -103,15 +104,24 @@ export function TemplateSection() {
 	const toggleLiveStatus = async () => {
 		if (!portfolio) return;
 
+		// If trying to make portfolio live, check authorization
 		if (!portfolio.isLive) {
-			if (!isSubscribed) setShowPricingDialog(true);
-			if (hasReachedPortfolioLimit) {
-				toast.error(
-					"Portfolio limit reached. Please upgrade your plan."
-				);
+			const liveAuthCheck = await checkPortfolioLiveAuth(user.id);
+
+			if (!liveAuthCheck.allowed) {
+				logger.warn("Portfolio live status blocked", {
+					portfolioId,
+					reason: liveAuthCheck.reason,
+					details: liveAuthCheck.details,
+				});
+
 				setShowPricingDialog(true);
+				toast.error(
+					liveAuthCheck.reason ||
+						"Portfolio limit reached. Please upgrade your plan."
+				);
+				return;
 			}
-			return;
 		}
 
 		// If all checks pass, update the portfolio

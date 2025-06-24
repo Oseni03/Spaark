@@ -7,12 +7,19 @@ import { createId } from "@paralleldrive/cuid2";
 const subscriptionSchema = z
 	.object({
 		id: idSchema,
-		type: z.enum(["INDIVIDUAL", "TEAM"]),
+		type: z.enum(["BASIC", "PRO", "CUSTOM"]),
 		frequency: z.string(),
 		status: z.string(),
 		priceId: z.string(),
 		startDate: z.date().nullable(),
 		endDate: z.date().nullable(),
+		portfolioLimit: z.number(),
+		blogEnabled: z.boolean(),
+		blogLimit: z.number().nullable(),
+		customPortfolioLimit: z.number().nullable(),
+		customArticleLimit: z.number().nullable(),
+		customizable: z.boolean(),
+		trial: z.number().nullable(),
 	})
 	.nullable();
 

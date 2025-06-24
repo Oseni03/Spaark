@@ -11,7 +11,8 @@ import { getSubscriptionData } from "@/utils/subscription-plans";
 export async function POST(request) {
 	try {
 		const body = await request.json();
-		const { type, frequency, userEmail, userId, returnUrl } = body;
+		const { type, frequency, userEmail, userId, returnUrl, customConfig } =
+			body;
 
 		// Validate all required fields
 		if (!type || !frequency || !userEmail || !userId) {
@@ -30,17 +31,26 @@ export async function POST(request) {
 			);
 		}
 
-		logger.info("Starting checkout process", {
+		logger.info("Starting checkout process (API)", {
 			type,
 			frequency,
 			userEmail,
 			userId,
+			customConfig,
 		});
 
 		let subscriptionData;
 		try {
-			logger.info("Getting subscription data", { type, frequency });
-			subscriptionData = getSubscriptionData(type, frequency);
+			logger.info("Getting subscription data", {
+				type,
+				frequency,
+				customConfig,
+			});
+			subscriptionData = getSubscriptionData(
+				type,
+				frequency,
+				customConfig
+			);
 			logger.info("Subscription data retrieved", subscriptionData);
 		} catch (error) {
 			logger.error("Invalid subscription configuration", {
@@ -54,7 +64,17 @@ export async function POST(request) {
 			);
 		}
 
-		const { price, priceId, portfolioLimit } = subscriptionData;
+		const {
+			price,
+			priceId,
+			portfolioLimit,
+			blogEnabled,
+			blogLimit,
+			customizable,
+			customPortfolioLimit,
+			customArticleLimit,
+			trial,
+		} = subscriptionData;
 
 		if (!priceId) {
 			logger.error("Invalid price configuration", {
@@ -74,6 +94,12 @@ export async function POST(request) {
 			type: type.toUpperCase(),
 			frequency,
 			priceId,
+			blogEnabled,
+			blogLimit,
+			customizable,
+			customPortfolioLimit,
+			customArticleLimit,
+			trial,
 		});
 
 		if (!subscriptionResult.success) {
@@ -147,6 +173,7 @@ export async function POST(request) {
 						subscriptionId: subscription.id,
 						type,
 						frequency,
+						customConfig,
 					},
 					customizations: {
 						title: `${type} Subscription`,
@@ -179,42 +206,17 @@ export async function POST(request) {
 				transactionId: txn.data.id,
 				transaction_id: flutterwaveResponse.data.data?.transaction_id, // Add this line
 			});
-		} catch (flwError) {
-			logger.error("Flutterwave API error:", {
-				error: flwError.message,
-				response: flwError.response?.data,
-				status: flwError.response?.status,
-				data: {
-					amount: price,
-					currency: "USD",
-					email: userEmail,
-					transactionRef: txn.data.id,
-				},
-			});
-
-			// Handle the failed transaction
-			await handlePaymentFailure({ transactionId: txn.data.id });
-
+		} catch (error) {
+			logger.error("Flutterwave payment initiation failed", error);
 			return NextResponse.json(
-				{
-					message: "Payment service error",
-					details:
-						flwError.response?.data?.message || flwError.message,
-					transactionId: txn.data.id,
-				},
-				{ status: flwError.response?.status || 500 }
+				{ message: "Payment initiation failed" },
+				{ status: 500 }
 			);
 		}
 	} catch (error) {
-		logger.error("Checkout process failed:", {
-			error: error.message,
-			stack: error.stack,
-		});
+		logger.error("Checkout process error:", error);
 		return NextResponse.json(
-			{
-				message: "Payment initialization failed",
-				details: error.message,
-			},
+			{ message: "Internal server error" },
 			{ status: 500 }
 		);
 	}

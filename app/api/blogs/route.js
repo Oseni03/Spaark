@@ -3,6 +3,8 @@ import { logger } from "@/lib/utils";
 import { getBlogsByAuthor, getBlogsByPortfolio } from "@/services/blog";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { COOKIE_NAME } from "@/utils/constants";
+import { prisma } from "@/lib/db";
+import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
 
 const getCorsHeaders = (origin) => {
 	const allowedOrigins = [
@@ -111,3 +113,125 @@ export const config = {
 		externalResolver: true,
 	},
 };
+
+export async function POST(request) {
+	try {
+		const authToken = request.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
+
+		if (!userId) {
+			return new NextResponse("Unauthorized", { status: 401 });
+		}
+
+		const body = await request.json();
+		const {
+			title,
+			slug,
+			portfolioId,
+			content,
+			excerpt,
+			featuredImage,
+			status = "draft",
+		} = body;
+
+		if (!title || !slug || !portfolioId) {
+			return NextResponse.json(
+				{ error: "Title, slug, and portfolioId are required" },
+				{ status: 400 }
+			);
+		}
+
+		// Check if portfolio belongs to user and has blog enabled
+		const portfolio = await prisma.portfolio.findUnique({
+			where: { id: portfolioId },
+			select: { userId: true, blogEnabled: true },
+		});
+
+		if (!portfolio) {
+			return NextResponse.json(
+				{ error: "Portfolio not found" },
+				{ status: 404 }
+			);
+		}
+
+		if (portfolio.userId !== userId) {
+			return new NextResponse("Unauthorized", { status: 401 });
+		}
+
+		if (!portfolio.blogEnabled) {
+			return NextResponse.json(
+				{ error: "Blog is not enabled for this portfolio" },
+				{ status: 403 }
+			);
+		}
+
+		// Check subscription authorization for publishing articles
+		if (status === "published") {
+			const authCheck = await checkBlogArticleCreationAuth(userId);
+
+			if (!authCheck.allowed) {
+				logger.warn("Blog article creation blocked", {
+					userId,
+					portfolioId,
+					reason: authCheck.reason,
+					details: authCheck.details,
+				});
+
+				return NextResponse.json(
+					{
+						error: authCheck.reason,
+						details: authCheck.details,
+						upgradeRequired: true,
+					},
+					{ status: 403 }
+				);
+			}
+		}
+
+		// Check if slug already exists
+		const existingBlog = await prisma.blog.findUnique({
+			where: { slug },
+		});
+
+		if (existingBlog) {
+			return NextResponse.json(
+				{ error: "Blog with this slug already exists" },
+				{ status: 409 }
+			);
+		}
+
+		// Create blog article
+		const blog = await prisma.blog.create({
+			data: {
+				title,
+				slug,
+				content,
+				excerpt,
+				featuredImage,
+				status,
+				portfolioId,
+				authorId: userId,
+				...(status === "published" && { publishedAt: new Date() }),
+			},
+		});
+
+		logger.info("Blog article created successfully", {
+			blogId: blog.id,
+			userId,
+			portfolioId,
+			status,
+			...(status === "published" && {
+				remainingArticles: authCheck?.details?.remaining - 1,
+			}),
+		});
+
+		return NextResponse.json(blog);
+	} catch (error) {
+		logger.error("Error creating blog article:", error);
+		return NextResponse.json(
+			{ error: "Failed to create blog article" },
+			{ status: 500 }
+		);
+	}
+}

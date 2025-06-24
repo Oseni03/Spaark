@@ -1,72 +1,55 @@
 export const SUBSCRIPTION_PLANS = {
-	INDIVIDUAL: {
-		weekly: {
-			price: 3,
-			priceId: process.env.NEXT_PUBLIC_WEEKLY_INDIVIDUAL_PRICE_ID,
-			interval: "week",
-			features: [
-				"Template options",
-				"Custom domain support",
-				"Project showcase",
-				"Skills visualization",
-				"Built-in blog",
-				"contact form",
-			],
-			portfolioLimit: 1,
-		},
+	BASIC: {
 		monthly: {
-			price: 10,
-			priceId: process.env.NEXT_PUBLIC_MONTHLY_INDIVIDUAL_PRICE_ID,
+			price: 5,
+			priceId: process.env.NEXT_PUBLIC_MONTHLY_BASIC_PRICE_ID,
 			interval: "month",
+			trial: 14,
 			features: [
-				"Template options",
+				"1 active portfolio",
 				"Custom domain support",
+				"Free template selection",
 				"Project showcase",
 				"Skills visualization",
-				"Built-in blog",
-				"contact form",
+				"Contact form",
 			],
 			portfolioLimit: 1,
-		},
-		yearly: {
-			price: 96,
-			priceId: process.env.NEXT_PUBLIC_YEARLY_INDIVIDUAL_PRICE_ID,
-			interval: "year",
-			features: [
-				"Template options",
-				"Custom domain support",
-				"Project showcase",
-				"Skills visualization",
-				"Built-in blog",
-				"contact form",
-			],
-			portfolioLimit: 1,
+			blogEnabled: false,
 		},
 	},
-	TEAM: {
+	PRO: {
 		monthly: {
-			price: 25,
-			priceId: process.env.NEXT_PUBLIC_MONTHLY_TEAM_PRICE_ID,
+			price: 15,
+			priceId: process.env.NEXT_PUBLIC_MONTHLY_PRO_PRICE_ID,
 			interval: "month",
 			features: [
-				"All Individual features",
-				"Team collaboration",
-				"Shared templates",
-				"Custom branding",
+				"3 active portfolios",
+				"All Basic features",
+				"Blog enabled (up to 10 articles)",
+				"Premium templates",
+				"Analytics dashboard",
 			],
 			portfolioLimit: 3,
+			blogLimit: 10,
+			blogEnabled: true,
 		},
-		yearly: {
-			price: 240,
-			priceId: process.env.NEXT_PUBLIC_YEARLY_TEAM_PRICE_ID,
-			interval: "year",
+	},
+	CUSTOM: {
+		monthly: {
+			basePrice: 25,
+			pricePerPortfolio: 5,
+			pricePerArticle: 1,
+			priceId: process.env.NEXT_PUBLIC_MONTHLY_CUSTOM_PRICE_ID,
+			interval: "month",
 			features: [
-				"All Individual features",
-				"Team collaboration",
-				"Shared templates",
-				"Custom branding",
+				"Custom number of portfolios",
+				"All Pro features",
+				"Unlimited blog articles",
+				"Priority support",
+				"Custom features on request",
 			],
-			portfolioLimit: 3,
+			customizable: true,
+			blogEnabled: true,
 		},
 	},
 };
@@ -83,7 +66,38 @@ export const getPlanFeatures = (type, tier, frequency) => {
 	return SUBSCRIPTION_PLANS[type][tier][frequency].features;
 };
 
-export const getSubscriptionData = (type, frequency) => {
+// Calculate custom price for CUSTOM plan
+export const calculateCustomPrice = (
+	basePrice,
+	portfolios,
+	articles,
+	pricePerPortfolio,
+	pricePerArticle
+) => {
+	const portfolioCost = (portfolios - 3) * pricePerPortfolio; // Pro plan has 3 portfolios
+	const articleCost = Math.max(0, articles - 10) * pricePerArticle; // Pro plan has 10 articles
+	return basePrice + portfolioCost + articleCost;
+};
+
+// Validate plan limits for custom configuration
+export const validatePlanLimits = (type, portfolios, articles) => {
+	if (type !== "CUSTOM") return true;
+
+	// Custom plan limits
+	const minPortfolios = 5;
+	const maxPortfolios = 20;
+	const minArticles = 20;
+	const maxArticles = 100;
+
+	return (
+		portfolios >= minPortfolios &&
+		portfolios <= maxPortfolios &&
+		articles >= minArticles &&
+		articles <= maxArticles
+	);
+};
+
+export const getSubscriptionData = (type, frequency, customConfig = null) => {
 	// Convert type to match SUBSCRIPTION_PLANS keys
 	const planType = type.toUpperCase();
 
@@ -102,10 +116,139 @@ export const getSubscriptionData = (type, frequency) => {
 		throw new Error(`Invalid frequency ${frequency} for plan type ${type}`);
 	}
 
+	// Calculate price for custom plan
+	let price = plan.price;
+	let portfolioLimit = plan.portfolioLimit;
+	let customPortfolioLimit = null;
+	let customArticleLimit = null;
+
+	if (planType === "CUSTOM" && customConfig) {
+		price = calculateCustomPrice(
+			plan.basePrice,
+			customConfig.portfolios,
+			customConfig.articles,
+			plan.pricePerPortfolio,
+			plan.pricePerArticle
+		);
+		portfolioLimit = customConfig.portfolios;
+		customPortfolioLimit = customConfig.portfolios;
+		customArticleLimit = customConfig.articles;
+	}
+
 	return {
-		price: plan.price,
+		price,
 		priceId: plan.priceId,
 		interval: plan.interval,
-		portfolioLimit: plan.portfolioLimit,
+		trial: plan.trial,
+		portfolioLimit,
+		blogEnabled: plan.blogEnabled,
+		blogLimit: plan.blogLimit,
+		customizable: plan.customizable,
+		customPortfolioLimit,
+		customArticleLimit,
+		features: plan.features,
 	};
+};
+
+// Check if user can create more portfolios
+export const canCreatePortfolio = (subscription, currentPortfolioCount) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	const limit =
+		subscription.customPortfolioLimit || subscription.portfolioLimit;
+	return currentPortfolioCount < limit;
+};
+
+// Check if user can create blog articles
+export const canCreateBlogArticle = (subscription, currentArticleCount) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	if (!subscription.blogEnabled) {
+		return false;
+	}
+
+	// Custom plan has unlimited articles
+	if (subscription.customizable) {
+		return true;
+	}
+
+	// Check against blog limit
+	return (
+		!subscription.blogLimit || currentArticleCount < subscription.blogLimit
+	);
+};
+
+// Check if user has access to premium features
+export const hasPremiumFeatures = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	return subscription.type === "PRO" || subscription.type === "CUSTOM";
+};
+
+// Check if user has access to analytics
+export const hasAnalyticsAccess = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	return subscription.type === "PRO" || subscription.type === "CUSTOM";
+};
+
+// Check if user has access to custom domain
+export const hasCustomDomainAccess = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	// All plans support custom domains
+	return true;
+};
+
+// Get user's portfolio limit
+export const getUserPortfolioLimit = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return 0;
+	}
+
+	return subscription.customPortfolioLimit || subscription.portfolioLimit;
+};
+
+// Get user's blog limit
+export const getUserBlogLimit = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return 0;
+	}
+
+	if (!subscription.blogEnabled) {
+		return 0;
+	}
+
+	// Custom plan has unlimited articles
+	if (subscription.customizable) {
+		return -1; // -1 indicates unlimited
+	}
+
+	return subscription.blogLimit || 0;
+};
+
+// Check if user is in trial period
+export const isInTrialPeriod = (subscription) => {
+	if (!subscription || subscription.status !== "active") {
+		return false;
+	}
+
+	if (!subscription.trial || !subscription.startDate) {
+		return false;
+	}
+
+	const trialEndDate = new Date(subscription.startDate);
+	trialEndDate.setDate(trialEndDate.getDate() + subscription.trial);
+
+	return new Date() < trialEndDate;
 };

@@ -9,6 +9,7 @@ import {
 	deleteBlog as deleteBlogAction,
 	publishBlog as publishBlogAction,
 } from "@/services/blog";
+import { prisma } from "@/lib/db";
 
 export const fetchBlogsForPortfolio = createAsyncThunk(
 	"blogs/fetch",
@@ -29,6 +30,26 @@ export const createBlogInDatabase = createAsyncThunk(
 		try {
 			if (!portfolioId) {
 				return rejectWithValue({ error: "Portfolio ID is required" });
+			}
+
+			// Check if portfolio belongs to user and has blog enabled
+			const portfolio = await prisma.portfolio.findUnique({
+				where: { id: portfolioId },
+				select: { userId: true, blogEnabled: true },
+			});
+
+			if (!portfolio) {
+				return rejectWithValue({ error: "Portfolio not found" });
+			}
+
+			if (portfolio.userId !== data.userId) {
+				return rejectWithValue({ error: "Unauthorized" });
+			}
+
+			if (!portfolio.blogEnabled) {
+				return rejectWithValue({
+					error: "Blog is not enabled for this portfolio",
+				});
 			}
 
 			const blog = await createBlogAction({

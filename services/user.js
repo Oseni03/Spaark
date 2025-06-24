@@ -12,17 +12,7 @@ const userSelect = {
 	userType: true,
 	createdAt: true,
 	updatedAt: true,
-	subscription: {
-		select: {
-			id: true,
-			type: true,
-			frequency: true,
-			status: true,
-			priceId: true,
-			startDate: true,
-			endDate: true,
-		},
-	},
+	subscription: true,
 };
 
 export async function getUserByEmail(email) {

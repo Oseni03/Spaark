@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,10 @@ import axios from "axios";
 import { Spinner } from "../ui/Spinner";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/utils";
+import {
+	calculateCustomPrice,
+	validatePlanLimits,
+} from "@/utils/subscription-plans";
 import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import { useAuth } from "@/context/auth-context";
@@ -33,10 +37,43 @@ const PricingCard = ({
 	isHovered,
 	onMouseEnter,
 	onMouseLeave,
-	onBillingChange,
 	onSubscribe,
 	processing,
 }) => {
+	const [customConfig, setCustomConfig] = useState({
+		portfolios: 5,
+		articles: 20,
+	});
+
+	const price = useMemo(() => {
+		if (type !== "Custom") return prices[billing].price;
+		return calculateCustomPrice(
+			prices[billing].basePrice,
+			customConfig.portfolios,
+			customConfig.articles,
+			prices[billing].pricePerPortfolio,
+			prices[billing].pricePerArticle
+		);
+	}, [type, billing, prices, customConfig]);
+
+	const handleCustomConfigChange = useCallback((key, value) => {
+		setCustomConfig((prev) => ({ ...prev, [key]: Number(value) }));
+	}, []);
+
+	const handleSubscribe = useCallback(() => {
+		if (
+			!validatePlanLimits(
+				type,
+				customConfig.portfolios,
+				customConfig.articles
+			)
+		) {
+			toast.error("Invalid plan configuration");
+			return;
+		}
+		onSubscribe(type, billing, customConfig);
+	}, [type, billing, customConfig, onSubscribe]);
+
 	return (
 		<Card
 			className={`relative transition-all duration-300 ${
@@ -48,47 +85,65 @@ const PricingCard = ({
 			<CardHeader>
 				<CardTitle>{type}</CardTitle>
 				<p className="text-sm text-gray-500">
-					{type === "Individual"
-						? "Perfect for freelancers and solo developers"
-						: "For organizations and development teams"}
+					{type === "Basic" && "Perfect for individual portfolios"}
+					{type === "Pro" && "Ideal for professionals"}
+					{type === "Custom" && "Tailored to your needs"}
 				</p>
 			</CardHeader>
 			<CardContent>
-				{/* Billing toggle */}
-				<div className="flex bg-gray-100 dark:text-gray-900 rounded-lg p-1 mb-6">
-					{Object.keys(prices).map((period) => (
-						<button
-							key={period}
-							className={`flex-1 py-2 rounded-md text-sm transition-all duration-300 ${
-								billing === period
-									? "bg-white shadow-sm transform scale-105"
-									: "hover:bg-gray-200"
-							}`}
-							onClick={() => onBillingChange(period)}
-						>
-							{period.charAt(0).toUpperCase() + period.slice(1)}
-						</button>
-					))}
-				</div>
-
-				{/* Price display */}
 				<div className="mb-8 text-center">
 					<div className="flex items-baseline justify-center">
 						<span className="text-4xl font-bold">
-							${prices[billing].price}
+							${type === "Custom" ? price : prices[billing].price}
 						</span>
-						<span className="text-gray-500 ml-2">
-							/{prices[billing].interval}
-						</span>
+						<span className="text-gray-500 ml-2">/month</span>
 					</div>
-					{billing === "yearly" && (
-						<span className="text-green-600 text-sm mt-1">
-							Save 20% with annual billing
+					{prices[billing].trial && (
+						<span className="text-green-600 text-sm mt-1 block">
+							{prices[billing].trial} days free trial
 						</span>
 					)}
 				</div>
 
-				{/* Features list */}
+				{type === "Custom" && (
+					<div className="mb-6 space-y-4">
+						<div>
+							<label>Portfolios: {customConfig.portfolios}</label>
+							<input
+								type="range"
+								min="5"
+								max="20"
+								value={customConfig.portfolios}
+								onChange={(e) =>
+									handleCustomConfigChange(
+										"portfolios",
+										e.target.value
+									)
+								}
+								className="w-full"
+							/>
+						</div>
+						<div>
+							<label>
+								Articles/month: {customConfig.articles}
+							</label>
+							<input
+								type="range"
+								min="20"
+								max="100"
+								value={customConfig.articles}
+								onChange={(e) =>
+									handleCustomConfigChange(
+										"articles",
+										e.target.value
+									)
+								}
+								className="w-full"
+							/>
+						</div>
+					</div>
+				)}
+
 				<ul className="space-y-4">
 					{features.map((feature, index) => (
 						<li
@@ -105,12 +160,12 @@ const PricingCard = ({
 				<Button
 					size="lg"
 					className="w-full mt-8"
-					onClick={() => onSubscribe(type, billing)}
+					onClick={handleSubscribe}
 					variant="default"
 					disabled={processing}
 				>
 					{processing && <Spinner />}
-					Get Started
+					{type === "Basic" ? "Start Free Trial" : "Get Started"}
 				</Button>
 			</CardContent>
 		</Card>
@@ -124,57 +179,62 @@ export default function Pricing({
 	const router = useRouter();
 	const { user } = useAuth();
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [individualBilling, setIndividualBilling] = useState("monthly");
-	const [teamBilling, setTeamBilling] = useState("monthly");
-	const [isHoveredIndividual, setIsHoveredIndividual] = useState(false);
-	const [isHoveredTeam, setIsHoveredTeam] = useState(false);
+	const [hoveredStates, setHoveredStates] = useState({});
 
-	const handleCheckout = async (type, billing) => {
-		if (isProcessing || !user) {
-			logger.info("Checkout blocked", { isProcessing, hasUser: !!user });
-			router.push("/sign-in");
-			toast("Sign in to subscribe!");
-			return;
-		}
+	const setHovered = useCallback((type) => {
+		setHoveredStates((prev) => ({ ...prev, [type]: !prev[type] }));
+	}, []);
 
-		setIsProcessing(true);
-		logger.info("Starting checkout process", {
-			type,
-			billing,
-			userId: user.id,
-		});
-
-		try {
-			const response = await axios.post("/api/payment/checkout", {
-				type: type.toUpperCase(),
-				frequency: billing.toUpperCase(),
-				userId: user.id,
-				userEmail: user.emailAddresses[0].emailAddress,
-				returnUrl, // Add returnUrl to the payload
-			});
-
-			logger.info("Checkout response received", {
-				hasLink: !!response.data.link,
-			});
-
-			if (response.data.link) {
-				window.location.href = response.data.link;
+	const handleCheckout = useCallback(
+		async (type, billing, customConfig = {}) => {
+			if (!user) {
+				router.push("/sign-in");
+				toast.info("Please sign in to continue");
 				return;
 			}
 
-			logger.error("No payment link received");
-			toast.error("Unable to initiate checkout");
-		} catch (err) {
-			logger.error("Checkout error:", {
-				message: err.message,
-				response: err.response?.data,
-				stack: err.stack,
+			setIsProcessing(true);
+			logger.info("Starting checkout process", {
+				type,
+				billing,
+				userId: user.id,
+				customConfig,
 			});
-			toast.error(err.response?.data?.message || "Checkout failed");
-		} finally {
-			setIsProcessing(false);
-		}
-	};
+
+			try {
+				const response = await axios.post("/api/payment/checkout", {
+					type: type.toUpperCase(),
+					frequency: billing.toLowerCase(),
+					userId: user.id,
+					userEmail: user.emailAddresses[0].emailAddress,
+					returnUrl,
+					customConfig: type === "Custom" ? customConfig : null,
+				});
+
+				logger.info("Checkout response received", {
+					hasLink: !!response.data.link,
+				});
+
+				if (response.data.link) {
+					window.location.href = response.data.link;
+					return;
+				}
+
+				logger.error("No payment link received");
+				toast.error("Unable to initiate checkout");
+			} catch (err) {
+				logger.error("Checkout error:", {
+					message: err.message,
+					response: err.response?.data,
+					stack: err.stack,
+				});
+				toast.error(err.response?.data?.message || "Checkout failed");
+			} finally {
+				setIsProcessing(false);
+			}
+		},
+		[user, router, returnUrl]
+	);
 
 	return (
 		<div className={`${isDialog ? "" : "container"}`}>
@@ -184,36 +244,27 @@ export default function Pricing({
 			/>
 
 			<div
-				className={`grid md:grid-cols-2 gap-8 ${isDialog ? "max-w-4xl" : "max-w-6xl"} mx-auto`}
+				className={`grid md:grid-cols-3 gap-8 ${
+					isDialog ? "max-w-5xl" : "max-w-7xl"
+				} mx-auto`}
 			>
-				<PricingCard
-					type="Individual"
-					billing={individualBilling}
-					prices={SUBSCRIPTION_PLANS.INDIVIDUAL}
-					features={
-						SUBSCRIPTION_PLANS.INDIVIDUAL[individualBilling]
-							.features
-					}
-					isHovered={isHoveredIndividual}
-					onMouseEnter={() => setIsHoveredIndividual(true)}
-					onMouseLeave={() => setIsHoveredIndividual(false)}
-					onBillingChange={setIndividualBilling}
-					onSubscribe={handleCheckout}
-					processing={isProcessing}
-				/>
-
-				<PricingCard
-					type="Team"
-					billing={teamBilling}
-					prices={SUBSCRIPTION_PLANS.TEAM}
-					features={SUBSCRIPTION_PLANS.TEAM[teamBilling].features}
-					isHovered={isHoveredTeam}
-					onMouseEnter={() => setIsHoveredTeam(true)}
-					onMouseLeave={() => setIsHoveredTeam(false)}
-					onBillingChange={setTeamBilling}
-					onSubscribe={handleCheckout}
-					processing={isProcessing}
-				/>
+				{["Basic", "Pro", "Custom"].map((type) => (
+					<PricingCard
+						key={type}
+						type={type}
+						billing="monthly"
+						prices={SUBSCRIPTION_PLANS[type.toUpperCase()]}
+						features={
+							SUBSCRIPTION_PLANS[type.toUpperCase()].monthly
+								.features
+						}
+						isHovered={hoveredStates[type]}
+						onMouseEnter={() => setHovered(type)}
+						onMouseLeave={() => setHovered(null)}
+						onSubscribe={handleCheckout}
+						processing={isProcessing}
+					/>
+				))}
 			</div>
 		</div>
 	);

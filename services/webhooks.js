@@ -4,27 +4,31 @@ import { logger } from "@/lib/utils";
 
 export async function handleChargeWebhook(data) {
 	const { tx_ref, status, customer } = data;
-	logger.info(`Processing charge webhook for transaction ${tx_ref}`, {
-		status,
-		customer,
-	});
 
 	try {
-		logger.info(`Finding transaction ${tx_ref}`);
-		// Find the transaction and associated subscription
+		logger.info(`Processing webhook for transaction ${tx_ref}`, {
+			status,
+			customerEmail: customer?.email,
+		});
+
+		// Find the transaction
 		const transaction = await prisma.transaction.findUnique({
 			where: { id: tx_ref },
 			include: {
 				subscription: true,
-				user: true,
-				subscriptionId: true,
 			},
 		});
 
 		if (!transaction) {
-			logger.error(`Transaction ${tx_ref} not found`);
-			throw new Error(`Transaction ${tx_ref} not found`);
+			logger.error(`Transaction not found: ${tx_ref}`);
+			throw new Error(`Transaction not found: ${tx_ref}`);
 		}
+
+		logger.info(`Found transaction`, {
+			transactionId: transaction.id,
+			status: transaction.status,
+			subscriptionId: transaction.subscriptionId,
+		});
 
 		if (status === "successful") {
 			logger.info(`Starting successful payment flow for ${tx_ref}`);

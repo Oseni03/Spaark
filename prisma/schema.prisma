@@ -324,6 +324,12 @@ model Subscription {
   startDate      DateTime?
   endDate        DateTime?
   portfolioLimit Int       @default(1)
+  blogEnabled    Boolean   @default(false)
+  blogLimit      Int?
+  customPortfolioLimit Int?
+  customArticleLimit   Int?
+  customizable   Boolean   @default(false)
+  trial          Int?      // days of free trial
   createdAt      DateTime  @default(now())
   updatedAt      DateTime? @updatedAt
 

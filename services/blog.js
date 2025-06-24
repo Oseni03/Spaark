@@ -8,6 +8,7 @@ import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
 import { COOKIE_NAME } from "@/utils/constants";
+import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
 
 const select = {
 	id: true,
@@ -134,11 +135,23 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 
 		// Separate tags from main data
 		const { tags = [], ...blogData } = data;
+		const { status } = blogData;
+
+		if (status === "published") {
+			const authCheck = await checkBlogArticleCreationAuth(
+				decodedToken.uid
+			);
+
+			if (!authCheck.allowed) {
+				throw new Error(authCheck.reason);
+			}
+		}
 
 		const blog = await prisma.blog.update({
 			where: {
 				id: blogId,
 				portfolioId,
+				authorId: decodedToken.uid,
 			},
 			data: {
 				...blogData,
@@ -174,6 +187,7 @@ export async function deleteBlog({ blogId, portfolioId }) {
 			where: {
 				id: blogId,
 				portfolioId,
+				authorId: decodedToken.uid,
 			},
 		});
 
