@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
-import Flutterwave from "flutterwave-node-v3";
 import {
 	handlePaymentSuccess,
 	handlePaymentFailure,
 } from "@/services/subscription";
 import { logger } from "@/lib/utils";
-
-const flw = new Flutterwave(
-	process.env.FLW_PUBLIC_KEY,
-	process.env.FLW_SECRET_KEY
-);
+import { paymentService } from "@/services/payment";
 
 export async function POST(request) {
 	try {
@@ -29,15 +24,20 @@ export async function POST(request) {
 			});
 		}
 
-		// Verify payment with Flutterwave SDK
-		const response = await flw.Transaction.verify({ id: transaction_id });
-		const { data } = response;
+		logger.info("Verifying payment", {
+			transactionId: transaction_id,
+			reference: tx_ref,
+			provider: paymentService.getCurrentProvider(),
+		});
+
+		// Verify payment with the payment service
+		const response = await paymentService.verifyPayment(transaction_id);
 
 		// Verify transaction details
 		const isValidTransaction =
-			data.status === "successful" &&
-			data.tx_ref === tx_ref &&
-			data.currency === "USD"; // Add your expected currency
+			response.status === "successful" &&
+			response.tx_ref === tx_ref &&
+			response.currency === "USD"; // Add your expected currency
 
 		if (!isValidTransaction) {
 			await handlePaymentFailure({
@@ -60,9 +60,9 @@ export async function POST(request) {
 			success: true,
 			message: "Payment verified successfully",
 			data: {
-				amount: data.amount,
-				currency: data.currency,
-				customer: data.customer,
+				amount: response.amount,
+				currency: response.currency,
+				customer: response.customer,
 			},
 		});
 	} catch (error) {

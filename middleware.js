@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
 const isProtectedRoute = (pathname) => {
-	return pathname.startsWith("/builder") || pathname.startsWith("/dashboard");
+	return (
+		pathname.startsWith("/builder") ||
+		pathname.startsWith("/dashboard") ||
+		pathname.startsWith("/checkout")
+	);
 };
 
 const authPaths = ["/sign-in", "/sign-up"];

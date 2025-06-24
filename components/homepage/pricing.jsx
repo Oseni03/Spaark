@@ -202,38 +202,22 @@ export default function Pricing({
 			});
 
 			try {
-				const response = await axios.post("/api/payment/checkout", {
-					type: type.toUpperCase(),
-					frequency: billing.toLowerCase(),
-					userId: user.id,
-					userEmail: user.emailAddresses[0].emailAddress,
-					returnUrl,
-					customConfig: type === "Custom" ? customConfig : null,
-				});
+				// Redirect to custom checkout page instead of Flutterwave UI
+				const checkoutUrl = `/checkout?type=${type.toLowerCase()}&frequency=${billing.toLowerCase()}&returnUrl=${encodeURIComponent(returnUrl)}`;
 
-				logger.info("Checkout response received", {
-					hasLink: !!response.data.link,
-				});
-
-				if (response.data.link) {
-					window.location.href = response.data.link;
-					return;
-				}
-
-				logger.error("No payment link received");
-				toast.error("Unable to initiate checkout");
+				logger.info("Redirecting to checkout page", { checkoutUrl });
+				router.push(checkoutUrl);
 			} catch (err) {
 				logger.error("Checkout error:", {
 					message: err.message,
-					response: err.response?.data,
 					stack: err.stack,
 				});
-				toast.error(err.response?.data?.message || "Checkout failed");
+				toast.error("Failed to initiate checkout");
 			} finally {
 				setIsProcessing(false);
 			}
 		},
-		[user, router, returnUrl]
+		[returnUrl, router, user]
 	);
 
 	return (
