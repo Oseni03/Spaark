@@ -69,12 +69,10 @@ export function TemplateSection() {
 	const dispatch = useDispatch();
 	const [showPricingDialog, setShowPricingDialog] = useState(false);
 	const { user } = useAuth();
-	const isSubscribed = user?.subscription?.status === "active";
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
-	const { hasReachedPortfolioLimit } = useAuth();
 
 	logger.info("Current portfolio:", portfolio); // Debug log
 	logger.info("Available templates:", templates); // Debug log

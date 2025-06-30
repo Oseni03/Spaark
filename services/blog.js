@@ -70,12 +70,11 @@ export async function getBlogsByAuthor(authorId) {
 }
 
 // Update other functions to use processBlog instead of direct serialization
-export async function getBlog(blogId, portfolioId) {
+export async function getBlog(blogId) {
 	return withErrorHandling(async () => {
 		const blog = await prisma.blog.findFirst({
 			where: {
 				id: blogId,
-				portfolioId,
 			},
 			select,
 		});

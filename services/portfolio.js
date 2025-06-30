@@ -179,6 +179,25 @@ export async function getPortfolioBySlug(slug) {
 	});
 }
 
+export async function getPortfolioById(portfolioId) {
+	return withErrorHandling(async () => {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
+		}
+
+		const userId = decodedToken.uid;
+
+		const portfolio = await prisma.portfolio.findUnique({
+			where: { id: portfolioId, userId },
+			select: portfolioSelect,
+		});
+		return transformPortfolio(portfolio);
+	});
+}
+
 export async function getPortfolio(domain) {
 	return withErrorHandling(async () => {
 		const portfolio = await prisma.portfolio.findFirst({

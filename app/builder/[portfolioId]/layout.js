@@ -55,6 +55,7 @@ import ProtectedRoute from "@/app/protected-route";
 
 function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
+	const router = useRouter();
 	const { portfolioId } = useParams();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
@@ -70,6 +71,10 @@ function BuilderLayoutContent({ children }) {
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
+
+	if (!portfolio) {
+		router.push("/dashboard/portfolios");
+	}
 
 	const handleZoomIn = () => {
 		transformRef.current?.zoomIn(0.2);
@@ -90,10 +95,6 @@ function BuilderLayoutContent({ children }) {
 	const handleSave = async () => {
 		try {
 			setIsSaving(true);
-
-			if (!portfolio) {
-				throw new Error("No portfolio data found");
-			}
 
 			// Show loading toast
 			const loadingToast = toast.loading("Saving changes...", {

@@ -19,11 +19,13 @@ export const sectionSchema = z.object({
 
 export const metadataSchema = z.object({
 	template: z.string().default("default"),
-	theme: z.object({
-		text: z.string().default(""),
-		primary: z.string().default(""),
-		background: z.string().default(""),
-	}),
+	theme: z
+		.object({
+			text: z.string().default(""),
+			primary: z.string().default(""),
+			background: z.string().default(""),
+		})
+		.optional(),
 });
 
 export const portfolioSchema = z.object({

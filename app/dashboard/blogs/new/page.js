@@ -3,10 +3,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { BlogForm } from "../components/blog-form";
-import { createBlogInDatabase } from "@/redux/thunks/blog";
 import { toast } from "sonner";
-import { defaultBlogMetadata } from "@/schema/sections/blog";
 import { logger } from "@/lib/utils";
+import { getPortfolioById, createBlogAction } from "@/services/portfolio";
 
 export default function NewBlogPost() {
 	const dispatch = useDispatch();
@@ -30,15 +29,28 @@ export default function NewBlogPost() {
 
 			logger.info("Creating blog with data:", { portfolioId, blogData });
 
-			await dispatch(
-				createBlogInDatabase({
-					portfolioId,
-					data: {
-						...defaultBlogMetadata,
-						...blogData,
-					},
-				})
-			).unwrap();
+			if (!portfolioId) {
+				throw new Error("Portfolio is required");
+			}
+
+			// Check if portfolio belongs to user and has blog enabled
+			const portfolio = await getPortfolioById(portfolioId);
+
+			if (portfolio.error) {
+				throw new Error(portfolio.error || "Portfolio not found");
+			}
+
+			if (!portfolio.data.blogEnabled) {
+				throw new Error("Blog is not enabled for this portfolio");
+			}
+
+			await createBlogAction({
+				portfolioId,
+				data: {
+					...data,
+					status: "draft",
+				},
+			});
 
 			const endTime = performance.now();
 			logger.info("Blog post created successfully", {

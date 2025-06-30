@@ -1,9 +1,8 @@
 "use client";
 
-import { useSelector, useDispatch } from "react-redux";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams, notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { updateBlogInDatabase } from "@/redux/thunks/blog";
 import {
 	ArrowLeft,
 	PencilSimple,
@@ -13,21 +12,56 @@ import {
 import { toast } from "sonner";
 import dayjs from "dayjs";
 import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
-import { useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import { BlogPost } from "@/components/blog/blog-post";
+import { getBlog, updateBlog } from "@/services/blog";
+import { getPortfolioById } from "@/services/portfolio";
 
 export default function Page() {
-	const dispatch = useDispatch();
 	const router = useRouter();
 	const [isPublishing, setIsPublishing] = useState(false);
 	const { postId } = useParams();
-	const blog = useSelector((state) =>
-		state.blogs.items.find((blog) => blog.id === postId)
-	);
-	const portfolio = useSelector((state) =>
-		state.portfolios.items.find((p) => p.id === blog?.portfolioId)
-	);
+	const [blog, setBlog] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [portfolio, setPortfolio] = useState(null);
+
+	useEffect(() => {
+		const fetchPost = async () => {
+			try {
+				setLoading(true);
+				const post = await getBlog(postId);
+				if (post.error) {
+					throw new Error(post.error);
+				}
+				setBlog(post.data);
+			} catch (error) {
+				toast.error("Blog post not found!");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchPost();
+	}, [postId]);
+
+	useEffect(() => {
+		const fetchPortfolio = async () => {
+			try {
+				setLoading(true);
+				const item = await getPortfolioById(blog.portfolioId);
+				if (item.error) {
+					throw new Error(item.error);
+				}
+				setPortfolio(item.data);
+			} catch (error) {
+				toast.error("Portfolio not found!");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchPortfolio();
+	}, [blog]);
 
 	const handleBack = () => {
 		router.push("/dashboard/blogs");
@@ -40,17 +74,17 @@ export default function Page() {
 	const handlePublish = async () => {
 		try {
 			setIsPublishing(true);
-			await dispatch(
-				updateBlogInDatabase({
-					blogId: postId,
-					portfolioId: blog.portfolioId,
-					data: {
-						status: blog.status === "draft" ? "published" : "draft",
-						publishedAt:
-							blog.status === "draft" ? new Date() : null,
-					},
-				})
-			).unwrap();
+			const blog = await updateBlog({
+				blogId: postId,
+				portfolioId: blog.portfolioId,
+				data: {
+					status: blog.status === "draft" ? "published" : "draft",
+					publishedAt: blog.status === "draft" ? new Date() : null,
+				},
+			});
+			if (blog.error) {
+				throw new Error(blog.error);
+			}
 
 			toast.success(
 				`Blog post ${blog.status === "draft" ? "published" : "unpublished"} successfully`
@@ -67,8 +101,12 @@ export default function Page() {
 		}
 	};
 
-	if (!blog || !portfolio) {
+	if (loading) {
 		return <BlogPostSkeleton />;
+	}
+
+	if (!blog || !portfolio) {
+		return notFound();
 	}
 
 	const contentHtml =

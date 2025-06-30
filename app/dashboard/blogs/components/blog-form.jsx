@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { BadgeInput } from "@/components/ui/badge-input";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 // Form Schema
 const blogFormSchema = blogMetadataSchema.extend({
@@ -130,6 +131,7 @@ export function BlogForm({
 				error: error.message,
 				formData: data,
 			});
+			toast.error(error?.message || "Invalid data");
 			// Set form error for slug field if it's a slug uniqueness error
 			if (error.message.includes("slug is already in use")) {
 				form.setError("slug", {

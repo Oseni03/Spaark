@@ -8,7 +8,6 @@ import {
 	CloudArrowUp,
 	CloudX,
 } from "@phosphor-icons/react";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
 import {
 	AlertDialog,
@@ -20,11 +19,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-	removeBlogFromDatabase,
-	updateBlogInDatabase,
-	createBlogInDatabase,
-} from "@/redux/thunks/blog";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -39,12 +33,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
+import { createBlog, deleteBlog, updateBlog } from "@/services/blog";
 
 // Initialize the relative time plugin
 dayjs.extend(relativeTime);
 
 export const BlogCard = ({ blog }) => {
-	const dispatch = useDispatch();
 	const router = useRouter();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -60,20 +54,18 @@ export const BlogCard = ({ blog }) => {
 
 	const onDuplicate = async () => {
 		try {
-			const result = await dispatch(
-				createBlogInDatabase({
-					portfolioId: blog.portfolioId,
-					data: {
-						title: `${blog.title} (Copy)`,
-						slug: `${blog.slug}-copy`,
-						excerpt: blog.excerpt || "",
-						content: blog.content,
-						featuredImage: blog.featuredImage,
-						status: "draft",
-						tags: blog.tags?.map((tag) => tag.name) || [],
-					},
-				})
-			).unwrap();
+			const result = await createBlog({
+				portfolioId: blog.portfolioId,
+				data: {
+					title: `${blog.title} (Copy)`,
+					slug: `${blog.slug}-copy`,
+					excerpt: blog.excerpt || "",
+					content: blog.content,
+					featuredImage: blog.featuredImage,
+					status: "draft",
+					tags: blog.tags?.map((tag) => tag.name) || [],
+				},
+			});
 
 			if (result.error) {
 				throw new Error(result.error);
@@ -92,12 +84,10 @@ export const BlogCard = ({ blog }) => {
 
 	const handleDelete = async () => {
 		try {
-			const result = await dispatch(
-				removeBlogFromDatabase({
-					blogId: blog.id,
-					portfolioId: blog.portfolioId,
-				})
-			).unwrap();
+			const result = await deleteBlog({
+				blogId: blog.id,
+				portfolioId: blog.portfolioId,
+			});
 
 			if (result.error) {
 				throw new Error(result.error);
@@ -113,17 +103,14 @@ export const BlogCard = ({ blog }) => {
 
 	const onPublish = async () => {
 		try {
-			const result = await dispatch(
-				updateBlogInDatabase({
-					blogId: blog.id,
-					portfolioId: blog.portfolioId,
-					data: {
-						status: blog.status === "draft" ? "published" : "draft",
-						publishedAt:
-							blog.status === "draft" ? new Date() : null,
-					},
-				})
-			).unwrap();
+			const result = await updateBlog({
+				blogId: blog.id,
+				portfolioId: blog.portfolioId,
+				data: {
+					status: blog.status === "draft" ? "published" : "draft",
+					publishedAt: blog.status === "draft" ? new Date() : null,
+				},
+			});
 
 			if (result.error) {
 				throw new Error(result.error);
