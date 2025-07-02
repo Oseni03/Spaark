@@ -1,12 +1,16 @@
 "use client";
 
+import { useSelector } from "react-redux";
 import { AnimatePresence, motion } from "framer-motion";
 import { PortfolioCard } from "../components/portfolio-card";
 import { BaseCard } from "../components/base-card";
 import { CreatePortfolioCard } from "../components/create-portfolio-card";
 import { ImportPortfolioCard } from "../components/import-portfolio-card";
 
-function Page({ portfolios = [], loading = false }) {
+function Page() {
+	const portfolios = useSelector((state) => state.portfolios.items);
+	const loading = useSelector((state) => state.portfolios.loading);
+
 	return (
 		<div className="grid grid-cols-1 gap-8 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
 			<motion.div

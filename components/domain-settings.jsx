@@ -17,7 +17,7 @@ import {
 	XCircle,
 	Loader2,
 	Info,
-} from "@phosphor-icons/react";
+} from "lucide-react";
 import { DomainStatus } from "./domain-status";
 import { DomainConfiguration } from "./domain-configuration";
 import { validDomainRegex } from "@/lib/domains";

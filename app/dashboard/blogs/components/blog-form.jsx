@@ -50,7 +50,6 @@ const createTagObject = (tagName) => ({
 export function BlogForm({
 	onSubmit,
 	portfolios,
-	loading,
 	defaultValues = {
 		portfolioId: "",
 		title: "",
@@ -60,7 +59,7 @@ export function BlogForm({
 		tags: [],
 	},
 }) {
-	const [validationLoading, setValidationLoading] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const form = useForm({
 		resolver: zodResolver(blogFormSchema),
 		defaultValues,
@@ -105,7 +104,7 @@ export function BlogForm({
 	};
 
 	const handleSubmit = async (data) => {
-		setValidationLoading(true);
+		setLoading(true);
 		try {
 			logger.info("Validating form data", { data });
 
@@ -142,7 +141,7 @@ export function BlogForm({
 			// Let the error propagate to be handled by the parent
 			throw error;
 		} finally {
-			setValidationLoading(false);
+			setLoading(false);
 		}
 	};
 
@@ -387,10 +386,8 @@ export function BlogForm({
 					)}
 				/>
 
-				<Button type="submit" disabled={loading || validationLoading}>
-					{loading || validationLoading
-						? "Saving..."
-						: "Save Blog Post"}
+				<Button type="submit" disabled={loading}>
+					{loading ? "Saving..." : "Save Blog Post"}
 				</Button>
 			</form>
 		</Form>

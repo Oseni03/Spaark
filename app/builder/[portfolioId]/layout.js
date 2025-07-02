@@ -12,13 +12,8 @@ import {
 	BreadcrumbPage,
 	BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import { cn, logger } from "@/lib/utils";
-import {
-	PORTFOLIO_TAILWIND_CLASS,
-	CONTAINER_CLASS,
-	CONTENT_CLASS,
-} from "@/utils/constants";
+import { CONTAINER_CLASS } from "@/utils/constants";
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -33,9 +28,7 @@ import {
 	ZoomIn,
 	ZoomOut,
 	Maximize2,
-	Eye,
 	Save,
-	Settings,
 } from "lucide-react";
 import { useVerifyPayment } from "@/hooks/use-verify-payment";
 import { useAuth } from "@/context/auth-context";
@@ -49,13 +42,19 @@ import {
 } from "@/components/ui/tooltip";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useSelector } from "react-redux";
-import { updatePortfolioWithSections } from "@/services/portfolio";
+import { useDispatch } from "react-redux";
+import {
+	getDetailedPortfolio,
+	updatePortfolioWithSections,
+} from "@/services/portfolio";
 import ProtectedRoute from "@/app/protected-route";
+import { updatePortfolio } from "@/redux/features/portfolioSlice";
+import { useSelector } from "react-redux";
 
 function BuilderLayoutContent({ children }) {
 	useVerifyPayment();
 	const router = useRouter();
+	const dispatch = useDispatch();
 	const { portfolioId } = useParams();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
 	const [leftOpen, setLeftOpen] = React.useState(true);
@@ -72,9 +71,23 @@ function BuilderLayoutContent({ children }) {
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 
-	if (!portfolio) {
-		router.push("/dashboard/portfolios");
-	}
+	useEffect(() => {
+		const fetchPortfolio = async () => {
+			try {
+				const item = await getDetailedPortfolio(portfolioId);
+				if (item.error) {
+					throw new Error(item.error);
+				}
+				dispatch(updatePortfolio({ id: portfolioId, data: item.data }));
+			} catch (error) {
+				logger.info("Error getting detailed portfolio: ", { error });
+				toast.error("Portfolio not found!");
+				router.push("/dashboard/portfolios");
+			}
+		};
+
+		fetchPortfolio();
+	}, [portfolioId, router, dispatch]);
 
 	const handleZoomIn = () => {
 		transformRef.current?.zoomIn(0.2);

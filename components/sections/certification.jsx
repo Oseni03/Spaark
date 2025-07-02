@@ -71,7 +71,7 @@ export const Certification = () => {
 	};
 	const onToggleVisibility = (item) => {
 		dispatch(
-			updateCertificationn({
+			updateCertification({
 				...item,
 				visible: !item.visible,
 				portfolioId,

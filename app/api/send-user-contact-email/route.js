@@ -24,7 +24,7 @@ export async function POST(request) {
 		const resp = await getPortfolio(subdomain);
 
 		// Check if user exists
-		if (!resp.success) {
+		if (!resp.success || !resp.data || resp.error) {
 			return new NextResponse(
 				{ error: "User not found" },
 				{ status: 400 }
@@ -33,7 +33,7 @@ export async function POST(request) {
 		logger.info("User resp: ", resp);
 
 		// Get the user's primary email address
-		const userEmail = resp?.data?.basics?.email;
+		const userEmail = resp.data?.basics?.email;
 
 		if (!userEmail) {
 			return new NextResponse(

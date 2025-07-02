@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPortfolios } from "@/services/portfolio";
 import { logger } from "@/lib/utils";
-import { getUser } from "@/services/user";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { COOKIE_NAME } from "@/utils/constants";
 
@@ -86,20 +85,6 @@ export async function GET(req) {
 
 		// Get portfolios for user
 		const portfolios = await getPortfolios(userId);
-		// const userPromise = getUser(userId);
-
-		// const [user, portfolios] = await Promise.all([
-		// 	userPromise,
-		// 	portfoliosPromise,
-		// ]);
-
-		// if (!user) {
-		// 	logger.error("User not found", {
-		// 		requestId,
-		// 		userId,
-		// 	});
-		// 	return createErrorResponse(404, "User not found", origin);
-		// }
 
 		if (!portfolios.success) {
 			logger.error("Portfolio fetch failed", {

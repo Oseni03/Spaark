@@ -8,9 +8,7 @@ import { logger } from "@/lib/utils";
 import { getPortfolioById, createBlogAction } from "@/services/portfolio";
 
 export default function NewBlogPost() {
-	const dispatch = useDispatch();
 	const router = useRouter();
-	const { loading } = useSelector((state) => state.blogs);
 	const portfolios = useSelector((state) => state.portfolios.items);
 
 	logger.info("Initializing NewBlogPost component", {
@@ -73,11 +71,7 @@ export default function NewBlogPost() {
 
 	return (
 		<div className="container max-w-4xl py-10">
-			<BlogForm
-				onSubmit={onSubmit}
-				portfolios={portfolios}
-				loading={loading}
-			/>
+			<BlogForm onSubmit={onSubmit} portfolios={portfolios} />
 		</div>
 	);
 }

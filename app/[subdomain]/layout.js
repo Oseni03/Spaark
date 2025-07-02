@@ -73,7 +73,7 @@ export default async function PortfolioLayout({ params, children }) {
 					{children}
 				</PortfolioProvider>
 			</div>
-		)
+		);
 	} catch (error) {
 		logger.error(`Error loading portfolio for ${portfolioSlug}:`, error);
 		return NotFound();

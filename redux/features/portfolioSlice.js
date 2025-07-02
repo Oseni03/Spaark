@@ -30,6 +30,7 @@ const portfolioSlice = createSlice({
 			const transformedData = portfolios.map((portfolio) =>
 				transformPortfolio(portfolio)
 			);
+			logger.info("transformed portfolios: ", transformedData);
 			state.items = transformedData;
 		},
 		updatePortfolio: (state, action) => {

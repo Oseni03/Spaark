@@ -7,7 +7,9 @@ import { getSocials } from "@/services/social";
 import { getSkills } from "@/services/skill";
 import { getProjects } from "@/services/project";
 import { getHackathons } from "@/services/hackathon";
-import { logger } from "@/lib/utils";
+import { logger, transformPortfolio } from "@/lib/utils";
+import { getPortfolioById } from "@/services/portfolio";
+import { defaultBasics } from "@/schema/sections/basics";
 
 // Helper function to get CORS headers
 const getCorsHeaders = (origin) => {
@@ -56,6 +58,7 @@ export async function GET(req, { params }) {
 
 	try {
 		const results = await Promise.allSettled([
+			getPortfolioById(portfolioId),
 			getBasics(portfolioId),
 			getSocials(portfolioId),
 			getExperiences(portfolioId),
@@ -67,6 +70,7 @@ export async function GET(req, { params }) {
 		]);
 
 		const [
+			portfolio,
 			basics,
 			socials,
 			experiences,
@@ -80,26 +84,31 @@ export async function GET(req, { params }) {
 		);
 
 		const portfolioData = {
-			basics,
-			socials,
-			experiences,
-			educations,
-			certifications,
-			skills,
-			projects,
-			hackathons,
+			...portfolio.data,
+			basics: basics.data || defaultBasics,
+			socials: socials.data || [],
+			experiences: experiences.data || [],
+			educations: educations.data || [],
+			certifications: certifications.data || [],
+			skills: skills.data || [],
+			projects: projects.data || [],
+			hackathons: hackathons.data || [],
 		};
 
-		return new NextResponse(JSON.stringify({ portfolio: portfolioData }), {
-			status: 200,
-			headers: {
-				"Content-Type": "application/json",
-				...getCorsHeaders(origin),
-				"Cache-Control": "private, no-cache, no-store, must-revalidate",
-				Pragma: "no-cache",
-				Expires: "0",
-			},
-		});
+		return new NextResponse(
+			JSON.stringify({ portfolio: transformPortfolio(portfolioData) }),
+			{
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+					...getCorsHeaders(origin),
+					"Cache-Control":
+						"private, no-cache, no-store, must-revalidate",
+					Pragma: "no-cache",
+					Expires: "0",
+				},
+			}
+		);
 	} catch (error) {
 		logger.error("Error fetching user data:", error);
 		return createErrorResponse(500, "Failed to fetch user data", origin);

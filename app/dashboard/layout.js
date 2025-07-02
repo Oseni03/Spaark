@@ -60,7 +60,7 @@ const DashboardLayoutContent = ({ children }) => {
 					count: portfolios?.data?.length || 0,
 				});
 
-				if (portfolios?.data) {
+				if (portfolios.data) {
 					logger.info("Updating portfolios in store", {
 						count: portfolios.data.length,
 					});

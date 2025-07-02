@@ -19,13 +19,6 @@ const portfolioSelect = {
 	// organizationId: true,
 	metadata: true,
 	basics: true,
-	socials: true,
-	experiences: true,
-	educations: true,
-	skills: true,
-	certifications: true,
-	projects: true,
-	hackathons: true,
 };
 
 export async function getAllPortfolios() {
@@ -87,6 +80,9 @@ export async function createPortfolio(data) {
 			},
 			select: portfolioSelect,
 		});
+		if (!portfolio) {
+			throw new Error("Error creating portfolio");
+		}
 		return transformPortfolio(portfolio);
 	});
 }
@@ -140,6 +136,10 @@ export async function updatePortfolio(id, data) {
 			select: portfolioSelect,
 		});
 
+		if (!updatedPortfolio) {
+			throw new Error("Portfolio not found");
+		}
+
 		return transformPortfolio(updatedPortfolio);
 	});
 }
@@ -160,12 +160,9 @@ export async function deletePortfolio(id) {
 			OR: [{ userId }],
 		};
 
-		const deletedPortfolio = await prisma.portfolio.delete({
+		return await prisma.portfolio.delete({
 			where: whereClause,
-			select: portfolioSelect,
 		});
-
-		return deletedPortfolio;
 	});
 }
 
@@ -173,8 +170,28 @@ export async function getPortfolioBySlug(slug) {
 	return withErrorHandling(async () => {
 		const portfolio = await prisma.portfolio.findUnique({
 			where: { slug },
-			select: portfolioSelect,
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isLive: true,
+				blogEnabled: true,
+				customDomain: true,
+				// organizationId: true,
+				metadata: true,
+				basics: true,
+				socials: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
 		});
+		if (!portfolio) {
+			throw new Error("Portfolio not found");
+		}
 		return transformPortfolio(portfolio);
 	});
 }
@@ -194,6 +211,52 @@ export async function getPortfolioById(portfolioId) {
 			where: { id: portfolioId, userId },
 			select: portfolioSelect,
 		});
+
+		if (!portfolio) {
+			throw new Error("Portfolio not found");
+		}
+
+		return transformPortfolio(portfolio);
+	});
+}
+
+export async function getDetailedPortfolio(portfolioId) {
+	return withErrorHandling(async () => {
+		const cookieStore = await cookies();
+		const authToken = cookieStore.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		if (!decodedToken?.uid) {
+			throw new Error("Unauthorized");
+		}
+
+		const userId = decodedToken.uid;
+
+		const portfolio = await prisma.portfolio.findUnique({
+			where: { id: portfolioId, userId },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isLive: true,
+				blogEnabled: true,
+				customDomain: true,
+				// organizationId: true,
+				metadata: true,
+				basics: true,
+				socials: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
+		});
+
+		if (!portfolio) {
+			throw new Error("Portfolio not found");
+		}
+
 		return transformPortfolio(portfolio);
 	});
 }
@@ -205,8 +268,29 @@ export async function getPortfolio(domain) {
 				OR: [{ customDomain: domain }, { slug: domain }],
 				isLive: true,
 			},
-			select: portfolioSelect,
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isLive: true,
+				blogEnabled: true,
+				customDomain: true,
+				// organizationId: true,
+				metadata: true,
+				basics: true,
+				socials: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
 		});
+
+		if (!portfolio) {
+			throw new Error("Portfolio not found");
+		}
 
 		return transformPortfolio(portfolio);
 	});
@@ -414,6 +498,10 @@ export async function updatePortfolioWithSections(id, data) {
 			},
 			select: portfolioSelect,
 		});
+
+		if (!updatedPortfolio) {
+			throw new Error("Portfolio not found");
+		}
 
 		return transformPortfolio(updatedPortfolio);
 	});
