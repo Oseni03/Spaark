@@ -118,6 +118,9 @@ export function DomainSettings() {
 
 		setIsSubmitting(true);
 		try {
+			if (!portfolio.isLive) {
+				throw new Error("Domain can only be added to a live portfolio");
+			}
 			// First verify/add domain with Vercel
 			const domainResponse = await fetch("/api/domains", {
 				method: "POST",

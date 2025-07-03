@@ -5,10 +5,14 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { updatePortfolioInDatabase } from "@/redux/thunks/portfolio";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
+import { checkBlogEnableAuth } from "@/middleware/subscription-auth";
 
 export function BlogSettings() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
+	const { user } = useAuth();
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
@@ -16,6 +20,18 @@ export function BlogSettings() {
 
 	const toggleBlogFeature = async () => {
 		if (!portfolio) return;
+
+		if (portfolio.blogEnabled) {
+			const blogAuth = await checkBlogEnableAuth(user.id);
+
+			if (!blogAuth.allowed) {
+				toast.error(
+					blogAuth.reason ||
+						"Blog feature not available in current plan"
+				);
+				return;
+			}
+		}
 
 		dispatch(
 			updatePortfolioInDatabase({

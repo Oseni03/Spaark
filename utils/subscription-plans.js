@@ -1,13 +1,12 @@
 export const SUBSCRIPTION_PLANS = {
-	BASIC: {
+	FREE: {
 		monthly: {
-			price: 5,
+			price: 0,
 			priceId: process.env.NEXT_PUBLIC_MONTHLY_BASIC_PRICE_ID,
 			interval: "month",
-			trial: 14,
+			trial: true,
 			features: [
 				"1 active portfolio",
-				"Custom domain support",
 				"Free template selection",
 				"Project showcase",
 				"Skills visualization",
@@ -17,41 +16,58 @@ export const SUBSCRIPTION_PLANS = {
 			blogEnabled: false,
 		},
 	},
+	BASIC: {
+		monthly: {
+			price: 9.99,
+			priceId: process.env.NEXT_PUBLIC_MONTHLY_BASIC_PRICE_ID,
+			interval: "month",
+			trial: false,
+			features: [
+				"1 active portfolios",
+				"All Free features",
+				"Blog enabled (up to 10 articles)",
+				"Custom domain support",
+			],
+			portfolioLimit: 1,
+			blogLimit: 10,
+			blogEnabled: true,
+		},
+	},
 	PRO: {
 		monthly: {
-			price: 15,
+			price: 24.99,
 			priceId: process.env.NEXT_PUBLIC_MONTHLY_PRO_PRICE_ID,
 			interval: "month",
 			features: [
 				"3 active portfolios",
 				"All Basic features",
-				"Blog enabled (up to 10 articles)",
-				"Premium templates",
-				"Analytics dashboard",
+				"Blog enabled (up to 30 articles)",
+				// "Premium templates",
+				// "Analytics dashboard",
 			],
 			portfolioLimit: 3,
-			blogLimit: 10,
+			blogLimit: 30,
 			blogEnabled: true,
 		},
 	},
-	CUSTOM: {
-		monthly: {
-			basePrice: 25,
-			pricePerPortfolio: 5,
-			pricePerArticle: 1,
-			priceId: process.env.NEXT_PUBLIC_MONTHLY_CUSTOM_PRICE_ID,
-			interval: "month",
-			features: [
-				"Custom number of portfolios",
-				"All Pro features",
-				"Unlimited blog articles",
-				"Priority support",
-				"Custom features on request",
-			],
-			customizable: true,
-			blogEnabled: true,
-		},
-	},
+	// CUSTOM: {
+	// 	monthly: {
+	// 		basePrice: 49.55,
+	// 		pricePerPortfolio: 5,
+	// 		pricePerArticle: 1,
+	// 		priceId: process.env.NEXT_PUBLIC_MONTHLY_CUSTOM_PRICE_ID,
+	// 		interval: "month",
+	// 		features: [
+	// 			"Custom number of portfolios",
+	// 			"All Pro features",
+	// 			"Unlimited blog articles",
+	// 			"Priority support",
+	// 			"Custom features on request",
+	// 		],
+	// 		customizable: true,
+	// 		blogEnabled: true,
+	// 	},
+	// },
 };
 
 export const getPlanPrice = (type, tier, frequency) => {

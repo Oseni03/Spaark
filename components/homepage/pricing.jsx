@@ -12,8 +12,8 @@ import { logger } from "@/lib/utils";
 import {
 	calculateCustomPrice,
 	validatePlanLimits,
+	SUBSCRIPTION_PLANS,
 } from "@/utils/subscription-plans";
-import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import { useAuth } from "@/context/auth-context";
 
@@ -98,11 +98,6 @@ const PricingCard = ({
 						</span>
 						<span className="text-gray-500 ml-2">/month</span>
 					</div>
-					{prices[billing].trial && (
-						<span className="text-green-600 text-sm mt-1 block">
-							{prices[billing].trial} days free trial
-						</span>
-					)}
 				</div>
 
 				{type === "Custom" && (
@@ -165,7 +160,7 @@ const PricingCard = ({
 					disabled={processing}
 				>
 					{processing && <Spinner />}
-					{type === "Basic" ? "Start Free Trial" : "Get Started"}
+					{type === "Free" ? "Start For Free" : "Get Started"}
 				</Button>
 			</CardContent>
 		</Card>
@@ -190,6 +185,11 @@ export default function Pricing({
 			if (!user) {
 				router.push("/sign-in");
 				toast.info("Please sign in to continue");
+				return;
+			}
+
+			if (type.toUpperCase() === "FREE") {
+				router.push("/dashboard/portfolios");
 				return;
 			}
 
@@ -232,7 +232,7 @@ export default function Pricing({
 					isDialog ? "max-w-5xl" : "max-w-7xl"
 				} mx-auto`}
 			>
-				{["Basic", "Pro", "Custom"].map((type) => (
+				{["Free", "Basic", "Pro"].map((type) => (
 					<PricingCard
 						key={type}
 						type={type}
