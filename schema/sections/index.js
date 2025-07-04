@@ -40,6 +40,7 @@ export const portfolioSchema = z.object({
 // Schema
 export const mainSchema = portfolioSchema.extend({
 	customDomain: z.string().optional().nullable(),
+	domainVerified: z.boolean().default(false),
 	basics: basicsSchema.omit({ id: true, portfolioId: true }).optional(),
 	certifications: z
 		.object({
@@ -140,6 +141,7 @@ export const defaultPortfolio = {
 export const defaultMain = {
 	...defaultPortfolio,
 	customDomain: "",
+	domainVerified: false,
 	basics: {
 		...defaultSection,
 		...defaultBasics,

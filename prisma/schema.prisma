@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
   //directUrl = env("DIRECT_URL")
 }
 
@@ -104,15 +104,16 @@ model OrganizationMember {
 }
 
 model Portfolio {
-  id           String    @id @default(cuid())
-  name         String
-  slug         String    @unique
-  isLive       Boolean   @default(false)
-  blogEnabled  Boolean   @default(false)
-  customDomain String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime? @updatedAt
-  metadata     Json?
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  isLive         Boolean   @default(false)
+  blogEnabled    Boolean   @default(false)
+  customDomain   String?
+  domainVerified Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+  metadata       Json?
 
   // Ownership
   userId         String
@@ -314,24 +315,24 @@ model Transaction {
 }
 
 model Subscription {
-  id             String    @id @default(cuid())
-  userId         String?   @unique
-  organizationId String?   @unique
-  type           String // INDIVIDUAL or TEAM
-  frequency      String // weekly, monthly, yearly
-  status         String    @default("pending")
-  priceId        String
-  startDate      DateTime?
-  endDate        DateTime?
-  portfolioLimit Int       @default(1)
-  blogEnabled    Boolean   @default(false)
-  blogLimit      Int?
+  id                   String    @id @default(cuid())
+  userId               String?   @unique
+  organizationId       String?   @unique
+  type                 String // INDIVIDUAL or TEAM
+  frequency            String // weekly, monthly, yearly
+  status               String    @default("pending")
+  priceId              String
+  startDate            DateTime?
+  endDate              DateTime?
+  portfolioLimit       Int       @default(1)
+  blogEnabled          Boolean   @default(false)
+  blogLimit            Int?
   customPortfolioLimit Int?
   customArticleLimit   Int?
-  customizable   Boolean   @default(false)
-  trial          Int?      // days of free trial
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime? @updatedAt
+  customizable         Boolean   @default(false)
+  trial                Int? // days of free trial
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime? @updatedAt
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]

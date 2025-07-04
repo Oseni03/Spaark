@@ -16,6 +16,7 @@ const portfolioSelect = {
 	isLive: true,
 	blogEnabled: true,
 	customDomain: true,
+	domainVerified: true,
 	// organizationId: true,
 	metadata: true,
 	basics: true,
@@ -177,6 +178,7 @@ export async function getPortfolioBySlug(slug) {
 				isLive: true,
 				blogEnabled: true,
 				customDomain: true,
+				domainVerified: true,
 				// organizationId: true,
 				metadata: true,
 				basics: true,
@@ -240,6 +242,7 @@ export async function getDetailedPortfolio(portfolioId) {
 				isLive: true,
 				blogEnabled: true,
 				customDomain: true,
+				domainVerified: true,
 				// organizationId: true,
 				metadata: true,
 				basics: true,
@@ -275,6 +278,7 @@ export async function getPortfolio(domain) {
 				isLive: true,
 				blogEnabled: true,
 				customDomain: true,
+				domainVerified: true,
 				// organizationId: true,
 				metadata: true,
 				basics: true,
@@ -293,6 +297,60 @@ export async function getPortfolio(domain) {
 		}
 
 		return transformPortfolio(portfolio);
+	});
+}
+
+export async function getPortfolioFromSlug(subdomain) {
+	try {
+		const portfolioResult = await getPortfolio(subdomain);
+
+		if (!portfolioResult.success || !portfolioResult.data) {
+			return { success: false, error: "Portfolio not found" };
+		}
+
+		const portfolio = portfolioResult.data;
+		const metaTags = {
+			title: portfolio.basics?.name || subdomain,
+			description:
+				portfolio.basics?.summary || "Welcome to my portfolio!",
+			image: portfolio.basics?.picture,
+			url: portfolio.customDomain
+				? portfolio.customDomain
+				: `${subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
+		};
+
+		return {
+			success: true,
+			data: { portfolio, metaTags },
+		};
+	} catch (error) {
+		console.error("Error fetching portfolio:", error);
+		return { success: false, error: "Failed to fetch portfolio" };
+	}
+}
+
+export async function updatePortfolioDomain(portfolioId, domain) {
+	return withErrorHandling(async () => {
+		return await prisma.portfolio.update({
+			where: { id: portfolioId },
+			data: { customDomain: domain },
+		});
+	});
+}
+
+export async function getPortfolioByDomain(domain) {
+	return withErrorHandling(async () => {
+		return await prisma.portfolio.findFirst({
+			where: { customDomain: domain },
+		});
+	});
+}
+export async function markDomainVerified(domain) {
+	return withErrorHandling(async () => {
+		return await prisma.portfolio.updateMany({
+			where: { customDomain: domain },
+			data: { domainVerified: true },
+		});
 	});
 }
 

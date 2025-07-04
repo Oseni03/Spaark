@@ -2,71 +2,84 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
-import { getDomainResponse, verifyDomain } from "@/lib/domains";
 import { cn } from "@/lib/utils";
+import { useSelector } from "react-redux";
+import { useParams } from "next/navigation";
 
 export function DomainStatus({ domain, onStatusChange, className }) {
+	const { portfolioId } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [status, setStatus] = useState(null);
 	const [error, setError] = useState(null);
 
-	useEffect(() => {
-		let isMounted = true;
+	const portfolio = useSelector((state) =>
+		state.portfolios.items.find((item) => item.id === portfolioId)
+	);
 
+	useEffect(() => {
 		async function checkDomain() {
 			if (!domain) return;
+
+			// If domain is already verified in database, skip the check
+			if (portfolio?.domainVerified) {
+				setStatus("Valid");
+				setError(null);
+				setLoading(false);
+				onStatusChange && onStatusChange("Valid");
+				return;
+			}
 
 			setLoading(true);
 			setError(null);
 
 			try {
-				// First check if domain exists in Vercel
-				const response = await getDomainResponse(domain);
+				// Check domain status and configuration
+				const response = await fetch(
+					`/api/domains/check?domain=${domain}`
+				);
 
-				if (!isMounted) return;
+				if (!response.ok) {
+					logger.error("Domain check API request failed", {
+						status: response.status,
+						statusText: response.statusText,
+					});
+					throw new Error("Failed to fetch domain data");
+				}
 
-				if (response.error) {
+				const {
+					data: { domain: domainData, config: configData },
+				} = await response.json();
+
+				if (domainData.error) {
 					// Domain not found in Vercel - needs to be added
 					setStatus("NotConfigured");
 					onStatusChange && onStatusChange("NotConfigured");
-				} else if (!response.verified) {
-					// Domain exists but not verified - try to verify
-					try {
-						await verifyDomain(domain);
-						if (isMounted) {
-							setStatus("Pending");
-							onStatusChange && onStatusChange("Pending");
-						}
-					} catch (verifyError) {
-						if (isMounted) {
-							setStatus("Pending");
-							onStatusChange && onStatusChange("Pending");
-						}
-					}
+				} else if (!domainData.verified) {
+					// Domain exists but not verified - show pending status
+					setStatus("Pending");
+					onStatusChange && onStatusChange("Pending");
+				} else if (configData.misconfigured) {
+					// Domain verified but DNS is misconfigured
+					setStatus("Invalid");
+					setError("DNS records are not properly configured");
+					onStatusChange && onStatusChange("Invalid");
 				} else {
+					// Domain is valid and properly configured
 					setStatus("Valid");
 					onStatusChange && onStatusChange("Valid");
 				}
 			} catch (error) {
-				if (isMounted) {
-					console.error("Error checking domain:", error);
-					setStatus("Invalid");
-					setError(error.message);
-					onStatusChange && onStatusChange("Invalid");
-				}
+				console.error("Error checking domain:", error);
+				setStatus("Invalid");
+				setError(error.message);
+				onStatusChange && onStatusChange("Invalid");
 			} finally {
-				if (isMounted) {
-					setLoading(false);
-				}
+				setLoading(false);
 			}
 		}
 
 		checkDomain();
-
-		return () => {
-			isMounted = false;
-		};
-	}, [domain, onStatusChange]);
+	}, [domain, onStatusChange, portfolio?.domainVerified]);
 
 	if (loading) {
 		return (

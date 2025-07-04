@@ -41,35 +41,44 @@ export async function middleware(request) {
 		);
 	}
 
-	// Handle subdomains
+	// Handle subdomains and custom domains
 	const hostname = request.headers.get("host");
-	const domain =
-		process.env.NODE_ENV === "production"
-			? hostname.replace(`.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`, "")
-			: hostname
-					.split(":")[0]
-					.replace(".localhost", "")
-					.replace("adequate-adequately-husky.ngrok-free.app", "");
+	const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+	const isProduction = process.env.NODE_ENV === "production";
 
-	if (
-		!domain ||
-		["localhost", "www", process.env.NEXT_PUBLIC_ROOT_DOMAIN].includes(
-			domain
-		)
-	) {
+	let domain = isProduction
+		? hostname.replace(`.${rootDomain}`, "")
+		: hostname
+				.split(":")[0]
+				.replace(".localhost", "")
+				.replace("adequate-adequately-husky.ngrok-free.app", "");
+
+	// If it's a root domain, www, or localhost, continue as normal
+	if (!domain || ["localhost", "www", rootDomain].includes(domain)) {
 		return NextResponse.next();
 	}
 
-	// Handle API requests from subdomains
+	// If it's an API request from subdomains, rewrite to main domain
 	if (url.pathname.startsWith("/api/")) {
-		const mainDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-		const protocol =
-			process.env.NODE_ENV === "production" ? "https" : "http";
+		const mainDomain = rootDomain;
+		const protocol = isProduction ? "https" : "http";
 		const newURL = `${protocol}://${mainDomain}${pathname}${search}`;
 		return NextResponse.rewrite(new URL(newURL));
 	}
 
-	// Pass the domain to the dynamic route
+	// Detect if this is a custom domain (not a subdomain of root domain)
+	const isCustomDomain = isProduction
+		? !hostname.endsWith(`.${rootDomain}`)
+		: !hostname.endsWith(".localhost") && hostname !== "localhost";
+
+	if (isCustomDomain) {
+		// Rewrite to a special catch-all route, passing the custom domain as a query param
+		const rewrittenUrl = new URL(`/custom-domain${pathname}`, request.url);
+		rewrittenUrl.searchParams.set("domain", hostname);
+		return NextResponse.rewrite(rewrittenUrl);
+	}
+
+	// Otherwise, treat as subdomain
 	return NextResponse.rewrite(new URL(`/${domain}${pathname}`, request.url));
 }
 

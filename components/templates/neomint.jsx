@@ -3,24 +3,11 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-	Github,
-	Mail,
-	Linkedin,
-	ExternalLink,
-	Menu,
-	X,
-	ArrowRight,
-	Download,
-	MoonStar,
-	Sun,
-	ChevronRight,
-	ArrowUpRight,
-} from "lucide-react";
+import { Mail, ExternalLink, X, ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn, getInitials, getSocialIcon, getSocialLink } from "@/lib/utils";
+import { cn, getSocialIcon, getSocialLink } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import HTMLReactParser from "html-react-parser";
 import Link from "next/link";
@@ -41,10 +28,8 @@ export default function Neomint({
 	socials = defaultMain.socials,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
-	const { theme, setTheme } = useTheme();
 	const [activeSection, setActiveSection] = useState("home");
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [scrolled, setScrolled] = useState(false);
 	const sectionsRef = useRef(null);
 	const pathname = usePathname();
 	const isBlogActive = pathname === "/blog";
@@ -215,7 +200,31 @@ export default function Neomint({
 					className="min-h-screen pt-20 flex items-center"
 				>
 					<div className="container mx-auto px-6 py-20">
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center lg:[&>*:first-child]:order-last">
+							{basics.picture && (
+								<motion.div
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{ opacity: 1, scale: 1 }}
+									transition={{ duration: 0.5, delay: 0.2 }}
+									className="relative"
+								>
+									<div className="relative w-full aspect-square max-w-md mx-auto">
+										<div
+											className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-xl`}
+										></div>
+										<div className="relative z-10 bg-card border border-border rounded-full overflow-hidden p-4">
+											<Image
+												src={basics.picture}
+												alt={basics.name}
+												width={600}
+												height={600}
+												className="w-full h-full object-cover rounded-full"
+											/>
+										</div>
+									</div>
+								</motion.div>
+							)}
+
 							<motion.div
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
@@ -303,28 +312,6 @@ export default function Neomint({
 											</span>
 										</Link>
 									)}
-								</div>
-							</motion.div>
-
-							<motion.div
-								initial={{ opacity: 0, scale: 0.9 }}
-								animate={{ opacity: 1, scale: 1 }}
-								transition={{ duration: 0.5, delay: 0.2 }}
-								className="relative"
-							>
-								<div className="relative w-full aspect-square max-w-md mx-auto">
-									<div
-										className={`absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-xl`}
-									></div>
-									<div className="relative z-10 bg-card border border-border rounded-full overflow-hidden p-4">
-										<Image
-											src="/placeholder.svg?height=600&width=600"
-											alt="Jordan Chen"
-											width={600}
-											height={600}
-											className="w-full h-full object-cover rounded-full"
-										/>
-									</div>
 								</div>
 							</motion.div>
 						</div>
@@ -452,58 +439,64 @@ export default function Neomint({
 												{project.name}
 											</h3>
 											<div
-												className={`text-muted-foreground mb-4 line-clamp-2`}
+												className={`text-muted-foreground mb-4`}
 											>
 												{HTMLReactParser(
 													project.description
 												)}
 											</div>
-											{project.technologies && (
-												<div className="flex flex-wrap gap-2 mb-6">
-													{project.technologies.map(
-														(tech, index) => (
-															<Badge
-																key={index}
-																variant="outline"
-																className={`border-border text-muted-foreground`}
-															>
-																{tech}
-															</Badge>
-														)
+											<div className="align-bottom">
+												{project.technologies && (
+													<div className="flex flex-wrap gap-2 mb-6">
+														{project.technologies.map(
+															(tech, index) => (
+																<Badge
+																	key={index}
+																	variant="outline"
+																	className={`border-border text-muted-foreground`}
+																>
+																	{tech}
+																</Badge>
+															)
+														)}
+													</div>
+												)}
+												<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+													{project.source && (
+														<Link
+															href={
+																project.source
+															}
+															className={cn(
+																buttonVariants({
+																	variant:
+																		"outline",
+																	size: "sm",
+																}),
+																"group/btn"
+															)}
+														>
+															<GithubLogo className="mr-2 h-4 w-4" />
+															Code
+															<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+														</Link>
+													)}
+													{project.website && (
+														<Link
+															href={
+																project.website
+															}
+															className={cn(
+																buttonVariants({
+																	size: "sm",
+																})
+															)}
+														>
+															<ExternalLink className="mr-2 h-4 w-4" />
+															Demo
+														</Link>
 													)}
 												</div>
-											)}
-											<div className="flex gap-3">
-												{project.source && (
-													<Link
-														href={project.source}
-														className={cn(
-															buttonVariants({
-																variant:
-																	"outline",
-																size: "sm",
-															}),
-															"group/btn"
-														)}
-													>
-														<GithubLogo className="mr-2 h-4 w-4" />
-														Code
-														<ArrowUpRight className="ml-1 h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-													</Link>
-												)}
-												{project.website && (
-													<Link
-														href={project.website}
-														className={cn(
-															buttonVariants({
-																size: "sm",
-															})
-														)}
-													>
-														<ExternalLink className="mr-2 h-4 w-4" />
-														Demo
-													</Link>
-												)}
 											</div>
 										</CardContent>
 									</Card>
@@ -611,9 +604,9 @@ export default function Neomint({
 													className="relative mb-16"
 												>
 													<div className="flex flex-col md:flex-row items-center">
-														<div className="flex md:w-1/2 md:justify-end mb-8 md:mb-0 md:pr-12">
+														<div className="flex md:w-1/2 md:text-right mb-8 md:mb-0 md:pr-12">
 															<div
-																className={`bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors`}
+																className={`md:max-w-md w-full transition-colors`}
 															>
 																<Badge
 																	className={`bg-primary/10 text-primary hover:bg-primary/20 mb-2`}
@@ -720,7 +713,7 @@ export default function Neomint({
 														</div>
 														<div className="flex md:w-1/2 md:justify-start mb-8 md:mb-0 md:pl-12 order-1 md:order-2">
 															<div
-																className={`*:bg-card border border-border p-6 rounded-lg shadow-sm md:max-w-md w-full hover:border-primary transition-colors`}
+																className={`md:max-w-md w-full transition-colors`}
 															>
 																<Badge
 																	className={`bg-primary/10 text-primary hover:bg-primary/20 mb-2`}

@@ -23,7 +23,6 @@ import { DomainConfiguration } from "./domain-configuration";
 import { validDomainRegex } from "@/lib/domains";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
-import { updatePortfolioInDatabase } from "@/redux/thunks/portfolio";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -35,12 +34,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "./ui/tooltip";
+import { updatePortfolio } from "@/redux/features/portfolioSlice";
 
 export function DomainSettings() {
 	const { portfolioId } = useParams();
@@ -122,36 +116,42 @@ export function DomainSettings() {
 				throw new Error("Domain can only be added to a live portfolio");
 			}
 			// First verify/add domain with Vercel
+			// Add domain to Vercel and update portfolio
 			const domainResponse = await fetch("/api/domains", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ domain: newDomain }),
+				body: JSON.stringify({
+					domain: newDomain,
+					portfolioId: portfolioId,
+				}),
 			});
 
 			if (!domainResponse.ok) {
 				const error = await domainResponse.json();
 				logger.error("Domain error: ", error);
-				throw new Error(error.error?.message || "Failed to add domain");
+				throw new Error(error.error || "Failed to add domain");
 			}
 
-			// Update portfolio using Redux thunk
-			const result = await dispatch(
-				updatePortfolioInDatabase({
-					id: portfolioId,
-					data: { customDomain: newDomain },
-				})
-			).unwrap();
+			const resp = await domainResponse.json();
 
-			// Check if the thunk was successful
-			if (result && !result.error) {
+			if (resp.success) {
+				dispatch(
+					updatePortfolio({
+						id: portfolioId,
+						data: { customDomain: newDomain },
+					})
+				);
 				toast.success(
-					"Domain added successfully! Please configure your DNS settings."
+					resp.data.message || "Domain added successfully!"
 				);
 				setNewDomain("");
 				setDomainStatus(null);
 				setValidationError("");
+
+				// Refresh portfolio data
+				// The portfolio will be updated via the API response
 			} else {
-				throw new Error(result?.error || "Failed to update portfolio");
+				throw new Error(resp.error || "Failed to add domain");
 			}
 		} catch (error) {
 			toast.error(error.message || "Failed to add domain");
@@ -166,7 +166,7 @@ export function DomainSettings() {
 
 		setIsRemoving(true);
 		try {
-			// First remove from Vercel
+			// Remove domain from Vercel and database
 			const response = await fetch(
 				`/api/domains?domain=${portfolio.customDomain}&portfolioId=${portfolioId}`,
 				{
@@ -177,25 +177,27 @@ export function DomainSettings() {
 			if (!response.ok) {
 				const error = await response.json();
 				throw new Error(
-					error.error?.message ||
-						"Failed to remove domain configuration"
+					error.error || "Failed to remove domain configuration"
 				);
 			}
 
-			// Update portfolio using Redux thunk
-			const result = await dispatch(
-				updatePortfolioInDatabase({
-					id: portfolioId,
-					data: { customDomain: null },
-				})
-			).unwrap();
+			const result = await response.json();
 
-			// Check if the thunk was successful
-			if (result && !result.error) {
-				toast.success("Domain removed successfully");
+			if (result.success) {
+				dispatch(
+					updatePortfolio({
+						id: portfolioId,
+						data: { customDomain: null },
+					})
+				);
+				toast.success(result.message || "Domain removed successfully");
 				setShowRemoveDialog(false);
+				setDomainStatus(null);
+
+				// Refresh portfolio data
+				// The portfolio will be updated via the API response
 			} else {
-				throw new Error(result?.error || "Failed to update portfolio");
+				throw new Error(result.error || "Failed to remove domain");
 			}
 		} catch (error) {
 			toast.error(error.message || "Failed to remove domain");
@@ -240,29 +242,37 @@ export function DomainSettings() {
 		newDomain && !validationError && !isSubmitting && !portfolioLoading;
 
 	return (
-		<section id="domains" className="flex flex-col gap-y-6">
+		<section id="domains" className="flex flex-col gap-y-4 sm:gap-y-6">
 			<header>
-				<h2 className="text-xl font-semibold">Custom Domain</h2>
+				<h2 className="text-lg sm:text-xl font-semibold">
+					Custom Domain
+				</h2>
 				<p className="text-sm text-muted-foreground">
 					Configure a custom domain for your portfolio
 				</p>
 			</header>
 
 			{portfolio?.customDomain ? (
-				<Card className="p-6">
-					<div className="flex items-center justify-between mb-4">
-						<div className="flex items-center gap-3">
-							<Globe className="h-5 w-5 text-primary" />
-							<div>
-								<span className="font-medium">
+				<Card className="p-4 sm:p-6">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between mb-4">
+						<div className="flex flex-row items-start gap-3 min-w-0">
+							<Globe className="h-5 w-5 text-primary mb-1 sm:mb-0 flex-shrink-0 mt-0.5" />
+							<div className="min-w-0 flex-1">
+								<span className="font-medium break-all block">
 									{portfolio.customDomain}
 								</span>
-								<DomainStatus
-									domain={portfolio.customDomain}
-									onStatusChange={setDomainStatus}
-								/>
+								<div className="mt-1">
+									<DomainStatus
+										domain={portfolio.customDomain}
+										onStatusChange={setDomainStatus}
+									/>
+								</div>
 							</div>
-							{domainStatus && getStatusBadge(domainStatus)}
+							{domainStatus && (
+								<div className="flex-shrink-0">
+									{getStatusBadge(domainStatus)}
+								</div>
+							)}
 						</div>
 						<AlertDialog
 							open={showRemoveDialog}
@@ -270,19 +280,19 @@ export function DomainSettings() {
 						>
 							<AlertDialogTrigger asChild>
 								<Button
-									variant="destructive"
+									variant="icon"
 									size="sm"
 									disabled={isRemoving || portfolioLoading}
+									className="flex-shrink-0"
 								>
 									{isRemoving ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
 									) : (
 										<Trash className="h-4 w-4" />
 									)}
-									{isRemoving ? "Removing..." : "Remove"}
 								</Button>
 							</AlertDialogTrigger>
-							<AlertDialogContent>
+							<AlertDialogContent className="max-w-md mx-4">
 								<AlertDialogHeader>
 									<AlertDialogTitle>
 										Remove Custom Domain
@@ -312,7 +322,16 @@ export function DomainSettings() {
 						</AlertDialog>
 					</div>
 
-					<DomainConfiguration domain={portfolio.customDomain} />
+					{/* Show DNS configuration instructions if domain is not configured or pending and not verified in database */}
+					{!portfolio.domainVerified &&
+						(domainStatus === "NotConfigured" ||
+							domainStatus === "Pending") && (
+							<div className="mt-4">
+								<DomainConfiguration
+									domain={portfolio.customDomain}
+								/>
+							</div>
+						)}
 				</Card>
 			) : (
 				<div className="space-y-4">
@@ -333,7 +352,7 @@ export function DomainSettings() {
 							>
 								Domain Name
 							</label>
-							<div className="flex gap-2">
+							<div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
 								<div className="flex-1 relative">
 									<Input
 										id="domain-input"
@@ -360,7 +379,11 @@ export function DomainSettings() {
 										</div>
 									)}
 								</div>
-								<Button type="submit" disabled={!canSubmit}>
+								<Button
+									type="submit"
+									disabled={!canSubmit}
+									className="w-full sm:w-auto"
+								>
 									{isSubmitting ? (
 										<>
 											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -376,16 +399,18 @@ export function DomainSettings() {
 							</div>
 							{validationError && (
 								<p className="text-sm text-red-500 flex items-center gap-1">
-									<AlertCircle className="h-3 w-3" />
-									{validationError}
+									<AlertCircle className="h-3 w-3 flex-shrink-0" />
+									<span className="break-words">
+										{validationError}
+									</span>
 								</p>
 							)}
 						</div>
 					</form>
 
-					<div className="bg-muted/50 p-4 rounded-lg">
+					<div className="bg-muted/50 p-3 rounded-lg">
 						<h4 className="font-medium mb-2">How it works:</h4>
-						<ol className="text-sm text-muted-foreground space-y-1">
+						<ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
 							<li>
 								1. Enter your domain name (e.g., yourdomain.com)
 							</li>

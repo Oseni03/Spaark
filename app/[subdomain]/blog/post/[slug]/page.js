@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { formatDate } from "@/lib/utils";
 import { getBlogPost } from "@/services/blog";
-import { getPortfolioFromSlug } from "@/lib/blog-utils";
+import { getPortfolioFromSlug } from "@/services/portfolio";
 import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
 import NotFound from "@/app/not-found";
 import { BlogPost } from "@/components/blog/blog-post";
