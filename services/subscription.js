@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/db";
 import { withErrorHandling } from "./shared";
 import { cookies } from "next/headers";

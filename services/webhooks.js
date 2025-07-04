@@ -1,3 +1,5 @@
+"use server";
+
 import { handlePaymentSuccess } from "./subscription";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";

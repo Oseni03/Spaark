@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";
 import { withErrorHandling } from "./shared";
