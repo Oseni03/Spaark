@@ -15,10 +15,9 @@ import {
 	Lock,
 	Shield,
 	CheckCircle2,
-	AlertCircle,
-	Loader2,
 	ArrowLeft,
-} from "@phosphor-icons/react";
+	Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import {

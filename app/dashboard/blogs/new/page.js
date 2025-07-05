@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { BlogForm } from "../components/blog-form";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
-import { getPortfolioById, createBlogAction } from "@/services/portfolio";
+import { getPortfolioById } from "@/services/portfolio";
+import { createBlog } from "@/services/blog";
 
 export default function NewBlogPost() {
 	const router = useRouter();
@@ -42,7 +43,7 @@ export default function NewBlogPost() {
 				throw new Error("Blog is not enabled for this portfolio");
 			}
 
-			await createBlogAction({
+			await createBlog({
 				portfolioId,
 				data: {
 					...data,
