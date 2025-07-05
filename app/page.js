@@ -8,24 +8,36 @@ import PageWrapper from "@/components/wrapper/page-wrapper";
 export default function Home() {
 	return (
 		<PageWrapper>
-			<div className="flex mb-[8rem] md:mb-0 w-full">
+			{/* Hero Section */}
+			<div className="flex w-full">
 				<HeroSection />
 			</div>
-			<div className="flex my-md-[8rem] w-full" id="features">
+
+			{/* Features Section */}
+			<div className="flex w-full py-20" id="features">
 				<Features />
 			</div>
-			<div id="pricing" className="flex my-[8rem]">
+
+			{/* Pricing Section */}
+			<div
+				id="pricing"
+				className="flex w-full py-20 bg-gradient-to-b from-background to-muted/20"
+			>
 				<Pricing />
 			</div>
-			{/* <div
-				id="newsletter"
-				className="flex mt-[8rem] w-full justify-center items-center px-4"
-			>
-				<Newsletter />
-			</div>{" "} */}
-			<div className="flex justify-center items-center w-full my-[8rem]">
+
+			{/* FAQ Section */}
+			<div className="flex w-full py-20">
 				<AccordionComponent />
 			</div>
+
+			{/* Newsletter Section - Commented out for now */}
+			{/* <div
+				id="newsletter"
+				className="flex w-full py-20 bg-gradient-to-b from-muted/20 to-background"
+			>
+				<Newsletter />
+			</div> */}
 		</PageWrapper>
 	);
 }
