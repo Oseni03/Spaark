@@ -6,10 +6,23 @@ import { defineLive } from "next-sanity";
 // Only create client if environment variables are configured
 let client = null;
 try {
-	const { client: sanityClient } = require("./client");
-	client = sanityClient;
+	// Check if environment variables are available
+	if (
+		process.env.NEXT_PUBLIC_SANITY_PROJECT_ID &&
+		process.env.NEXT_PUBLIC_SANITY_DATASET
+	) {
+		const { client: sanityClient } = require("./client");
+		client = sanityClient;
+	} else {
+		console.warn(
+			"Sanity not configured, live content will not be available"
+		);
+	}
 } catch (error) {
-	console.warn("Sanity not configured, live content will not be available");
+	console.warn(
+		"Sanity not configured, live content will not be available:",
+		error.message
+	);
 }
 
 export const { sanityFetch, SanityLive } = client

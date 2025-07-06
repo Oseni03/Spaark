@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
+import { parseISO, format } from "date-fns";
 
 export const BlogPost = ({
 	title,
@@ -26,9 +27,15 @@ export const BlogPost = ({
 
 			<div className="mb-4">
 				<div className="flex flex-col gap-3">
-					<span className="text-gray-600 dark:text-gray-400">
-						{date}
-					</span>
+					<div className="flex items-center space-x-2 text-sm">
+						<time
+							className="text-gray-500 dark:text-gray-400"
+							dateTime={date}
+						>
+							{format(parseISO(date), "MMMM dd, yyyy")}
+						</time>
+						<span>· {"5"} min read</span>
+					</div>
 					<div className="flex items-center gap-2">
 						<Avatar className="h-8 w-8">
 							<AvatarImage src={author.image} alt={author.name} />

@@ -1,23 +1,15 @@
 import { Post } from "./Post";
 import { logger } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
+import { getPost, getPostPaths } from "@/sanity/lib/client";
+import { urlForImage } from "@/sanity/lib/image";
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-	// Only generate static params if Sanity is configured
-	if (
-		!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
-		!process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		return [];
-	}
-
 	try {
-		const { client } = await import("@/sanity/lib/client");
-		const { postPathsQuery } = await import("@/sanity/lib/queries");
-		const posts = await client.fetch(postPathsQuery);
-		return posts;
+		const postpaths = await getPostPaths();
+		return postpaths;
 	} catch (error) {
 		console.warn("Failed to generate static params for blog posts:", error);
 		return [];
@@ -27,27 +19,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }, parent) {
 	const { slug } = await params;
 
-	// Only fetch metadata if Sanity is configured
-	if (
-		!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
-		!process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		return {
-			title: "Blog Post",
-			description: "Blog post not available",
-		};
-	}
-
 	try {
-		const { sanityFetch } = await import("@/sanity/lib/live");
-		const { postQuery } = await import("@/sanity/lib/queries");
-		const { client } = await import("@/sanity/lib/client");
-		const imageUrlBuilder = (await import("@sanity/image-url")).default;
-
-		const post = await sanityFetch({
-			query: postQuery,
-			params,
-		});
+		const post = await getPost(params);
 
 		logger.info("Fetched Post:", post);
 
@@ -58,27 +31,22 @@ export async function generateMetadata({ params }, parent) {
 
 		const previousImages = (await parent).openGraph?.images || [];
 
-		const builder = imageUrlBuilder(client);
-		const imageUrl = post.mainImage
-			? builder
-					.image(post.mainImage)
-					.auto("format")
-					.fit("max")
-					.width(1200)
-					.height(630)
-					.url()
-			: undefined;
-		const keywords = post.data.keywords?.split(",") || [];
+		const keywords = post.keywords?.split(",") || [];
 		logger.info("Keywords:", keywords);
 
 		return {
-			title: post.data.title,
-			description: post.data.description ?? "",
+			title: post.title,
+			description: post.description ?? "",
 			alternates: { canonical: `/blog/post/${slug}` },
 			openGraph: {
-				images: imageUrl
-					? [imageUrl, ...previousImages]
-					: previousImages,
+				images: [
+					{
+						url: urlForImage(post?.mainImage)?.src,
+						width: 1200, // 800
+						height: 630, // 600
+					},
+					...previousImages,
+				],
 			},
 			keywords: [...keywords, ...siteConfig.keywords, post.title],
 		};
@@ -94,19 +62,9 @@ export async function generateMetadata({ params }, parent) {
 // Multiple versions of this page will be statically generated
 // using the `params` returned by `generateStaticParams`
 export default async function Page({ params }) {
-	// Only fetch post if Sanity is configured
-	if (
-		!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
-		!process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		return <div>Blog post not available</div>;
-	}
-
 	try {
-		const { sanityFetch } = await import("@/sanity/lib/live");
-		const { postQuery } = await import("@/sanity/lib/queries");
-		const post = await sanityFetch({ query: postQuery, params });
-		return <Post post={post.data} />;
+		const post = await getPost(params);
+		return <Post post={post} />;
 	} catch (error) {
 		console.warn("Failed to fetch blog post:", error);
 		return <div>Blog post not available</div>;

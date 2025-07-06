@@ -18,7 +18,14 @@ import { useAuth } from "@/context/auth-context";
 export const Header1 = () => {
 	const [isOpen, setOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
-	const { user, loading, signOut } = useAuth();
+
+	// Use auth context with proper error handling
+	const authData = useAuth();
+	const { user, loading, signOut } = authData || {
+		user: null,
+		loading: true,
+		signOut: async () => {},
+	};
 
 	const navItems = useMemo(
 		() => [
@@ -47,6 +54,9 @@ export const Header1 = () => {
 	);
 
 	useEffect(() => {
+		// Only run on client side
+		if (typeof window === "undefined") return;
+
 		const handleScroll = () => {
 			setScrolled(window.scrollY > 20);
 		};

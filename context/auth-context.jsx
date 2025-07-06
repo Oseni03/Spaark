@@ -7,9 +7,22 @@ import { upsertUser } from "@/services/user";
 import { logger } from "@/lib/utils";
 import { initAuthCookies } from "@/lib/firebase/auth-cookies";
 
-const AuthContext = createContext({});
+// Provide proper default values for the context
+const defaultAuthContext = {
+	user: null,
+	loading: true,
+	signOut: async () => {},
+};
 
-export const useAuth = () => useContext(AuthContext);
+const AuthContext = createContext(defaultAuthContext);
+
+export const useAuth = () => {
+	const context = useContext(AuthContext);
+	if (context === undefined) {
+		throw new Error("useAuth must be used within an AuthProvider");
+	}
+	return context;
+};
 
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(null);
@@ -25,6 +38,12 @@ export function AuthProvider({ children }) {
 	};
 
 	useEffect(() => {
+		// Only run on client side
+		if (typeof window === "undefined") {
+			setLoading(false);
+			return;
+		}
+
 		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
 			if (firebaseUser) {
 				try {

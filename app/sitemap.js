@@ -1,3 +1,4 @@
+import { getAllPostsSlugs } from "@/sanity/lib/client";
 import { getBlogPosts } from "@/services/blog";
 import { getAllPortfolios } from "@/services/portfolio";
 
@@ -5,31 +6,10 @@ export default async function sitemap() {
 	const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 	// Fetch data with null checks
-	let portfolios = [];
-	try {
-		portfolios = await getAllPortfolios();
-		console.log("Portfolios fetched:", portfolios?.length || 0);
-	} catch (error) {
-		console.warn("Failed to fetch portfolios:", error);
-		portfolios = [];
-	}
+	const { data: portfolios } = await getAllPortfolios();
 
 	// Only fetch Sanity blog posts if environment variables are configured
-	let blogPosts = [];
-	if (
-		process.env.NEXT_PUBLIC_SANITY_PROJECT_ID &&
-		process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		try {
-			const { client } = await import("@/sanity/lib/client");
-			const { postSlugsQuery } = await import("@/sanity/lib/queries");
-			blogPosts = (await client.fetch(postSlugsQuery)) || [];
-			console.log("Sanity blog posts fetched:", blogPosts?.length || 0);
-		} catch (error) {
-			console.warn("Failed to fetch Sanity blog posts:", error);
-			blogPosts = [];
-		}
-	}
+	const blogPosts = await getAllPostsSlugs();
 
 	// Ensure portfolios is an array and handle null/undefined cases
 	console.log(

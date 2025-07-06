@@ -6,8 +6,8 @@ import { extractTextFromPortableTextBlock, slugify } from "@/utils/text";
 export function TableOfContents({ body }) {
 	const [activeId, setActiveId] = useState(null);
 	const headings = body.filter(
-		(block) => block.style === "h2"
-		// (block) => block.style === "h2" || block.style === "h3",
+		// (block) => block.style === "h2"
+		(block) => block.style === "h2" || block.style === "h3"
 	);
 
 	useEffect(() => {

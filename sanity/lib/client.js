@@ -1,17 +1,52 @@
 import { createClient } from "next-sanity";
-
 import { apiVersion, dataset, projectId } from "../env";
+import {
+	postPathsQuery,
+	postQuery,
+	postSlugsQuery,
+	postsQuery,
+	recentPostsQuery,
+} from "./queries";
 
 // Check if required environment variables are set
-if (!projectId || !dataset) {
-	throw new Error(
-		"Missing required Sanity environment variables. Please set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET"
-	);
+const client = projectId
+	? createClient({ projectId, dataset, apiVersion, useCdn: true })
+	: null;
+
+export { client };
+
+export async function getRecentPost() {
+	if (client) {
+		return (await client.fetch(recentPostsQuery, { tags: ["post"] })) || [];
+	}
+	return [];
 }
 
-export const client = createClient({
-	projectId,
-	dataset,
-	apiVersion,
-	useCdn: true, // Set to false if statically generating pages, using ISR or tag-based revalidation
-});
+export async function getPosts() {
+	if (client) {
+		return (await client.fetch(postsQuery)) || [];
+	}
+	return [];
+}
+
+export async function getPost(params) {
+	if (client) {
+		return (await client.fetch(postQuery, params)) || {};
+	}
+	return {};
+}
+
+export async function getPostPaths() {
+	if (client) {
+		return (await client.fetch(postPathsQuery)) || [];
+	}
+	return [];
+}
+
+export async function getAllPostsSlugs() {
+	if (client) {
+		const slugs = (await client.fetch(postSlugsQuery)) || [];
+		return slugs.map((slug) => ({ slug }));
+	}
+	return [];
+}

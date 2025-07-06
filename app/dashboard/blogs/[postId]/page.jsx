@@ -148,9 +148,7 @@ export default function Page() {
 
 			<BlogPost
 				title={blog.title}
-				date={dayjs(blog.publishedAt || blog.updatedAt).format(
-					"MMMM D, YYYY"
-				)}
+				date={blog.publishedAt || blog.updatedAt}
 				author={{
 					name: portfolio?.basics?.name || "Anonymous",
 					image: portfolio?.basics?.picture,

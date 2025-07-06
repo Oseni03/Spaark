@@ -6,23 +6,9 @@ import { TableOfContents } from "@/app/blog/components/TableOfContents";
 import { TryProduct } from "../../components/TryProduct";
 import { ReadMore } from "@/app/blog/components/ReadMore";
 import { BlogWrapper } from "@/components/wrapper/blog-wrapper";
+import { urlForImage } from "@/sanity/lib/image";
 
 export function Post({ post }) {
-	// Only create image builder if Sanity is configured
-	let builder = null;
-	if (
-		process.env.NEXT_PUBLIC_SANITY_PROJECT_ID &&
-		process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		try {
-			const { client } = require("@/sanity/lib/client");
-			const imageUrlBuilder = require("@sanity/image-url").default;
-			builder = imageUrlBuilder(client);
-		} catch (error) {
-			console.warn("Failed to create image builder:", error);
-		}
-	}
-
 	const content = PortableText(post.body);
 
 	// If no post data, show fallback
@@ -58,13 +44,9 @@ export function Post({ post }) {
 								</p>
 							</header>
 							<div className="prose prose-gray dark:prose-invert mx-auto max-w-3xl">
-								{post.mainImage && builder && (
+								{post.mainImage && (
 									<Image
-										src={builder
-											.image(post.mainImage)
-											.width(1200)
-											.height(675)
-											.url()}
+										src={urlForImage(post.mainImage).src}
 										alt={post?.mainImage?.alt || post.title}
 										width={1200}
 										height={675}
@@ -86,13 +68,12 @@ export function Post({ post }) {
 									Written by
 								</p>
 								<div className="flex items-center">
-									{post.authorImage && builder && (
+									{post.authorImage && (
 										<Image
-											src={builder
-												.image(post.authorImage)
-												.width(32)
-												.height(32)
-												.url()}
+											src={
+												urlForImage(post.authorImage)
+													.src
+											}
 											alt={post.authorName ?? ""}
 											className="mr-2 h-8 w-8 rounded-full"
 											width={32}

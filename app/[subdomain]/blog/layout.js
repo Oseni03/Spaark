@@ -1,18 +1,46 @@
 import { getPortfolio } from "@/services/portfolio";
 
-export async function generateMetadata({ params }) {
+async function sharedMetaData(params) {
 	const validatedParams = await Promise.resolve(params);
 	const { subdomain } = validatedParams;
-	const portfolio = await getPortfolio(subdomain);
-	const name =
-		portfolio.data?.basics?.name || portfolio.data?.name || subdomain;
+	const { data: portfolio } = await getPortfolio(subdomain);
+	const name = portfolio?.basics?.name || portfolio?.name || subdomain;
+	const headline = portfolio?.basics?.headline;
+	const summary = portfolio?.basics?.summary || `Welcome to ${name}'s blog!`;
+	const picture = portfolio?.basics?.picture;
 
 	return {
-		title: `Blog`,
-		description: `Read the latest posts from ${name}'s blog`,
+		title: {
+			template: `%s | ${name}`,
+			default: headline ? `${name} - ${headline}` : `${name} - Blogs`,
+		},
+		description: summary,
+		openGraph: {
+			title: headline ? `${name} - ${headline}` : `${name} - Blogs`,
+			description: summary,
+			images: picture ? [picture] : [],
+			type: "profile",
+			username: subdomain,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: headline ? `${name} - ${headline}` : `${name} - Blogs`,
+			description: summary,
+		},
+		keywords: ["Next.js", "Sanity", "Tailwind CSS"],
+		// Optionally add authors if available in portfolio
+		// authors: [{ name }],
+		robots: {
+			index: true,
+			follow: true,
+		},
 	};
 }
 
+export async function generateMetadata({ params }) {
+	return await sharedMetaData(params);
+}
+
 export default function BlogLayout({ children }) {
-	return children;
+	return <>{children}</>;
 }

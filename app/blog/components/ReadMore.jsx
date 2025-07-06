@@ -1,28 +1,11 @@
 import React from "react";
 import Link from "next/link";
 import { logger } from "@/lib/utils";
+import { getRecentPost } from "@/sanity/lib/client";
 
 export async function ReadMore() {
-	// Only fetch posts if Sanity is configured
-	if (
-		!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
-		!process.env.NEXT_PUBLIC_SANITY_DATASET
-	) {
-		return (
-			<div className="text-center text-gray-500 py-8">
-				No recent blog posts available.
-			</div>
-		);
-	}
-
 	try {
-		const { sanityFetch } = await import("@/sanity/lib/live");
-		const { recentPostsQuery } = await import("@/sanity/lib/queries");
-
-		const blogPosts = await sanityFetch({
-			query: recentPostsQuery,
-			tags: ["post"],
-		});
+		const blogPosts = await getRecentPost();
 
 		logger.info("Fetched blog posts:", blogPosts);
 

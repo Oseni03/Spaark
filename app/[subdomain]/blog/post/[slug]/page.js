@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
-import { formatDate } from "@/lib/utils";
 import { getBlogPost } from "@/services/blog";
 import { getPortfolioFromSlug } from "@/services/portfolio";
 import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
@@ -100,7 +99,7 @@ export default function Page() {
 					title={post.title}
 					excerpt={post.excerpt}
 					featuredImage={post.featuredImage}
-					date={formatDate(post.publishedAt)}
+					date={post.publishedAt}
 					author={{
 						name: portfolio.basics?.name || "Anonymous",
 						image: portfolio.basics?.picture,

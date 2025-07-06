@@ -16,7 +16,7 @@ import { siteConfig } from "./config/site";
 
 // Check if required environment variables are set
 if (!projectId || !dataset) {
-	throw new Error(
+	console.warn(
 		"Missing required Sanity environment variables. Please set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET"
 	);
 }

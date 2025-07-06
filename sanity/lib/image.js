@@ -1,10 +1,25 @@
-import createImageUrlBuilder from '@sanity/image-url'
+import createImageUrlBuilder from "@sanity/image-url";
+import { dataset, projectId } from "../env";
 
-import { dataset, projectId } from '../env'
+const imageBuilder = createImageUrlBuilder({ projectId, dataset });
 
-// https://www.sanity.io/docs/image-url
-const builder = createImageUrlBuilder({ projectId, dataset })
+export const urlForImage = (source) => {
+	if (!source || !source.asset) return;
+	const dimensions = source?.asset?._ref.split("-")[2];
 
-export const urlFor = (source) => {
-  return builder.image(source)
-}
+	const [width, height] = dimensions
+		.split("x")
+		.map((num) => parseInt(num, 10));
+
+	const url = imageBuilder
+		.image(source)
+		.auto("format")
+		.width(Math.min(width, "2000"))
+		.url();
+
+	return {
+		src: url,
+		width: width,
+		height: height,
+	};
+};
