@@ -81,10 +81,10 @@ class PaymentService {
 					email,
 					tx_ref,
 					cardholder_name,
-					authorization: {
-						mode: "pin",
-						pin: "3310", // This would be collected from user in a real implementation
-					},
+					// authorization: {
+					// 	mode: "pin",
+					// 	pin: "3310", // This would be collected from user in a real implementation
+					// },
 					meta,
 				},
 				{

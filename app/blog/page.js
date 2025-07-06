@@ -1,22 +1,60 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BlogWrapper } from "@/components/wrapper/blog-wrapper";
-import { sanityFetch } from "@/sanity/lib/live";
-import { postsQuery } from "@/sanity/lib/queries";
-import { Card, CardContent } from "@/components/ui/card";
 
 export const revalidate = 60;
 
 export default async function BlogContentsPage() {
-	const posts = await sanityFetch({ query: postsQuery });
+	// Only fetch posts if Sanity is configured
+	if (
+		!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
+		!process.env.NEXT_PUBLIC_SANITY_DATASET
+	) {
+		return (
+			<BlogWrapper>
+				<div className="py-16 sm:py-24">
+					<div className="mx-auto max-w-7xl px-6 lg:px-8">
+						<h2 className="mb-8 font-cal text-3xl tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+							From the blog
+						</h2>
+						<div className="text-center text-gray-500">
+							Blog posts are not available at the moment.
+						</div>
+					</div>
+				</div>
+			</BlogWrapper>
+		);
+	}
 
-	console.log("Fetched posts:", posts);
+	try {
+		const { sanityFetch } = await import("@/sanity/lib/live");
+		const { postsQuery } = await import("@/sanity/lib/queries");
+		const posts = await sanityFetch({ query: postsQuery });
 
-	return (
-		<BlogWrapper>
-			<Posts posts={posts.data} />
-		</BlogWrapper>
-	);
+		console.log("Fetched posts:", posts);
+
+		return (
+			<BlogWrapper>
+				<Posts posts={posts.data} />
+			</BlogWrapper>
+		);
+	} catch (error) {
+		console.warn("Failed to fetch blog posts:", error);
+		return (
+			<BlogWrapper>
+				<div className="py-16 sm:py-24">
+					<div className="mx-auto max-w-7xl px-6 lg:px-8">
+						<h2 className="mb-8 font-cal text-3xl tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+							From the blog
+						</h2>
+						<div className="text-center text-gray-500">
+							Failed to load blog posts.
+						</div>
+					</div>
+				</div>
+			</BlogWrapper>
+		);
+	}
 }
 
 function Posts({ posts = [] }) {

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * This configuration is used to for the Sanity Studio that’s mounted on the `\app\app\studio\[[...tool]]\page.jsx` route
+ * This configuration is used to for the Sanity Studio that's mounted on the `\app\app\studio\[[...tool]]\page.jsx` route
  */
 
 import { visionTool } from "@sanity/vision";
@@ -13,6 +13,13 @@ import { apiVersion, dataset, projectId } from "./sanity/env";
 import { schema } from "./sanity/schemaTypes";
 import { structure } from "./sanity/structure";
 import { siteConfig } from "./config/site";
+
+// Check if required environment variables are set
+if (!projectId || !dataset) {
+	throw new Error(
+		"Missing required Sanity environment variables. Please set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET"
+	);
+}
 
 export default defineConfig({
 	basePath: "/studio",

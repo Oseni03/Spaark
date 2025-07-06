@@ -19,8 +19,36 @@ The Portfolio Builder is an open-source, web-based application designed specific
 1. **Fork the Repository**: Start by forking the repository to your GitHub account.
 2. **Clone the Repository**: Clone the forked repository to your local machine.
 3. **Install Dependencies**: Navigate to the project directory and run `npm install` to install all required dependencies.
-4. **Customize Your Portfolio**: Fill in the necessary information such as personal details, projects, and skills.
-5. **Deploy**: Follow the deployment instructions to publish your portfolio online. Once deployed, you will receive a link to your personalized portfolio.
+4. **Set up Environment Variables**: Create a `.env.local` file in the root directory with the following variables:
+   ```env
+   # Sanity CMS Configuration (Optional - for blog functionality)
+   NEXT_PUBLIC_SANITY_PROJECT_ID=your_sanity_project_id
+   NEXT_PUBLIC_SANITY_DATASET=production
+   NEXT_PUBLIC_SANITY_API_VERSION=2025-01-29
+   
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   NEXT_PUBLIC_ROOT_DOMAIN=localhost:3000
+   
+   # Database Configuration (if using Prisma)
+   DATABASE_URL="your_database_url"
+   ```
+5. **Customize Your Portfolio**: Fill in the necessary information such as personal details, projects, and skills.
+6. **Deploy**: Follow the deployment instructions to publish your portfolio online. Once deployed, you will receive a link to your personalized portfolio.
+
+## Environment Variables
+
+### Required for Basic Functionality
+- `NEXT_PUBLIC_APP_URL`: The URL of your application (e.g., `http://localhost:3000` for development)
+- `NEXT_PUBLIC_ROOT_DOMAIN`: The root domain for portfolio subdomains (e.g., `localhost:3000` for development)
+- `DATABASE_URL`: Your database connection string (if using Prisma)
+
+### Optional for Blog Functionality
+- `NEXT_PUBLIC_SANITY_PROJECT_ID`: Your Sanity project ID (get this from your Sanity project settings)
+- `NEXT_PUBLIC_SANITY_DATASET`: Your Sanity dataset name (usually `production`)
+- `NEXT_PUBLIC_SANITY_API_VERSION`: Sanity API version (default: `2025-01-29`)
+
+**Note**: If Sanity environment variables are not configured, the blog functionality will be disabled, but the portfolio builder will still work normally.
 
 ## Contributions
 

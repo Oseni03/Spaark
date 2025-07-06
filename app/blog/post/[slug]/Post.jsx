@@ -2,17 +2,47 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { PortableText } from "@/components/blog/porttable-text";
-import { client } from "@/sanity/lib/client";
-import imageUrlBuilder from "@sanity/image-url";
 import { TableOfContents } from "@/app/blog/components/TableOfContents";
 import { TryProduct } from "../../components/TryProduct";
 import { ReadMore } from "@/app/blog/components/ReadMore";
 import { BlogWrapper } from "@/components/wrapper/blog-wrapper";
 
-const builder = imageUrlBuilder(client);
-
 export function Post({ post }) {
+	// Only create image builder if Sanity is configured
+	let builder = null;
+	if (
+		process.env.NEXT_PUBLIC_SANITY_PROJECT_ID &&
+		process.env.NEXT_PUBLIC_SANITY_DATASET
+	) {
+		try {
+			const { client } = require("@/sanity/lib/client");
+			const imageUrlBuilder = require("@sanity/image-url").default;
+			builder = imageUrlBuilder(client);
+		} catch (error) {
+			console.warn("Failed to create image builder:", error);
+		}
+	}
+
 	const content = PortableText(post.body);
+
+	// If no post data, show fallback
+	if (!post) {
+		return (
+			<BlogWrapper>
+				<div className="mx-auto max-w-screen-xl px-4 py-12 md:pt-16 lg:px-8">
+					<div className="text-center">
+						<h1 className="text-3xl font-medium text-gray-900 dark:text-gray-50 mb-4">
+							Blog Post Not Available
+						</h1>
+						<p className="text-gray-700 dark:text-gray-200">
+							This blog post is not available at the moment.
+						</p>
+					</div>
+				</div>
+			</BlogWrapper>
+		);
+	}
+
 	return (
 		<BlogWrapper>
 			<article className="mx-auto max-w-screen-xl px-4 py-12 md:pt-16 lg:px-8">
@@ -28,7 +58,7 @@ export function Post({ post }) {
 								</p>
 							</header>
 							<div className="prose prose-gray dark:prose-invert mx-auto max-w-3xl">
-								{post.mainImage && (
+								{post.mainImage && builder && (
 									<Image
 										src={builder
 											.image(post.mainImage)
@@ -56,7 +86,7 @@ export function Post({ post }) {
 									Written by
 								</p>
 								<div className="flex items-center">
-									{post.authorImage && (
+									{post.authorImage && builder && (
 										<Image
 											src={builder
 												.image(post.authorImage)
