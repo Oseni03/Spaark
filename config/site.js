@@ -5,9 +5,9 @@ import { FileCode, Code, Globe, Book } from "lucide-react";
 
 export const siteConfig = {
 	name: "Spaark",
-	heroIntro: "Create your tech portfolio in minutes",
+	heroIntro: "Build your developer portfolio in minutes",
 	description:
-		"Choose from our beautiful templates, fill in your details, and get your portfolio live in minutes.",
+		"Showcase your code, projects, and technical skills with our developer-focused templates. Deploy your portfolio with custom domains and integrated tech blog.",
 	keywords: [
 		"portfolio builder",
 		"developer portfolio",
@@ -44,6 +44,7 @@ export const siteConfig = {
 				"Launch your professional tech portfolio in minutes with our mobile-responsive, SEO-optimized templates designed specifically for developers and tech professionals.",
 			icon: FileCode,
 			id: "templates",
+			plans: ["free", "basic", "pro"],
 		},
 		{
 			name: "Professional Domain Setup",
@@ -51,6 +52,7 @@ export const siteConfig = {
 				"Stand out with a custom domain that matches your personal brand. Easy setup with full SSL security and fast global CDN included.",
 			icon: Globe,
 			id: "domain",
+			plans: ["basic", "pro"],
 		},
 		{
 			name: "Built-in Tech Blog",
@@ -58,6 +60,7 @@ export const siteConfig = {
 				"Boost your personal brand with an integrated technical blog. Share your expertise, attract recruiters, and establish thought leadership in your field.",
 			icon: Book,
 			id: "blog",
+			plans: ["basic", "pro"],
 		},
 		{
 			name: "Developer-Focused Features",
@@ -65,6 +68,24 @@ export const siteConfig = {
 				"Showcase your GitHub projects, tech stack, and coding achievements with dedicated sections that highlight your technical expertise.",
 			icon: Code,
 			id: "tech-features",
+			plans: ["basic", "pro"],
+		},
+	],
+	templates: [
+		{
+			id: "default",
+			name: "Default",
+			preview: "/templates/default.png",
+		},
+		{
+			id: "violetvista",
+			name: "Violet Vista",
+			preview: "/templates/violetvista.png",
+		},
+		{
+			id: "neomint",
+			name: "Neomint",
+			preview: "/templates/noemint.png",
 		},
 	],
 };

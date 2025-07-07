@@ -1,16 +1,11 @@
 "use client";
 
 import { siteConfig } from "@/config/site";
-import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 
 export const Features = () => {
-	const freePlan = SUBSCRIPTION_PLANS.FREE.monthly;
-	const basicPlan = SUBSCRIPTION_PLANS.BASIC.monthly;
-	const proPlan = SUBSCRIPTION_PLANS.PRO.monthly;
-
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
@@ -30,6 +25,20 @@ export const Features = () => {
 
 		return () => observer.disconnect();
 	}, []);
+
+	// Helper function to get badge styling based on plan name
+	const getBadgeStyling = (planName) => {
+		switch (planName.toLowerCase()) {
+			case "free":
+				return "text-xs bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:scale-105 transition-transform duration-200";
+			case "basic":
+				return "text-xs bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:scale-105 transition-transform duration-200";
+			case "pro":
+				return "text-xs bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:scale-105 transition-transform duration-200";
+			default:
+				return "text-xs bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:scale-105 transition-transform duration-200";
+		}
+	};
 
 	return (
 		<section
@@ -83,24 +92,16 @@ export const Features = () => {
 								{feature.description}
 							</p>
 							<div className="flex gap-1 flex-wrap justify-center">
-								<Badge
-									variant="outline"
-									className="text-xs bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:scale-105 transition-transform duration-200"
-								>
-									Free
-								</Badge>
-								<Badge
-									variant="outline"
-									className="text-xs bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:scale-105 transition-transform duration-200"
-								>
-									Basic
-								</Badge>
-								<Badge
-									variant="outline"
-									className="text-xs bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:scale-105 transition-transform duration-200"
-								>
-									Pro
-								</Badge>
+								{feature.plans.map((plan, planIndex) => (
+									<Badge
+										key={planIndex}
+										variant="outline"
+										className={getBadgeStyling(plan)}
+									>
+										{plan.charAt(0).toUpperCase() +
+											plan.slice(1)}
+									</Badge>
+								))}
 							</div>
 						</CardContent>
 					</Card>

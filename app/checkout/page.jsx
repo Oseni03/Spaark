@@ -242,7 +242,7 @@ function CheckoutContent() {
 				priceId,
 			});
 
-			if (!txn.success) {
+			if (!txn.success || !txn.data) {
 				logger.error("Transaction creation failed", txn.error);
 				throw new Error(txn.error);
 			}
@@ -257,6 +257,7 @@ function CheckoutContent() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					transactionId,
+					priceId,
 					cardData: {
 						card_number: cardData.cardNumber.replace(/\s/g, ""),
 						cvv: cardData.cvv,
@@ -264,7 +265,7 @@ function CheckoutContent() {
 						expiry_year: cardData.expiryYear,
 						currency: "USD",
 						amount: planData.price,
-						email: user.emailAddresses[0].emailAddress,
+						email: user.email,
 						tx_ref: transactionId,
 						cardholder_name: cardData.cardholderName,
 					},
@@ -566,7 +567,7 @@ function CheckoutContent() {
 										Customer Information
 									</h4>
 									<p className="text-sm text-gray-600 dark:text-gray-400">
-										{user.emailAddresses[0].emailAddress}
+										{user.email}
 									</p>
 								</div>
 							</CardContent>

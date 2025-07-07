@@ -66,6 +66,7 @@ class PaymentService {
 			tx_ref,
 			cardholder_name,
 			meta = {},
+			priceId,
 		} = paymentData;
 
 		try {
@@ -86,6 +87,7 @@ class PaymentService {
 					// 	pin: "3310", // This would be collected from user in a real implementation
 					// },
 					meta,
+					payment_plan: planId,
 				},
 				{
 					headers: {

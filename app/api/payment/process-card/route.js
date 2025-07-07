@@ -19,7 +19,7 @@ export async function POST(request) {
 			);
 		}
 
-		const { transactionId, cardData } = await request.json();
+		const { transactionId, priceId, cardData } = await request.json();
 
 		if (!transactionId || !cardData) {
 			return NextResponse.json(
@@ -82,6 +82,7 @@ export async function POST(request) {
 					transactionId,
 					userId,
 				},
+				priceId,
 			});
 
 			if (paymentResult.success) {

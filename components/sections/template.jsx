@@ -26,25 +26,7 @@ import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
 import { defaultMetadata } from "@/schema/sections";
 import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
-
-const templates = [
-	{
-		id: "default",
-		name: "Default",
-		preview: "/templates/default.png",
-	},
-	{
-		id: "violetvista",
-		name: "Violet Vista",
-		preview: "/templates/violetvista.png",
-	},
-	{
-		id: "neomint",
-		name: "Neomint",
-		preview: "/templates/noemint.png",
-	},
-	// Add more templates as needed
-];
+import { siteConfig } from "@/config/site";
 
 const templateTheme = {
 	default: {
@@ -75,7 +57,7 @@ export function TemplateSection() {
 	);
 
 	logger.info("Current portfolio:", portfolio); // Debug log
-	logger.info("Available templates:", templates); // Debug log
+	logger.info("Available templates:", siteConfig.templates); // Debug log
 
 	const selectedTemplate = portfolio?.metadata.template || "default";
 	logger.info("Selected template:", selectedTemplate); // Debug log
@@ -254,7 +236,7 @@ export function TemplateSection() {
 
 				<ScrollArea className="flex-1 -mx-6 px-6">
 					<div className="grid grid-cols-2 gap-8 @lg/right:grid-cols-3 @2xl/right:grid-cols-4">
-						{templates.map((template, index) => (
+						{siteConfig.templates.map((template, index) => (
 							<div key={template.id} className="w-full h-[280px]">
 								<AspectRatio
 									ratio={1 / 1.4142}

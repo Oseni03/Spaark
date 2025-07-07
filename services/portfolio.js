@@ -20,6 +20,7 @@ const portfolioSelect = {
 	// organizationId: true,
 	metadata: true,
 	basics: true,
+	updatedAt: true,
 };
 
 export async function getAllPortfolios() {

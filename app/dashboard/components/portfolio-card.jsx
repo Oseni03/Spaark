@@ -20,7 +20,6 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn, generateRandomName } from "@/lib/utils";
-import dayjs from "dayjs";
 import { AnimatePresence, motion } from "framer-motion";
 import { BaseCard } from "./base-card";
 import { useRouter } from "next/navigation";
@@ -38,6 +37,11 @@ import { portfolioSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
 import slugify from "@sindresorhus/slugify";
 import Link from "next/link";
+import Image from "next/image";
+import { siteConfig } from "@/config/site";
+
+// Template preview mapping
+const DEFAULT_TEMPLATE = "/templates/default.png";
 
 export const PortfolioCard = ({ portfolio }) => {
 	const router = useRouter();
@@ -84,6 +88,11 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(removePortfolioFromDatabase(portfolio.id));
 	};
 
+	const templateId = portfolio?.metadata?.template || "default";
+	const previewSrc =
+		siteConfig.templates.find((temp) => temp.id === templateId).preview ||
+		DEFAULT_TEMPLATE;
+
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger>
@@ -91,6 +100,18 @@ export const PortfolioCard = ({ portfolio }) => {
 					className="relative overflow-hidden cursor-pointer hover:shadow-lg transition-all"
 					onClick={onOpen}
 				>
+					{/* Template Preview Image */}
+					<div className="relative w-full aspect-[1/1.4142] bg-muted/40">
+						<Image
+							src={previewSrc}
+							alt={`${templateId} preview`}
+							fill
+							className="object-cover rounded-t-md"
+							priority={false}
+							sizes="(max-width: 768px) 100vw, 33vw"
+						/>
+					</div>
+
 					<AnimatePresence>
 						{portfolio.locked && (
 							<motion.div
@@ -107,7 +128,8 @@ export const PortfolioCard = ({ portfolio }) => {
 					<div
 						className={cn(
 							"absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end space-y-0.5 p-4 pt-12",
-							"bg-gradient-to-t from-background/80 to-transparent"
+							// Change the gradient to a darker one for better text contrast
+							"bg-gradient-to-t from-black/80 via-black/60 to-transparent"
 						)}
 					>
 						<div className="mb-4">
@@ -117,13 +139,13 @@ export const PortfolioCard = ({ portfolio }) => {
 									{portfolio.name}
 								</h3>
 							</div>
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+							<div className="flex items-center gap-2 text-sm text-white">
 								<Globe className="w-4 h-4" />
 								<span>{portfolioLink}</span>
 							</div>
 						</div>
 
-						<div className="space-y-2 text-sm text-muted-foreground">
+						<div className="space-y-2 text-sm text-white">
 							<p>
 								Template:{" "}
 								{portfolio?.metadata?.template || "Default"}
