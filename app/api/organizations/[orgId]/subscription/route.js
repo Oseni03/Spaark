@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyAuthToken } from "@/lib/firebase/admin";
 import { COOKIE_NAME } from "@/utils/constants";
+import { createCheckoutSession } from "@polar-sh/nextjs/server";
 
 export async function GET(req, { params }) {
 	try {
@@ -63,6 +64,43 @@ export async function GET(req, { params }) {
 
 // Polar: Create a new checkout session for organization subscription (stub)
 export async function POST(req, { params }) {
-	// TODO: Implement Polar checkout session creation for organization
-	return NextResponse.json({ message: "Polar org checkout session creation not implemented yet." }, { status: 501 });
+	try {
+		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
+		const decodedToken = await verifyAuthToken(authToken);
+		const userId = decodedToken?.uid;
+		const { orgId } = params;
+
+		if (!userId || !orgId) {
+			return new NextResponse("Unauthorized", { status: 401 });
+		}
+
+		const { planType } = await req.json(); // Expect planType in body
+
+		// TODO: Map planType to Polar product/price ID
+		const POLAR_PRODUCT_ID = process.env.POLAR_PRODUCT_ID;
+		const POLAR_ACCESS_TOKEN = process.env.POLAR_ACCESS_TOKEN;
+
+		if (!POLAR_PRODUCT_ID || !POLAR_ACCESS_TOKEN) {
+			return new NextResponse("Polar config missing", { status: 500 });
+		}
+
+		// Create checkout session with Polar
+		const session = await createCheckoutSession({
+			accessToken: POLAR_ACCESS_TOKEN,
+			productId: POLAR_PRODUCT_ID,
+			customerId: orgId, // or email if required
+			// Optionally pass success/cancel URLs
+		});
+
+		// Optionally, store session.id in Subscription for later verification
+		await prisma.subscription.update({
+			where: { organizationId: orgId },
+			data: { polarSubscriptionId: session.id },
+		});
+
+		return NextResponse.json({ url: session.url });
+	} catch (error) {
+		console.error("Error creating Polar org checkout session:", error);
+		return new NextResponse("Failed to create org checkout session", { status: 500 });
+	}
 }
