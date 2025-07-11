@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import { verifyAuthToken } from "@/lib/firebase/admin";
-import { COOKIE_NAME } from "@/utils/constants";
 import { logger } from "@/lib/utils";
 import { handlePaymentFailure } from "@/services/subscription";
 import { paymentService } from "@/services/payment";
+import { getUserIdFromSession } from "@/lib/auth-utils";
 
 export async function POST(request) {
 	try {
 		// Verify authentication
-		const authToken = request.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const userId = await getUserIdFromSession();
 
 		if (!userId) {
 			return NextResponse.json(

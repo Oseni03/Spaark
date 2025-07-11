@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPortfolios } from "@/services/portfolio";
 import { logger } from "@/lib/utils";
-import { verifyAuthToken } from "@/lib/firebase/admin";
-import { COOKIE_NAME } from "@/utils/constants";
+import { getUserIdFromSession } from "@/lib/auth-utils";
 
 // Helper function to get CORS headers
 const getCorsHeaders = (origin) => {
@@ -60,10 +59,7 @@ export async function GET(req) {
 		const { searchParams } = new URL(req.url);
 		let userId = searchParams.get("userId");
 
-		// Get Firebase auth token from cookie
-		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const authenticatedUserId = decodedToken?.uid;
+		const authenticatedUserId = await getUserIdFromSession();
 
 		logger.info("Auth details", {
 			requestId,

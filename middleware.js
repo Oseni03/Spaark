@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 const isProtectedRoute = (pathname) => {
 	return (
@@ -14,21 +15,21 @@ export async function middleware(request) {
 	const { nextUrl: url } = request;
 	const { pathname, search } = request.nextUrl;
 
-	// Get Firebase auth token from cookie
-	const hasAuthToken = request.cookies.has("firebaseAuthToken");
+	// Get session from cookie
+	const sessionCookie = getSessionCookie(request);
 
 	// Check if the path is an auth path
 	const isAuthPath = authPaths.some((path) => pathname === path);
 
-	// If the path is protected and no token exists, redirect to login
-	if (isProtectedRoute(pathname) && !hasAuthToken) {
+	// If the path is protected and no session exists, redirect to login
+	if (isProtectedRoute(pathname) && !sessionCookie) {
 		const url = new URL("/sign-in", request.url);
 		url.searchParams.set("callbackUrl", pathname);
 		return NextResponse.redirect(url);
 	}
 
-	// If there's a token and trying to access an auth page, redirect to dashboard
-	if (isAuthPath && hasAuthToken) {
+	// If there's a session and trying to access an auth page, redirect to dashboard
+	if (isAuthPath && sessionCookie) {
 		return NextResponse.redirect(
 			new URL("/dashboard/portfolios", request.url)
 		);

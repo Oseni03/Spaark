@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics, basicsSchema } from "@/schema/sections/basics";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -56,12 +54,7 @@ export async function createBasics(portfolioId, data = defaultBasics) {
 
 export async function updatePortfolioBasics({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		const userId = await verifyAuth();
 
 		// Update user in database
 		const updatedBasics = await prisma.basics.update({

@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { skillSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
+import { verifyAuth } from "@/lib/auth-utils";
 
 const select = {
 	id: true,
@@ -33,12 +31,7 @@ export async function getSkills(portfolioId) {
 
 export async function createSkill({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		// Create skill with additional metadata
 		const skill = await prisma.skill.create({
@@ -57,12 +50,7 @@ export async function createSkill({ portfolioId, ...data }) {
 
 export async function editSkill(skillId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		const existingSkill = await prisma.skill.findUnique({
 			where: { id: skillId, portfolioId },
@@ -92,14 +80,7 @@ export async function editSkill(skillId, { portfolioId, ...data }) {
 
 export async function deleteSkill(skillId, portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a skill"
-			);
-		}
+		await verifyAuth();
 
 		const existingSkill = await prisma.skill.findUnique({
 			where: { id: skillId, portfolioId },

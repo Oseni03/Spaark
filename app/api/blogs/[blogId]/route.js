@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyAuthToken } from "@/lib/firebase/admin";
-import { COOKIE_NAME } from "@/utils/constants";
 import { logger } from "@/lib/utils";
 import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
+import { getUserIdFromSession } from "@/lib/auth-utils";
 
 export async function PATCH(request, { params }) {
 	try {
-		const authToken = request.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const userId = await getUserIdFromSession()
 		const { blogId } = params;
 
 		if (!userId) {
@@ -108,9 +105,7 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
 	try {
-		const authToken = request.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const userId = await getUserIdFromSession()
 		const { blogId } = params;
 
 		if (!userId) {

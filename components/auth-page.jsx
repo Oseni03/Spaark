@@ -2,17 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-	GoogleAuthProvider,
-	signInWithPopup,
-	sendSignInLinkToEmail,
-} from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
 
 // Action code settings for email link authentication
 const actionCodeSettings = {
@@ -29,14 +24,9 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		setIsLoading(true);
 		try {
 			logger.info("Starting Google sign in");
-			const provider = new GoogleAuthProvider();
-			const result = await signInWithPopup(auth, provider);
+			await authClient.signInWithProvider("google");
 
-			logger.info("Google sign in successful", {
-				uid: result.user.uid,
-				email: result.user.email,
-			});
-
+			logger.info("Google sign in successful");
 			toast.success("Successfully signed in!");
 
 			if (redirectPath) {
@@ -52,7 +42,7 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		}
 	};
 
-	// Handle Email Link Sign In
+	// Handle Email Sign In
 	const handleEmailSignIn = async (e) => {
 		e.preventDefault();
 		if (!email || !email.includes("@")) {
@@ -62,10 +52,9 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 
 		setIsLoading(true);
 		try {
-			await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-
-			// Save the email locally to remember the user when they open the link
-			window.localStorage.setItem("emailForSignIn", email);
+			await authClient.signInWithEmail({
+				email,
+			});
 
 			toast.success("Sign-in link sent!", {
 				description: "Check your email for the sign-in link.",

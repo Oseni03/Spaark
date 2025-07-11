@@ -1,13 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
 import { transformPortfolio } from "@/lib/utils";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const portfolioSelect = {
 	id: true,
@@ -60,14 +58,7 @@ export async function getPortfolios(userId, orgId = null) {
 
 export async function createPortfolio(data) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 		const { portfolioId, ...basicsData } = defaultBasics;
 
 		const portfolio = await prisma.portfolio.create({
@@ -114,14 +105,7 @@ const getValidBasicsUpdateFields = (basics) => {
 
 export async function updatePortfolio(id, data) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		// Extract main portfolio fields
 		const { id: portfolioId, ...portfolioData } = data;
@@ -148,14 +132,7 @@ export async function updatePortfolio(id, data) {
 
 export async function deletePortfolio(id) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		const whereClause = {
 			id,
@@ -225,14 +202,7 @@ export async function getPortfolioById(portfolioId) {
 
 export async function getDetailedPortfolio(portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		const portfolio = await prisma.portfolio.findUnique({
 			where: { id: portfolioId, userId },
@@ -357,14 +327,7 @@ export async function markDomainVerified(domain) {
 
 export async function updatePortfolioWithSections(id, data) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		// First, get the existing portfolio to preserve createdAt
 		const existingPortfolio = await prisma.portfolio.findUnique({
@@ -578,7 +541,7 @@ export async function createPortfolioWithSections(data) {
 			);
 		}
 
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		// Extract main portfolio fields and nested sections
 		const {

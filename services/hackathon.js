@@ -1,13 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { hackathonSchema } from "@/schema/sections";
 import { logger } from "@/lib/utils";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -60,12 +58,7 @@ export async function createHackathon({ portfolioId, ...data }) {
 		}
 
 		// Get the authenticated user
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		const userId = await verifyAuth();
 
 		// Ensure links is an array
 		const links = Array.isArray(data.links) ? data.links : [];
@@ -108,12 +101,7 @@ export async function createHackathon({ portfolioId, ...data }) {
 export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		const userId = await verifyAuth();
 
 		// Destructure links from the data and validate them
 		const { links, ...hackathonData } = data;
@@ -147,12 +135,7 @@ export async function editHackathon(hackathonId, { portfolioId, ...data }) {
 
 export async function deleteHackathon(hackathonId, portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		const userId = await verifyAuth();
 
 		await prisma.hackathon.delete({
 			where: { id: hackathonId, portfolioId },

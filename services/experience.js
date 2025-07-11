@@ -3,10 +3,8 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { experienceSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const experienceSelect = {
 	id: true,
@@ -39,12 +37,7 @@ export async function getExperiences(portfolioId) {
 export async function createExperience({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		// Create experience with correct data structure
 		const exp = await prisma.experience.create({
@@ -66,12 +59,7 @@ export async function createExperience({ portfolioId, ...data }) {
 export async function editExperience(experienceId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
 		// Get the authenticated user
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		const updatedExp = await prisma.experience.update({
 			where: {
@@ -94,11 +82,9 @@ export async function editExperience(experienceId, { portfolioId, ...data }) {
 
 export async function deleteExperience(experienceId, portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
+		await verifyAuth();
+		if (!experienceId || !portfolioId) {
+			throw new Error("Experience ID and Portfolio ID are required");
 		}
 
 		await prisma.experience.delete({

@@ -5,16 +5,13 @@ import {
 } from "@/lib/domains";
 import { updatePortfolioDomain } from "@/services/portfolio";
 import { logger } from "@/lib/utils";
-import { verifyAuthToken } from "@/lib/firebase/admin";
 import { NextResponse } from "next/server";
-import { COOKIE_NAME } from "@/utils/constants";
 import { prisma } from "@/lib/db";
+import { getUserIdFromSession } from "@/lib/auth-utils";
 
 export async function POST(req) {
 	try {
-		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const userId = await getUserIdFromSession();
 
 		if (!userId) {
 			return NextResponse.json(
@@ -145,9 +142,7 @@ export async function POST(req) {
 
 export async function DELETE(req) {
 	try {
-		const authToken = req.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const userId = await getUserIdFromSession();
 
 		if (!userId) {
 			return NextResponse.json(

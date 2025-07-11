@@ -1,11 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
-import { upsertUser } from "@/services/user";
-import { logger } from "@/lib/utils";
-import { initAuthCookies } from "@/lib/firebase/auth-cookies";
+import { createContext, useContext, useEffect } from "react";
+import { useSession, signOut as betterAuthSignOut } from "@/lib/auth-client";
+import logger from "@/lib/logger";
 
 // Provide proper default values for the context
 const defaultAuthContext = {
@@ -25,64 +22,30 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }) {
-	const [user, setUser] = useState(null);
-	const [loading, setLoading] = useState(true);
+	const { data: session, status } = useSession();
 
 	const signOut = async () => {
 		try {
-			await firebaseSignOut(auth);
-			logger.info("User signed out successfully");
+			await betterAuthSignOut();
+			logger.info("User signed out");
 		} catch (error) {
-			logger.error("Error signing out:", error);
+			logger.error("Sign out error:", error);
+			throw error;
 		}
 	};
 
+	// Convert session to user object to maintain compatibility
+	const user = session?.user ?? null;
+	const loading = status === "loading";
+
 	useEffect(() => {
-		// Only run on client side
-		if (typeof window === "undefined") {
-			setLoading(false);
-			return;
+		if (user) {
+			logger.info("User authenticated:", {
+				userId: user.id,
+				email: user.email,
+			});
 		}
-
-		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-			if (firebaseUser) {
-				try {
-					// First upsert the user to ensure we have a record
-					const dbUser = await upsertUser({
-						id: firebaseUser.uid,
-						email: firebaseUser.email,
-					});
-
-					// Combine Firebase user with database user data
-					setUser({
-						...dbUser.data,
-						emailVerified: firebaseUser.emailVerified,
-						displayName: firebaseUser.displayName || undefined,
-						photoURL: firebaseUser.photoURL || "",
-					});
-
-					logger.info("User authenticated:", {
-						id: dbUser.id,
-						email: dbUser.email,
-					});
-				} catch (error) {
-					logger.error("Error syncing user data:", error);
-					setUser(null);
-				}
-			} else {
-				setUser(null);
-			}
-			setLoading(false);
-		});
-
-		// Initialize cookie management
-		const cookieCleanup = initAuthCookies();
-
-		return () => {
-			unsubscribe();
-			if (cookieCleanup) cookieCleanup();
-		};
-	}, []);
+	}, [user]);
 
 	return (
 		<AuthContext.Provider value={{ user, loading, signOut }}>

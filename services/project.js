@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { projectSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -38,12 +36,7 @@ export async function getProjects(portfolioId) {
 
 export async function createProject({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		const project = await prisma.project.create({
 			data: {
@@ -53,18 +46,16 @@ export async function createProject({ portfolioId, ...data }) {
 			select,
 		});
 
-		revalidatePath("/builder");
+		revalidatePath(`/dashboard/projects`);
 		return projectSchema.parse(project);
 	});
 }
 
 export async function editProject(projectId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
+		await verifyAuth();
+		if (!portfolioId) {
+			throw new Error("Portfolio ID is required");
 		}
 
 		const updatedProject = await prisma.project.update({
@@ -81,23 +72,47 @@ export async function editProject(projectId, { portfolioId, ...data }) {
 	});
 }
 
-export async function deleteProject(projectId, portfolioId) {
+export async function deleteProject(id) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error(
-				"Unauthorized: You must be logged in to delete a project."
-			);
-		}
+		await verifyAuth();
 
-		await prisma.project.delete({
-			where: { id: projectId, portfolioId },
+		const project = await prisma.project.delete({
+			where: { id },
+			select,
 		});
 
-		revalidatePath("/builder");
+		revalidatePath(`/dashboard/projects`);
+		return projectSchema.parse(project);
+	});
+}
 
-		return { projectId, portfolioId };
+export async function updateProject(id, data) {
+	return withErrorHandling(async () => {
+		await verifyAuth();
+		
+		const project = await prisma.project.update({
+			where: { id },
+			data,
+			select,
+		});
+
+		revalidatePath(`/dashboard/projects`);
+		return projectSchema.parse(project);
+	});
+}
+
+export async function updateOrder(portfolioId, order) {
+	return withErrorHandling(async () => {
+		await verifyAuth();
+
+		for (const [index, projectId] of order.entries()) {
+			await prisma.project.update({
+				where: { id: projectId },
+				data: { order: index },
+			});
+		}
+
+		revalidatePath(`/dashboard/projects`);
+		return true;
 	});
 }

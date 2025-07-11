@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { socialSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const select = {
 	id: true,
@@ -32,11 +30,9 @@ export async function getSocials(portfolioId) {
 
 export async function createSocial({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
+		await verifyAuth();
+		if (!portfolioId) {
+			throw new Error("Portfolio ID is required");
 		}
 
 		// Create social with additional metadata
@@ -55,12 +51,7 @@ export async function createSocial({ portfolioId, ...data }) {
 
 export async function editSocial(socialId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth()
 
 		const updatedSocial = await prisma.social.update({
 			where: { id: socialId, portfolioId },
@@ -78,14 +69,7 @@ export async function editSocial(socialId, { portfolioId, ...data }) {
 
 export async function deleteSocial(socialId, portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a social"
-			);
-		}
+		await verifyAuth()
 
 		await prisma.social.delete({
 			where: { id: socialId, portfolioId },

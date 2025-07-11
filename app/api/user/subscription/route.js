@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyAuthToken } from "@/lib/firebase/admin";
-import { COOKIE_NAME } from "@/utils/constants";
+import { auth } from "@/lib/auth";
 import { logger } from "@/lib/utils";
+import { headers } from "next/headers";
 
 export async function GET(request) {
 	try {
-		const authToken = request.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const session = await auth.api.getSession({
+			headers: await headers()
+		});
+		const userId = session?.user?.id;
 
 		if (!userId) {
 			return new NextResponse("Unauthorized", { status: 401 });

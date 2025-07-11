@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { certificationSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
 
 const certificationSelect = {
 	id: true,
@@ -37,12 +35,7 @@ export async function getCertifications(portfolioId) {
 
 export async function createCertification({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
+		const userId = await verifyAuth();
 
 		const certification = await prisma.certification.create({
 			data: {

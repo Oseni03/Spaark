@@ -2,10 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { withErrorHandling } from "./shared";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
 import { logger } from "@/lib/utils";
-import { COOKIE_NAME } from "@/utils/constants";
+import { verifyAuth } from "@/lib/auth-utils";
 
 export async function initializeSubscription({
 	userId,
@@ -209,15 +207,9 @@ export async function updateTransaction({ tx_ref, status }) {
 
 export async function updateSubscription() {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
+		const userId = await verifyAuth()
 		const user = await prisma.user.update({
-			where: { id: decodedToken.uid },
+			where: { id: userId },
 			data: {
 				subscribed: true,
 				updatedAt: new Date(),

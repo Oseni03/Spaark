@@ -1,12 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { educationSchema } from "@/schema/sections";
-import { COOKIE_NAME } from "@/utils/constants";
+import { verifyAuth } from "@/lib/auth-utils";
 
 const educationSelect = {
 	id: true,
@@ -36,12 +34,7 @@ export async function getEducations(portfolioId) {
 
 export async function createEducation({ portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		// Create education with additional metadata
 		const edu = await prisma.education.create({
@@ -60,12 +53,7 @@ export async function createEducation({ portfolioId, ...data }) {
 
 export async function editEducation(educationId, { portfolioId, ...data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error("Unauthorized");
-		}
+		await verifyAuth();
 
 		const updatedEdu = await prisma.education.update({
 			where: { id: educationId, portfolioId },
@@ -85,14 +73,7 @@ export async function editEducation(educationId, { portfolioId, ...data }) {
 
 export async function deleteEducation(educationId, portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid || !portfolioId) {
-			throw new Error(
-				"Unauthorized: Must be logged in to delete a education"
-			);
-		}
+		await verifyAuth();
 
 		await prisma.education.delete({
 			where: { id: educationId, portfolioId },

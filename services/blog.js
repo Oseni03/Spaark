@@ -1,13 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyAuthToken } from "@/lib/firebase/admin";
+import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
-import { COOKIE_NAME } from "@/utils/constants";
 import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
 
 const select = {
@@ -89,13 +87,8 @@ export async function getBlog(blogId) {
 
 export async function createBlog({ portfolioId, data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) throw new Error("Unauthorized");
+		const userId = await verifyAuth();
 		if (!portfolioId) throw new Error("Portfolio ID is required");
-
-		const userId = decodedToken.uid;
 
 		// Separate tags from main data
 		const { tags = [], ...blogData } = data;
@@ -127,10 +120,7 @@ export async function createBlog({ portfolioId, data }) {
 
 export async function updateBlog({ blogId, portfolioId, data }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) throw new Error("Unauthorized");
+		const userId = await verifyAuth();
 
 		// Separate tags from main data
 		const { tags = [], ...blogData } = data;
@@ -138,7 +128,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 
 		if (status === "published") {
 			const authCheck = await checkBlogArticleCreationAuth(
-				decodedToken.uid
+				userId
 			);
 
 			if (!authCheck.allowed) {
@@ -150,7 +140,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 			where: {
 				id: blogId,
 				portfolioId,
-				authorId: decodedToken.uid,
+				authorId: userId,
 			},
 			data: {
 				...blogData,
@@ -177,16 +167,13 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 
 export async function deleteBlog({ blogId, portfolioId }) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) throw new Error("Unauthorized");
+		const userId = await verifyAuth();
 
 		await prisma.blog.delete({
 			where: {
 				id: blogId,
 				portfolioId,
-				authorId: decodedToken.uid,
+				authorId: userId,
 			},
 		});
 

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/utils";
 import { getBlogsByAuthor, getBlogsByPortfolio } from "@/services/blog";
-import { verifyAuthToken } from "@/lib/firebase/admin";
-import { COOKIE_NAME } from "@/utils/constants";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
 import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
 
@@ -56,11 +56,12 @@ export async function GET(req) {
 	try {
 		const { searchParams } = new URL(req.url);
 		const portfolioId = searchParams.get("portfolioId");
-		const authToken = await req.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const session = await auth.api.getSession({
+			headers: await headers()
+		});
+		const userId = session?.user?.id;
 
-		if (!portfolioId && !userId) {
+		if (!userId) {
 			logger.error("Unauthorized request", { requestId });
 			return createErrorResponse(401, "Unauthorized", origin);
 		}
@@ -116,9 +117,10 @@ export const config = {
 
 export async function POST(request) {
 	try {
-		const authToken = request.cookies.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		const userId = decodedToken?.uid;
+		const session = await auth.api.getSession({
+			headers: await headers()
+		});
+		const userId = session?.user?.id;
 
 		if (!userId) {
 			return new NextResponse("Unauthorized", { status: 401 });
