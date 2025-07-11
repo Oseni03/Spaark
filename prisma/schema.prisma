@@ -302,8 +302,6 @@ model Transaction {
   priceId        String
   title          String
   amount         Float
-  subscriptionId String?
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime?     @updatedAt
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -311,35 +309,23 @@ model Transaction {
 
   @@index([userId])
   @@index([organizationId])
-  @@index([subscriptionId])
 }
 
 model Subscription {
   id                   String    @id @default(cuid())
   userId               String?   @unique
   organizationId       String?   @unique
-  type                 String // INDIVIDUAL or TEAM
-  frequency            String // weekly, monthly, yearly
-  status               String    @default("pending")
-  priceId              String
-  startDate            DateTime?
-  endDate              DateTime?
-  portfolioLimit       Int       @default(1)
+  polarSubscriptionId  String?   @unique // Polar subscription/session/checkout ID
+  status               String    // active, cancelled, trialing, etc (mirrored from Polar)
+  planType             String    // BASIC, PRO, etc
   blogEnabled          Boolean   @default(false)
   blogLimit            Int?
   customPortfolioLimit Int?
-  customArticleLimit   Int?
-  customizable         Boolean   @default(false)
-  trial                Int? // days of free trial
   createdAt            DateTime  @default(now())
   updatedAt            DateTime? @updatedAt
 
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
   organization Organization? @relation(fields: [organizationId], references: [id])
-
-  @@index([userId])
-  @@index([organizationId])
 }
 
 model Contact {
