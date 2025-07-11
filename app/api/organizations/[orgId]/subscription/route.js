@@ -40,15 +40,29 @@ export async function GET(req, { params }) {
 			return new NextResponse("Organization not found", { status: 404 });
 		}
 
-		const subscription = organization.subscription || {
-			status: "inactive",
-			type: "TEAM",
-			portfolioLimit: 0,
-		};
+		const subscription = organization.subscription
+			? {
+				id: organization.subscription.id,
+				polarSubscriptionId: organization.subscription.polarSubscriptionId,
+				status: organization.subscription.status,
+				planType: organization.subscription.planType,
+				blogEnabled: organization.subscription.blogEnabled,
+				blogLimit: organization.subscription.blogLimit,
+				customPortfolioLimit: organization.subscription.customPortfolioLimit,
+				createdAt: organization.subscription.createdAt,
+				updatedAt: organization.subscription.updatedAt,
+			}
+			: null;
 
 		return NextResponse.json(subscription);
 	} catch (error) {
 		console.error("Error fetching organization subscription:", error);
 		return new NextResponse("Internal Server Error", { status: 500 });
 	}
+}
+
+// Polar: Create a new checkout session for organization subscription (stub)
+export async function POST(req, { params }) {
+	// TODO: Implement Polar checkout session creation for organization
+	return NextResponse.json({ message: "Polar org checkout session creation not implemented yet." }, { status: 501 });
 }
