@@ -310,7 +310,7 @@ export default function Pricing({
 			});
 
 			try {
-				// Redirect to custom checkout page instead of Flutterwave UI
+				// Redirect to Polar checkout page
 				const checkoutUrl = `/checkout?type=${type.toLowerCase()}&frequency=${billing.toLowerCase()}&returnUrl=${encodeURIComponent(returnUrl)}`;
 
 				logger.info("Redirecting to checkout page", { checkoutUrl });

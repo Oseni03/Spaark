@@ -251,7 +251,7 @@ function CheckoutContent() {
 
 			const transactionId = txn.data.id;
 
-			// Now process the card payment directly with Flutterwave
+			// Redirect user to Polar checkout link
 			const paymentResponse = await fetch("/api/payment/process-card", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -321,7 +321,7 @@ function CheckoutContent() {
 						Complete Your Purchase
 					</h1>
 					<p className="text-gray-600 dark:text-gray-400 mt-2">
-						Secure payment powered by Flutterwave
+						Secure payment powered by Polar
 					</p>
 				</div>
 

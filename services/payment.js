@@ -5,10 +5,11 @@ import { logger } from "@/lib/utils";
 const PAYMENT_PROVIDERS = {
 	FLUTTERWAVE: "flutterwave",
 	PAYSTACK: "paystack",
+	POLAR: "polar",
 };
 
 // Current payment provider (can be easily changed)
-const CURRENT_PROVIDER = PAYMENT_PROVIDERS.FLUTTERWAVE;
+const CURRENT_PROVIDER = PAYMENT_PROVIDERS.POLAR;
 
 class PaymentService {
 	constructor() {
@@ -32,6 +33,11 @@ class PaymentService {
 					baseUrl: "https://api.paystack.co",
 					webhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET,
 				};
+			case PAYMENT_PROVIDERS.POLAR:
+				return {
+					accessToken: process.env.POLAR_ACCESS_TOKEN,
+					baseUrl: "https://api.polar.sh/v1",
+				};
 			default:
 				throw new Error(
 					`Unsupported payment provider: ${this.provider}`
@@ -46,6 +52,12 @@ class PaymentService {
 				return this.processFlutterwaveCardPayment(paymentData);
 			case PAYMENT_PROVIDERS.PAYSTACK:
 				return this.processPaystackCardPayment(paymentData);
+			case PAYMENT_PROVIDERS.POLAR:
+				// Polar does not support direct card payments, use checkout link
+				return {
+					success: false,
+					message: "Direct card payments are not supported with Polar. Use createPaymentLink instead.",
+				};
 			default:
 				throw new Error(
 					`Unsupported payment provider: ${this.provider}`
@@ -172,6 +184,8 @@ class PaymentService {
 				return this.verifyFlutterwavePayment(transactionId);
 			case PAYMENT_PROVIDERS.PAYSTACK:
 				return this.verifyPaystackPayment(transactionId);
+			case PAYMENT_PROVIDERS.POLAR:
+				return this.verifyPolarPayment(transactionId);
 			default:
 				throw new Error(
 					`Unsupported payment provider: ${this.provider}`
@@ -242,6 +256,8 @@ class PaymentService {
 				return this.createFlutterwavePaymentLink(paymentData);
 			case PAYMENT_PROVIDERS.PAYSTACK:
 				return this.createPaystackPaymentLink(paymentData);
+			case PAYMENT_PROVIDERS.POLAR:
+				return this.createPolarPaymentLink(paymentData);
 			default:
 				throw new Error(
 					`Unsupported payment provider: ${this.provider}`
@@ -325,6 +341,83 @@ class PaymentService {
 			};
 		} catch (error) {
 			logger.error("Paystack payment link error:", error);
+			throw error;
+		}
+	}
+
+	// Polar payment link (checkout session)
+	async createPolarPaymentLink(paymentData) {
+		const {
+			amount,
+			currency,
+			success_url,
+			cancel_url,
+			customer_email,
+			customer_name,
+			product_id,
+			product_price_id,
+			metadata = {},
+		} = paymentData;
+
+		try {
+			const response = await axios.post(
+				`${this.config.baseUrl}/checkouts`,
+				{
+					amount,
+					currency,
+					success_url,
+					cancel_url,
+					customer_email,
+					customer_name,
+					product_id,
+					product_price_id,
+					metadata,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${this.config.accessToken}`,
+						"Content-Type": "application/json",
+					},
+				}
+			);
+
+			const data = response.data;
+			return {
+				success: true,
+				link: data.url,
+				checkout_id: data.id,
+			};
+		} catch (error) {
+			logger.error("Polar payment link error:", error);
+			throw error;
+		}
+	}
+
+	// Polar payment verification
+	async verifyPolarPayment(checkoutId) {
+		try {
+			const response = await axios.get(
+				`${this.config.baseUrl}/checkouts/${checkoutId}`,
+				{
+					headers: {
+						Authorization: `Bearer ${this.config.accessToken}`,
+					},
+				}
+			);
+			const data = response.data;
+			return {
+				success: data.status === "open" || data.status === "completed",
+				status: data.status,
+				amount: data.amount,
+				currency: data.currency,
+				customer: {
+					email: data.customer_email,
+					name: data.customer_name,
+				},
+				reference: data.id,
+			};
+		} catch (error) {
+			logger.error("Polar payment verification error:", error);
 			throw error;
 		}
 	}
