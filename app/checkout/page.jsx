@@ -35,13 +35,6 @@ function CheckoutContent() {
 	const { user } = useAuth();
 
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [cardData, setCardData] = useState({
-		cardNumber: "",
-		expiryMonth: "",
-		expiryYear: "",
-		cvv: "",
-		cardholderName: "",
-	});
 	const [errors, setErrors] = useState({});
 
 	// Get plan details from URL params
@@ -62,235 +55,29 @@ function CheckoutContent() {
 		}
 	}, [type, frequency, planData, router]);
 
-	const validateCardData = () => {
-		const newErrors = {};
-
-		// Card number validation (basic Luhn algorithm)
-		const cardNumber = cardData.cardNumber.replace(/\s/g, "");
-		if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
-			newErrors.cardNumber = "Please enter a valid card number";
-		}
-
-		// Expiry validation
-		const currentYear = new Date().getFullYear();
-		const currentMonth = new Date().getMonth() + 1;
-		const expiryMonth = parseInt(cardData.expiryMonth);
-		const expiryYear = parseInt(cardData.expiryYear);
-
-		if (!expiryMonth || expiryMonth < 1 || expiryMonth > 12) {
-			newErrors.expiryMonth = "Invalid month";
-		}
-
-		if (
-			!expiryYear ||
-			expiryYear < currentYear ||
-			(expiryYear === currentYear && expiryMonth < currentMonth)
-		) {
-			newErrors.expiryYear = "Card has expired";
-		}
-
-		// CVV validation
-		if (
-			!cardData.cvv ||
-			cardData.cvv.length < 3 ||
-			cardData.cvv.length > 4
-		) {
-			newErrors.cvv = "Please enter a valid CVV";
-		}
-
-		// Cardholder name validation
-		if (!cardData.cardholderName.trim()) {
-			newErrors.cardholderName = "Please enter the cardholder name";
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	};
-
-	const formatCardNumber = (value) => {
-		const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-		const matches = v.match(/\d{4,16}/g);
-		const match = (matches && matches[0]) || "";
-		const parts = [];
-		for (let i = 0, len = match.length; i < len; i += 4) {
-			parts.push(match.substring(i, i + 4));
-		}
-		if (parts.length) {
-			return parts.join(" ");
-		} else {
-			return v;
-		}
-	};
-
-	const handleInputChange = (field, value) => {
-		let formattedValue = value;
-
-		// Format card number
-		if (field === "cardNumber") {
-			formattedValue = formatCardNumber(value);
-		}
-
-		// Format expiry month/year
-		if (field === "expiryMonth" || field === "expiryYear") {
-			formattedValue = value.replace(/\D/g, "");
-		}
-
-		// Format CVV
-		if (field === "cvv") {
-			formattedValue = value.replace(/\D/g, "");
-		}
-
-		setCardData((prev) => ({
-			...prev,
-			[field]: formattedValue,
-		}));
-
-		// Clear error when user starts typing
-		if (errors[field]) {
-			setErrors((prev) => ({
-				...prev,
-				[field]: "",
-			}));
-		}
-	};
-
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-
-		if (!validateCardData()) {
-			toast.error("Please fix the errors above");
-			return;
-		}
-
 		setIsProcessing(true);
-
+		setErrors({});
 		try {
-			let subscriptionData;
-			try {
-				logger.info("Getting subscription data", {
-					type,
-					frequency,
-				});
-				subscriptionData = getSubscriptionData(
-					type.toUpperCase(),
-					frequency.toLowerCase()
-				);
-				logger.info("Subscription data retrieved", subscriptionData);
-			} catch (error) {
-				logger.error("Invalid subscription configuration", {
-					type,
-					frequency,
-					error,
-				});
-				throw new Error(error.message);
-			}
-
-			const {
-				price,
-				priceId,
-				portfolioLimit,
-				blogEnabled,
-				blogLimit,
-				customizable,
-				customPortfolioLimit,
-				customArticleLimit,
-				trial,
-			} = subscriptionData;
-
-			if (!priceId) {
-				logger.error("Invalid price configuration", {
-					type,
-					frequency,
-				});
-				throw new Error("Invalid subscription configuration");
-			}
-
-			logger.info("Initializing subscription");
-			const subscriptionResult = await initializeSubscription({
-				userId: user.id,
-				portfolioLimit,
-				type: type.toUpperCase(),
-				frequency: frequency.toLowerCase(),
-				priceId,
-				blogEnabled,
-				blogLimit,
-				customizable,
-				customPortfolioLimit,
-				customArticleLimit,
-				trial,
-			});
-
-			if (!subscriptionResult.success) {
-				logger.error(
-					"Subscription creation failed",
-					subscriptionResult.error
-				);
-				throw new Error(subscriptionResult.error);
-			}
-
-			const subscription = subscriptionResult.data;
-			logger.info("Subscription initialized", {
-				subscriptionId: subscription.id,
-			});
-
-			logger.info("Creating transaction record");
-			const txn = await createTransaction({
-				userId: user.id,
-				title: `${type.toUpperCase()} Subscription - ${frequency.toLowerCase()}`,
-				subscriptionId: subscription.id,
-				amount: price,
-				priceId,
-			});
-
-			if (!txn.success || !txn.data) {
-				logger.error("Transaction creation failed", txn.error);
-				throw new Error(txn.error);
-			}
-
-			logger.info("Transaction created", { transactionId: txn.data.id });
-
-			const transactionId = txn.data.id;
-
-			// Redirect user to Polar checkout link
-			const paymentResponse = await fetch("/api/payment/process-card", {
+			const response = await fetch("/api/user/subscription", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					transactionId,
-					priceId,
-					cardData: {
-						card_number: cardData.cardNumber.replace(/\s/g, ""),
-						cvv: cardData.cvv,
-						expiry_month: cardData.expiryMonth,
-						expiry_year: cardData.expiryYear,
-						currency: "USD",
-						amount: planData.price,
-						email: user.email,
-						tx_ref: transactionId,
-						cardholder_name: cardData.cardholderName,
-					},
-				}),
+				body: JSON.stringify({ planType: type }),
 			});
-
-			if (!paymentResponse.ok) {
-				const error = await paymentResponse.json();
-				throw new Error(error.message || "Payment processing failed");
+			if (!response.ok) {
+				const error = await response.text();
+				throw new Error(error || "Failed to create checkout session");
 			}
-
-			const paymentData = await paymentResponse.json();
-
-			if (paymentData.status === "success") {
-				toast.success("Payment successful! Redirecting...");
-				// Redirect to success page with transaction details
-				router.push(
-					`/success?status=successful&tx_ref=${transactionId}&transaction_id=${paymentData.transaction_id}`
-				);
+			const data = await response.json();
+			if (data.url) {
+				window.location.href = data.url;
 			} else {
-				throw new Error(paymentData.message || "Payment failed");
+				throw new Error("No checkout URL returned");
 			}
 		} catch (error) {
-			logger.error("Payment error:", error);
-			toast.error(error.message || "Payment processing failed");
+			logger.error("Checkout error:", error);
+			toast.error(error.message || "Checkout failed");
 		} finally {
 			setIsProcessing(false);
 		}
@@ -336,160 +123,13 @@ function CheckoutContent() {
 						</CardHeader>
 						<CardContent>
 							<form onSubmit={handleSubmit} className="space-y-6">
-								{/* Cardholder Name */}
-								<div className="space-y-2">
-									<Label htmlFor="cardholderName">
-										Cardholder Name
-									</Label>
-									<Input
-										id="cardholderName"
-										placeholder="John Doe"
-										value={cardData.cardholderName}
-										onChange={(e) =>
-											handleInputChange(
-												"cardholderName",
-												e.target.value
-											)
-										}
-										className={
-											errors.cardholderName
-												? "border-red-500"
-												: ""
-										}
-										disabled={isProcessing}
-									/>
-									{errors.cardholderName && (
-										<p className="text-sm text-red-500">
-											{errors.cardholderName}
-										</p>
-									)}
-								</div>
-
-								{/* Card Number */}
-								<div className="space-y-2">
-									<Label htmlFor="cardNumber">
-										Card Number
-									</Label>
-									<Input
-										id="cardNumber"
-										placeholder="1234 5678 9012 3456"
-										value={cardData.cardNumber}
-										onChange={(e) =>
-											handleInputChange(
-												"cardNumber",
-												e.target.value
-											)
-										}
-										maxLength="19"
-										className={
-											errors.cardNumber
-												? "border-red-500"
-												: ""
-										}
-										disabled={isProcessing}
-									/>
-									{errors.cardNumber && (
-										<p className="text-sm text-red-500">
-											{errors.cardNumber}
-										</p>
-									)}
-								</div>
-
-								{/* Expiry and CVV */}
-								<div className="grid grid-cols-3 gap-4">
-									<div className="space-y-2">
-										<Label htmlFor="expiryMonth">
-											Month
-										</Label>
-										<Input
-											id="expiryMonth"
-											placeholder="MM"
-											value={cardData.expiryMonth}
-											onChange={(e) =>
-												handleInputChange(
-													"expiryMonth",
-													e.target.value
-												)
-											}
-											maxLength="2"
-											className={
-												errors.expiryMonth
-													? "border-red-500"
-													: ""
-											}
-											disabled={isProcessing}
-										/>
-										{errors.expiryMonth && (
-											<p className="text-sm text-red-500">
-												{errors.expiryMonth}
-											</p>
-										)}
-									</div>
-									<div className="space-y-2">
-										<Label htmlFor="expiryYear">Year</Label>
-										<Input
-											id="expiryYear"
-											placeholder="YYYY"
-											value={cardData.expiryYear}
-											onChange={(e) =>
-												handleInputChange(
-													"expiryYear",
-													e.target.value
-												)
-											}
-											maxLength="4"
-											className={
-												errors.expiryYear
-													? "border-red-500"
-													: ""
-											}
-											disabled={isProcessing}
-										/>
-										{errors.expiryYear && (
-											<p className="text-sm text-red-500">
-												{errors.expiryYear}
-											</p>
-										)}
-									</div>
-									<div className="space-y-2">
-										<Label htmlFor="cvv">CVV</Label>
-										<Input
-											id="cvv"
-											placeholder="123"
-											value={cardData.cvv}
-											onChange={(e) =>
-												handleInputChange(
-													"cvv",
-													e.target.value
-												)
-											}
-											maxLength="4"
-											className={
-												errors.cvv
-													? "border-red-500"
-													: ""
-											}
-											disabled={isProcessing}
-										/>
-										{errors.cvv && (
-											<p className="text-sm text-red-500">
-												{errors.cvv}
-											</p>
-										)}
-									</div>
-								</div>
-
-								{/* Security Notice */}
+								{/* No card fields, just a button */}
 								<Alert>
 									<Shield className="h-4 w-4" />
 									<AlertDescription>
-										Your payment information is encrypted
-										and secure. We never store your card
-										details.
+										You will be redirected to a secure Polar checkout page to complete your payment.
 									</AlertDescription>
 								</Alert>
-
-								{/* Submit Button */}
 								<Button
 									type="submit"
 									className="w-full"
@@ -499,7 +139,7 @@ function CheckoutContent() {
 									{isProcessing ? (
 										<>
 											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-											Processing Payment...
+											Redirecting to Polar...
 										</>
 									) : (
 										<>
