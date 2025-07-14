@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect } from "react";
 import { useSession, signOut as betterAuthSignOut } from "@/lib/auth-client";
-import logger from "@/lib/logger";
+import { logger } from "@/lib/utils";
 
 // Provide proper default values for the context
 const defaultAuthContext = {
@@ -26,7 +26,13 @@ export function AuthProvider({ children }) {
 
 	const signOut = async () => {
 		try {
-			await betterAuthSignOut();
+			await betterAuthSignOut({
+				fetchOptions: {
+					onSuccess: () => {
+						router.push("/sign-in"); // redirect to login page
+					},
+				},
+			});
 			logger.info("User signed out");
 		} catch (error) {
 			logger.error("Sign out error:", error);

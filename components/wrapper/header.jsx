@@ -45,10 +45,10 @@ export const Header1 = () => {
 				title: "Blog",
 				href: "/blog",
 			},
-			// {
-			// 	title: "Give feedback",
-			// 	href: "https://spaark.canny.io/feature-request",
-			// },
+			{
+				title: "Feature Requests",
+				href: "/feature-requests",
+			},
 		],
 		[]
 	);

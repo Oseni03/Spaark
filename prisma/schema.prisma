@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -40,16 +41,26 @@ model User {
   updatedAt  DateTime? @updatedAt
 
   // Relations
-  portfolios    Portfolio[]
-  blogs         Blog[]
-  memberships   OrganizationMember[]
-  organizations Organization[] // Organizations owned by user
-  transactions  Transaction[]
-  subscription  Subscription?
+  portfolios             Portfolio[]
+  blogs                  Blog[]
+  memberships            OrganizationMember[]
+  organizations          Organization[] // Organizations owned by user
+  transactions           Transaction[]
+  subscription           Subscription?
+  featureRequests        FeatureRequest[]
+  featureVotes           FeatureVote[]
+  featureRequestComments FeatureRequestComment[]
 
   // One-to-one relation to Code
-  code   Code?
-  codeId String? @unique
+  code          Code?
+  codeId        String?   @unique
+  name          String
+  emailVerified Boolean
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
 }
 
 model Organization {
@@ -422,4 +433,103 @@ model Newsletter {
   email     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model FeatureRequest {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  useCase     String?
+  painPoint   String?
+  outcome     String?
+  category    String?
+  tags        String[]
+  status      String   @default("Under Consideration") // Under Consideration, Planned, In Progress, Launched, Not Planned
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  authorId String
+  author   User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes    FeatureVote[]
+  comments FeatureRequestComment[]
+
+  @@index([authorId])
+  @@index([status])
+}
+
+model FeatureVote {
+  id               String   @id @default(cuid())
+  featureRequestId String
+  userId           String
+  createdAt        DateTime @default(now())
+
+  // Relations
+  featureRequest FeatureRequest @relation(fields: [featureRequestId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([featureRequestId, userId])
+  @@index([featureRequestId])
+  @@index([userId])
+}
+
+model FeatureRequestComment {
+  id               String   @id @default(cuid())
+  featureRequestId String
+  userId           String
+  content          String   @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  featureRequest FeatureRequest @relation(fields: [featureRequestId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([featureRequestId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }

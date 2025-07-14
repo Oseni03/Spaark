@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
+import slugify from "@sindresorhus/slugify";
+import { useRouter } from "next/navigation";
 
 // Action code settings for email link authentication
 const actionCodeSettings = {
@@ -16,7 +18,9 @@ const actionCodeSettings = {
 };
 
 export default function AuthPage({ actionText, redirectPath = "/" }) {
+	const router = useRouter();
 	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
 	// Handle Google Sign In
@@ -43,26 +47,57 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 	};
 
 	// Handle Email Sign In
-	const handleEmailSignIn = async (e) => {
+	const handleAuth = async (e) => {
 		e.preventDefault();
-		if (!email || !email.includes("@")) {
-			toast.error("Please enter a valid email address");
-			return;
-		}
 
 		setIsLoading(true);
 		try {
-			await authClient.signInWithEmail({
-				email,
-			});
-
-			toast.success("Sign-in link sent!", {
-				description: "Check your email for the sign-in link.",
-			});
+			if (slugify(actionText) === "sign-in") {
+				await authClient.signInWithEmail(
+					{
+						email,
+						password,
+					},
+					{
+						onSuccess: (ctx) => {
+							//redirect to the dashboard or sign in page
+							toast.success("Sign in successful!!");
+							router.push("/dashboard/portfolios");
+						},
+						onError: (ctx) => {
+							// display the error message
+							toast.error(
+								ctx.error.message || "Invalid credentials"
+							);
+						},
+					}
+				);
+			} else {
+				await authClient.signUp.email(
+					{
+						email,
+						password,
+						name: "Anonymous",
+						callbackURL: "/dashboard/portfolios",
+					},
+					{
+						onSuccess: (ctx) => {
+							//redirect to the dashboard or sign in page
+							toast.success("Sign in successful!!");
+						},
+						onError: (ctx) => {
+							// display the error message
+							toast.error(
+								ctx.error.message || "Invalid credentials"
+							);
+						},
+					}
+				);
+			}
 		} catch (error) {
-			logger.error("Authentication with email link failed:", error);
-			toast.error("Email link failed", {
-				description: "There was a problem sending the sign-in link.",
+			logger.error("Authentication with email failed:", error);
+			toast.error("Error authenticating", {
+				description: "There was a problem authenticating you.",
 			});
 		} finally {
 			setIsLoading(false);
@@ -123,16 +158,22 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 							</div>
 						</div>
 
-						<form
-							onSubmit={handleEmailSignIn}
-							className="space-y-4"
-						>
+						<form onSubmit={handleAuth} className="space-y-4">
 							<div className="space-y-2">
 								<Input
 									type="email"
 									placeholder="name@example.com"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
+									disabled={isLoading}
+								/>
+								<Input
+									type="password"
+									placeholder="Password"
+									value={password}
+									onChange={(e) =>
+										setPassword(e.target.value)
+									}
 									disabled={isLoading}
 								/>
 							</div>

@@ -4,6 +4,9 @@ import { siteConfig } from "@/config/site";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowRight, Lightbulb, ThumbsUp } from "lucide-react";
 
 export const Features = () => {
 	const [isVisible, setIsVisible] = useState(false);
@@ -106,6 +109,46 @@ export const Features = () => {
 						</CardContent>
 					</Card>
 				))}
+			</div>
+
+			{/* Feature Requests Section */}
+			<div
+				className={`text-center transition-all duration-1000 ${
+					isVisible
+						? "opacity-100 translate-y-0"
+						: "opacity-0 translate-y-8"
+				}`}
+				style={{ transitionDelay: "800ms" }}
+			>
+				<div className="max-w-2xl mx-auto">
+					<div className="flex items-center justify-center gap-3 mb-4">
+						<Lightbulb className="w-8 h-8 text-yellow-500" />
+						<h3 className="text-2xl font-semibold">
+							Have a feature idea?
+						</h3>
+					</div>
+					<p className="text-muted-foreground mb-6">
+						Help us improve by suggesting new features or voting on
+						existing requests. Your feedback shapes the future of
+						our platform.
+					</p>
+					<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+						<Link href="/feature-requests">
+							<Button className="group">
+								<ThumbsUp className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+								View & Vote on Features
+								<ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+							</Button>
+						</Link>
+						<Link href="/feature-requests">
+							<Button variant="outline" className="group">
+								<Lightbulb className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+								Request New Feature
+								<ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+							</Button>
+						</Link>
+					</div>
+				</div>
 			</div>
 
 			{/* Floating Animation Elements */}

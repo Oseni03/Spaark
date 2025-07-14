@@ -82,7 +82,7 @@ export async function GET(req) {
 		// Get portfolios for user
 		const portfolios = await getPortfolios(userId);
 
-		if (!portfolios.success || !portfolio.data) {
+		if (!portfolios.success || !portfolios.data) {
 			logger.error("Portfolio fetch failed", {
 				requestId,
 				error: portfolios.error,
