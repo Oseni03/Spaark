@@ -66,6 +66,7 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 						},
 						onError: (ctx) => {
 							// display the error message
+							logger.error(ctx.error);
 							toast.error(
 								ctx.error.message || "Invalid credentials"
 							);
@@ -182,7 +183,7 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 								className="w-full"
 								disabled={isLoading}
 							>
-								{actionText} with Email
+								{actionText}
 							</Button>
 						</form>
 					</CardContent>

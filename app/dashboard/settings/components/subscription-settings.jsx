@@ -29,7 +29,7 @@ import {
 
 export function SubscriptionSettings() {
 	const { user } = useAuth();
-	const subscription = user.subscription;
+	const subscription = user?.subscription || null;
 
 	const portfolioLimit = getUserPortfolioLimit(subscription);
 	const blogLimit = getUserBlogLimit(subscription);

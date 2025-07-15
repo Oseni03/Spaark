@@ -21,7 +21,6 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import ProtectedRoute from "../protected-route";
 
 const generateBreadcrumbs = (pathname) => {
 	const paths = pathname.split("/").filter(Boolean);
@@ -84,59 +83,53 @@ const DashboardLayoutContent = ({ children }) => {
 
 	logger.info("Rendering dashboard layout");
 	return (
-		<ProtectedRoute>
-			<SidebarProvider>
-				<DashboardSidebar />
-				<main className="flex flex-1 min-h-screen">
-					<div className="p-2 md:p-10 flex flex-col gap-2 flex-1 w-full h-full">
-						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-4">
-								<SidebarTrigger />
-								<Breadcrumb>
-									<BreadcrumbList>
-										<BreadcrumbItem>
-											<BreadcrumbLink href="/dashboard">
-												Dashboard
-											</BreadcrumbLink>
-										</BreadcrumbItem>
-										{breadcrumbs
-											.slice(1)
-											.map((breadcrumb, index) => (
-												<React.Fragment
-													key={breadcrumb.href}
-												>
-													<BreadcrumbSeparator />
-													<BreadcrumbItem>
-														{breadcrumb.current ? (
-															<BreadcrumbPage>
-																{
-																	breadcrumb.label
-																}
-															</BreadcrumbPage>
-														) : (
-															<BreadcrumbLink
-																href={
-																	breadcrumb.href
-																}
-															>
-																{
-																	breadcrumb.label
-																}
-															</BreadcrumbLink>
-														)}
-													</BreadcrumbItem>
-												</React.Fragment>
-											))}
-									</BreadcrumbList>
-								</Breadcrumb>
-							</div>
-							<ModeToggle />
+		<SidebarProvider>
+			<DashboardSidebar />
+			<main className="flex flex-1 min-h-screen">
+				<div className="p-2 md:p-10 flex flex-col gap-2 flex-1 w-full h-full">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-4">
+							<SidebarTrigger />
+							<Breadcrumb>
+								<BreadcrumbList>
+									<BreadcrumbItem>
+										<BreadcrumbLink href="/dashboard">
+											Dashboard
+										</BreadcrumbLink>
+									</BreadcrumbItem>
+									{breadcrumbs
+										.slice(1)
+										.map((breadcrumb, index) => (
+											<React.Fragment
+												key={breadcrumb.href}
+											>
+												<BreadcrumbSeparator />
+												<BreadcrumbItem>
+													{breadcrumb.current ? (
+														<BreadcrumbPage>
+															{breadcrumb.label}
+														</BreadcrumbPage>
+													) : (
+														<BreadcrumbLink
+															href={
+																breadcrumb.href
+															}
+														>
+															{breadcrumb.label}
+														</BreadcrumbLink>
+													)}
+												</BreadcrumbItem>
+											</React.Fragment>
+										))}
+								</BreadcrumbList>
+							</Breadcrumb>
 						</div>
-						{children}
+						<ModeToggle />
 					</div>
-				</main>
-			</SidebarProvider>
-		</ProtectedRoute>
+					{children}
+				</div>
+			</main>
+		</SidebarProvider>
 	);
 };
 
