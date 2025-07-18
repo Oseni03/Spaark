@@ -51,7 +51,7 @@ export async function generateMetadata({ params }, parent) {
 			keywords: [...keywords, ...siteConfig.keywords, post.title],
 		};
 	} catch (error) {
-		console.warn("Failed to generate metadata for blog post:", error);
+		logger.warn("Failed to generate metadata for blog post:", error);
 		return {
 			title: "Blog Post",
 			description: "Blog post not available",

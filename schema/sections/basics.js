@@ -10,7 +10,14 @@ export const basicsSchema = z.object({
 	email: z.literal("").or(z.string().email("Invalid email address")),
 	phone: z.literal("").or(z.string().min(7, "Invalid phone number")),
 	location: z.literal("").or(z.string().min(2, "Must be more than 2 char")),
-	years: z.number().nullable(),
+	years: z
+		.string()
+		.transform((val) => {
+			if (val === "" || val === null || val === undefined) return null;
+			const num = parseInt(val, 10);
+			return isNaN(num) ? null : num;
+		})
+		.nullable(),
 	picture: z.literal("").or(z.string().url("Invalid image URL")),
 	summary: z.string().default(""),
 	about: z.string().default(""),
@@ -25,7 +32,7 @@ export const defaultBasics = {
 	email: "",
 	phone: "",
 	location: "",
-	years: null,
+	years: "",
 	picture: "",
 	summary: "",
 	about: "",

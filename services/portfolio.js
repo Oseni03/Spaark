@@ -5,7 +5,7 @@ import { verifyAuth } from "@/lib/auth-utils";
 import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
-import { transformPortfolio } from "@/lib/utils";
+import { logger, transformPortfolio } from "@/lib/utils";
 
 const portfolioSelect = {
 	id: true,
@@ -15,9 +15,9 @@ const portfolioSelect = {
 	blogEnabled: true,
 	customDomain: true,
 	domainVerified: true,
-	// organizationId: true,
-	metadata: true,
+	template: true,
 	basics: true,
+	createdAt: true,
 	updatedAt: true,
 };
 
@@ -67,7 +67,7 @@ export async function createPortfolio(data) {
 				user: { connect: { id: userId } },
 				basics: {
 					create: {
-						...basicsData,
+						...(basicsData || defaultBasics),
 					},
 				},
 			},
@@ -76,6 +76,7 @@ export async function createPortfolio(data) {
 		if (!portfolio) {
 			throw new Error("Error creating portfolio");
 		}
+		logger.info("Server portfolio created: ", portfolio);
 		return transformPortfolio(portfolio);
 	});
 }
@@ -158,7 +159,7 @@ export async function getPortfolioBySlug(slug) {
 				customDomain: true,
 				domainVerified: true,
 				// organizationId: true,
-				metadata: true,
+				template: true,
 				basics: true,
 				socials: true,
 				experiences: true,
@@ -178,14 +179,7 @@ export async function getPortfolioBySlug(slug) {
 
 export async function getPortfolioById(portfolioId) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-		if (!decodedToken?.uid) {
-			throw new Error("Unauthorized");
-		}
-
-		const userId = decodedToken.uid;
+		const userId = await verifyAuth();
 
 		const portfolio = await prisma.portfolio.findUnique({
 			where: { id: portfolioId, userId },
@@ -215,7 +209,7 @@ export async function getDetailedPortfolio(portfolioId) {
 				customDomain: true,
 				domainVerified: true,
 				// organizationId: true,
-				metadata: true,
+				template: true,
 				basics: true,
 				socials: true,
 				experiences: true,
@@ -251,7 +245,7 @@ export async function getPortfolio(domain) {
 				customDomain: true,
 				domainVerified: true,
 				// organizationId: true,
-				metadata: true,
+				template: true,
 				basics: true,
 				socials: true,
 				experiences: true,
@@ -531,16 +525,6 @@ export async function updatePortfolioWithSections(id, data) {
 
 export async function createPortfolioWithSections(data) {
 	return withErrorHandling(async () => {
-		const cookieStore = await cookies();
-		const authToken = cookieStore.get(COOKIE_NAME)?.value;
-		const decodedToken = await verifyAuthToken(authToken);
-
-		if (!decodedToken?.uid) {
-			throw new UnauthorizedError(
-				"Missing or invalid authentication token"
-			);
-		}
-
 		const userId = await verifyAuth();
 
 		// Extract main portfolio fields and nested sections

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect } from "react";
 import { useSession, signOut as betterAuthSignOut } from "@/lib/auth-client";
 import { logger } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 // Provide proper default values for the context
 const defaultAuthContext = {
@@ -23,6 +24,7 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }) {
 	const { data: session, status } = useSession();
+	const router = useRouter();
 
 	const signOut = async () => {
 		try {

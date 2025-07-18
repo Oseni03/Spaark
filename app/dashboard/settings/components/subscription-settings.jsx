@@ -9,23 +9,16 @@ import {
 	Globe,
 	ChartLine,
 } from "@phosphor-icons/react";
-import {
-	Dialog,
-	DialogContent,
-	DialogTrigger,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import Pricing from "@/components/homepage/pricing";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import {
 	getUserPortfolioLimit,
 	getUserBlogLimit,
-	isInTrialPeriod,
 	hasPremiumFeatures,
 	hasAnalyticsAccess,
 } from "@/utils/subscription-plans";
+import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/utils";
 
 export function SubscriptionSettings() {
 	const { user } = useAuth();
@@ -33,7 +26,6 @@ export function SubscriptionSettings() {
 
 	const portfolioLimit = getUserPortfolioLimit(subscription);
 	const blogLimit = getUserBlogLimit(subscription);
-	const inTrial = isInTrialPeriod(subscription);
 	const hasPremium = hasPremiumFeatures(subscription);
 	const hasAnalytics = hasAnalyticsAccess(subscription);
 
@@ -45,14 +37,23 @@ export function SubscriptionSettings() {
 
 	const getPlanDisplayName = (type) => {
 		switch (type) {
+			case "FREE":
+				return "Free";
 			case "BASIC":
 				return "Basic";
 			case "PRO":
 				return "Pro";
-			case "CUSTOM":
-				return "Custom";
 			default:
 				return type || "Not Subscribed";
+		}
+	};
+
+	const handleManageSubscription = async () => {
+		try {
+			await authClient.customer.portal();
+		} catch (error) {
+			logger.error("Failed to open customer portal:", error);
+			toast.error("Failed to open subscription management");
 		}
 	};
 
@@ -75,33 +76,16 @@ export function SubscriptionSettings() {
 						</h4>
 						<p className="text-sm text-muted-foreground">
 							{getPlanDisplayName(subscription?.type)}
-							{inTrial && (
-								<span className="ml-2 text-green-600 text-xs">
-									(Trial)
-								</span>
-							)}
 						</p>
 					</div>
 					<div className="flex justify-start sm:justify-end">
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button variant="outline">
-									<CreditCard className="mr-2 h-4 w-4" />
-									Manage Subscription
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-								<DialogHeader>
-									<DialogTitle>
-										Manage Your Subscription
-									</DialogTitle>
-								</DialogHeader>
-								<Pricing
-									isDialog={true}
-									returnUrl={window.location.href}
-								/>
-							</DialogContent>
-						</Dialog>
+						<Button
+							variant="outline"
+							onClick={handleManageSubscription}
+						>
+							<CreditCard className="mr-2 h-4 w-4" />
+							Manage Subscription
+						</Button>
 					</div>
 				</div>
 

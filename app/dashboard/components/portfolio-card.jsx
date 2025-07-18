@@ -88,7 +88,7 @@ export const PortfolioCard = ({ portfolio }) => {
 		dispatch(removePortfolioFromDatabase(portfolio.id));
 	};
 
-	const templateId = portfolio?.metadata?.template || "default";
+	const templateId = portfolio?.template || "default";
 	const previewSrc =
 		siteConfig.templates.find((temp) => temp.id === templateId).preview ||
 		DEFAULT_TEMPLATE;
@@ -146,13 +146,7 @@ export const PortfolioCard = ({ portfolio }) => {
 						</div>
 
 						<div className="space-y-2 text-sm text-white">
-							<p>
-								Template:{" "}
-								{portfolio?.metadata?.template || "Default"}
-							</p>
-							{portfolio.updatedAt && (
-								<p>Last updated: {portfolio.updatedAt}</p>
-							)}
+							<p>Template: {portfolio?.template || "Default"}</p>
 							<div className="flex items-center gap-2">
 								<FileText className="w-4 h-4" />
 								Blog:{" "}

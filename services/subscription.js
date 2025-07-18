@@ -1,221 +1,141 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { withErrorHandling } from "./shared";
-import { logger } from "@/lib/utils";
-import { verifyAuth } from "@/lib/auth-utils";
+import { getUserIdFromSession } from "@/lib/auth-utils";
 
-export async function initializeSubscription({
-	userId,
-	portfolioLimit,
-	type,
-	frequency,
-	priceId,
-	blogEnabled = false,
-	blogLimit = null,
-	customizable = false,
-	customPortfolioLimit = null,
-	customArticleLimit = null,
-	trial = null,
-}) {
-	return withErrorHandling(async () => {
-		if (!userId || !type || !frequency || !priceId) {
-			throw new Error(
-				"Missing required fields for subscription initialization"
-			);
-		}
-
-		const getEndDate = (frequency) => {
-			const now = Date.now();
-			switch (frequency.toUpperCase()) {
-				case "WEEKLY":
-					return new Date(now + 7 * 24 * 60 * 60 * 1000); // 7 days
-				case "MONTHLY":
-					return new Date(now + 30 * 24 * 60 * 60 * 1000); // 30 days
-				case "YEARLY":
-					return new Date(now + 365 * 24 * 60 * 60 * 1000); // 365 days
-				default:
-					throw new Error(`Invalid frequency: ${frequency}`);
-			}
-		};
-
-		const subscription = await prisma.subscription.upsert({
-			where: { userId },
-			update: {
-				status: "pending",
-				portfolioLimit,
-				type,
-				frequency,
-				priceId,
-				blogEnabled,
-				blogLimit,
-				customizable,
-				customPortfolioLimit,
-				customArticleLimit,
-				trial,
-				startDate: new Date(),
-				endDate: getEndDate(frequency),
-			},
-			create: {
-				userId,
-				status: "pending",
-				portfolioLimit,
-				type,
-				frequency,
-				priceId,
-				blogEnabled,
-				blogLimit,
-				customizable,
-				customPortfolioLimit,
-				customArticleLimit,
-				trial,
-				startDate: new Date(),
-				endDate: getEndDate(frequency),
-			},
-		});
-
-		if (!subscription) {
-			throw new Error("Failed to create subscription record");
-		}
-
-		return subscription;
-	});
-}
-
-export async function createTransaction({
-	userId,
-	title,
-	subscriptionId,
-	amount,
-	priceId,
-}) {
-	return withErrorHandling(async () => {
-		logger.info("Creating transaction", {
-			userId,
-			subscriptionId,
-			amount,
-		});
+export async function getSubscriptionDetails() {
+	try {
+		const userId = await getUserIdFromSession();
 
 		if (!userId) {
-			throw new Error("UserId has to be provided");
+			return { hasSubscription: false };
 		}
 
-		const transaction = await prisma.transaction.create({
-			data: {
-				userId,
-				title,
-				status: "pending",
-				amount,
-				subscriptionId,
-				priceId,
-			},
+		const userSubscriptions = await prisma.subscription.findUnique({
+			where: { userId },
 		});
 
-		if (!transaction) {
-			throw new Error("Failed to create transaction record");
+		if (!userSubscriptions.length) {
+			return { hasSubscription: false };
 		}
 
-		logger.info("Transaction created successfully", {
-			transactionId: transaction.id,
-		});
-		return transaction;
-	});
-}
+		// Get the most recent active subscription
+		const activeSubscription = userSubscriptions
+			.filter((sub) => sub.status === "active")
+			.sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() -
+					new Date(a.createdAt).getTime()
+			)[0];
 
-export async function handlePaymentFailure({ transactionId }) {
-	return withErrorHandling(async () => {
-		logger.info("Processing failed payment", { transactionId });
+		if (!activeSubscription) {
+			// Check for canceled or expired subscriptions
+			const latestSubscription = userSubscriptions.sort(
+				(a, b) =>
+					new Date(b.createdAt).getTime() -
+					new Date(a.createdAt).getTime()
+			)[0];
 
-		const result = await prisma.$transaction(async (prisma) => {
-			const transaction = await prisma.transaction.update({
-				where: { id: transactionId },
-				data: { status: "cancelled" },
-				include: { subscription: true },
-			});
+			if (latestSubscription) {
+				const now = new Date();
+				const isExpired =
+					new Date(latestSubscription.currentPeriodEnd) < now;
+				const isCanceled = latestSubscription.status === "canceled";
 
-			if (transaction.subscription) {
-				await prisma.subscription.update({
-					where: { id: transaction.subscription.id },
-					data: { status: "cancelled" },
-				});
-			}
-
-			return transaction;
-		});
-
-		if (!result) {
-			throw new Error("Failed process failed payment");
-		}
-
-		logger.info("Failed payment processed successfully", {
-			transactionId: result.id,
-		});
-		return result;
-	});
-}
-
-export async function handlePaymentSuccess({ transactionId }) {
-	return withErrorHandling(async () => {
-		logger.info("Processing successful payment", { transactionId });
-
-		const result = await prisma.$transaction(async (prisma) => {
-			const updatedTransaction = await prisma.transaction.update({
-				where: { id: transactionId, status: { not: "cancelled" } },
-				data: { status: "completed" },
-				include: { subscription: true },
-			});
-
-			if (updatedTransaction.subscription) {
-				await prisma.subscription.update({
-					where: { id: updatedTransaction.subscription.id },
-					data: { status: "active" },
-				});
-			}
-
-			return updatedTransaction;
-		});
-
-		logger.info("Payment processed successfully", { transactionId });
-		return result;
-	});
-}
-
-export async function updateTransaction({ tx_ref, status }) {
-	return withErrorHandling(async () => {
-		if (!tx_ref || !status) {
-			throw new Error("Missing required parameter");
-		}
-
-		const trxn = await prisma.transaction.update({
-			where: { id: tx_ref },
-			data: {
-				status,
-				updatedAt: new Date(),
-			},
-			include: {
-				user: {
-					select: {
-						id: true,
+				return {
+					hasSubscription: true,
+					subscription: {
+						id: latestSubscription.id,
+						productId: latestSubscription.productId,
+						status: latestSubscription.status,
+						amount: latestSubscription.amount,
+						currency: latestSubscription.currency,
+						recurringInterval: latestSubscription.recurringInterval,
+						currentPeriodStart:
+							latestSubscription.currentPeriodStart,
+						currentPeriodEnd: latestSubscription.currentPeriodEnd,
+						cancelAtPeriodEnd: latestSubscription.cancelAtPeriodEnd,
+						canceledAt: latestSubscription.canceledAt,
+						organizationId: null,
 					},
-				},
-			},
-		});
+					error: isCanceled
+						? "Subscription has been canceled"
+						: isExpired
+							? "Subscription has expired"
+							: "Subscription is not active",
+					errorType: isCanceled
+						? "CANCELED"
+						: isExpired
+							? "EXPIRED"
+							: "GENERAL",
+				};
+			}
 
-		return trxn;
-	});
+			return { hasSubscription: false };
+		}
+
+		return {
+			hasSubscription: true,
+			subscription: {
+				id: activeSubscription.id,
+				productId: activeSubscription.productId,
+				status: activeSubscription.status,
+				amount: activeSubscription.amount,
+				currency: activeSubscription.currency,
+				recurringInterval: activeSubscription.recurringInterval,
+				currentPeriodStart: activeSubscription.currentPeriodStart,
+				currentPeriodEnd: activeSubscription.currentPeriodEnd,
+				cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd,
+				canceledAt: activeSubscription.canceledAt,
+				organizationId: null,
+			},
+		};
+	} catch (error) {
+		console.error("Error fetching subscription details:", error);
+		return {
+			hasSubscription: false,
+			error: "Failed to load subscription details",
+			errorType: "GENERAL",
+		};
+	}
 }
 
-export async function updateSubscription() {
-	return withErrorHandling(async () => {
-		const userId = await verifyAuth()
-		const user = await prisma.user.update({
-			where: { id: userId },
-			data: {
-				subscribed: true,
-				updatedAt: new Date(),
-			},
-		});
+// Simple helper to check if user has an active subscription
+export async function isUserSubscribed() {
+	const result = await getSubscriptionDetails();
+	return result.hasSubscription && result.subscription?.status === "active";
+}
 
-		return user;
-	});
+// Helper to check if user has access to a specific product/tier
+export async function hasAccessToProduct(productId) {
+	const result = await getSubscriptionDetails();
+	return (
+		result.hasSubscription &&
+		result.subscription?.status === "active" &&
+		result.subscription?.productId === productId
+	);
+}
+
+// Helper to get user's current subscription status
+// "active" | "canceled" | "expired" | "none"
+export async function getUserSubscriptionStatus() {
+	const result = await getSubscriptionDetails();
+
+	if (!result.hasSubscription) {
+		return "none";
+	}
+
+	if (result.subscription?.status === "active") {
+		return "active";
+	}
+
+	if (result.errorType === "CANCELED") {
+		return "canceled";
+	}
+
+	if (result.errorType === "EXPIRED") {
+		return "expired";
+	}
+
+	return "none";
 }

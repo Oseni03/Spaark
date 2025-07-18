@@ -11,7 +11,6 @@ import { logger } from "@/lib/utils";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
-import { useVerifyPayment } from "@/hooks/use-verify-payment";
 import { usePathname } from "next/navigation";
 import {
 	Breadcrumb,
@@ -32,7 +31,6 @@ const generateBreadcrumbs = (pathname) => {
 };
 
 const DashboardLayoutContent = ({ children }) => {
-	useVerifyPayment();
 	const dispatch = useDispatch();
 	const pathname = usePathname();
 	const breadcrumbs = generateBreadcrumbs(pathname);
@@ -126,7 +124,9 @@ const DashboardLayoutContent = ({ children }) => {
 						</div>
 						<ModeToggle />
 					</div>
-					{children}
+					<div className="max-w-6xl">
+						<div className="mx-auto">{children}</div>
+					</div>
 				</div>
 			</main>
 		</SidebarProvider>

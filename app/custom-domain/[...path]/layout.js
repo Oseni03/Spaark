@@ -39,16 +39,7 @@ export default async function CustomDomainLayout({ children }) {
 		};
 
 		return (
-			<div
-				className={cn(
-					"scrollbar-hide",
-					"overflow-y-auto",
-					portfolio.metadata?.theme?.background &&
-						`bg-[${portfolio.metadata.theme.background}]`,
-					portfolio.metadata?.theme?.text &&
-						`text-[${portfolio.metadata.theme.text}]`
-				)}
-			>
+			<div className={cn("scrollbar-hide", "overflow-y-auto")}>
 				<BuildWithButton />
 				<PortfolioProvider
 					portfolio={portfolio}

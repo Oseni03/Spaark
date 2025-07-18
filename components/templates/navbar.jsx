@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { getSocialLink, getSocialIcon } from "@/lib/utils";
-import { defaultMetadata } from "@/schema/sections";
 import { HomeIcon, NotebookIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";

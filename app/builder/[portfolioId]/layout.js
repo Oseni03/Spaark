@@ -30,7 +30,6 @@ import {
 	Maximize2,
 	Save,
 } from "lucide-react";
-import { useVerifyPayment } from "@/hooks/use-verify-payment";
 import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 import { X } from "lucide-react";
@@ -51,7 +50,6 @@ import { updatePortfolio } from "@/redux/features/portfolioSlice";
 import { useSelector } from "react-redux";
 
 function BuilderLayoutContent({ children }) {
-	useVerifyPayment();
 	const router = useRouter();
 	const dispatch = useDispatch();
 	const { portfolioId } = useParams();

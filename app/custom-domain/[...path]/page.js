@@ -7,7 +7,6 @@ import { usePortfolio } from "@/context/PortfolioContext";
 import { logger } from "@/lib/utils";
 import { CONTAINER_CLASS, CONTENT_CLASS } from "@/utils/constants";
 import { cn } from "@/lib/utils";
-import { defaultMetadata } from "@/schema/sections";
 import { Navbar } from "@/components/templates/navbar";
 
 export default function Page() {
@@ -49,7 +48,6 @@ export default function Page() {
 			(item) => item.visible
 		),
 		socials: portfolio?.socials?.items || [],
-		metadata: portfolio?.metadata || defaultMetadata,
 		blogEnabled: portfolio?.blogEnabled || false,
 	};
 
@@ -59,14 +57,13 @@ export default function Page() {
 		<div className={cn(CONTAINER_CLASS, "min-h-screen")}>
 			<div className={CONTENT_CLASS}>
 				<TemplateWrapper
-					template={portfolio?.metadata?.template || "default"}
+					template={portfolio?.template || "default"}
 					data={portfolioData}
 					// className="py-12 sm:py-16 lg:py-24"
 				/>
 				<Navbar
 					blogEnabled={portfolioData.blogEnabled}
 					socials={portfolioData.socials}
-					metadata={portfolioData.metadata}
 				/>
 			</div>
 		</div>

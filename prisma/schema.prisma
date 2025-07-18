@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,33 +8,9 @@ datasource db {
   //directUrl = env("DIRECT_URL")
 }
 
-enum UserType {
-  INDIVIDUAL
-  ORGANIZATION
-}
-
-enum Role {
-  OWNER
-  ADMIN
-  MANAGER
-  MEMBER
-}
-
-enum Permission {
-  MANAGE_ORGANIZATION
-  MANAGE_MEMBERS
-  INVITE_MEMBERS
-  MANAGE_ROLES
-  CREATE_PORTFOLIO
-  EDIT_PORTFOLIO
-  DELETE_PORTFOLIO
-  VIEW_ANALYTICS
-}
-
 model User {
   id         String    @id // Remove @default(cuid()) since we'll use Firebase UID
   email      String    @unique
-  userType   UserType  @default(INDIVIDUAL)
   subscribed Boolean?  @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime? @updatedAt
@@ -43,10 +18,7 @@ model User {
   // Relations
   portfolios             Portfolio[]
   blogs                  Blog[]
-  memberships            OrganizationMember[]
-  organizations          Organization[] // Organizations owned by user
-  transactions           Transaction[]
-  subscription           Subscription?
+  subscription           Subscription[]
   featureRequests        FeatureRequest[]
   featureVotes           FeatureVote[]
   featureRequestComments FeatureRequestComment[]
@@ -63,57 +35,6 @@ model User {
   @@map("user")
 }
 
-model Organization {
-  id        String    @id @default(cuid())
-  // clerkOrgId String    @unique
-  name      String
-  slug      String    @unique
-  industry  String?
-  size      String?
-  logo      String?
-  website   String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
-  // Organization settings
-  allowMemberInvites Boolean @default(false)
-  requireApproval    Boolean @default(true)
-  defaultRole        Role    @default(MEMBER)
-
-  // Relations
-  ownerId      String
-  owner        User                 @relation(fields: [ownerId], references: [id])
-  members      OrganizationMember[]
-  portfolios   Portfolio[]
-  transactions Transaction[]
-
-  // Add new subscription relation
-  subscription Subscription?
-
-  @@index([ownerId])
-}
-
-model OrganizationMember {
-  id             String       @id @default(cuid())
-  organizationId String
-  userId         String
-  role           Role         @default(MEMBER)
-  permissions    Permission[]
-  status         String       @default("pending") // pending, active, suspended
-  invitedBy      String?
-  invitedAt      DateTime     @default(now())
-  joinedAt       DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime?    @updatedAt
-
-  // Relations
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@index([organizationId])
-}
-
 model Portfolio {
   id             String    @id @default(cuid())
   name           String
@@ -124,13 +45,11 @@ model Portfolio {
   domainVerified Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime? @updatedAt
-  metadata       Json?
+  template       String    @default("default")
 
   // Ownership
-  userId         String
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Portfolio content
   basics         Basics?
@@ -144,7 +63,6 @@ model Portfolio {
   blogs          Blog[]
 
   @@index([userId])
-  @@index([organizationId])
 }
 
 model Basics {
@@ -305,52 +223,39 @@ model Hackathon {
   @@index([portfolioId])
 }
 
-model Transaction {
-  id             String        @id @default(cuid())
-  userId         String?
-  organizationId String?
-  status         String        @default("pending")
-  priceId        String
-  title          String
-  amount         Float
-  subscriptionId String?
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime?     @updatedAt
-  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([organizationId])
-  @@index([subscriptionId])
-}
-
 model Subscription {
-  id                   String    @id @default(cuid())
-  userId               String?   @unique
-  organizationId       String?   @unique
-  type                 String // INDIVIDUAL or TEAM
-  frequency            String // weekly, monthly, yearly
-  status               String    @default("pending")
-  priceId              String
-  startDate            DateTime?
-  endDate              DateTime?
-  portfolioLimit       Int       @default(1)
-  blogEnabled          Boolean   @default(false)
-  blogLimit            Int?
-  customPortfolioLimit Int?
-  customArticleLimit   Int?
-  customizable         Boolean   @default(false)
-  trial                Int? // days of free trial
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime? @updatedAt
+  id                          String    @id @default(cuid())
+  userId                      String?   @unique
+  amount                      Int
+  currency                    String
+  recurringInterval           String
+  status                      String
+  currentPeriodStart          DateTime
+  currentPeriodEnd            DateTime
+  cancelAtPeriodEnd           Boolean   @default(false)
+  canceledAt                  DateTime?
+  startedAt                   DateTime
+  endsAt                      DateTime?
+  endedAt                     DateTime?
+  customerId                  String
+  productId                   String
+  discountId                  String?
+  checkoutId                  String
+  customerCancellationReason  String?
+  customerCancellationComment String?
+  metadata                    Json?
+  customFieldData             Json?
+  portfolioLimit              Int       @default(1)
+  blogEnabled                 Boolean   @default(false)
+  blogLimit                   Int?
+  customPortfolioLimit        Int?
+  customArticleLimit          Int?
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime? @updatedAt
 
-  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([organizationId])
 }
 
 model Contact {

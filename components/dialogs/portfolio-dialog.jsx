@@ -57,6 +57,7 @@ export const PortfolioDialog = ({
 	}, [isOpen, currentPortfolio, reset]);
 
 	const onSubmit = async (data) => {
+		logger.info("Portfolio data submitted: ", data);
 		try {
 			if (currentPortfolio) {
 				dispatch(
@@ -72,6 +73,7 @@ export const PortfolioDialog = ({
 					addPortfolioInDatabase({
 						...defaultPortfolio,
 						...data,
+						id: createId(),
 					})
 				);
 			}

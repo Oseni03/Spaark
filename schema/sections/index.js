@@ -17,24 +17,13 @@ export const sectionSchema = z.object({
 	visible: z.boolean().default(true),
 });
 
-export const metadataSchema = z.object({
-	template: z.string().default("default"),
-	theme: z
-		.object({
-			text: z.string().default(""),
-			primary: z.string().default(""),
-			background: z.string().default(""),
-		})
-		.optional(),
-});
-
 export const portfolioSchema = z.object({
 	id: idSchema,
 	name: z.string().min(1).max(255),
 	slug: z.string().min(1).max(255),
 	isLive: z.boolean().default(false),
 	blogEnabled: z.boolean().default(false),
-	metadata: metadataSchema,
+	template: z.string().default("default"),
 });
 
 // Schema
@@ -120,22 +109,13 @@ export const defaultSection = {
 	error: null,
 };
 
-export const defaultMetadata = {
-	template: "default",
-	theme: {
-		text: "#0A0A0A",
-		primary: "#171717",
-		background: "#FFFFFF",
-	},
-};
-
 export const defaultPortfolio = {
 	id: createId(),
 	name: "",
 	slug: "",
 	isLive: false,
 	blogEnabled: false,
-	metadata: defaultMetadata,
+	template: "default",
 };
 
 export const defaultMain = {

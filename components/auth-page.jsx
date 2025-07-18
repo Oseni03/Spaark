@@ -11,12 +11,6 @@ import { authClient } from "@/lib/auth-client";
 import slugify from "@sindresorhus/slugify";
 import { useRouter } from "next/navigation";
 
-// Action code settings for email link authentication
-const actionCodeSettings = {
-	url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/email-verify`,
-	handleCodeInApp: true,
-};
-
 export default function AuthPage({ actionText, redirectPath = "/" }) {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
@@ -28,7 +22,9 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		setIsLoading(true);
 		try {
 			logger.info("Starting Google sign in");
-			await authClient.signInWithProvider("google");
+			await authClient.signIn.social({
+				provider: "google",
+			});
 
 			logger.info("Google sign in successful");
 			toast.success("Successfully signed in!");
@@ -53,12 +49,10 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		setIsLoading(true);
 		try {
 			if (slugify(actionText) === "sign-in") {
-				await authClient.signInWithEmail(
-					{
-						email,
-						password,
-					},
-					{
+				await authClient.signIn.email({
+					email,
+					password,
+					fetchOptions: {
 						onSuccess: (ctx) => {
 							//redirect to the dashboard or sign in page
 							toast.success("Sign in successful!!");
@@ -71,8 +65,8 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 								ctx.error.message || "Invalid credentials"
 							);
 						},
-					}
-				);
+					},
+				});
 			} else {
 				await authClient.signUp.email(
 					{

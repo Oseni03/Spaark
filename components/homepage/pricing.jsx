@@ -6,17 +6,13 @@ import { Check, Sparkles, Zap, Crown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import axios from "axios";
 import { Spinner } from "../ui/Spinner";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/utils";
-import {
-	calculateCustomPrice,
-	validatePlanLimits,
-	SUBSCRIPTION_PLANS,
-} from "@/utils/subscription-plans";
+import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
-import { useAuth } from "@/context/auth-context";
+import { getUserIdFromSession } from "@/lib/auth-utils";
+import { authClient } from "@/lib/auth-client";
 
 const PricingHeader = ({ title, subtitle, isVisible }) => (
 	<section
@@ -64,39 +60,13 @@ const PricingCard = ({
 	isVisible,
 	index,
 }) => {
-	const [customConfig, setCustomConfig] = useState({
-		portfolios: 5,
-		articles: 20,
-	});
-
 	const price = useMemo(() => {
-		if (type !== "Custom") return prices[billing].price;
-		return calculateCustomPrice(
-			prices[billing].basePrice,
-			customConfig.portfolios,
-			customConfig.articles,
-			prices[billing].pricePerPortfolio,
-			prices[billing].pricePerArticle
-		);
-	}, [type, billing, prices, customConfig]);
-
-	const handleCustomConfigChange = useCallback((key, value) => {
-		setCustomConfig((prev) => ({ ...prev, [key]: Number(value) }));
-	}, []);
+		return prices[billing].price;
+	}, [billing, prices]);
 
 	const handleSubscribe = useCallback(() => {
-		if (
-			!validatePlanLimits(
-				type,
-				customConfig.portfolios,
-				customConfig.articles
-			)
-		) {
-			toast.error("Invalid plan configuration");
-			return;
-		}
-		onSubscribe(type, billing, customConfig);
-	}, [type, billing, customConfig, onSubscribe]);
+		onSubscribe(price.priceId, price.slug);
+	}, [price, onSubscribe]);
 
 	const getPlanColor = (type) => {
 		switch (type) {
@@ -167,7 +137,7 @@ const PricingCard = ({
 						<span
 							className={`text-4xl font-bold ${getPriceColor(type)}`}
 						>
-							${type === "Custom" ? price : prices[billing].price}
+							${prices[billing].price}
 						</span>
 						<span className="text-gray-500 ml-2">
 							{type === "FREE" ? "" : "/month"}
@@ -179,47 +149,6 @@ const PricingCard = ({
 						</p>
 					)}
 				</div>
-
-				{type === "Custom" && (
-					<div className="mb-6 space-y-4">
-						<div>
-							<label className="text-sm font-medium">
-								Portfolios: {customConfig.portfolios}
-							</label>
-							<input
-								type="range"
-								min="5"
-								max="20"
-								value={customConfig.portfolios}
-								onChange={(e) =>
-									handleCustomConfigChange(
-										"portfolios",
-										e.target.value
-									)
-								}
-								className="w-full"
-							/>
-						</div>
-						<div>
-							<label className="text-sm font-medium">
-								Articles/month: {customConfig.articles}
-							</label>
-							<input
-								type="range"
-								min="20"
-								max="100"
-								value={customConfig.articles}
-								onChange={(e) =>
-									handleCustomConfigChange(
-										"articles",
-										e.target.value
-									)
-								}
-								className="w-full"
-							/>
-						</div>
-					</div>
-				)}
 
 				<ul className="space-y-3 mb-8">
 					{features.map((feature, index) => (
@@ -256,15 +185,24 @@ const PricingCard = ({
 	);
 };
 
-export default function Pricing({
-	isDialog = false,
-	returnUrl = process.env.NEXT_PUBLIC_APP_URL,
-}) {
+export default function Pricing() {
 	const router = useRouter();
-	const { user } = useAuth();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [hoveredStates, setHoveredStates] = useState({});
 	const [isVisible, setIsVisible] = useState(false);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const userId = await getUserIdFromSession();
+				if (userId) setIsAuthenticated(true);
+			} catch {
+				setIsAuthenticated(false);
+			}
+		};
+		checkAuth();
+	}, []);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -289,51 +227,33 @@ export default function Pricing({
 	}, []);
 
 	const handleCheckout = useCallback(
-		async (type, billing, customConfig = {}) => {
-			if (!user) {
+		async (productId, slug) => {
+			if (isAuthenticated === false) {
 				router.push("/sign-in");
-				toast.info("Please sign in to continue");
 				return;
 			}
-
-			if (type.toUpperCase() === "FREE") {
-				router.push("/dashboard/portfolios");
-				return;
-			}
-
 			setIsProcessing(true);
-			logger.info("Starting checkout process", {
-				type,
-				billing,
-				userId: user.id,
-				customConfig,
-			});
 
 			try {
-				// Redirect to custom checkout page instead of Flutterwave UI
-				const checkoutUrl = `/checkout?type=${type.toLowerCase()}&frequency=${billing.toLowerCase()}&returnUrl=${encodeURIComponent(returnUrl)}`;
-
-				logger.info("Redirecting to checkout page", { checkoutUrl });
-				router.push(checkoutUrl);
-			} catch (err) {
-				logger.error("Checkout error:", {
-					message: err.message,
-					stack: err.stack,
+				await authClient.checkout({
+					products: [productId],
+					slug: slug,
 				});
-				toast.error("Failed to initiate checkout");
+			} catch (error) {
+				logger.error("Checkout failed:", error);
+				// TODO: Add user-facing error notification
+				toast.error("Oops, something went wrong");
 			} finally {
 				setIsProcessing(false);
 			}
 		},
-		[returnUrl, router, user]
+		[router, isAuthenticated]
 	);
 
 	const planTypes = ["FREE", "BASIC", "PRO"];
 
 	return (
-		<div
-			className={`${isDialog ? "" : "container"} relative overflow-hidden`}
-		>
+		<div className={`container relative overflow-hidden`}>
 			{/* Background Animation Elements */}
 			<div className="absolute inset-0 pointer-events-none">
 				<div className="absolute top-20 left-10 w-2 h-2 bg-primary/20 rounded-full animate-ping"></div>
@@ -349,9 +269,7 @@ export default function Pricing({
 			/>
 
 			<div
-				className={`grid md:grid-cols-3 gap-8 ${
-					isDialog ? "max-w-5xl" : "max-w-6xl"
-				} mx-auto relative z-10`}
+				className={`grid md:grid-cols-3 gap-8 max-w-6xl mx-auto relative z-10`}
 			>
 				{planTypes.map((type, index) => (
 					<PricingCard

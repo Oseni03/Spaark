@@ -26,7 +26,6 @@ export default function VioletVista({
 	hackathons = defaultMain.hackathons,
 	certifications = defaultMain.certifications,
 	socials = defaultMain.socials,
-	metadata = defaultMain.metadata,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
 	const [activeSection, setActiveSection] = useState("home");

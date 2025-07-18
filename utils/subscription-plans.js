@@ -1,8 +1,10 @@
+import { logger } from "@/lib/utils";
+
 export const SUBSCRIPTION_PLANS = {
 	FREE: {
 		monthly: {
 			price: 0,
-			priceId: process.env.NEXT_PUBLIC_MONTHLY_BASIC_PRICE_ID,
+			priceId: process.env.NEXT_PUBLIC_MONTHLY_FREE_PRICE_ID,
 			interval: "month",
 			trial: true,
 			features: [
@@ -14,6 +16,7 @@ export const SUBSCRIPTION_PLANS = {
 			],
 			portfolioLimit: 1,
 			blogEnabled: false,
+			slug: "free",
 		},
 	},
 	BASIC: {
@@ -31,6 +34,7 @@ export const SUBSCRIPTION_PLANS = {
 			portfolioLimit: 1,
 			blogLimit: 10,
 			blogEnabled: true,
+			slug: "basic_monthly",
 		},
 	},
 	PRO: {
@@ -48,30 +52,9 @@ export const SUBSCRIPTION_PLANS = {
 			portfolioLimit: 3,
 			blogLimit: 30,
 			blogEnabled: true,
+			slug: "pro_monthly",
 		},
 	},
-	// CUSTOM: {
-	// 	monthly: {
-	// 		basePrice: 49.55,
-	// 		pricePerPortfolio: 5,
-	// 		pricePerArticle: 1,
-	// 		priceId: process.env.NEXT_PUBLIC_MONTHLY_CUSTOM_PRICE_ID,
-	// 		interval: "month",
-	// 		features: [
-	// 			"Custom number of portfolios",
-	// 			"All Pro features",
-	// 			"Unlimited blog articles",
-	// 			"Priority support",
-	// 			"Custom features on request",
-	// 		],
-	// 		customizable: true,
-	// 		blogEnabled: true,
-	// 	},
-	// },
-};
-
-export const getPlanPrice = (type, tier, frequency) => {
-	return SUBSCRIPTION_PLANS[type][tier][frequency].price;
 };
 
 export const getPlanPriceId = (type, tier, frequency) => {
@@ -82,38 +65,7 @@ export const getPlanFeatures = (type, tier, frequency) => {
 	return SUBSCRIPTION_PLANS[type][tier][frequency].features;
 };
 
-// Calculate custom price for CUSTOM plan
-export const calculateCustomPrice = (
-	basePrice,
-	portfolios,
-	articles,
-	pricePerPortfolio,
-	pricePerArticle
-) => {
-	const portfolioCost = (portfolios - 3) * pricePerPortfolio; // Pro plan has 3 portfolios
-	const articleCost = Math.max(0, articles - 10) * pricePerArticle; // Pro plan has 10 articles
-	return basePrice + portfolioCost + articleCost;
-};
-
-// Validate plan limits for custom configuration
-export const validatePlanLimits = (type, portfolios, articles) => {
-	if (type !== "CUSTOM") return true;
-
-	// Custom plan limits
-	const minPortfolios = 5;
-	const maxPortfolios = 20;
-	const minArticles = 20;
-	const maxArticles = 100;
-
-	return (
-		portfolios >= minPortfolios &&
-		portfolios <= maxPortfolios &&
-		articles >= minArticles &&
-		articles <= maxArticles
-	);
-};
-
-export const getSubscriptionData = (type, frequency, customConfig = null) => {
+export const getSubscriptionData = (type, frequency) => {
 	// Convert type to match SUBSCRIPTION_PLANS keys
 	const planType = type.toUpperCase();
 
@@ -132,24 +84,8 @@ export const getSubscriptionData = (type, frequency, customConfig = null) => {
 		throw new Error(`Invalid frequency ${frequency} for plan type ${type}`);
 	}
 
-	// Calculate price for custom plan
 	let price = plan.price;
 	let portfolioLimit = plan.portfolioLimit;
-	let customPortfolioLimit = null;
-	let customArticleLimit = null;
-
-	if (planType === "CUSTOM" && customConfig) {
-		price = calculateCustomPrice(
-			plan.basePrice,
-			customConfig.portfolios,
-			customConfig.articles,
-			plan.pricePerPortfolio,
-			plan.pricePerArticle
-		);
-		portfolioLimit = customConfig.portfolios;
-		customPortfolioLimit = customConfig.portfolios;
-		customArticleLimit = customConfig.articles;
-	}
 
 	return {
 		price,
@@ -159,9 +95,6 @@ export const getSubscriptionData = (type, frequency, customConfig = null) => {
 		portfolioLimit,
 		blogEnabled: plan.blogEnabled,
 		blogLimit: plan.blogLimit,
-		customizable: plan.customizable,
-		customPortfolioLimit,
-		customArticleLimit,
 		features: plan.features,
 	};
 };
@@ -172,8 +105,7 @@ export const canCreatePortfolio = (subscription, currentPortfolioCount) => {
 		return false;
 	}
 
-	const limit =
-		subscription.customPortfolioLimit || subscription.portfolioLimit;
+	const limit = subscription.portfolioLimit;
 	return currentPortfolioCount < limit;
 };
 
@@ -185,11 +117,6 @@ export const canCreateBlogArticle = (subscription, currentArticleCount) => {
 
 	if (!subscription.blogEnabled) {
 		return false;
-	}
-
-	// Custom plan has unlimited articles
-	if (subscription.customizable) {
-		return true;
 	}
 
 	// Check against blog limit
@@ -204,7 +131,7 @@ export const hasPremiumFeatures = (subscription) => {
 		return false;
 	}
 
-	return subscription.type === "PRO" || subscription.type === "CUSTOM";
+	return subscription.type === "PRO";
 };
 
 // Check if user has access to analytics
@@ -213,7 +140,7 @@ export const hasAnalyticsAccess = (subscription) => {
 		return false;
 	}
 
-	return subscription.type === "PRO" || subscription.type === "CUSTOM";
+	return subscription.type === "PRO";
 };
 
 // Check if user has access to custom domain
@@ -232,7 +159,7 @@ export const getUserPortfolioLimit = (subscription) => {
 		return 0;
 	}
 
-	return subscription.customPortfolioLimit || subscription.portfolioLimit;
+	return subscription.portfolioLimit;
 };
 
 // Get user's blog limit
@@ -243,11 +170,6 @@ export const getUserBlogLimit = (subscription) => {
 
 	if (!subscription.blogEnabled) {
 		return 0;
-	}
-
-	// Custom plan has unlimited articles
-	if (subscription.customizable) {
-		return -1; // -1 indicates unlimited
 	}
 
 	return subscription.blogLimit || 0;

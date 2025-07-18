@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 const isProtectedRoute = (pathname) => {
-	return (
-		pathname.startsWith("/builder") ||
-		pathname.startsWith("/dashboard") ||
-		pathname.startsWith("/checkout")
-	);
+	return pathname.startsWith("/builder") || pathname.startsWith("/dashboard");
 };
 
 const authPaths = ["/sign-in", "/sign-up"];

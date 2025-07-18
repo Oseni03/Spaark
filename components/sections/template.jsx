@@ -14,8 +14,6 @@ import { Globe, Eye, EyeSlash } from "@phosphor-icons/react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
-import { Dialog, DialogContent } from "../ui/dialog";
-import Pricing from "../homepage/pricing";
 import {
 	Tooltip,
 	TooltipContent,
@@ -24,7 +22,6 @@ import {
 } from "../ui/tooltip";
 import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
-import { defaultMetadata } from "@/schema/sections";
 import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
 import { siteConfig } from "@/config/site";
 
@@ -49,7 +46,6 @@ const templateTheme = {
 export function TemplateSection() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
-	const [showPricingDialog, setShowPricingDialog] = useState(false);
 	const { user } = useAuth();
 
 	const portfolio = useSelector((state) =>
@@ -59,7 +55,7 @@ export function TemplateSection() {
 	logger.info("Current portfolio:", portfolio); // Debug log
 	logger.info("Available templates:", siteConfig.templates); // Debug log
 
-	const selectedTemplate = portfolio?.metadata.template || "default";
+	const selectedTemplate = portfolio?.template || "default";
 	logger.info("Selected template:", selectedTemplate); // Debug log
 
 	const handleTemplateSelect = (templateId) => {
@@ -69,16 +65,21 @@ export function TemplateSection() {
 			updatePortfolio({
 				id: portfolio.id,
 				data: {
-					metadata: {
-						...portfolio.metadata,
-						theme: defaultMetadata.theme,
-						template: templateId,
-					},
+					template: templateId,
 				},
 			})
 		);
 
 		toast.success("Template updated successfully");
+	};
+
+	const handleManageSubscription = async () => {
+		try {
+			await authClient.customer.portal();
+		} catch (error) {
+			logger.error("Failed to open customer portal:", error);
+			toast.error("Failed to open subscription management");
+		}
 	};
 
 	const toggleLiveStatus = async () => {
@@ -95,10 +96,12 @@ export function TemplateSection() {
 					details: liveAuthCheck.details,
 				});
 
-				setShowPricingDialog(true);
 				toast.error(
-					liveAuthCheck.reason ||
-						"Portfolio limit reached. Please upgrade your plan."
+					liveAuthCheck.reason || "Portfolio limit reached.",
+					{
+						description: "Please upgrade your plan.",
+						action: { onClick: handleManageSubscription },
+					}
 				);
 				return;
 			}
@@ -284,15 +287,6 @@ export function TemplateSection() {
 					</div>
 				</ScrollArea>
 			</section>
-
-			<Dialog
-				open={showPricingDialog}
-				onOpenChange={setShowPricingDialog}
-			>
-				<DialogContent className="max-w-5xl">
-					<Pricing isDialog={true} returnUrl={window.location.href} />
-				</DialogContent>
-			</Dialog>
 		</>
 	);
 }
