@@ -15,6 +15,7 @@ import { RichInput } from "@/components/ui/rich-input";
 import { logger } from "@/lib/utils";
 import { Spinner } from "../ui/Spinner";
 import { toast } from "sonner";
+import { createId } from "@paralleldrive/cuid2";
 
 export const BasicsSection = () => {
 	const { portfolioId } = useParams();
@@ -30,7 +31,10 @@ export const BasicsSection = () => {
 		formState: { errors, defaultValues },
 	} = useForm({
 		resolver: zodResolver(basicsSchema),
-		defaultValues: portfolio?.basics || defaultBasics,
+		defaultValues: portfolio?.basics || {
+			...defaultBasics,
+			id: createId(),
+		},
 	});
 
 	useEffect(() => {

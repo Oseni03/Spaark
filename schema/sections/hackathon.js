@@ -9,7 +9,7 @@ export const hackathonSchema = itemSchema.extend({
 	location: z.string(),
 	description: z.string(),
 	date: z.string(),
-	logo: z.literal("").or(z.string().url("Invalid image URL")).nullable(),
+	logo: z.literal("").or(z.string()).nullable(),
 	links: z.array(linkSchema).default([]),
 	technologies: z.array(z.string()).default([]),
 });

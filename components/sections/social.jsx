@@ -30,7 +30,7 @@ export const Social = () => {
 
 	const form = useForm({
 		resolver: zodResolver(socialSchema),
-		defaultValues: defaultSocial,
+		defaultValues: { ...defaultSocial, id: createId() },
 	});
 	const {
 		reset,

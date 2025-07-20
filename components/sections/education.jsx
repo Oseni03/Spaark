@@ -28,7 +28,7 @@ export const Education = () => {
 
 	const form = useForm({
 		resolver: zodResolver(educationSchema),
-		defaultValues: defaultEducation,
+		defaultValues: { ...defaultEducation, id: createId() },
 	});
 	const {
 		reset,

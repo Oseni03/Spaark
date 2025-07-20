@@ -28,7 +28,7 @@ export const Experience = () => {
 
 	const form = useForm({
 		resolver: zodResolver(experienceSchema),
-		defaultValues: defaultExperience,
+		defaultValues: { ...defaultExperience, id: createId() },
 	});
 	const {
 		reset,

@@ -28,7 +28,7 @@ export const Hackathon = () => {
 
 	const form = useForm({
 		resolver: zodResolver(hackathonSchema),
-		defaultValues: defaultHackathon,
+		defaultValues: { ...defaultHackathon, id: createId() },
 	});
 	const {
 		reset,

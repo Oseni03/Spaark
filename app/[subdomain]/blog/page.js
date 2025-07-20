@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { getBlogPosts } from "@/services/blog";
-import { getPortfolioFromSlug } from "@/services/portfolio";
+import { getPortfolioBySlug } from "@/services/portfolio";
 import BlogListSkeleton from "@/components/blog/blog-list-skeleton";
 import NotFound from "@/app/not-found";
 import Container from "@/components/blog/container";
@@ -32,13 +32,12 @@ function BlogContent() {
 		async function initializeData() {
 			try {
 				if (!portfolio) {
-					const portfolioResult =
-						await getPortfolioFromSlug(subdomain);
+					const portfolioResult = await getPortfolioBySlug(subdomain);
 					if (!portfolioResult.success) {
 						setError("Portfolio not found");
 						return;
 					}
-					setPortfolio(portfolioResult.data.portfolio);
+					setPortfolio(portfolioResult.data);
 				}
 				if (portfolio?.blogEnabled) {
 					const result = await getBlogPosts(portfolio.id);

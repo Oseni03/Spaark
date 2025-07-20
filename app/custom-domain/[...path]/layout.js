@@ -1,5 +1,5 @@
 import React from "react";
-import { getPortfolio } from "@/services/portfolio";
+import { getPortfolioByDomain } from "@/services/portfolio";
 import { logger, cn } from "@/lib/utils";
 import NotFound from "@/app/not-found";
 import { PortfolioProvider } from "@/context/PortfolioContext";
@@ -16,7 +16,7 @@ export default async function CustomDomainLayout({ children }) {
 		}
 
 		// Fetch portfolio by custom domain
-		const portfolioResult = await getPortfolio(domain);
+		const portfolioResult = await getPortfolioByDomain(domain);
 		logger?.info?.("Custom domain portfolio result: ", portfolioResult);
 
 		if (!portfolioResult.success || !portfolioResult.data) {

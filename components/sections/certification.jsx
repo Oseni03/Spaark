@@ -28,7 +28,7 @@ export const Certification = () => {
 
 	const form = useForm({
 		resolver: zodResolver(certificationSchema),
-		defaultValues: defaultCertification,
+		defaultValues: { ...defaultCertification, id: createId() },
 	});
 	const {
 		reset,

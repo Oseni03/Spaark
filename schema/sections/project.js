@@ -10,7 +10,7 @@ export const projectSchema = itemSchema.extend({
 	technologies: z.array(z.string()).default([]),
 	website: z.literal("").or(z.string().url("Invalid URL")).nullable(), // Allow empty string, valid URL, or null
 	source: z.literal("").or(z.string().url("Invalid URL")).nullable(), // Allow empty string, valid URL, or null
-	image: z.literal("").or(z.string().url("Invalid URL")).nullable(), // Allow empty string, valid URL, or null
+	image: z.literal("").or(z.string()).nullable(), // Allow empty string, valid URL, or null
 	video: z.literal("").or(z.string().url("Invalid URL")).nullable(), // Allow empty string, valid URL, or null
 	type: z.literal("").or(z.string()).nullable(),
 });

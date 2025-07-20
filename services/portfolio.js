@@ -305,9 +305,34 @@ export async function updatePortfolioDomain(portfolioId, domain) {
 
 export async function getPortfolioByDomain(domain) {
 	return withErrorHandling(async () => {
-		return await prisma.portfolio.findFirst({
+		const portfolio = await prisma.portfolio.findFirst({
 			where: { customDomain: domain },
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				isLive: true,
+				blogEnabled: true,
+				customDomain: true,
+				domainVerified: true,
+				// organizationId: true,
+				template: true,
+				basics: true,
+				socials: true,
+				experiences: true,
+				educations: true,
+				skills: true,
+				certifications: true,
+				projects: true,
+				hackathons: true,
+			},
 		});
+
+		if (!portfolio) {
+			throw new Error("Portfolio not found");
+		}
+
+		return transformPortfolio(portfolio);
 	});
 }
 export async function markDomainVerified(domain) {

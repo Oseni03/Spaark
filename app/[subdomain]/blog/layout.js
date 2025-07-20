@@ -1,9 +1,9 @@
-import { getPortfolio } from "@/services/portfolio";
+import { getPortfolioBySlug } from "@/services/portfolio";
 
 async function sharedMetaData(params) {
 	const validatedParams = await Promise.resolve(params);
 	const { subdomain } = validatedParams;
-	const { data: portfolio } = await getPortfolio(subdomain);
+	const { data: portfolio } = await getPortfolioBySlug(subdomain);
 	const name = portfolio?.basics?.name || portfolio?.name || subdomain;
 	const headline = portfolio?.basics?.headline;
 	const summary = portfolio?.basics?.summary || `Welcome to ${name}'s blog!`;

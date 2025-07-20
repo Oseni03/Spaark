@@ -18,7 +18,7 @@ export const basicsSchema = z.object({
 			return isNaN(num) ? null : num;
 		})
 		.nullable(),
-	picture: z.literal("").or(z.string().url("Invalid image URL")),
+	picture: z.literal("").or(z.string()),
 	summary: z.string().default(""),
 	about: z.string().default(""),
 });

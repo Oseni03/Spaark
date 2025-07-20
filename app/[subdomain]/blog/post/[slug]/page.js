@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { getBlogPost } from "@/services/blog";
-import { getPortfolioFromSlug } from "@/services/portfolio";
+import { getPortfolioBySlug } from "@/services/portfolio";
 import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
 import NotFound from "@/app/not-found";
 import { BlogPost } from "@/components/blog/blog-post";
@@ -26,13 +26,12 @@ export default function Page() {
 			try {
 				// If we don't have portfolio data from context, fetch it
 				if (!portfolio) {
-					const portfolioResult =
-						await getPortfolioFromSlug(subdomain);
+					const portfolioResult = await getPortfolioBySlug(subdomain);
 					if (!portfolioResult.success) {
 						setError("Portfolio not found");
 						return;
 					}
-					setPortfolio(portfolioResult.data.portfolio);
+					setPortfolio(portfolioResult.data);
 				}
 
 				// Only fetch post if we have portfolio data and blog is enabled

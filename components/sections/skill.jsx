@@ -28,7 +28,7 @@ export const Skill = () => {
 
 	const form = useForm({
 		resolver: zodResolver(skillSchema),
-		defaultValues: defaultSkill,
+		defaultValues: { ...defaultSkill, id: createId() },
 	});
 	const {
 		reset,

@@ -70,8 +70,11 @@ export async function middleware(request) {
 
 	if (isCustomDomain) {
 		// Rewrite to a special catch-all route, passing the custom domain as a query param
-		const rewrittenUrl = new URL(`/custom-domain${pathname}`, request.url);
-		rewrittenUrl.searchParams.set("domain", hostname);
+		const subdomain = isProduction
+			? hostname.replace(`.${rootDomain}`, "")
+			: hostname.replace(".localhost:3000", "");
+		const rewrittenUrl = new URL(`/${subdomain}${pathname}`, request.url);
+		rewrittenUrl.searchParams.set("domain", subdomain);
 		return NextResponse.rewrite(rewrittenUrl);
 	}
 

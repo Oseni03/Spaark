@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { siteConfig } from "@/config/site";
 import { logger } from "@/lib/utils";
 import ContactNotification from "@/emails/templates/contact-notification";
-import { getPortfolio } from "@/services/portfolio";
+import { getPortfolioBySlug } from "@/services/portfolio";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,7 +21,7 @@ export async function POST(request) {
 		}
 		logger.info("Request data: ", reqData);
 
-		const resp = await getPortfolio(subdomain);
+		const resp = await getPortfolioBySlug(subdomain);
 
 		// Check if user exists
 		if (!resp.success || !resp.data || resp.error) {

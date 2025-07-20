@@ -7,7 +7,7 @@ export const educationSchema = itemSchema.extend({
 	studyType: z.string(),
 	date: z.string(),
 	summary: z.string().optional(),
-	logo: z.literal("").or(z.string().url()).nullable(),
+	logo: z.literal("").or(z.string()).nullable(),
 	url: z.literal("").or(z.string().url()),
 	location: z.literal("").or(z.string()).nullable(),
 });

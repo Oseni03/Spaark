@@ -9,7 +9,7 @@ export const experienceSchema = itemSchema.extend({
 	location: z.string().optional(),
 	date: z.string(),
 	summary: z.string(),
-	picture: z.literal("").or(z.string().url("Invalid image URL")),
+	picture: z.literal("").or(z.string()),
 	url: z.literal("").or(z.string().url()),
 	technologies: z.array(z.string()).default([]),
 });
