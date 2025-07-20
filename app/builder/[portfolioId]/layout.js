@@ -47,6 +47,7 @@ import {
 	updatePortfolioWithSections,
 } from "@/services/portfolio";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
+import { setSaved } from "@/redux/features/portfolioSlice";
 import { useSelector } from "react-redux";
 
 function BuilderLayoutContent({ children }) {
@@ -67,6 +68,7 @@ function BuilderLayoutContent({ children }) {
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
+	const saved = useSelector((state) => state.portfolios.saved);
 
 	useEffect(() => {
 		const fetchPortfolio = async () => {
@@ -126,6 +128,7 @@ function BuilderLayoutContent({ children }) {
 			toast.success("Changes saved", {
 				description: "Your portfolio has been updated successfully.",
 			});
+			dispatch(setSaved(true));
 		} catch (error) {
 			logger.error("Error saving portfolio:", error);
 			toast.error("Error saving changes", {
@@ -300,6 +303,13 @@ function BuilderLayoutContent({ children }) {
 														size="icon"
 														onClick={handleSave}
 														disabled={isSaving}
+														className={cn(
+															saved === false &&
+																!isSaving &&
+																"animate-pulse ring-2 ring-yellow-400",
+															isSaving &&
+																"opacity-50 cursor-not-allowed"
+														)}
 													>
 														<Save className="h-4 w-4" />
 													</Button>

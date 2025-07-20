@@ -15,6 +15,7 @@ const initialState = {
 	status: "idle",
 	error: null,
 	loading: false,
+	saved: true,
 };
 
 const portfolioSlice = createSlice({
@@ -34,6 +35,7 @@ const portfolioSlice = createSlice({
 			state.items = transformedData;
 		},
 		updatePortfolio: (state, action) => {
+			state.saved = false;
 			const { id, data } = action.payload;
 			const portfolio = state.items.find((item) => item.id === id);
 			if (portfolio) {
@@ -43,6 +45,7 @@ const portfolioSlice = createSlice({
 		},
 		// Basics
 		addBasics: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...basics } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -52,6 +55,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateBasics: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...basics } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -61,6 +65,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeBasics: (state, action) => {
+			state.saved = false;
 			const { portfolioId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -71,6 +76,7 @@ const portfolioSlice = createSlice({
 		},
 		// Experience
 		addExperience: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...experience } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -83,6 +89,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateExperience: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...experience } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -100,6 +107,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeExperience: (state, action) => {
+			state.saved = false;
 			const { portfolioId, experienceId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -113,6 +121,7 @@ const portfolioSlice = createSlice({
 		},
 		// Education
 		addEducation: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...education } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -125,6 +134,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateEducation: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...education } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -142,6 +152,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeEducation: (state, action) => {
+			state.saved = false;
 			const { portfolioId, educationId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -154,6 +165,7 @@ const portfolioSlice = createSlice({
 		},
 		// Skill
 		addSkill: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...skill } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -166,6 +178,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateSkill: (state, action) => {
+			state.saved = false;
 			const { portfolioId, skillId, ...skill } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -183,6 +196,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeSkill: (state, action) => {
+			state.saved = false;
 			const { portfolioId, skillId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -195,6 +209,7 @@ const portfolioSlice = createSlice({
 		},
 		// Project
 		addProject: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...project } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -207,6 +222,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateProject: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...project } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -224,6 +240,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeProject: (state, action) => {
+			state.saved = false;
 			const { portfolioId, projectId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -236,6 +253,7 @@ const portfolioSlice = createSlice({
 		},
 		// Hackathon
 		addHackathon: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...hackathon } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -248,6 +266,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateHackathon: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...hackathon } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -265,6 +284,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeHackathon: (state, action) => {
+			state.saved = false;
 			const { portfolioId, hackathonId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -277,6 +297,7 @@ const portfolioSlice = createSlice({
 		},
 		// Certification
 		addCertification: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...certification } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -286,6 +307,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateCertification: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...certification } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -303,6 +325,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeCertification: (state, action) => {
+			state.saved = false;
 			const { portfolioId, certificationId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -316,6 +339,7 @@ const portfolioSlice = createSlice({
 		},
 		// Social
 		addSocial: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...social } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -325,6 +349,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		updateSocial: (state, action) => {
+			state.saved = false;
 			const { portfolioId, ...social } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -342,6 +367,7 @@ const portfolioSlice = createSlice({
 			}
 		},
 		removeSocial: (state, action) => {
+			state.saved = false;
 			const { portfolioId, socialId } = action.payload;
 			const portfolio = state.items.find(
 				(item) => item.id === portfolioId
@@ -351,6 +377,9 @@ const portfolioSlice = createSlice({
 					(c) => c.id !== socialId
 				);
 			}
+		},
+		setSaved: (state, action) => {
+			state.saved = action.payload;
 		},
 	},
 	extraReducers: (builder) => {
@@ -498,6 +527,7 @@ export const {
 	addSocial,
 	updateSocial,
 	removeSocial,
+	setSaved,
 } = portfolioSlice.actions;
 
 export default portfolioSlice.reducer;
