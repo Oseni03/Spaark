@@ -10,11 +10,9 @@ import {
 	CloudX,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import dayjs from "dayjs";
 import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { BlogPost } from "@/components/blog/blog-post";
-import { getBlog, updateBlog } from "@/services/blog";
 import { getPortfolioById } from "@/services/portfolio";
 
 export default function Page() {
@@ -22,22 +20,25 @@ export default function Page() {
 	const [isPublishing, setIsPublishing] = useState(false);
 	const { postId } = useParams();
 	const [blog, setBlog] = useState(null);
-	const [loading, setLoading] = useState(false);
 	const [portfolio, setPortfolio] = useState(null);
+	const [blogLoading, setBlogLoading] = useState(true);
+	const [portfolioLoading, setPortfolioLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchPost = async () => {
 			try {
-				setLoading(true);
-				const post = await getBlog(postId);
-				if (post.error) {
-					throw new Error(post.error);
+				setBlogLoading(true);
+				const response = await fetch(`/api/blogs/${postId}`);
+				if (!response.ok) {
+					throw new Error("Failed to fetch blog post");
 				}
-				setBlog(post.data);
+				const post = await response.json();
+				setBlog(post);
 			} catch (error) {
+				setBlog(null);
 				toast.error("Blog post not found!");
 			} finally {
-				setLoading(false);
+				setBlogLoading(false);
 			}
 		};
 
@@ -46,17 +47,19 @@ export default function Page() {
 
 	useEffect(() => {
 		const fetchPortfolio = async () => {
+			if (!blog) return;
 			try {
-				setLoading(true);
+				setPortfolioLoading(true);
 				const item = await getPortfolioById(blog.portfolioId);
 				if (item.error) {
 					throw new Error(item.error);
 				}
 				setPortfolio(item.data);
 			} catch (error) {
+				setPortfolio(null);
 				toast.error("Portfolio not found!");
 			} finally {
-				setLoading(false);
+				setPortfolioLoading(false);
 			}
 		};
 
@@ -74,16 +77,20 @@ export default function Page() {
 	const handlePublish = async () => {
 		try {
 			setIsPublishing(true);
-			const blog = await updateBlog({
-				blogId: postId,
-				portfolioId: blog.portfolioId,
-				data: {
+			const response = await fetch(`/api/blogs/${postId}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					portfolioId: blog.portfolioId,
 					status: blog.status === "draft" ? "published" : "draft",
 					publishedAt: blog.status === "draft" ? new Date() : null,
-				},
+				}),
 			});
-			if (blog.error) {
-				throw new Error(blog.error);
+			const resp = await response.json();
+			if (!response.ok || resp.error) {
+				throw new Error(resp.error || "Failed to update blog post");
 			}
 
 			toast.success(
@@ -101,7 +108,7 @@ export default function Page() {
 		}
 	};
 
-	if (loading) {
+	if (blogLoading || portfolioLoading) {
 		return <BlogPostSkeleton />;
 	}
 

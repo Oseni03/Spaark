@@ -167,7 +167,10 @@ export default function Neomint({
 									>
 										{getSocialIcon(social)}
 										<span className="sr-only">
-											{social.network.toUpperCase()}
+											{social.network
+												.charAt(0)
+												.toLocaleUpperCase() +
+												social.network.slice(1)}
 										</span>
 									</Link>
 								))}
@@ -291,7 +294,10 @@ export default function Neomint({
 										>
 											{getSocialIcon(social)}
 											<span className="sr-only">
-												{social.network.toUpperCase()}
+												{social.network
+													.charAt(0)
+													.toLocaleUpperCase() +
+													social.network.slice(1)}
 											</span>
 										</Link>
 									))}
@@ -1088,7 +1094,14 @@ export default function Neomint({
 																		social
 																	)}
 																	<span className="sr-only">
-																		{social.network.toUpperCase()}
+																		{social.network
+																			.charAt(
+																				0
+																			)
+																			.toLocaleUpperCase() +
+																			social.network.slice(
+																				1
+																			)}
 																	</span>
 																</Link>
 															)

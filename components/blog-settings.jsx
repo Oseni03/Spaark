@@ -22,7 +22,7 @@ export function BlogSettings() {
 		if (!portfolio) return;
 
 		if (portfolio.blogEnabled) {
-			const blogAuth = await checkBlogEnableAuth(user.id);
+			const blogAuth = await checkBlogEnableAuth();
 
 			if (!blogAuth.allowed) {
 				toast.error(
@@ -31,14 +31,14 @@ export function BlogSettings() {
 				);
 				return;
 			}
-		}
 
-		dispatch(
-			updatePortfolioInDatabase({
-				id: portfolio.id,
-				data: { blogEnabled: !portfolio.blogEnabled },
-			})
-		);
+			dispatch(
+				updatePortfolioInDatabase({
+					id: portfolio.id,
+					data: { blogEnabled: !portfolio.blogEnabled },
+				})
+			);
+		}
 	};
 
 	return (

@@ -134,6 +134,38 @@ function Page() {
 						))}
 					</AnimatePresence>
 				)}
+
+				{/* Empty State */}
+				{!loading && blogs && blogs.length === 0 && (
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+						className="col-span-full flex flex-col items-center justify-center py-12 text-center"
+					>
+						<div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+							<svg
+								className="w-8 h-8 text-muted-foreground"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+								/>
+							</svg>
+						</div>
+						<h3 className="text-lg font-semibold mb-2">
+							No blog article yet
+						</h3>
+						<p className="text-muted-foreground mb-4">
+							Create your first blog article to get started
+						</p>
+					</motion.div>
+				)}
 			</div>
 		</div>
 	);

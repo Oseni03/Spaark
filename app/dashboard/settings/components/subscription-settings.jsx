@@ -12,27 +12,38 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import {
-	getUserPortfolioLimit,
-	getUserBlogLimit,
-	hasPremiumFeatures,
-	hasAnalyticsAccess,
+	getSubscriptionData,
+	getPlanTypeByProductId,
 } from "@/utils/subscription-plans";
 import { authClient } from "@/lib/auth-client";
 import { logger } from "@/lib/utils";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function SubscriptionSettings() {
 	const { user } = useAuth();
 	const subscription = user?.subscription || null;
+	const [portalLoading, setPortalLoading] = useState(false);
 
-	const portfolioLimit = getUserPortfolioLimit(subscription);
-	const blogLimit = getUserBlogLimit(subscription);
-	const hasPremium = hasPremiumFeatures(subscription);
-	const hasAnalytics = hasAnalyticsAccess(subscription);
+	// Derive plan type/frequency from productId
+	let planInfo = null;
+	let planData = null;
+	if (subscription && subscription.productId) {
+		planInfo = getPlanTypeByProductId(subscription.productId);
+		if (planInfo) {
+			planData = getSubscriptionData(planInfo.type, planInfo.frequency);
+		}
+	}
+
+	// Fallback to Free plan if no active subscription or mapping
+	if (!planData) {
+		planData = getSubscriptionData("FREE", "monthly");
+	}
 
 	const formatLimit = (limit) => {
 		if (limit === -1) return "Unlimited";
 		if (limit === 0) return "Not available";
-		return limit.toString();
+		return limit?.toString?.() || "Not available";
 	};
 
 	const getPlanDisplayName = (type) => {
@@ -50,10 +61,19 @@ export function SubscriptionSettings() {
 
 	const handleManageSubscription = async () => {
 		try {
-			await authClient.customer.portal();
+			setPortalLoading(true);
+			if (!user) {
+				toast.info("No user data");
+				return;
+			}
+			await authClient.customer.portal({
+				customerExternalId: user.id,
+			});
 		} catch (error) {
 			logger.error("Failed to open customer portal:", error);
 			toast.error("Failed to open subscription management");
+		} finally {
+			setPortalLoading(false);
 		}
 	};
 
@@ -75,7 +95,7 @@ export function SubscriptionSettings() {
 							Current Plan
 						</h4>
 						<p className="text-sm text-muted-foreground">
-							{getPlanDisplayName(subscription?.type)}
+							{getPlanDisplayName(planInfo?.type || "FREE")}
 						</p>
 					</div>
 					<div className="flex justify-start sm:justify-end">
@@ -89,7 +109,7 @@ export function SubscriptionSettings() {
 					</div>
 				</div>
 
-				{subscription && (
+				{planData && (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2 text-sm font-medium">
@@ -97,7 +117,7 @@ export function SubscriptionSettings() {
 								Portfolios
 							</div>
 							<p className="text-sm text-muted-foreground">
-								{formatLimit(portfolioLimit)}
+								{formatLimit(planData.portfolioLimit)}
 							</p>
 						</div>
 
@@ -107,7 +127,10 @@ export function SubscriptionSettings() {
 								Blog Articles
 							</div>
 							<p className="text-sm text-muted-foreground">
-								{formatLimit(blogLimit)}
+								{formatLimit(
+									planData.blogLimit ||
+										(planData.blogEnabled ? "Unlimited" : 0)
+								)}
 							</p>
 						</div>
 
@@ -117,19 +140,23 @@ export function SubscriptionSettings() {
 								Custom Domain
 							</div>
 							<p className="text-sm text-muted-foreground">
-								{hasPremium ? "Available" : "Basic only"}
+								{planData.blogEnabled
+									? "Available"
+									: "Basic and Pro only"}
 							</p>
 						</div>
 
-						<div className="space-y-2">
+						{/* <div className="space-y-2">
 							<div className="flex items-center gap-2 text-sm font-medium">
 								<ChartLine className="h-4 w-4" />
 								Analytics
 							</div>
 							<p className="text-sm text-muted-foreground">
-								{hasAnalytics ? "Available" : "Not available"}
+								{planInfo?.type === "PRO"
+									? "Available"
+									: "Not available"}
 							</p>
-						</div>
+						</div> */}
 					</div>
 				)}
 
@@ -137,9 +164,9 @@ export function SubscriptionSettings() {
 					<div className="text-sm text-muted-foreground">
 						<p>
 							Next billing:{" "}
-							{subscription.endDate
+							{subscription.currentPeriodEnd
 								? new Date(
-										subscription.endDate
+										subscription.currentPeriodEnd
 									).toLocaleDateString()
 								: "Not set"}
 						</p>

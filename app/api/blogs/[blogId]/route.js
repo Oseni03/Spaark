@@ -3,10 +3,33 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";
 import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
 import { getUserIdFromSession } from "@/lib/auth-utils";
+import { getBlog } from "@/services/blog";
+
+export async function GET(request, { params }) {
+	try {
+		const { blogId } = params;
+		const blog = await getBlog(blogId);
+
+		if (!blog.success || blog.error) {
+			return NextResponse.json(
+				{ error: blog.error || "Blog not found" },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json(blog.data);
+	} catch (error) {
+		logger.error("Error fetching blog article:", error);
+		return NextResponse.json(
+			{ error: "Failed to fetch blog article" },
+			{ status: 500 }
+		);
+	}
+}
 
 export async function PATCH(request, { params }) {
 	try {
-		const userId = await getUserIdFromSession()
+		const userId = await getUserIdFromSession();
 		const { blogId } = params;
 
 		if (!userId) {
@@ -14,11 +37,11 @@ export async function PATCH(request, { params }) {
 		}
 
 		const body = await request.json();
-		const { status, ...otherUpdates } = body;
+		const { portfolioId, status, ...otherUpdates } = body;
 
 		// Get current blog
 		const currentBlog = await prisma.blog.findUnique({
-			where: { id: blogId },
+			where: { id: blogId, authorId: userId },
 			select: {
 				authorId: true,
 				status: true,
@@ -33,10 +56,6 @@ export async function PATCH(request, { params }) {
 				{ error: "Blog not found" },
 				{ status: 404 }
 			);
-		}
-
-		if (currentBlog.authorId !== userId) {
-			return new NextResponse("Unauthorized", { status: 401 });
 		}
 
 		// Check if portfolio has blog enabled
@@ -74,7 +93,7 @@ export async function PATCH(request, { params }) {
 
 		// Update blog
 		const updatedBlog = await prisma.blog.update({
-			where: { id: blogId },
+			where: { id: blogId, portfolioId, authorId: userId },
 			data: {
 				...otherUpdates,
 				...(status !== undefined && {
@@ -105,7 +124,7 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
 	try {
-		const userId = await getUserIdFromSession()
+		const userId = await getUserIdFromSession();
 		const { blogId } = params;
 
 		if (!userId) {

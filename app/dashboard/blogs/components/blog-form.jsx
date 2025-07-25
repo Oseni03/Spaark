@@ -53,6 +53,7 @@ export function BlogForm({
 	defaultValues = {
 		portfolioId: "",
 		title: "",
+		slug: "",
 		excerpt: "",
 		content: null,
 		featuredImage: undefined,
@@ -114,8 +115,15 @@ export function BlogForm({
 				throw new Error("Please fill in all required fields");
 			}
 
-			// Validate slug uniqueness
-			await validateSlugUniqueness(data.slug, defaultValues.id);
+			// Validate slug uniqueness with toast
+			await toast.promise(
+				validateSlugUniqueness(data.slug, defaultValues.id),
+				{
+					loading: "Validating slug...",
+					success: "Slug is unique!",
+					error: (err) => err.message || "Slug validation failed",
+				}
+			);
 
 			// Ensure content is not null
 			const formData = {
@@ -124,7 +132,13 @@ export function BlogForm({
 			};
 
 			logger.info("Submitting form data", { formData });
-			await onSubmit(formData);
+
+			// Save blog post with toast
+			await toast.promise(onSubmit(formData), {
+				loading: "Saving blog post...",
+				success: "Blog post saved!",
+				error: (err) => err.message || "Failed to save blog post",
+			});
 		} catch (error) {
 			logger.error("Form submission error", {
 				error: error.message,

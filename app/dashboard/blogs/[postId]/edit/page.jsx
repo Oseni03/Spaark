@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter, useParams, notFound } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { BlogForm } from "../../components/blog-form";
 import { useState } from "react";
-import { updateBlog, getBlog } from "@/services/blog";
-import { useAuth } from "@/context/auth-context";
 import { useSelector } from "react-redux";
+import { logger } from "@/lib/utils";
+import { BlogPostSkeleton } from "@/components/blog/blog-post-skeleton";
 
 export default function Page() {
 	const router = useRouter();
-	const { user } = useAuth();
 	const { postId } = useParams();
 	const [blogLoading, setBlogLoading] = useState(false);
 	const portfolios = useSelector((state) => state.portfolios.items);
@@ -20,11 +20,13 @@ export default function Page() {
 		const fetchPost = async () => {
 			try {
 				setBlogLoading(true);
-				const post = await getBlog(postId);
-				if (post.error) {
-					throw new Error(post.error);
+				const response = await fetch(`/api/blogs/${postId}`);
+				if (!response.ok) {
+					throw new Error("Failed to fetch blog post");
 				}
-				setBlog(post.data);
+				const post = await response.json();
+				setBlog(post);
+				logger.info("Got blog post from API");
 			} catch (error) {
 				toast.error("Blog post not found!");
 			} finally {
@@ -37,13 +39,19 @@ export default function Page() {
 
 	const onSubmit = async (data) => {
 		try {
-			const resp = await updateBlog({
-				blogId: postId,
-				portfolioId: blog.portfolioId,
-				data,
+			const response = await fetch(`/api/blogs/${postId}`, {
+				method: "PATCH",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					...data,
+					portfolioId: blog.portfolioId,
+				}),
 			});
-			if (resp.error) {
-				throw new Error(resp.error);
+			const resp = await response.json();
+			if (!response.ok || resp.error) {
+				throw new Error(resp.error || "Failed to update blog post");
 			}
 
 			toast.success("Blog post updated successfully");
@@ -54,10 +62,10 @@ export default function Page() {
 	};
 
 	if (blogLoading) {
-		return <div>Loading...</div>;
+		return <BlogPostSkeleton />;
 	}
 
-	if (!blog) {
+	if (!blog && !blogLoading) {
 		return notFound();
 	}
 

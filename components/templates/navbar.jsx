@@ -57,13 +57,13 @@ export const Navbar = ({ socials, blogEnabled }) => {
 
 					<Separator orientation="vertical" className="h-full" />
 					{Object.entries(socials)
-						.filter(([_, socials]) => socials.visible)
-						.map(([network, socials]) => (
+						.filter(([_, social]) => social.visible)
+						.map(([network, social]) => (
 							<DockIcon key={network}>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<Link
-											href={getSocialLink(socials)}
+											href={getSocialLink(social)}
 											target="_blank"
 											className={cn(
 												buttonVariants({
@@ -73,15 +73,15 @@ export const Navbar = ({ socials, blogEnabled }) => {
 												"size-12"
 											)}
 										>
-											{getSocialIcon(socials)}
+											{getSocialIcon(social)}
 										</Link>
 									</TooltipTrigger>
 									<TooltipContent>
 										<p>
-											{socials.network
+											{social.network
 												.charAt(0)
 												.toLocaleUpperCase() +
-												socials.network.slice(1)}
+												social.network.slice(1)}
 										</p>
 									</TooltipContent>
 								</Tooltip>

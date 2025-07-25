@@ -85,7 +85,7 @@ export const siteConfig = {
 		{
 			id: "neomint",
 			name: "Neomint",
-			preview: "/templates/noemint.png",
+			preview: "/templates/neomint.png",
 		},
 	],
 };

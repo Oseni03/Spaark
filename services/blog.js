@@ -97,7 +97,7 @@ export async function createBlog({ portfolioId, data }) {
 			data: {
 				...blogData,
 				authorId: userId,
-				portfolio: { connect: { id: portfolioId } },
+				portfolioId: portfolioId, // <-- use only portfolioId
 				tags: {
 					connectOrCreate: tags.map((tag) => ({
 						where: {
@@ -127,9 +127,7 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 		const { status } = blogData;
 
 		if (status === "published") {
-			const authCheck = await checkBlogArticleCreationAuth(
-				userId
-			);
+			const authCheck = await checkBlogArticleCreationAuth(userId);
 
 			if (!authCheck.allowed) {
 				throw new Error(authCheck.reason);

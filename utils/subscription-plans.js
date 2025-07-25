@@ -102,7 +102,8 @@ export const getSubscriptionData = (type, frequency) => {
 // Check if user can create more portfolios
 export const canCreatePortfolio = (subscription, currentPortfolioCount) => {
 	if (!subscription || subscription.status !== "active") {
-		return false;
+		const plan = SUBSCRIPTION_PLANS.FREE.monthly;
+		return currentPortfolioCount < plan.portfolioLimit;
 	}
 
 	const limit = subscription.portfolioLimit;
@@ -112,26 +113,20 @@ export const canCreatePortfolio = (subscription, currentPortfolioCount) => {
 // Check if user can create blog articles
 export const canCreateBlogArticle = (subscription, currentArticleCount) => {
 	if (!subscription || subscription.status !== "active") {
-		return false;
+		const plan = SUBSCRIPTION_PLANS.FREE.monthly;
+		return (
+			plan.blogEnabled &&
+			(!plan.blogLimit || currentArticleCount < plan.blogLimit)
+		);
 	}
 
 	if (!subscription.blogEnabled) {
 		return false;
 	}
 
-	// Check against blog limit
 	return (
 		!subscription.blogLimit || currentArticleCount < subscription.blogLimit
 	);
-};
-
-// Check if user has access to premium features
-export const hasPremiumFeatures = (subscription) => {
-	if (!subscription || subscription.status !== "active") {
-		return false;
-	}
-
-	return subscription.type === "PRO";
 };
 
 // Check if user has access to analytics
@@ -143,20 +138,11 @@ export const hasAnalyticsAccess = (subscription) => {
 	return subscription.type === "PRO";
 };
 
-// Check if user has access to custom domain
-export const hasCustomDomainAccess = (subscription) => {
-	if (!subscription || subscription.status !== "active") {
-		return false;
-	}
-
-	// All plans support custom domains
-	return true;
-};
-
 // Get user's portfolio limit
 export const getUserPortfolioLimit = (subscription) => {
 	if (!subscription || subscription.status !== "active") {
-		return 0;
+		const plan = SUBSCRIPTION_PLANS.FREE.monthly;
+		return plan.portfolioLimit;
 	}
 
 	return subscription.portfolioLimit;
@@ -165,7 +151,8 @@ export const getUserPortfolioLimit = (subscription) => {
 // Get user's blog limit
 export const getUserBlogLimit = (subscription) => {
 	if (!subscription || subscription.status !== "active") {
-		return 0;
+		const plan = SUBSCRIPTION_PLANS.FREE.monthly;
+		return plan.blogEnabled ? plan.blogLimit || 0 : 0;
 	}
 
 	if (!subscription.blogEnabled) {
@@ -175,18 +162,14 @@ export const getUserBlogLimit = (subscription) => {
 	return subscription.blogLimit || 0;
 };
 
-// Check if user is in trial period
-export const isInTrialPeriod = (subscription) => {
-	if (!subscription || subscription.status !== "active") {
-		return false;
+// Utility to map productId to plan type and frequency
+export function getPlanTypeByProductId(productId) {
+	for (const [type, tiers] of Object.entries(SUBSCRIPTION_PLANS)) {
+		for (const [frequency, plan] of Object.entries(tiers)) {
+			if (plan.priceId === productId) {
+				return { type, frequency };
+			}
+		}
 	}
-
-	if (!subscription.trial || !subscription.startDate) {
-		return false;
-	}
-
-	const trialEndDate = new Date(subscription.startDate);
-	trialEndDate.setDate(trialEndDate.getDate() + subscription.trial);
-
-	return new Date() < trialEndDate;
-};
+	return null;
+}

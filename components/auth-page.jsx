@@ -72,13 +72,14 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 					{
 						email,
 						password,
-						name: "Anonymous",
+						name: email.split("@")[0] || "",
 						callbackURL: "/dashboard/portfolios",
 					},
 					{
 						onSuccess: (ctx) => {
 							//redirect to the dashboard or sign in page
 							toast.success("Sign in successful!!");
+							logger.info("New user data: ", { data: ctx.data });
 						},
 						onError: (ctx) => {
 							// display the error message

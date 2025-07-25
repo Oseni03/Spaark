@@ -962,7 +962,14 @@ export default function VioletVista({
 																		social
 																	)}
 																	<span className="sr-only">
-																		{social.network.toUpperCase()}
+																		{social.network
+																			.charAt(
+																				0
+																			)
+																			.toLocaleUpperCase() +
+																			social.network.slice(
+																				1
+																			)}
 																	</span>
 																</Link>
 															)
@@ -1158,7 +1165,10 @@ export default function VioletVista({
 										>
 											{getSocialIcon(social)}
 											<span className="sr-only">
-												{social.network.toUpperCase()}
+												{social.network
+													.charAt(0)
+													.toLocaleUpperCase() +
+													social.network.slice(1)}
 											</span>
 										</Link>
 									))}

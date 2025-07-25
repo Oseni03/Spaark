@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
 import { logger, transformPortfolio } from "@/lib/utils";
+import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
 
 const portfolioSelect = {
 	id: true,
@@ -110,6 +111,19 @@ export async function updatePortfolio(id, data) {
 
 		// Extract main portfolio fields
 		const { id: portfolioId, ...portfolioData } = data;
+
+		// If isLive is being set to true, check subscription auth
+		if (
+			typeof portfolioData.isLive !== "undefined" &&
+			portfolioData.isLive === true
+		) {
+			const liveAuthCheck = await checkPortfolioLiveAuth(userId);
+			if (!liveAuthCheck.allowed) {
+				throw new Error(
+					liveAuthCheck.reason || "Portfolio live limit reached"
+				);
+			}
+		}
 
 		const updatedPortfolio = await prisma.portfolio.update({
 			where: {
@@ -371,6 +385,19 @@ export async function updatePortfolioWithSections(id, data) {
 			hackathons,
 			...portfolioData
 		} = data;
+
+		// If isLive is being set to true, check subscription auth
+		if (
+			typeof portfolioData.isLive !== "undefined" &&
+			portfolioData.isLive === true
+		) {
+			const liveAuthCheck = await checkPortfolioLiveAuth(userId);
+			if (!liveAuthCheck.allowed) {
+				throw new Error(
+					liveAuthCheck.reason || "Portfolio live limit reached"
+				);
+			}
+		}
 
 		// Update the portfolio with nested data
 		const updatedPortfolio = await prisma.portfolio.update({

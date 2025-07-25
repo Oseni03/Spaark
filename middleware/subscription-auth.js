@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";
 import {
+	getSubscriptionDetails,
+	isUserSubscribed,
+} from "@/services/subscription";
+import {
 	canCreatePortfolio,
 	canCreateBlogArticle,
 	getUserPortfolioLimit,
@@ -12,11 +16,18 @@ import {
  */
 export async function checkPortfolioCreationAuth(userId) {
 	try {
-		// Get user with subscription and live portfolio count
+		const subscription = await getSubscriptionDetails();
+
+		if (subscription.error) {
+			return {
+				allowed: false,
+				reason: subscription?.error || "No active subscription",
+			};
+		}
+
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
-			include: {
-				subscription: true,
+			select: {
 				portfolios: {
 					where: { isLive: true },
 					select: { id: true },
@@ -24,17 +35,9 @@ export async function checkPortfolioCreationAuth(userId) {
 			},
 		});
 
-		if (!user) {
-			return { allowed: false, reason: "User not found" };
-		}
-
-		if (!user.subscription || user.subscription.status !== "active") {
-			return { allowed: false, reason: "No active subscription" };
-		}
-
-		const currentLivePortfolioCount = user.portfolios.length;
+		const currentLivePortfolioCount = user?.portfolios?.length || 0;
 		const canCreate = canCreatePortfolio(
-			user.subscription,
+			subscription,
 			currentLivePortfolioCount
 		);
 
@@ -43,10 +46,10 @@ export async function checkPortfolioCreationAuth(userId) {
 			reason: canCreate ? null : "Portfolio limit reached",
 			details: {
 				current: currentLivePortfolioCount,
-				limit: getUserPortfolioLimit(user.subscription),
+				limit: getUserPortfolioLimit(subscription),
 				remaining: Math.max(
 					0,
-					getUserPortfolioLimit(user.subscription) -
+					getUserPortfolioLimit(subscription) -
 						currentLivePortfolioCount
 				),
 			},
@@ -62,11 +65,18 @@ export async function checkPortfolioCreationAuth(userId) {
  */
 export async function checkBlogArticleCreationAuth(userId) {
 	try {
-		// Get user with subscription and blog count
+		const subscription = await getSubscriptionDetails();
+
+		if (subscription.error) {
+			return {
+				allowed: false,
+				reason: subscription?.error || "No active subscription",
+			};
+		}
+
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
-			include: {
-				subscription: true,
+			select: {
 				blogs: {
 					where: { status: "published" },
 					select: { id: true },
@@ -74,17 +84,9 @@ export async function checkBlogArticleCreationAuth(userId) {
 			},
 		});
 
-		if (!user) {
-			return { allowed: false, reason: "User not found" };
-		}
-
-		if (!user.subscription || user.subscription.status !== "active") {
-			return { allowed: false, reason: "No active subscription" };
-		}
-
-		const currentArticleCount = user.blogs.length;
+		const currentArticleCount = user?.blogs?.length || 0;
 		const canCreate = canCreateBlogArticle(
-			user.subscription,
+			subscription,
 			currentArticleCount
 		);
 
@@ -93,13 +95,13 @@ export async function checkBlogArticleCreationAuth(userId) {
 			reason: canCreate ? null : "Blog article limit reached",
 			details: {
 				current: currentArticleCount,
-				limit: getUserBlogLimit(user.subscription),
+				limit: getUserBlogLimit(subscription),
 				remaining:
-					getUserBlogLimit(user.subscription) === -1
+					getUserBlogLimit(subscription) === -1
 						? -1
 						: Math.max(
 								0,
-								getUserBlogLimit(user.subscription) -
+								getUserBlogLimit(subscription) -
 									currentArticleCount
 							),
 			},
@@ -113,24 +115,18 @@ export async function checkBlogArticleCreationAuth(userId) {
 /**
  * Check if user can enable blog for a portfolio
  */
-export async function checkBlogEnableAuth(userId) {
+export async function checkBlogEnableAuth() {
 	try {
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			include: {
-				subscription: true,
-			},
-		});
+		const subscription = await getSubscriptionDetails();
 
-		if (!user) {
-			return { allowed: false, reason: "User not found" };
+		if (subscription.error) {
+			return {
+				allowed: false,
+				reason: subscription?.error || "No active subscription",
+			};
 		}
 
-		if (!user.subscription || user.subscription.status !== "active") {
-			return { allowed: false, reason: "No active subscription" };
-		}
-
-		const blogEnabled = user.subscription.blogEnabled;
+		const blogEnabled = subscription.blogEnabled;
 
 		return {
 			allowed: blogEnabled,
@@ -139,7 +135,7 @@ export async function checkBlogEnableAuth(userId) {
 				: "Blog feature not available in current plan",
 			details: {
 				blogEnabled: blogEnabled,
-				plan: user.subscription.type,
+				plan: subscription.productId,
 			},
 		};
 	} catch (error) {
@@ -153,10 +149,18 @@ export async function checkBlogEnableAuth(userId) {
  */
 export async function checkPortfolioLiveAuth(userId) {
 	try {
+		const subscription = await getSubscriptionDetails();
+
+		if (subscription.error) {
+			return {
+				allowed: false,
+				reason: subscription?.error || "No active subscription",
+			};
+		}
+
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
-			include: {
-				subscription: true,
+			select: {
 				portfolios: {
 					where: { isLive: true },
 					select: { id: true },
@@ -164,17 +168,9 @@ export async function checkPortfolioLiveAuth(userId) {
 			},
 		});
 
-		if (!user) {
-			return { allowed: false, reason: "User not found" };
-		}
-
-		if (!user.subscription || user.subscription.status !== "active") {
-			return { allowed: false, reason: "No active subscription" };
-		}
-
-		const currentLivePortfolios = user.portfolios.length;
+		const currentLivePortfolios = user?.portfolios?.length || 0;
 		const canMakeLive = canCreatePortfolio(
-			user.subscription,
+			subscription,
 			currentLivePortfolios
 		);
 
@@ -183,11 +179,10 @@ export async function checkPortfolioLiveAuth(userId) {
 			reason: canMakeLive ? null : "Portfolio limit reached",
 			details: {
 				current: currentLivePortfolios,
-				limit: getUserPortfolioLimit(user.subscription),
+				limit: getUserPortfolioLimit(subscription),
 				remaining: Math.max(
 					0,
-					getUserPortfolioLimit(user.subscription) -
-						currentLivePortfolios
+					getUserPortfolioLimit(subscription) - currentLivePortfolios
 				),
 			},
 		};

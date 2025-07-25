@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useSession, signOut as betterAuthSignOut } from "@/lib/auth-client";
 import { logger } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { getSubscriptionDetails } from "@/services/subscription";
 
 // Provide proper default values for the context
 const defaultAuthContext = {
@@ -23,7 +24,8 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }) {
-	const { data: session, status } = useSession();
+	const { data: session, isPending } = useSession();
+	const [subscription, setSubscription] = useState(null);
 	const router = useRouter();
 
 	const signOut = async () => {
@@ -44,7 +46,6 @@ export function AuthProvider({ children }) {
 
 	// Convert session to user object to maintain compatibility
 	const user = session?.user ?? null;
-	const loading = status === "loading";
 
 	useEffect(() => {
 		if (user) {
@@ -52,11 +53,30 @@ export function AuthProvider({ children }) {
 				userId: user.id,
 				email: user.email,
 			});
+
+			const getUserSubscription = async () => {
+				const subscription = await getSubscriptionDetails();
+				if (subscription.error) {
+					logger.error("Failed to fetch user subscription");
+					return;
+				}
+
+				setSubscription(subscription);
+				logger.info("User subscription: ", subscription);
+			};
+
+			getUserSubscription();
 		}
 	}, [user]);
 
 	return (
-		<AuthContext.Provider value={{ user, loading, signOut }}>
+		<AuthContext.Provider
+			value={{
+				user: { ...user, subscription },
+				loading: isPending,
+				signOut,
+			}}
+		>
 			{children}
 		</AuthContext.Provider>
 	);
