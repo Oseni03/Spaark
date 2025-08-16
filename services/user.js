@@ -74,3 +74,46 @@ export async function updateProfile(data) {
 		};
 	}
 }
+
+export const signIn = async (email, password) => {
+	try {
+		await auth.api.signInEmail({
+			body: {
+				email,
+				password,
+			},
+		});
+
+		return {
+			success: true,
+			message: "Signed in successfully.",
+		};
+	} catch (error) {
+		return {
+			success: false,
+			message: error.message || "An unknown error occurred.",
+		};
+	}
+};
+
+export const signUp = async (email, password, username) => {
+	try {
+		await auth.api.signUpEmail({
+			body: {
+				email,
+				password,
+				name: username,
+			},
+		});
+
+		return {
+			success: true,
+			message: "Signed up successfully.",
+		};
+	} catch (error) {
+		return {
+			success: false,
+			message: error.message || "An unknown error occurred.",
+		};
+	}
+};
