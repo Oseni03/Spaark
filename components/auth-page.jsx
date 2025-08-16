@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 import slugify from "@sindresorhus/slugify";
 import { useRouter } from "next/navigation";
 
-export default function AuthPage({ actionText, redirectPath = "/" }) {
+export default function AuthPage({ actionText, redirectPath }) {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -22,7 +22,7 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		setIsLoading(true);
 		try {
 			logger.info("Starting Google sign in");
-			await authClient.signIn.social({
+			await signIn.social({
 				provider: "google",
 			});
 
@@ -49,14 +49,14 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 		setIsLoading(true);
 		try {
 			if (slugify(actionText) === "sign-in") {
-				await authClient.signIn.email({
+				await signIn.email({
 					email,
 					password,
+					callbackURL: "/dashboard/portfolios",
 					fetchOptions: {
 						onSuccess: (ctx) => {
 							//redirect to the dashboard or sign in page
 							toast.success("Sign in successful!!");
-							router.push("/dashboard/portfolios");
 						},
 						onError: (ctx) => {
 							// display the error message
@@ -68,20 +68,22 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 					},
 				});
 			} else {
-				await authClient.signUp.email(
+				await signUp.email(
 					{
 						email,
 						password,
 						name: email.split("@")[0] || "",
-						callbackURL: "/dashboard/portfolios",
+						// callbackURL: "/dashboard/portfolios",
 					},
 					{
 						onSuccess: (ctx) => {
 							//redirect to the dashboard or sign in page
-							toast.success("Sign in successful!!");
+							toast.success("Sign up successful!!");
 							logger.info("New user data: ", { data: ctx.data });
+							router.push("/dashboard/portfolios");
 						},
 						onError: (ctx) => {
+							logger.error("Sign up error: ", ctx);
 							// display the error message
 							toast.error(
 								ctx.error.message || "Invalid credentials"
@@ -181,6 +183,30 @@ export default function AuthPage({ actionText, redirectPath = "/" }) {
 								{actionText}
 							</Button>
 						</form>
+						{/* Conditional link for sign in/sign up navigation */}
+						<div className="text-center text-sm mt-2">
+							{slugify(actionText) === "sign-in" ? (
+								<>
+									Don&rsquo;t have an account?{" "}
+									<Link
+										href="/sign-up"
+										className="underline underline-offset-4 hover:text-primary"
+									>
+										Sign up
+									</Link>
+								</>
+							) : (
+								<>
+									Already have an account?{" "}
+									<Link
+										href="/sign-in"
+										className="underline underline-offset-4 hover:text-primary"
+									>
+										Sign in
+									</Link>
+								</>
+							)}
+						</div>
 					</CardContent>
 				</Card>
 				<p className="px-8 text-center text-sm text-muted-foreground">

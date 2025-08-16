@@ -84,15 +84,12 @@ export const getSubscriptionData = (type, frequency) => {
 		throw new Error(`Invalid frequency ${frequency} for plan type ${type}`);
 	}
 
-	let price = plan.price;
-	let portfolioLimit = plan.portfolioLimit;
-
 	return {
-		price,
+		price: plan.price,
 		priceId: plan.priceId,
 		interval: plan.interval,
 		trial: plan.trial,
-		portfolioLimit,
+		portfolioLimit: plan.portfolioLimit,
 		blogEnabled: plan.blogEnabled,
 		blogLimit: plan.blogLimit,
 		features: plan.features,
@@ -171,5 +168,5 @@ export function getPlanTypeByProductId(productId) {
 			}
 		}
 	}
-	return null;
+	return { type: "FREE", frequency: "monthly" };
 }

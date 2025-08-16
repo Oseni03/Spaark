@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/db";
 import { getUserIdFromSession } from "@/lib/auth-utils";
 import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
+import { polarClient } from "@/lib/auth";
+import { logger } from "@/lib/utils";
 
 export async function getSubscriptionDetails() {
 	try {
@@ -260,4 +262,53 @@ export async function getUserSubscriptionStatus() {
 	}
 
 	return "none";
+}
+
+export async function createCheckoutSession({ userId, email, priceId }) {
+	try {
+		if (!userId || !email || !priceId) {
+			throw new Error(
+				"User ID, user email and Price ID are required",
+				400,
+				"MISSING_PARAMS"
+			);
+		}
+
+		const checkoutSession = await polarClient.checkouts.create({
+			customerExternalId: userId,
+			products: [priceId],
+			customerEmail: email,
+			successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=billing&success=true`,
+		});
+
+		return {
+			success: true,
+			data: { checkoutSession },
+			message: "Checkout session created successfully",
+		};
+	} catch (error) {
+		logger.error("Failed to create checkout session:", error);
+		return { error: error.message || "Failed to create checkout session" };
+	}
+}
+
+export async function cancelSubscription({ subscriptionId }) {
+	try {
+		if (!subscriptionId) {
+			throw new Error("Subscription ID is required", 400);
+		}
+
+		const result = await polarClient.subscriptions.revoke({
+			id: subscriptionId,
+		});
+
+		return {
+			success: true,
+			data: result,
+			message: "Subscription cancelled successfully",
+		};
+	} catch (error) {
+		logger.error("Failed to cancel subscription:", error);
+		return { error: error.message || "Failed to cancel subscription" };
+	}
 }

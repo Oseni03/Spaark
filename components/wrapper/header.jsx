@@ -19,13 +19,7 @@ export const Header1 = () => {
 	const [isOpen, setOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 
-	// Use auth context with proper error handling
-	const authData = useAuth();
-	const { user, loading, signOut } = authData || {
-		user: null,
-		loading: true,
-		signOut: async () => {},
-	};
+	const { user, loading, signOut } = useAuth();
 
 	const navItems = useMemo(
 		() => [

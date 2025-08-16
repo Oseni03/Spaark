@@ -1,9 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/db"; // Assume this is your database connection
-import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { userSchema } from "@/schema/user";
+import { getUserFromSession, verifyAuth } from "@/lib/auth-utils";
+import { z } from "zod";
+import { auth } from "@/lib/auth";
 
 const userSelect = {
 	id: true,
@@ -15,6 +17,16 @@ const userSelect = {
 	subscription: true,
 };
 
+const UpdateProfileSchema = z.object({
+	name: z.string().min(2).optional(),
+	email: z.string().email().optional(),
+});
+
+const ChangePasswordSchema = z.object({
+	currentPassword: z.string().min(8),
+	newPassword: z.string().min(8),
+});
+
 export async function getUserByEmail(email) {
 	return withErrorHandling(async () => {
 		const user = await prisma.user.findUnique({
@@ -25,83 +37,40 @@ export async function getUserByEmail(email) {
 	});
 }
 
-export async function getUsers() {
-	return withErrorHandling(async () => {
-		const users = await prisma.user.findMany({
-			select: {
-				id: true,
-				email: true,
-				subscribed: true,
-				createdAt: true,
-				updatedAt: true,
-			},
-		});
-		return users.map((user) => userSchema.parse(user));
-	});
-}
+// Update user profile
+export async function updateProfile(data) {
+	try {
+		const user = await getUserFromSession();
 
-export async function getUser(userId) {
-	return withErrorHandling(async () => {
-		const user = await prisma.user.findUnique({
-			where: { id: userId },
-			select: userSelect,
-		});
-		return userSchema.parse(user);
-	});
-}
+		const validatedData = UpdateProfileSchema.parse(data);
+		const { name, email } = validatedData;
 
-export async function createUser(userId, email) {
-	return withErrorHandling(async () => {
-		const user = await prisma.user.create({
-			data: {
-				id: userId,
-				email,
-			},
-		});
-		return userSchema.parse(user);
-	});
-}
+		// Check if email is already taken by another user
+		if (email && email !== user.email) {
+			const existingUser = await prisma.user.findUnique({
+				where: { email },
+			});
 
-export async function updateUser(data) {
-	return withErrorHandling(async () => {
-		if (!data.id) {
-			throw new Error("Unauthorized");
+			if (existingUser) {
+				throw createError("Email already in use", 409, "EMAIL_IN_USE");
+			}
 		}
 
-		// Update user in database
-		const updatedUser = await prisma.user.update({
-			where: { id: data.id },
-			data: {
-				...data,
-				updatedAt: new Date(),
-			},
-			select: userSelect,
+		const updatedUser = await auth.api.updateUser({
+			name,
+			email,
 		});
 
-		revalidatePath("/builder");
-		return userSchema.parse(updatedUser);
-	});
-}
-
-export async function upsertUser({ id, email }) {
-	return withErrorHandling(async () => {
-		const user = await prisma.user.upsert({
-			where: { email },
-			update: { id },
-			create: { id, email },
-			select: userSelect,
-		});
-		return userSchema.parse(user);
-	});
-}
-
-export async function deleteUser(userId) {
-	return withErrorHandling(async () => {
-		const user = await prisma.user.delete({
-			data: {
-				id: userId,
-			},
-		});
-		return { userId };
-	});
+		return {
+			success: true,
+			data: { ...updatedUser },
+			message: "Profile updated successfully",
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error.message || "Failed to update profile",
+			code: error.code || "UPDATE_PROFILE_ERROR",
+		};
+	}
 }
