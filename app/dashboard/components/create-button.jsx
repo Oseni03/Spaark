@@ -10,7 +10,9 @@ import { logger } from "@/lib/utils";
 
 // Lazy load the dialog component
 const PortfolioDialog = lazy(() =>
-	import("@/components/dialogs/portfolio-dialog").then((mod) => ({
+	import(
+		"@/components/builder/sidebars/left/sections/dialogs/portfolio-dialog"
+	).then((mod) => ({
 		default: mod.PortfolioDialog,
 	}))
 );

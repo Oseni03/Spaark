@@ -1,6 +1,6 @@
 import React from "react";
 import { LoginForm } from "@/components/forms/login-form";
-import FormWrapper from "@/components/wrapper/form-wrapper";
+import FormWrapper from "@/components/forms/form-wrapper";
 
 function Page() {
 	return (

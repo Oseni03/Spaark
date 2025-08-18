@@ -2,8 +2,8 @@
 
 import React, { Suspense, useRef, useState, useEffect } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { LeftAppSidebar } from "@/components/left-app-sidebar";
-import { RightSidebar } from "@/components/right-app-sidebar";
+import { LeftSidebar } from "@/components/builder/sidebars/left/left-sidebar";
+import { RightSidebar } from "@/components/builder/sidebars/right/right-sidebar";
 import { NavActions } from "@/components/nav-actions";
 import {
 	Breadcrumb,
@@ -207,7 +207,7 @@ function BuilderLayoutContent({ children }) {
 							leftCollapsed && "min-w-0 max-w-0 p-0 opacity-0"
 						)}
 					>
-						<LeftAppSidebar />
+						<LeftSidebar />
 					</ResizablePanel>
 					<ResizableHandle withHandle />
 					<ResizablePanel>
@@ -387,7 +387,7 @@ function BuilderLayoutContent({ children }) {
 		<div className="relative min-h-screen">
 			<Sheet open={leftOpen} onOpenChange={setLeftOpen}>
 				<SheetContent side="left" className="w-[80vw] sm:w-[350px] p-0">
-					<LeftAppSidebar />
+					<LeftSidebar />
 				</SheetContent>
 			</Sheet>
 

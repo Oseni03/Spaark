@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ChevronRightIcon, Globe } from "lucide-react";
-import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
-import { ContactForm } from "@/app/contact-us/components/contact-form";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
 import { buttonVariants } from "@/components/ui/button";
 import { GithubLogo } from "@phosphor-icons/react";
@@ -28,6 +26,16 @@ import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "../ui/Spinner";
 import { defaultMain } from "@/schema/sections";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -151,8 +159,8 @@ export default function DefaultTemplate({
 	socials = defaultMain.socials,
 	blogEnabled = defaultMain.blogEnabled,
 }) {
-	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
-		useUserContactForm();
+	const { form, isSubmitting, onSubmit } = useUserContactForm();
+
 	return (
 		<main className="max-w-3xl mx-auto py-12 sm:py-24 px-6">
 			<div className="flex flex-col min-h-[100dvh] space-y-10 overflow-auto scrollbar-hide">
@@ -868,139 +876,113 @@ export default function DefaultTemplate({
 											<h3 className="text-xl font-bold mb-6">
 												Send a Message
 											</h3>
-											<form
-												onSubmit={handleSubmit}
-												className="space-y-4"
-											>
-												<div className="grid grid-cols-2 gap-4">
-													<div className="space-y-2">
-														<label
-															htmlFor="name"
-															className="text-sm font-medium"
-														>
-															Name
-														</label>
-														<input
-															id="name"
-															type="text"
+											<Form {...form}>
+												<form
+													onSubmit={form.handleSubmit(
+														onSubmit
+													)}
+													className="space-y-4"
+												>
+													<div className="grid grid-cols-2 gap-4">
+														<FormField
+															control={
+																form.control
+															}
 															name="full_name"
-															value={
-																formData.full_name
-															}
-															onChange={
-																handleChange
-															}
-															className={cn(
-																errors.full_name
-																	? "border-red-500"
-																	: "",
-																`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
+															render={({
+																field,
+															}) => (
+																<FormItem>
+																	<FormLabel className="text-sm font-medium">
+																		Name
+																	</FormLabel>
+																	<FormControl>
+																		<Input
+																			{...field}
+																			className={
+																				"w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+																			}
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
 															)}
 														/>
-														{errors.full_name && (
-															<p className="text-red-500">
-																{
-																	errors.full_name
-																}
-															</p>
-														)}
-													</div>
-													<div className="space-y-2">
-														<label
-															htmlFor="email"
-															className="text-sm font-medium"
-														>
-															Email
-														</label>
-														<input
-															id="email"
-															type="email"
+
+														<FormField
+															control={
+																form.control
+															}
 															name="email"
-															value={
-																formData.email
-															}
-															onChange={
-																handleChange
-															}
-															className={cn(
-																errors.email
-																	? "border-red-500"
-																	: "",
-																`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
+															render={({
+																field,
+															}) => (
+																<FormItem>
+																	<FormLabel className="text-sm font-medium">
+																		Email
+																	</FormLabel>
+																	<FormControl>
+																		<Input
+																			{...field}
+																			className={`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
 															)}
 														/>
-														{errors.email && (
-															<p className="text-red-500">
-																{errors.email}
-															</p>
-														)}
 													</div>
-												</div>
-												<div className="space-y-2">
-													<label
-														htmlFor="subject"
-														className="text-sm font-medium"
-													>
-														Subject
-													</label>
-													<input
-														id="subject"
-														type="text"
+													<FormField
+														control={form.control}
 														name="subject"
-														value={formData.subject}
-														onChange={handleChange}
-														className={cn(
-															errors.subject
-																? "border-red-500"
-																: "",
-															`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel className="text-sm font-medium">
+																	Subject
+																</FormLabel>
+																<FormControl>
+																	<Input
+																		{...field}
+																		className={`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
 														)}
 													/>
-													{errors.subject && (
-														<p className="text-red-500">
-															{errors.subject}
-														</p>
-													)}
-												</div>
-												<div className="space-y-2">
-													<label
-														htmlFor="message"
-														className="text-sm font-medium"
-													>
-														Message
-													</label>
-													<textarea
-														id="message"
+													<FormField
+														control={form.control}
 														name="message"
-														value={formData.message}
-														onChange={handleChange}
-														rows={4}
-														className={cn(
-															errors.message
-																? "border-red-500"
-																: "",
-															`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel className="text-sm font-medium">
+																	Message
+																</FormLabel>
+																<FormControl>
+																	<Textarea
+																		{...field}
+																		rows={4}
+																		className={`w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
 														)}
-													></textarea>
-													{errors.message && (
-														<p className="text-red-500">
-															{errors.message}
-														</p>
-													)}
-												</div>
-												<Button
-													type="submit"
-													className="w-full"
-													disabled={isSubmitting}
-												>
-													{isSubmitting && (
-														<Spinner />
-													)}
-													{isSubmitting
-														? "Sending..."
-														: "Send Message"}
-												</Button>
-											</form>
+													/>
+													<Button
+														type="submit"
+														className="w-full"
+														disabled={isSubmitting}
+													>
+														{isSubmitting && (
+															<Spinner />
+														)}
+														{isSubmitting
+															? "Sending..."
+															: "Send Message"}
+													</Button>
+												</form>
+											</Form>
 										</div>
 									</div>
 								</Card>

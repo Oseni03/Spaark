@@ -1,5 +1,5 @@
 import { SignupForm } from "@/components/forms/signup-form";
-import FormWrapper from "@/components/wrapper/form-wrapper";
+import FormWrapper from "@/components/forms/form-wrapper";
 import React from "react";
 
 function Page() {

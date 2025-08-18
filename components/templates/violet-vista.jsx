@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { Mail, ExternalLink, Menu, X, ArrowRight } from "lucide-react";
+import { Mail, ExternalLink, Menu, X, ArrowRight, Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +13,18 @@ import Link from "next/link";
 import HTMLReactParser from "html-react-parser";
 import { GithubLogo } from "@phosphor-icons/react";
 import { useUserContactForm } from "@/hooks/use-user-contact-form";
-import { Spinner } from "../ui/Spinner";
 import { defaultMain } from "@/schema/sections";
 import { getSocialLink, getSocialIcon } from "@/lib/utils";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 export default function VioletVista({
 	basics = defaultMain.basics,
@@ -33,8 +42,7 @@ export default function VioletVista({
 	const pathname = usePathname();
 	const isBlogActive = pathname === "/blog";
 
-	const { formData, errors, isSubmitting, handleChange, handleSubmit } =
-		useUserContactForm();
+	const { form, isSubmitting, onSubmit } = useUserContactForm();
 
 	const sections = useMemo(
 		() => [
@@ -1004,139 +1012,111 @@ export default function VioletVista({
 											<h3 className="text-xl font-bold text-primary mb-4">
 												Send a Message
 											</h3>
-											<form
-												onSubmit={handleSubmit}
-												className="space-y-4"
-											>
-												<div className="grid grid-cols-2 gap-4">
-													<div className="space-y-2">
-														<label
-															htmlFor="name"
-															className="text-sm font-medium"
-														>
-															Name
-														</label>
-														<input
-															id="name"
-															type="text"
+											<Form {...form}>
+												<form
+													onSubmit={form.handleSubmit(
+														onSubmit
+													)}
+													className="space-y-4"
+												>
+													<div className="grid grid-cols-2 gap-4">
+														<FormField
+															control={
+																form.control
+															}
 															name="full_name"
-															value={
-																formData.full_name
-															}
-															onChange={
-																handleChange
-															}
-															className={cn(
-																errors.full_name
-																	? "border-red-500"
-																	: "",
-																`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`
+															render={({
+																field,
+															}) => (
+																<FormItem>
+																	<FormLabel className="text-sm font-medium">
+																		Name
+																	</FormLabel>
+																	<FormControl>
+																		<Input
+																			{...field}
+																			className={`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`}
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
 															)}
 														/>
-														{errors.full_name && (
-															<p className="text-red-500">
-																{
-																	errors.full_name
-																}
-															</p>
-														)}
-													</div>
-													<div className="space-y-2">
-														<label
-															htmlFor="email"
-															className="text-sm font-medium"
-														>
-															Email
-														</label>
-														<input
-															id="email"
-															type="email"
+
+														<FormField
+															control={
+																form.control
+															}
 															name="email"
-															value={
-																formData.email
-															}
-															onChange={
-																handleChange
-															}
-															className={cn(
-																errors.email
-																	? "border-red-500"
-																	: "",
-																`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`
+															render={({
+																field,
+															}) => (
+																<FormItem>
+																	<FormLabel className="text-sm font-medium">
+																		Email
+																	</FormLabel>
+																	<FormControl>
+																		<Input
+																			{...field}
+																			className={`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`}
+																		/>
+																	</FormControl>
+																	<FormMessage />
+																</FormItem>
 															)}
 														/>
-														{errors.email && (
-															<p className="text-red-500">
-																{errors.email}
-															</p>
-														)}
 													</div>
-												</div>
-												<div className="space-y-2">
-													<label
-														htmlFor="subject"
-														className="text-sm font-medium"
-													>
-														Subject
-													</label>
-													<input
-														id="subject"
-														type="text"
+													<FormField
+														control={form.control}
 														name="subject"
-														value={formData.subject}
-														onChange={handleChange}
-														className={cn(
-															errors.subject
-																? "border-red-500"
-																: "",
-															`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel className="text-sm font-medium">
+																	Subject
+																</FormLabel>
+																<FormControl>
+																	<Input
+																		{...field}
+																		className={`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
 														)}
 													/>
-													{errors.subject && (
-														<p className="text-red-500">
-															{errors.subject}
-														</p>
-													)}
-												</div>
-												<div className="space-y-2">
-													<label
-														htmlFor="message"
-														className="text-sm font-medium"
-													>
-														Message
-													</label>
-													<textarea
-														id="message"
+													<FormField
+														control={form.control}
 														name="message"
-														value={formData.message}
-														onChange={handleChange}
-														rows={4}
-														className={cn(
-															errors.message
-																? "border-red-500"
-																: "",
-															`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`
+														render={({ field }) => (
+															<FormItem>
+																<FormLabel className="text-sm font-medium">
+																	Message
+																</FormLabel>
+																<FormControl>
+																	<Textarea
+																		{...field}
+																		rows={4}
+																		className={`w-full p-2 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary`}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
 														)}
-													></textarea>
-													{errors.message && (
-														<p className="text-red-500">
-															{errors.message}
-														</p>
-													)}
-												</div>
-												<Button
-													type="submit"
-													className={`w-full bg-primary/10 hover:bg-primary/20 text-primary`}
-													disabled={isSubmitting}
-												>
-													{isSubmitting && (
-														<Spinner />
-													)}
-													{isSubmitting
-														? "Sending..."
-														: "Send Message"}
-												</Button>
-											</form>
+													/>
+													<Button
+														type="submit"
+														className={`w-full bg-primary/10 hover:bg-primary/20 text-primary`}
+														disabled={isSubmitting}
+													>
+														{isSubmitting && (
+															<Loader2 />
+														)}
+														{isSubmitting
+															? "Sending..."
+															: "Send Message"}
+													</Button>
+												</form>
+											</Form>
 										</div>
 									</div>
 								</CardContent>

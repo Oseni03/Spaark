@@ -3,7 +3,7 @@
 import { withErrorHandling } from "./shared";
 import { prisma } from "@/lib/db";
 
-export async function saveContact({ email, full_name, message }) {
+export async function saveContact({ email, full_name, subject, message }) {
 	return withErrorHandling(async () => {
 		if (!email || !full_name || !message) {
 			throw new Error("All fields are required.");
@@ -11,6 +11,7 @@ export async function saveContact({ email, full_name, message }) {
 		const contact = await prisma.contact.create({
 			data: {
 				email,
+				subject,
 				full_name,
 				message,
 			},

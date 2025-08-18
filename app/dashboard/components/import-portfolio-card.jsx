@@ -7,7 +7,9 @@ import { useState, useCallback, Suspense, lazy } from "react";
 
 // Lazy load the dialog component
 const ImportDialog = lazy(() =>
-	import("@/components/dialogs/import-dialog").then((mod) => ({
+	import(
+		"@/components/builder/sidebars/left/sections/dialogs/import-dialog"
+	).then((mod) => ({
 		default: mod.ImportDialog,
 	}))
 );

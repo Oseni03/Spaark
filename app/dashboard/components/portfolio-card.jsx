@@ -30,7 +30,7 @@ import {
 } from "@/redux/thunks/portfolio";
 import { createId } from "@paralleldrive/cuid2";
 import { useState, useEffect } from "react";
-import { PortfolioDialog } from "@/components/dialogs/portfolio-dialog";
+import { PortfolioDialog } from "@/components/builder/sidebars/left/sections/dialogs/portfolio-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { portfolioSchema } from "@/schema/sections";

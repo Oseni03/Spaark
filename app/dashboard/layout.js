@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { setPortfolios } from "@/redux/features/portfolioSlice";
 import { logger } from "@/lib/utils";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import ModeToggle from "@/components/mode-toggle";
 import { usePathname } from "next/navigation";
 import {
