@@ -12,6 +12,7 @@ import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
 	name: z.string().min(2, "Name must be at least 2 characters"),
@@ -59,7 +60,11 @@ export function ProfileUpdate({ className, setError, ...props }) {
 	};
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className={cn("space-y-4", className)}
+			{...props}
+		>
 			<div className="grid gap-4 md:grid-cols-2">
 				<div className="space-y-2">
 					<Label htmlFor="name">Full Name</Label>

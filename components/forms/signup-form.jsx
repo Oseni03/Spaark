@@ -44,7 +44,7 @@ export function SignupForm({ className, ...props }) {
 	const signInWithGoogle = async () => {
 		await authClient.signIn.social({
 			provider: "google",
-			callbackURL: "/dashboard",
+			callbackURL: "/dashboard/portfolios",
 		});
 	};
 
@@ -118,59 +118,59 @@ export function SignupForm({ className, ...props }) {
 									Or continue with
 								</span>
 							</div>
-
-							<FormField
-								control={form.control}
-								name="username"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Username</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="shadcn"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Email</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="m@example.com"
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="password"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Password</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="********"
-												{...field}
-												type="password"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 						</div>
+
+						<FormField
+							control={form.control}
+							name="username"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Username</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="johndoe"
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="email"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Email</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="m@example.com"
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="password"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Password</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="********"
+											{...field}
+											type="password"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 					</div>
 					<Button
 						type="submit"

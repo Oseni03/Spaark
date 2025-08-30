@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Card,
 	CardContent,
@@ -12,19 +12,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, AlertCircle, Shield, Trash2, Key } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import {
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialog,
+	AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 const passwordSchema = z
 	.object({
@@ -40,10 +43,27 @@ const passwordSchema = z
 	});
 
 export function SecuritySettings() {
-	const [error, setError] = (useState < string) | (null > null);
-	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+	const [error, setError] = useState(null);
 	const [isChangingPassword, setChangingPassword] = useState(false);
 	const [isDeletingAccount, setDeletingAccount] = useState(false);
+	const [userAccounts, setUserAccounts] = useState([]);
+	const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
+
+	useEffect(() => {
+		const loadAccounts = async () => {
+			try {
+				setIsLoadingAccounts(true);
+				const accounts = await authClient.listAccounts();
+				setUserAccounts(Array.isArray(accounts) ? accounts : []);
+			} catch (err) {
+				console.error("Failed to load linked accounts:", err);
+				setUserAccounts([]);
+			} finally {
+				setIsLoadingAccounts(false);
+			}
+		};
+		loadAccounts();
+	}, []);
 
 	const {
 		register,
@@ -77,22 +97,37 @@ export function SecuritySettings() {
 		}
 	};
 
-	const handleDeleteAccount = async () => {
+	const sendDeleteConfirmationEmail = async () => {
 		try {
 			setDeletingAccount(true);
 			setError(null);
 			await authClient.deleteUser({
-				callbackURL: "/", // you can provide a callback URL to redirect after deletion
+				callbackURL: "/goodbye",
 			});
-			toast.success("Account deleted successfully");
-			// User will be redirected by the auth flow
+			toast.success("Account deletion verification email sent");
 		} catch (err) {
 			const errorMessage =
-				err?.data?.error?.message || "Failed to delete account";
+				err?.message || "Failed to initiate account deletion";
+			setError(errorMessage);
 			toast.error(errorMessage);
 		} finally {
 			setDeletingAccount(false);
-			setShowDeleteDialog(false);
+			setShowCancelDialog(false);
+		}
+	};
+
+	const handleAccountUnlink = async (account) => {
+		try {
+			await authClient.unlinkAccount({
+				providerId: account.provider,
+				accountId: account.id,
+			});
+			// Refresh accounts list
+			const accounts = await authClient.listAccounts();
+			setUserAccounts(Array.isArray(accounts) ? accounts : []);
+			toast.success("Account unlinked successfully");
+		} catch (err) {
+			toast.error(err.message || "Failed to unlink account");
 		}
 	};
 
@@ -255,67 +290,154 @@ export function SecuritySettings() {
 			</Card>
 
 			{/* Danger Zone */}
-			<Card className="border-destructive">
+			<AlertDialog>
+				<Card className="border-destructive">
+					<CardHeader>
+						<CardTitle className="flex items-center space-x-2 text-destructive">
+							<Trash2 className="h-5 w-5" />
+							<span>Danger Zone</span>
+						</CardTitle>
+						<CardDescription>
+							Irreversible and destructive actions
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<Alert variant="destructive">
+							<AlertCircle className="h-4 w-4" />
+							<AlertDescription>
+								Once you delete your account, there is no going
+								back. Please be certain.
+							</AlertDescription>
+						</Alert>
+
+						<AlertDialogTrigger asChild>
+							<Button variant="destructive">
+								<Trash2 className="mr-2 h-4 w-4" />
+								Delete Account
+							</Button>
+						</AlertDialogTrigger>
+					</CardContent>
+				</Card>
+
+				{/* Delete Account Dialog */}
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Account</AlertDialogTitle>
+						<AlertDialogDescription>
+							<p>
+								Are you absolutely sure you want to delete your
+								account? This action cannot be undone. This will
+								permanently delete your account and remove all
+								of your data from our servers.
+							</p>
+							<p>
+								Verification email will be sent to confirm your
+								account deletion. This action cannot be undone.
+							</p>
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+
+					<div className="space-y-4">
+						<div className="flex justify-end space-x-2">
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								type={"submiit"}
+								onClick={sendDeleteConfirmationEmail}
+							>
+								{isDeletingAccount && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
+								Send Verification Email
+							</AlertDialogAction>
+							{/* <Button
+								variant="destructive"
+								type="submit"
+								disabled={isDeletingAccount}
+							>
+								{isDeletingAccount && (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								)}
+								Send Verification Email
+							</Button> */}
+						</div>
+					</div>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* Linked Accounts */}
+			<Card>
 				<CardHeader>
-					<CardTitle className="flex items-center space-x-2 text-destructive">
-						<Trash2 className="h-5 w-5" />
-						<span>Danger Zone</span>
+					<CardTitle className="flex items-center space-x-2">
+						<Key className="h-5 w-5" />
+						<span>Linked Accounts</span>
 					</CardTitle>
 					<CardDescription>
-						Irreversible and destructive actions
+						Manage your connected accounts and authentication
+						methods
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<Alert variant="destructive">
-						<AlertCircle className="h-4 w-4" />
-						<AlertDescription>
-							Once you delete your account, there is no going
-							back. Please be certain.
-						</AlertDescription>
-					</Alert>
+					<div className="space-y-3">
+						{isLoadingAccounts ? (
+							<div className="flex items-center justify-center py-4">
+								<Loader2 className="h-6 w-6 animate-spin" />
+							</div>
+						) : userAccounts.length > 0 ? (
+							userAccounts.map((account) => (
+								<div
+									key={account.id}
+									className="flex items-center justify-between p-3 border rounded-lg"
+								>
+									<div>
+										<p className="font-medium capitalize">
+											{account.provider}
+										</p>
+										<p className="text-sm text-muted-foreground">
+											{account.providerAccountId}
+										</p>
+									</div>
+									{userAccounts.length > 1 && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={async () =>
+												await handleAccountUnlink(
+													account
+												)
+											}
+										>
+											Unlink
+										</Button>
+									)}
+								</div>
+							))
+						) : (
+							<div className="text-center py-4">
+								<p className="text-sm text-muted-foreground">
+									No linked accounts found
+								</p>
+							</div>
+						)}
 
-					<Button
-						variant="destructive"
-						onClick={() => setShowDeleteDialog(true)}
-					>
-						<Trash2 className="mr-2 h-4 w-4" />
-						Delete Account
-					</Button>
-				</CardContent>
-			</Card>
-
-			{/* Delete Account Dialog */}
-			<Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Delete Account</DialogTitle>
-						<DialogDescription>
-							Are you absolutely sure you want to delete your
-							account? This action cannot be undone. This will
-							permanently delete your account and remove all of
-							your data from our servers.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="flex justify-end space-x-2">
 						<Button
-							variant="outline"
-							onClick={() => setShowDeleteDialog(false)}
+							onClick={async () => {
+								try {
+									await authClient.linkSocial({
+										provider: "google",
+										callbackURL: "/settings",
+									});
+								} catch (err) {
+									toast.error(
+										err.message || "Failed to link account"
+									);
+								}
+							}}
 						>
-							Cancel
-						</Button>
-						<Button
-							variant="destructive"
-							onClick={handleDeleteAccount}
-							disabled={isDeletingAccount}
-						>
-							{isDeletingAccount && (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							)}
-							Delete Account
+							Link Google Account
 						</Button>
 					</div>
-				</DialogContent>
-			</Dialog>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }

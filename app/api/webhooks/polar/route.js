@@ -4,7 +4,10 @@ import {
 	WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
 import { prisma } from "@/lib/db";
-import { createFreeSubscription } from "@/services/subscription";
+import {
+	cancelSubscription,
+	createFreeSubscription,
+} from "@/services/subscription";
 import { logger } from "@/lib/utils";
 
 // Utility function to safely parse dates
@@ -58,38 +61,63 @@ export async function POST(req) {
 				}
 
 				// STEP 1: Extract user ID from customer data
-				const userId = data.customer?.externalId;
+				const userId = data.customer?.external_id;
+
+				// Find existing active subscriptions in Polar
+				// Add a 5-minute buffer to prevent cancelling very recent subscriptions
+				const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+				const existingSubscriptions =
+					await prisma.subscription.findMany({
+						where: {
+							userId: userId,
+							status: "active",
+							id: { not: data.id }, // Exclude the new subscription
+							createdAt: {
+								lt: fiveMinutesAgo, // Only consider subscriptions older than 5 minutes
+							},
+						},
+					});
+
+				// Cancel existing subscriptions in Polar
+				for (const subscription of existingSubscriptions) {
+					await cancelSubscription({
+						subscriptionId: subscription.id,
+					});
+					logger.info(
+						`🔔 Canceled existing subscription ${subscription.id} for user ${userId}`
+					);
+				}
 
 				// STEP 2: Build subscription data
 				const subscriptionData = {
-					createdAt: new Date(data.createdAt),
-					updatedAt: safeParseDate(data.modifiedAt) || new Date(),
+					createdAt: safeParseDate(data.created_at) || new Date(),
+					updatedAt: safeParseDate(data.modified_at) || new Date(),
 					amount: data.amount,
 					currency: data.currency,
-					recurringInterval: data.recurringInterval,
+					recurringInterval: data.recurring_interval || "monthly",
 					status: data.status,
 					currentPeriodStart:
-						safeParseDate(data.currentPeriodStart) || new Date(),
-					currentPeriodEnd:
-						safeParseDate(data.currentPeriodEnd) || new Date(),
-					cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
-					canceledAt: safeParseDate(data.canceledAt),
-					startedAt: safeParseDate(data.startedAt) || new Date(),
-					endsAt: safeParseDate(data.endsAt),
-					endedAt: safeParseDate(data.endedAt),
-					customerId: data.customerId,
-					productId: data.productId,
-					discountId: data.discountId || null,
-					checkoutId: data.checkoutId || "",
+						safeParseDate(data.current_period_start) || new Date(),
+					currentPeriodEnd: safeParseDate(data.current_period_end),
+					cancelAtPeriodEnd: data.cancel_at_period_end || false,
+					canceledAt: safeParseDate(data.canceled_at),
+					startedAt: safeParseDate(data.started_at),
+					endsAt: safeParseDate(data.ends_at),
+					endedAt: safeParseDate(data.ended_at),
+					customerId: data.customer_id,
+					productId: data.product_id,
+					discountId: data.discount_id || null,
+					checkoutId: data.checkout_id || "",
 					customerCancellationReason:
-						data.customerCancellationReason || null,
+						data.customer_cancellation_reason || null,
 					customerCancellationComment:
-						data.customerCancellationComment || null,
+						data.customer_cancellation_comment || null,
 					metadata: data.metadata
 						? JSON.stringify(data.metadata)
 						: null,
-					customFieldData: data.customFieldData
-						? JSON.stringify(data.customFieldData)
+					customFieldData: data.custom_field_data
+						? JSON.stringify(data.custom_field_data)
 						: null,
 					userId: userId,
 				};
@@ -102,8 +130,18 @@ export async function POST(req) {
 				});
 
 				// STEP 3: Use Prisma's upsert for proper upsert
+				if (!data.id) {
+					logger.error(
+						"💥 Missing required ID for subscription upsert:",
+						{ id: data.id }
+					);
+					return new NextResponse("Missing subscription ID", {
+						status: 400,
+					});
+				}
+
 				await prisma.subscription.upsert({
-					where: { id: data.id },
+					where: { id: data.id, userId: userId },
 					update: { ...subscriptionData },
 					create: {
 						id: data.id,
@@ -130,7 +168,7 @@ export async function POST(req) {
 		return new NextResponse("", { status: 202 });
 	} catch (error) {
 		if (error instanceof WebhookVerificationError) {
-			logger.error("❌ Webhook verification failed:", error);
+			logger.error("⌛ Webhook verification failed:", error);
 			return new NextResponse("Unauthorized", { status: 403 });
 		}
 

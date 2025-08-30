@@ -8,7 +8,7 @@ function Page() {
 			<div className="flex justify-center items-center min-h-screen">
 				<div className="w-full max-w-md space-y-6">
 					<div className="text-center">
-						<h1 className="text-2xl font-semibold">Welcome</h1>
+						<h1 className="text-2xl font-semibold">Spaark</h1>
 						<p className="mt-2 text-sm text-muted-foreground">
 							Sign up to create your portfolios
 						</p>

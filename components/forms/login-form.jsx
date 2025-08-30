@@ -40,10 +40,17 @@ export function LoginForm({ className, ...props }) {
 	});
 
 	const signInWithGoogle = async () => {
-		await authClient.signIn.social({
-			provider: "google",
-			callbackURL: "/dashboard",
-		});
+		try {
+			setIsLoading(true);
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/dashboard/portfolios",
+			});
+		} catch (error) {
+			toast.error("Failed to sign in with Google");
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	async function onSubmit(values) {

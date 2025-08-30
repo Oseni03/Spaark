@@ -87,14 +87,10 @@ export function DashboardSidebar() {
 			</SidebarContent>
 			<SidebarFooter>
 				<div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
-					<UserDropdown
-						user={user}
-						signOut={signOut}
-						className={cn(
-							"w-full flex justify-between items-center",
-							"p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md"
-						)}
-					/>
+					<div className="flex gap-2">
+						<UserDropdown user={user} signOut={signOut} />
+						<p>{user.name}</p>
+					</div>
 				</div>
 			</SidebarFooter>
 		</Sidebar>

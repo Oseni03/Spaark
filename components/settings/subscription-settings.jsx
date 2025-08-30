@@ -61,7 +61,7 @@ export function SubscriptionSettings() {
 
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
 	const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-	const [selectedPlan, setSelectedPlan] = useState < any > null;
+	const [selectedPlan, setSelectedPlan] = useState(null);
 
 	const subscription = user?.subscription || null;
 
@@ -70,6 +70,8 @@ export function SubscriptionSettings() {
 	if (subscription && subscription.productId) {
 		planInfo = getPlanTypeByProductId(subscription.productId);
 	}
+
+	const plans = ["FREE", "BASIC", "PRO"];
 
 	const handleCancelSubscription = async () => {
 		try {
@@ -268,16 +270,17 @@ export function SubscriptionSettings() {
 				</CardHeader>
 				<CardContent>
 					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-						{["FREE", "BASIC", "PRO"].map((planType) => {
+						{plans.map((planType) => {
 							const plan =
 								SUBSCRIPTION_PLANS[planType]["monthly"];
-							const Icon = planIcons[plan.id.toUpperCase()];
+							const Icon = planIcons[planType];
 							const isCurrentPlan =
-								subscription?.plan === plan.id.toUpperCase();
+								subscription?.productId === plan.priceId ||
+								false;
 
 							return (
 								<Card
-									key={plan.id}
+									key={planType}
 									className={`relative ${isCurrentPlan ? "border-primary" : ""}`}
 								>
 									{isCurrentPlan && (
@@ -322,13 +325,13 @@ export function SubscriptionSettings() {
 											<Button
 												className="w-full"
 												variant={
-													plan.id === "free"
+													plan.slug === "free"
 														? "outline"
 														: "default"
 												}
 												onClick={() => {
 													setSelectedPlan(plan);
-													if (plan.id === "free") {
+													if (plan.slug === "free") {
 														// Handle downgrade to free
 														setShowCancelDialog(
 															true
@@ -342,7 +345,7 @@ export function SubscriptionSettings() {
 												{isCreatingCheckout && (
 													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 												)}
-												{plan.id === "free"
+												{plan.slug === "free"
 													? "Downgrade"
 													: "Upgrade"}
 											</Button>
@@ -401,15 +404,18 @@ export function SubscriptionSettings() {
 						</DialogDescription>
 					</DialogHeader>
 					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 py-4">
-						{plans.map((plan) => {
-							const Icon = planIcons[plan.id.toUpperCase()];
+						{plans.map((planType) => {
+							const plan =
+								SUBSCRIPTION_PLANS[planType]["monthly"];
+							const Icon = planIcons[planType];
 							const isCurrentPlan =
-								subscription?.plan === plan.id.toUpperCase();
+								subscription?.productId === plan.priceId ||
+								false;
 
 							return (
 								<Card
-									key={plan.id}
-									className={`relative ${selectedPlan?.id === plan.id ? "border-primary ring-2 ring-primary/20" : ""} ${isCurrentPlan ? "border-muted-foreground" : ""}`}
+									key={planType}
+									className={`relative ${selectedPlan?.slug === plan.slug ? "border-primary ring-2 ring-primary/20" : ""} ${isCurrentPlan ? "border-muted-foreground" : ""}`}
 								>
 									{isCurrentPlan && (
 										<Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
@@ -453,13 +459,14 @@ export function SubscriptionSettings() {
 											<Button
 												className="w-full"
 												variant={
-													selectedPlan?.id === plan.id
+													selectedPlan?.slug ===
+													plan.slug
 														? "default"
 														: "outline"
 												}
 												onClick={() => {
 													setSelectedPlan(plan);
-													if (plan.id === "free") {
+													if (plan.slug === "free") {
 														// Handle downgrade to free
 														setShowCancelDialog(
 															true
@@ -474,14 +481,14 @@ export function SubscriptionSettings() {
 												disabled={isCreatingCheckout}
 											>
 												{isCreatingCheckout &&
-													selectedPlan?.id ===
-														plan.id && (
+													selectedPlan?.slug ===
+														plan.slug && (
 														<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 													)}
-												{plan.id === "free"
+												{plan.slug === "free"
 													? "Downgrade"
-													: selectedPlan?.id ===
-														  plan.id
+													: selectedPlan?.slug ===
+														  plan.slug
 														? "Selected"
 														: "Select Plan"}
 											</Button>

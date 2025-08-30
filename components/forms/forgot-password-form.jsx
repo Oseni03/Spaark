@@ -109,7 +109,7 @@ export function ForgotPasswordForm({ className, ...props }) {
 							<div className="text-center text-sm">
 								Don&apos;t have an account?{" "}
 								<Link
-									href="/signup"
+									href="/sign-up"
 									className="underline underline-offset-4"
 								>
 									Sign up
