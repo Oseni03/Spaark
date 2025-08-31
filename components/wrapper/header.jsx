@@ -36,10 +36,6 @@ export const Header1 = () => {
 				href: "/#pricing",
 			},
 			{
-				title: "Blog",
-				href: "/blog",
-			},
-			{
 				title: "Feature Requests",
 				href: "/feature-requests",
 			},

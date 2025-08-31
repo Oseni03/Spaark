@@ -1,4 +1,3 @@
-import { getAllPostsSlugs } from "@/sanity/lib/client";
 import { getBlogPosts } from "@/services/blog";
 import { getAllPortfolios } from "@/services/portfolio";
 
@@ -7,9 +6,6 @@ export default async function sitemap() {
 
 	// Fetch data with null checks
 	const { data: portfolios } = await getAllPortfolios();
-
-	// Only fetch Sanity blog posts if environment variables are configured
-	const blogPosts = await getAllPostsSlugs();
 
 	// Ensure portfolios is an array and handle null/undefined cases
 	console.log(
@@ -88,28 +84,10 @@ export default async function sitemap() {
 		},
 	];
 
-	console.log(
-		"Blog posts type:",
-		typeof blogPosts,
-		"Is array:",
-		Array.isArray(blogPosts)
-	);
-	const blogSitemapEntries = (Array.isArray(blogPosts) ? blogPosts : []).map(
-		(post) => ({
-			url: `${baseUrl}/blog/post/${post.slug?.current || post.slug}`,
-			lastModified: new Date(
-				post?._createdAt || post?.date || new Date()
-			).toISOString(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		})
-	);
-
 	const finalSitemap = [
 		...staticPages,
 		...portfolioSitemapEntries,
 		...flattenedBlogEntries,
-		...blogSitemapEntries,
 	];
 
 	console.log("Final sitemap entries:", finalSitemap.length);

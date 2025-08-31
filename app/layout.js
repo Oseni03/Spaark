@@ -7,7 +7,6 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
-import { SanityLive } from "@/sanity/lib/live";
 import Script from "next/script";
 import { AuthProvider } from "../context/auth-context";
 
@@ -85,7 +84,6 @@ export default function RootLayout({ children }) {
 							>
 								<TooltipProvider delayDuration={0}>
 									<Toaster />
-									<SanityLive />
 									{children}
 								</TooltipProvider>
 							</ThemeProvider>

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cx } from "@/lib/utils";
-import { urlForImage } from "@/sanity/lib/image";
 import { parseISO, format } from "date-fns";
 import { IconPhotoCircle } from "@tabler/icons-react";
 
@@ -14,10 +13,6 @@ export default function PostList({
 	fontSize,
 	fontWeight,
 }) {
-	const imageProps = post?.mainImage ? urlForImage(post.mainImage) : null;
-	const AuthorimageProps = post?.author?.image
-		? urlForImage(post.author.image)
-		: null;
 	return (
 		<>
 			<div
@@ -41,17 +36,13 @@ export default function PostList({
 									: "aspect-square"
 						)}
 						href={`/blog/post/${pathPrefix ? `${pathPrefix}/` : ""}${
-							post.slug.current
+							post.slug
 						}`}
 					>
-						{imageProps ? (
+						{post.featuredImage ? (
 							<Image
-								src={imageProps.src}
-								{...(post.mainImage.blurDataURL && {
-									placeholder: "blur",
-									blurDataURL: post.mainImage.blurDataURL,
-								})}
-								alt={post.mainImage.alt || "Thumbnail"}
+								src={post.featuredImage}
+								alt={post.title || "Thumbnail"}
 								priority={preloadImage ? true : false}
 								className="object-cover transition-all"
 								fill
@@ -82,7 +73,7 @@ export default function PostList({
 						>
 							<Link
 								href={`/post/${pathPrefix ? `${pathPrefix}/` : ""}${
-									post.slug.current
+									post.slug
 								}`}
 							>
 								<span
@@ -105,7 +96,7 @@ export default function PostList({
 									<Link
 										href={`/post/${
 											pathPrefix ? `${pathPrefix}/` : ""
-										}${post.slug.current}`}
+										}${post.slug}`}
 									>
 										{post.excerpt}
 									</Link>
@@ -114,37 +105,12 @@ export default function PostList({
 						</div>
 
 						<div className="mt-3 flex items-center space-x-3 text-gray-500 dark:text-gray-400">
-							<Link
-								href={`/author/${post?.author?.slug?.current}`}
-							>
-								<div className="flex items-center gap-3">
-									<div className="relative h-5 w-5 flex-shrink-0">
-										{post?.author?.image && (
-											<Image
-												src={AuthorimageProps.src}
-												alt={post?.author?.name}
-												className="rounded-full object-cover"
-												fill
-												sizes="20px"
-											/>
-										)}
-									</div>
-									<span className="truncate text-sm">
-										{post?.author?.name}
-									</span>
-								</div>
-							</Link>
-							<span className="text-xs text-gray-300 dark:text-gray-600">
-								&bull;
-							</span>
 							<time
 								className="truncate text-sm"
-								dateTime={post?.publishedAt || post._createdAt}
+								dateTime={post?.publishedAt}
 							>
 								{format(
-									parseISO(
-										post?.publishedAt || post._createdAt
-									),
+									parseISO(post?.publishedAt),
 									"MMMM dd, yyyy"
 								)}
 							</time>
