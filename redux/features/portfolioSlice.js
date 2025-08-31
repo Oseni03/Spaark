@@ -39,22 +39,10 @@ import {
 	removeSkillFromDatabase,
 } from "../thunks/skill";
 import {
-	addProfileInDatabase,
-	updateProfileInDatabase,
-	removeProfileFromDatabase,
-} from "../thunks/profile";
-import {
-	addTestimonialInDatabase,
-	updateTestimonialInDatabase,
-	removeTestimonialFromDatabase,
-} from "../thunks/testimonials";
-import { logger } from "@/lib/utils";
-import { transformPortfolio } from "@/lib/utils";
-import {
-	addTeamMemberInDatabase,
-	updateTeamMemberInDatabase,
-	removeTeamMemberFromDatabase,
-} from "../thunks/team";
+	addSocialInDatabase,
+	updateSocialInDatabase,
+	removeSocialFromDatabase,
+} from "../thunks/social";
 
 // Initial State
 const initialState = {
@@ -748,10 +736,10 @@ const portfolioSlice = createSlice({
 			})
 			.addCase(removeHackathonFromDatabase.rejected, setRejected);
 
-		// Profile Extra Reducers
+		// Social Extra Reducers
 		builder
-			.addCase(addProfileInDatabase.pending, setPending)
-			.addCase(addProfileInDatabase.fulfilled, (state, action) => {
+			.addCase(addSocialInDatabase.pending, setPending)
+			.addCase(addSocialInDatabase.fulfilled, (state, action) => {
 				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
@@ -760,16 +748,16 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					if (error) {
 						portfolio.error = error;
-						logger.error(error || "Failed to add profile");
+						logger.error(error || "Failed to add social");
 						return;
 					}
-					logger.info("Adding profile to portfolio:", data);
-					portfolio.profiles.items.push(data);
+					logger.info("Adding social to portfolio:", data);
+					portfolio.socials.items.push(data);
 				}
 			})
-			.addCase(addProfileInDatabase.rejected, setRejected)
-			.addCase(updateProfileInDatabase.pending, setPending)
-			.addCase(updateProfileInDatabase.fulfilled, (state, action) => {
+			.addCase(addSocialInDatabase.rejected, setRejected)
+			.addCase(updateSocialInDatabase.pending, setPending)
+			.addCase(updateSocialInDatabase.fulfilled, (state, action) => {
 				setFulfilled(state, action);
 				const { data, error } = action.payload;
 				const portfolio = state.items.find(
@@ -778,33 +766,33 @@ const portfolioSlice = createSlice({
 				if (portfolio) {
 					if (error) {
 						portfolio.error = error;
-						logger.error(error || "Failed to update profile");
+						logger.error(error || "Failed to update social");
 						return;
 					}
-					const index = portfolio.profiles.items.findIndex(
+					const index = portfolio.socials.items.findIndex(
 						(item) => item.id === data.id
 					);
 					if (index !== -1) {
-						portfolio.profiles.items[index] = data;
+						portfolio.socials.items[index] = data;
 					}
 				}
 			})
-			.addCase(updateProfileInDatabase.rejected, setRejected)
-			.addCase(removeProfileFromDatabase.pending, setPending)
-			.addCase(removeProfileFromDatabase.fulfilled, (state, action) => {
+			.addCase(updateSocialInDatabase.rejected, setRejected)
+			.addCase(removeSocialFromDatabase.pending, setPending)
+			.addCase(removeSocialFromDatabase.fulfilled, (state, action) => {
 				setFulfilled(state, action);
-				logger.info("Removing profile from database:", action.payload);
-				const { portfolioId, profileId } = action.payload;
+				logger.info("Removing social from database:", action.payload);
+				const { portfolioId, socialId } = action.payload;
 				const portfolio = state.items.find(
 					(portfolio) => portfolio.id === portfolioId
 				);
 				if (portfolio) {
-					portfolio.profiles.items = portfolio.profiles.items.filter(
-						(item) => item.id !== profileId
+					portfolio.socials.items = portfolio.socials.items.filter(
+						(item) => item.id !== socialId
 					);
 				}
 			})
-			.addCase(removeProfileFromDatabase.rejected, setRejected);
+			.addCase(removeSocialFromDatabase.rejected, setRejected);
 
 		// Project Extra Reducers
 		builder
@@ -917,125 +905,6 @@ const portfolioSlice = createSlice({
 				}
 			})
 			.addCase(removeSkillFromDatabase.rejected, setRejected);
-
-		// Testimonial Extra Reducers
-		builder
-			.addCase(addTestimonialInDatabase.pending, setPending)
-			.addCase(addTestimonialInDatabase.fulfilled, (state, action) => {
-				setFulfilled(state, action);
-				const { data, error } = action.payload;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === data.portfolioId
-				);
-				if (portfolio) {
-					if (error) {
-						portfolio.error = error;
-						logger.error(error || "Failed to add testimonial");
-						return;
-					}
-					portfolio.testimonials.items.push(data);
-				}
-			})
-			.addCase(addTestimonialInDatabase.rejected, setRejected)
-			.addCase(updateTestimonialInDatabase.pending, setPending)
-			.addCase(updateTestimonialInDatabase.fulfilled, (state, action) => {
-				setFulfilled(state, action);
-				const { data, error } = action.payload;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === data.portfolioId
-				);
-				if (portfolio) {
-					if (error) {
-						portfolio.error = error;
-						logger.error(error || "Failed to update testimonial");
-						return;
-					}
-					const index = portfolio.testimonials.items.findIndex(
-						(item) => item.id === data.id
-					);
-					if (index !== -1) {
-						portfolio.testimonials.items[index] = data;
-					}
-				}
-			})
-			.addCase(updateTestimonialInDatabase.rejected, setRejected)
-			.addCase(removeTestimonialFromDatabase.pending, setPending)
-			.addCase(
-				removeTestimonialFromDatabase.fulfilled,
-				(state, action) => {
-					setFulfilled(state, action);
-					const { portfolioId, testimonialId } = action.payload;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.testimonials.items =
-							portfolio.testimonials.items.filter(
-								(item) => item.id !== testimonialId
-							);
-					}
-				}
-			)
-			.addCase(removeTestimonialFromDatabase.rejected, setRejected);
-
-		// Team Member Extra Reducers
-		builder
-			.addCase(addTeamMemberInDatabase.pending, setPending)
-			.addCase(addTeamMemberInDatabase.fulfilled, (state, action) => {
-				setFulfilled(state);
-				const { data, error } = action.payload;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === data.portfolioId
-				);
-				if (portfolio) {
-					if (error) {
-						portfolio.error = error;
-						logger.error(error || "Failed to add team member");
-						return;
-					}
-					portfolio.teams.items.push(data);
-				}
-			})
-			.addCase(addTeamMemberInDatabase.rejected, setRejected)
-			.addCase(updateTeamMemberInDatabase.pending, setPending)
-			.addCase(updateTeamMemberInDatabase.fulfilled, (state, action) => {
-				setFulfilled(state);
-				const { data, error } = action.payload;
-				const portfolio = state.items.find(
-					(portfolio) => portfolio.id === data.portfolioId
-				);
-				if (portfolio) {
-					if (error) {
-						portfolio.error = error;
-						logger.error(error || "Failed to update team member");
-						return;
-					}
-					const index = portfolio.teams.items.findIndex(
-						(item) => item.id === data.id
-					);
-					if (index !== -1) {
-						portfolio.teams.items[index] = data;
-					}
-				}
-			})
-			.addCase(updateTeamMemberInDatabase.rejected, setRejected)
-			.addCase(removeTeamMemberFromDatabase.pending, setPending)
-			.addCase(
-				removeTeamMemberFromDatabase.fulfilled,
-				(state, action) => {
-					setFulfilled(state);
-					const { portfolioId, teamMemberId } = action.payload;
-					const portfolio = state.items.find(
-						(portfolio) => portfolio.id === portfolioId
-					);
-					if (portfolio) {
-						portfolio.teams.items = portfolio.teams.items.filter(
-							(item) => item.id !== teamMemberId
-						);
-					}
-				}
-			)
-			.addCase(removeTeamMemberFromDatabase.rejected, setRejected);
 	},
 });
 

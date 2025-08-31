@@ -12,22 +12,10 @@ import { Certification } from "@/components/sections/certification";
 import { Project } from "@/components/sections/project";
 import { Hackathon } from "@/components/sections/hackathon";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Testimonial } from "./sections/testimonial";
-import { Team } from "./sections/team";
-import { useParams } from "next/navigation";
-import { useSelector } from "react-redux";
 
 export function LeftAppSidebar() {
 	const router = useRouter();
 	const isDesktop = useMediaQuery("(min-width: 1024px)");
-	const { portfolioId } = useParams();
-
-	// Get portfolio to check if it belongs to an organization
-	const portfolio = useSelector((state) =>
-		state.portfolios.items.find((item) => item.id === portfolioId)
-	);
-
-	const isOrgPortfolio = Boolean(portfolio?.organizationId);
 
 	const Content = (
 		<div className="grid gap-y-6 p-6">
@@ -64,14 +52,6 @@ export function LeftAppSidebar() {
 			<Certification />
 			<Separator />
 			<Project />
-			<Separator />
-			{isOrgPortfolio && (
-				<>
-					<Team />
-					<Separator />
-				</>
-			)}
-			<Testimonial />
 			<Separator />
 			<Hackathon />
 		</div>
