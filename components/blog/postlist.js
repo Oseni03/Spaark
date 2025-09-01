@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cx } from "@/lib/utils";
 import { parseISO, format } from "date-fns";
-import { IconPhotoCircle } from "@tabler/icons-react";
+import { PictureInPicture2 } from "lucide-react";
 
 export default function PostList({
 	post,
@@ -50,7 +50,7 @@ export default function PostList({
 							/>
 						) : (
 							<span className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 text-gray-200">
-								<IconPhotoCircle />
+								<PictureInPicture2 />
 							</span>
 						)}
 					</Link>

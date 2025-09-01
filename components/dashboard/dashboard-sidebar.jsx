@@ -12,12 +12,7 @@ import {
 	SidebarMenuItem,
 	SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import {
-	IconArrowLeft,
-	IconBrandTabler,
-	IconSettings,
-	IconBook,
-} from "@tabler/icons-react";
+import { TableProperties, Settings2, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/app/dashboard/layout";
 import { UserDropdown } from "../user-dropdown";
@@ -28,21 +23,21 @@ const links = [
 		label: "Portfolios",
 		href: "/dashboard/portfolios",
 		icon: (
-			<IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+			<TableProperties className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
 		),
 	},
 	{
 		label: "Blogs",
 		href: "/dashboard/blogs",
 		icon: (
-			<IconBook className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+			<Book className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
 		),
 	},
 	{
 		label: "Settings",
 		href: "/dashboard/settings",
 		icon: (
-			<IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+			<Settings2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
 		),
 	},
 ];

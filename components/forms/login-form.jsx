@@ -20,11 +20,10 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 
 const formSchema = z.object({
 	email: z.string().email(),
-	password: z.string().min(8),
 });
 
 export function LoginForm({ className, ...props }) {
@@ -35,7 +34,6 @@ export function LoginForm({ className, ...props }) {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			email: "",
-			password: "",
 		},
 	});
 
@@ -56,16 +54,18 @@ export function LoginForm({ className, ...props }) {
 	async function onSubmit(values) {
 		setIsLoading(true);
 
-		const { success, message } = await signIn(
-			values.email,
-			values.password
-		);
+		const { error } = await authClient.signIn.magicLink({
+			email: values.email,
+			callbackURL: "/dashboard/portfolios",
+			newUserCallbackURL: "/dashboard/portfolios",
+		});
 
-		if (success) {
+		if (!error) {
 			toast.success(message);
-			router.push("/dashboard");
+			router.push("/dashboard/portfolios");
 		} else {
-			toast.error(message);
+			toast.error(error.message);
+			logger.error("Magic link sign-in error:", error);
 		}
 
 		setIsLoading(false);
@@ -140,35 +140,6 @@ export function LoginForm({ className, ...props }) {
 								</FormItem>
 							)}
 						/>
-
-						{/* Password Input */}
-						<div className="grid gap-3">
-							<div className="flex flex-col gap-2">
-								<FormField
-									control={form.control}
-									name="password"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Password</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="********"
-													{...field}
-													type="password"
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-								<Link
-									href="/forgot-password"
-									className="ml-auto text-sm underline-offset-4 hover:underline"
-								>
-									Forgot your password?
-								</Link>
-							</div>
-						</div>
 					</div>
 
 					<Button
@@ -179,7 +150,7 @@ export function LoginForm({ className, ...props }) {
 						{isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							"Sign in"
+							"Send Magic Link"
 						)}
 					</Button>
 				</form>
@@ -198,14 +169,14 @@ export function LoginForm({ className, ...props }) {
 			<div className="text-center text-xs text-gray-500 dark:text-gray-400">
 				By clicking continue, you agree to our{" "}
 				<Link
-					href="#"
+					href="/terms"
 					className="underline hover:text-gray-900 dark:hover:text-white"
 				>
 					Terms of Service
 				</Link>{" "}
 				and{" "}
 				<Link
-					href="#"
+					href="/privacy-policy"
 					className="underline hover:text-gray-900 dark:hover:text-white"
 				>
 					Privacy Policy

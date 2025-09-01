@@ -20,12 +20,11 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+import { cn, logger } from "@/lib/utils";
 
 const formSchema = z.object({
-	username: z.string().min(3),
+	name: z.string().min(3),
 	email: z.string().email(),
-	password: z.string().min(8),
 });
 
 export function SignupForm({ className, ...props }) {
@@ -35,9 +34,8 @@ export function SignupForm({ className, ...props }) {
 	const form = useForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			username: "",
+			name: "",
 			email: "",
-			password: "",
 		},
 	});
 
@@ -51,19 +49,17 @@ export function SignupForm({ className, ...props }) {
 	async function onSubmit(values) {
 		setIsLoading(true);
 
-		const { success, message } = await signUp(
-			values.email,
-			values.password,
-			values.username
-		);
+		const { error } = await authClient.signIn.magicLink({
+			email: values.email,
+			name: values.name,
+		});
 
-		if (success) {
-			toast.success(
-				`${message} Please check your email for verification.`
-			);
-			router.push("/dashboard");
+		if (!error) {
+			toast.success(`Please check your email for your sign in link.`);
+			router.push("/dashboard/portfolios");
 		} else {
-			toast.error(message);
+			toast.error(error.message);
+			logger.error("Magic link sign-in error:", error);
 		}
 
 		setIsLoading(false);
@@ -122,10 +118,10 @@ export function SignupForm({ className, ...props }) {
 
 						<FormField
 							control={form.control}
-							name="username"
+							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Username</FormLabel>
+									<FormLabel>Name</FormLabel>
 									<FormControl>
 										<Input
 											placeholder="johndoe"
@@ -147,24 +143,6 @@ export function SignupForm({ className, ...props }) {
 										<Input
 											placeholder="m@example.com"
 											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Password</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="********"
-											{...field}
-											type="password"
 										/>
 									</FormControl>
 									<FormMessage />
@@ -196,8 +174,8 @@ export function SignupForm({ className, ...props }) {
 			</Form>
 			<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
 				By clicking continue, you agree to our{" "}
-				<Link href="#">Terms of Service</Link> and{" "}
-				<Link href="#">Privacy Policy</Link>.
+				<Link href="/terms">Terms of Service</Link> and{" "}
+				<Link href="/privacy-policy">Privacy Policy</Link>.
 			</div>
 		</div>
 	);
