@@ -61,7 +61,7 @@ export function LoginForm({ className, ...props }) {
 		});
 
 		if (!error) {
-			toast.success(message);
+			toast.success("Magic link sent! Please check your email.");
 			router.push("/dashboard/portfolios");
 		} else {
 			toast.error(error.message);

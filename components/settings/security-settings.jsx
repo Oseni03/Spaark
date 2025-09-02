@@ -100,7 +100,7 @@ export function SecuritySettings() {
 						<div className="flex justify-end space-x-2">
 							<AlertDialogCancel>Cancel</AlertDialogCancel>
 							<AlertDialogAction
-								type={"submiit"}
+								type={"submit"}
 								onClick={sendDeleteConfirmationEmail}
 							>
 								{isDeletingAccount && (

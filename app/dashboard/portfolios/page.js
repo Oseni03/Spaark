@@ -12,7 +12,6 @@ function Page() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header with Create Button */}
 			<div className="grid gap-2 md:flex md:items-center md:justify-between">
 				<div>
 					<h1 className="text-2xl font-bold tracking-tight">
@@ -24,49 +23,21 @@ function Page() {
 				</div>
 				<CreateButton />
 			</div>
-
-			{/* Portfolios Grid */}
 			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-				{loading &&
-					Array.from({ length: 4 }).map((_, i) => (
-						<motion.div
-							key={i}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{
-								duration: 0.3,
-								delay: i * 0.1,
-							}}
-							className="duration-300 animate-in fade-in"
-							style={{
-								animationFillMode: "backwards",
-								animationDelay: `${i * 100}ms`,
-							}}
-						>
-							<BaseCard />
-						</motion.div>
-					))}
+				{loading && (
+					<div className="col-span-full flex justify-center py-12">
+						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+					</div>
+				)}
 
 				{portfolios && (
-					<AnimatePresence key={"portfolios"}>
+					<AnimatePresence>
 						{portfolios.map((portfolio, index) => (
 							<motion.div
 								key={portfolio.id || index}
-								layout
-								initial={{ opacity: 0, y: 20 }}
-								animate={{
-									opacity: 1,
-									y: 0,
-									transition: {
-										duration: 0.3,
-										delay: index * 0.1,
-									},
-								}}
-								exit={{
-									opacity: 0,
-									filter: "blur(8px)",
-									transition: { duration: 0.3 },
-								}}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
 							>
 								<PortfolioCard portfolio={portfolio} />
 							</motion.div>
