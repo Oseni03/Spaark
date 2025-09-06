@@ -40,10 +40,17 @@ export function SignupForm({ className, ...props }) {
 	});
 
 	const signInWithGoogle = async () => {
-		await authClient.signIn.social({
-			provider: "google",
-			callbackURL: "/dashboard/portfolios",
-		});
+		try {
+			setIsLoading(true);
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/dashboard/portfolios",
+			});
+		} catch (error) {
+			toast.error("Failed to sign in with Google");
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	async function onSubmit(values) {
@@ -79,6 +86,7 @@ export function SignupForm({ className, ...props }) {
 							type="button"
 							className="w-full"
 							onClick={signInWithGoogle}
+							disabled={isLoading}
 						>
 							<svg
 								className="mr-2 h-4 w-4"
@@ -103,6 +111,9 @@ export function SignupForm({ className, ...props }) {
 								/>
 							</svg>
 							Continue with Google
+							{isLoading && (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							)}
 						</Button>
 
 						<div className="relative">

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import { getPortfolioById } from "@/services/portfolio";
 import { createBlog } from "@/services/blog";
+import { checkBlogEnableAuth } from "@/services/subscription";
 
 export default function NewBlogPost() {
 	const router = useRouter();
@@ -39,8 +40,11 @@ export default function NewBlogPost() {
 				throw new Error(portfolio.error || "Portfolio not found");
 			}
 
-			if (!portfolio.data.blogEnabled) {
-				throw new Error("Blog is not enabled for this portfolio");
+			const { allowed, reason } = checkBlogEnableAuth();
+			if (!allowed) {
+				throw new Error(
+					reason || "Blog feature not available in current plan!"
+				);
 			}
 
 			await createBlog({

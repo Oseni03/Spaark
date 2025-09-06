@@ -788,7 +788,7 @@ export const RichInput = forwardRef(
 					<BubbleMenu
 						editor={editor}
 						tippyOptions={{ duration: 100 }}
-						className="bg-white rounded-md shadow-lg border p-1 flex gap-1"
+						className="bg-primary-foreground rounded-md shadow-lg border p-1 flex gap-1"
 					>
 						<Button
 							variant={

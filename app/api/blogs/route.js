@@ -4,7 +4,7 @@ import { getBlogsByAuthor, getBlogsByPortfolio } from "@/services/blog";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
-import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
+import { checkBlogArticleCreationAuth } from "@/services/subscription";
 
 const getCorsHeaders = (origin) => {
 	const allowedOrigins = [
@@ -57,7 +57,7 @@ export async function GET(req) {
 		const { searchParams } = new URL(req.url);
 		const portfolioId = searchParams.get("portfolioId");
 		const session = await auth.api.getSession({
-			headers: await headers()
+			headers: await headers(),
 		});
 		const userId = session?.user?.id;
 
@@ -118,7 +118,7 @@ export const config = {
 export async function POST(request) {
 	try {
 		const session = await auth.api.getSession({
-			headers: await headers()
+			headers: await headers(),
 		});
 		const userId = session?.user?.id;
 

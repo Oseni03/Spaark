@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { updatePortfolioInDatabase } from "@/redux/thunks/portfolio";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { checkBlogEnableAuth } from "@/middleware/subscription-auth";
+import { checkBlogEnableAuth } from "@/services/subscription";
 
 export function BlogSettings() {
 	const { portfolioId } = useParams();

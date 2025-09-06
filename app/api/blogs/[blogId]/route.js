@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";
-import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
+import { checkBlogArticleCreationAuth } from "@/services/subscription";
 import { getUserIdFromSession } from "@/lib/auth-utils";
 import { getBlog } from "@/services/blog";
 

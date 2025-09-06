@@ -120,20 +120,14 @@ export const DomainForm = ({ className, portfolio, ...props }) => {
 			<Form {...form}>
 				<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 					<div className="space-y-2">
-						<label
-							htmlFor="domain-input"
-							className="text-sm font-medium"
-						>
-							Domain Name
-						</label>
-						<div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+						<div className="flex flex-col gap-2">
 							<div className="flex-1 relative">
 								<FormField
 									control={form.control}
 									name="domain"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Email</FormLabel>
+											<FormLabel>Domain</FormLabel>
 											<FormControl>
 												<Input
 													placeholder="yourdomain.com"

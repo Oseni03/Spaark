@@ -65,9 +65,9 @@ export const PortfolioCard = ({ portfolio }) => {
 		}
 	}, [errors, defaultValues]);
 
-	const portfolioLink =
-		portfolio.customDomain ||
-		`${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+	const portfolioLink = portfolio.customDomain
+		? portfolio.customDomain
+		: `${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
 
 	const onOpen = () => {
 		router.push(`/builder/${portfolio.id}`);

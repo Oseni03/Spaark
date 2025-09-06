@@ -316,8 +316,8 @@ export default function VioletVista({
 								{HTMLReactParser(basics.about || "")}
 							</div>
 
-							{educations.length > 0 && (
-								<div className="flex flex-col md:flex-row gap-6">
+							<div className="flex flex-col md:flex-row gap-6">
+								{educations.length > 0 && (
 									<div className="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-6">
 										<h3 className="text-xl font-bold text-primary mb-4">
 											Education
@@ -346,41 +346,37 @@ export default function VioletVista({
 											)}
 										</div>
 									</div>
+								)}
 
-									{experiences.length > 0 && (
-										<div className="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-6">
-											<h3 className="text-xl font-bold text-primary mb-4">
-												Experience
-											</h3>
-											<div className="space-y-4">
-												{experiences.map(
-													(experience, index) => (
-														<div key={index}>
-															<div
-																className={`text-primary font-medium`}
-															>
-																{
-																	experience.date
-																}
-															</div>
-															<div className="font-bold">
-																{
-																	experience.position
-																}
-															</div>
-															<div className="text-muted-foreground">
-																{
-																	experience.company
-																}
-															</div>
+								{experiences.length > 0 && (
+									<div className="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-6">
+										<h3 className="text-xl font-bold text-primary mb-4">
+											Experience
+										</h3>
+										<div className="space-y-4">
+											{experiences.map(
+												(experience, index) => (
+													<div key={index}>
+														<div
+															className={`text-primary font-medium`}
+														>
+															{experience.date}
 														</div>
-													)
-												)}
-											</div>
+														<div className="font-bold">
+															{
+																experience.position
+															}
+														</div>
+														<div className="text-muted-foreground">
+															{experience.company}
+														</div>
+													</div>
+												)
+											)}
 										</div>
-									)}
-								</div>
-							)}
+									</div>
+								)}
+							</div>
 
 							{/* <div className="mt-12 flex justify-center">
 								<Button className={`bg-primary/10 hover:bg-background text-muted-foreground border border-primary/20`}>
@@ -723,7 +719,9 @@ export default function VioletVista({
 										</p>
 										<div className="mt-4 p-4 border-t border">
 											<p className="text-muted-foreground mb-4">
-												{education.summary}
+												{HTMLReactParser(
+													education.summary || ""
+												)}
 											</p>
 										</div>
 									</div>
@@ -877,7 +875,9 @@ export default function VioletVista({
 											{certificate.issuer}
 										</p>
 										<div className="text-sm text-muted-foreground">
-											{certificate.summary}
+											{HTMLReactParser(
+												certificate.summary
+											)}
 										</div>
 									</div>
 								))}

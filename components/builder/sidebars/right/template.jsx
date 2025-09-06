@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
-import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
+import { checkPortfolioLiveAuth } from "@/services/subscription";
 import { siteConfig } from "@/config/site";
 
 const templateTheme = {

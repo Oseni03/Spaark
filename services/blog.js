@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
-import { checkBlogArticleCreationAuth } from "@/middleware/subscription-auth";
+import { checkBlogArticleCreationAuth } from "./subscription";
 
 const select = {
 	id: true,

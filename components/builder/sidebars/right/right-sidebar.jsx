@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { TemplateSection } from "./template";
 import { SettingsTab } from "./settings-tab";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaintBrush, Sliders } from "@phosphor-icons/react";
 
 export const RightSidebar = () => {

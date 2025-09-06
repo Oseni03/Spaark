@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
 import { logger, transformPortfolio } from "@/lib/utils";
-import { checkPortfolioLiveAuth } from "@/middleware/subscription-auth";
+import { checkPortfolioLiveAuth } from "./subscription";
 
 const portfolioSelect = {
 	id: true,

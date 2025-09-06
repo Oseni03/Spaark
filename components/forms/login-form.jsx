@@ -84,6 +84,7 @@ export function LoginForm({ className, ...props }) {
 							type="button"
 							className="w-full"
 							onClick={signInWithGoogle}
+							disabled={isLoading}
 						>
 							<svg
 								className="mr-2 h-4 w-4"
@@ -108,6 +109,9 @@ export function LoginForm({ className, ...props }) {
 								/>
 							</svg>
 							Continue with Google
+							{isLoading && (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							)}
 						</Button>
 
 						<div className="relative">

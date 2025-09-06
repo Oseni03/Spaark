@@ -338,7 +338,7 @@ function BuilderLayoutContent({ children }) {
 							</header>
 							<main
 								className={
-									"flex-1 overflow-auto w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-6 md:py-8 lg:py-12 space-y-8 md:space-y-10"
+									"flex-1 overflow-auto w-full mx-auto"
 								}
 							>
 								<SubscriptionBanner />
