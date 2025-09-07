@@ -4,8 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 export default function FeatureRequestDetailPage() {
 	const { id } = useParams();
@@ -14,7 +14,9 @@ export default function FeatureRequestDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [comment, setComment] = useState("");
 	const [commentLoading, setCommentLoading] = useState(false);
-	const { user } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 
 	useEffect(() => {
 		fetchFeature();
@@ -98,7 +100,7 @@ export default function FeatureRequestDetailPage() {
 						</Card>
 					))}
 				</div>
-				{user && (
+				{user.id && (
 					<form
 						onSubmit={handleAddComment}
 						className="flex gap-2 items-center"
@@ -118,7 +120,7 @@ export default function FeatureRequestDetailPage() {
 						</Button>
 					</form>
 				)}
-				{!user && (
+				{!user.id && (
 					<div className="text-xs text-muted-foreground mt-2">
 						Login to comment.
 					</div>

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 import {
 	Disclosure,
@@ -14,11 +13,14 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "@/lib/auth-client";
 
 export default function FeatureRequestsPage() {
 	const [features, setFeatures] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const { user } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 
 	useEffect(() => {
 		fetchFeatures();
@@ -37,7 +39,7 @@ export default function FeatureRequestsPage() {
 	}
 
 	async function handleUpvote(id) {
-		if (!user) return toast.info("Login required");
+		if (!user.id) return toast.info("Login required");
 		const res = await fetch(`/api/feature-requests/${id}/vote`, {
 			method: "POST",
 		});
@@ -94,7 +96,7 @@ export default function FeatureRequestsPage() {
 											onClick={() =>
 												handleUpvote(feature.id)
 											}
-											disabled={!user}
+											disabled={!user.id}
 											aria-label="Upvote"
 										>
 											<ArrowUp />

@@ -16,7 +16,7 @@ import { TableProperties, Settings2, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/app/dashboard/layout";
 import { UserDropdown } from "../user-dropdown";
-import { useAuth } from "@/context/auth-context";
+import { useSession } from "@/lib/auth-client";
 
 const links = [
 	{
@@ -44,7 +44,9 @@ const links = [
 
 export function DashboardSidebar() {
 	const pathname = usePathname();
-	const { user, signOut } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 
 	return (
 		<Sidebar>
@@ -83,7 +85,7 @@ export function DashboardSidebar() {
 			<SidebarFooter>
 				<div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
 					<div className="flex gap-2">
-						<UserDropdown user={user} signOut={signOut} />
+						<UserDropdown />
 						<p>{user.name}</p>
 					</div>
 				</div>

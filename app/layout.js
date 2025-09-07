@@ -8,7 +8,6 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
 import Script from "next/script";
-import { AuthProvider } from "../context/auth-context";
 
 const fontSans = FontSans({
 	subsets: ["latin"],
@@ -52,45 +51,43 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
 	return (
-		<AuthProvider>
-			<html lang="en" suppressHydrationWarning>
-				<head>
-					<Script
-						strategy="afterInteractive"
-						src="https://www.googletagmanager.com/gtag/js?id=G-QX32SHB6DT"
-					/>
-					<Script id="google-analytics" strategy="afterInteractive">
-						{`
+		<html lang="en" suppressHydrationWarning>
+			<head>
+				<Script
+					strategy="afterInteractive"
+					src="https://www.googletagmanager.com/gtag/js?id=G-QX32SHB6DT"
+				/>
+				<Script id="google-analytics" strategy="afterInteractive">
+					{`
 							window.dataLayer = window.dataLayer || [];
 							function gtag(){dataLayer.push(arguments);}
 							gtag('js', new Date());
 							gtag('config', 'G-QX32SHB6DT');
 						`}
-					</Script>
-				</head>
-				<CSPostHogProvider>
-					<body
-						className={cn(
-							"min-h-screen font-sans antialiased",
-							fontSans.variable
-						)}
-					>
-						<CustomProvider>
-							<ThemeProvider
-								attribute="class"
-								defaultTheme="system"
-								enableSystem
-								disableTransitionOnChange
-							>
-								<TooltipProvider delayDuration={0}>
-									<Toaster />
-									{children}
-								</TooltipProvider>
-							</ThemeProvider>
-						</CustomProvider>
-					</body>
-				</CSPostHogProvider>
-			</html>
-		</AuthProvider>
+				</Script>
+			</head>
+			<CSPostHogProvider>
+				<body
+					className={cn(
+						"min-h-screen font-sans antialiased",
+						fontSans.variable
+					)}
+				>
+					<CustomProvider>
+						<ThemeProvider
+							attribute="class"
+							defaultTheme="system"
+							enableSystem
+							disableTransitionOnChange
+						>
+							<TooltipProvider delayDuration={0}>
+								<Toaster />
+								{children}
+							</TooltipProvider>
+						</ThemeProvider>
+					</CustomProvider>
+				</body>
+			</CSPostHogProvider>
+		</html>
 	);
 }

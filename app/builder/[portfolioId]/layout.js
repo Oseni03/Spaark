@@ -30,7 +30,6 @@ import {
 	Maximize2,
 	Save,
 } from "lucide-react";
-import { useAuth } from "@/context/auth-context";
 import Link from "next/link";
 import { X } from "lucide-react";
 import {
@@ -49,6 +48,7 @@ import {
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
 import { setSaved } from "@/redux/features/portfolioSlice";
 import { useSelector } from "react-redux";
+import { useSession } from "@/lib/auth-client";
 
 function BuilderLayoutContent({ children }) {
 	const router = useRouter();
@@ -62,7 +62,9 @@ function BuilderLayoutContent({ children }) {
 	const [wheelPanning, setWheelPanning] = useState(true);
 	const [scale, setScale] = useState(0.8);
 	const transformRef = useRef(null);
-	const { user, signOut } = useAuth();
+	const {
+		data: { subscription },
+	} = useSession();
 	const [showBanner, setShowBanner] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const portfolio = useSelector((state) =>
@@ -140,7 +142,7 @@ function BuilderLayoutContent({ children }) {
 	};
 
 	const SubscriptionBanner = () =>
-		user?.subscription?.status !== "active" &&
+		subscription?.status !== "active" &&
 		showBanner && (
 			<div className={cn(CONTAINER_CLASS, "mb-6")}>
 				<div className="relative bg-blue-50 dark:bg-blue-900/50 px-4 sm:px-6 py-4 flex items-center justify-between rounded-lg border border-blue-100 dark:border-blue-800">
@@ -320,7 +322,7 @@ function BuilderLayoutContent({ children }) {
 											</Tooltip>
 										</div>
 									</TooltipProvider>
-									<NavActions user={user} signOut={signOut} />
+									<NavActions />
 									<Button
 										variant="ghost"
 										size="icon"
@@ -417,7 +419,7 @@ function BuilderLayoutContent({ children }) {
 						</Breadcrumb>
 					</div>
 					<div className="ml-auto flex items-center gap-2">
-						<NavActions user={user} signOut={signOut} />
+						<NavActions />
 						<Button
 							variant="ghost"
 							size="icon"

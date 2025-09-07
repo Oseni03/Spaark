@@ -10,8 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/auth-context";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const profileSchema = z.object({
@@ -20,7 +19,9 @@ const profileSchema = z.object({
 });
 
 export function ProfileUpdate({ className, setError, ...props }) {
-	const { user } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 	const [isUpdating, setIsUpdating] = useState(false);
 
 	const {

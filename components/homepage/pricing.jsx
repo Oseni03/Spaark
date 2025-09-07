@@ -12,8 +12,7 @@ import { logger } from "@/lib/utils";
 import { SUBSCRIPTION_PLANS } from "@/utils/subscription-plans";
 import { TITLE_TAILWIND_CLASS } from "@/utils/constants";
 import { getUserIdFromSession } from "@/lib/auth-utils";
-import { authClient } from "@/lib/auth-client";
-import { useAuth } from "@/context/auth-context";
+import { authClient, useSession } from "@/lib/auth-client";
 
 const PlanIcon = ({ type }) => {
 	switch (type) {
@@ -167,7 +166,9 @@ const PricingCard = ({
 
 export default function Pricing() {
 	const router = useRouter();
-	const { user } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [hoveredStates, setHoveredStates] = useState({});
 	const [isVisible, setIsVisible] = useState(false);
@@ -196,7 +197,7 @@ export default function Pricing() {
 
 	const handleCheckout = useCallback(
 		async (slug) => {
-			if (!user) {
+			if (!user.id) {
 				router.push("/sign-in");
 				return;
 			}

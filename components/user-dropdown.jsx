@@ -22,9 +22,13 @@ import {
 import { ProfileUpdate } from "./forms/profile-update";
 import { Alert, AlertDescription } from "./ui/alert";
 import { AlertCircle } from "lucide-react";
+import { signOut, useSession } from "@/lib/auth-client";
 
-export const UserDropdown = ({ user, signOut, className }) => {
+export const UserDropdown = ({ className }) => {
 	const [error, setError] = useState(null);
+	const {
+		data: { user },
+	} = useSession();
 
 	const handleSignOut = async () => {
 		try {
