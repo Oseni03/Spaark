@@ -53,9 +53,7 @@ const planColors = {
 };
 
 export function SubscriptionSettings() {
-	const {
-		data: { user, subscription },
-	} = useSession();
+	const { data, isPending } = useSession();
 	const [isCancelling, setCancelling] = useState(false);
 	const [isReactivating, setReactivating] = useState(false);
 	const [isCreatingCheckout, setCreatingCheckout] = useState(false);
@@ -63,6 +61,9 @@ export function SubscriptionSettings() {
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
 	const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 	const [selectedPlan, setSelectedPlan] = useState(null);
+
+	const user = !isPending ? data?.user : null;
+	const subscription = !isPending ? data?.subscription : null;
 
 	// Derive plan type/frequency from productId
 	let planInfo = null;

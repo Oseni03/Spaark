@@ -12,9 +12,8 @@ import { useSession } from "@/lib/auth-client";
 export function BlogSettings() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
-	const {
-		data: { user },
-	} = useSession();
+	const { data, isPending } = useSession();
+	const user = !isPending ? data?.user : null;
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)

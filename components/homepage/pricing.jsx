@@ -166,12 +166,11 @@ const PricingCard = ({
 
 export default function Pricing() {
 	const router = useRouter();
-	const {
-		data: { user },
-	} = useSession();
+	const { data } = useSession();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [hoveredStates, setHoveredStates] = useState({});
 	const [isVisible, setIsVisible] = useState(false);
+	const user = data?.user;
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(

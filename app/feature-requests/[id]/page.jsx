@@ -14,9 +14,8 @@ export default function FeatureRequestDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [comment, setComment] = useState("");
 	const [commentLoading, setCommentLoading] = useState(false);
-	const {
-		data: { user },
-	} = useSession();
+	const { data } = useSession();
+	const user = data?.user;
 
 	useEffect(() => {
 		fetchFeature();

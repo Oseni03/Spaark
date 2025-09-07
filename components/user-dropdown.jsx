@@ -26,9 +26,8 @@ import { signOut, useSession } from "@/lib/auth-client";
 
 export const UserDropdown = ({ className }) => {
 	const [error, setError] = useState(null);
-	const {
-		data: { user },
-	} = useSession();
+	const { data, isPending } = useSession();
+	const user = !isPending ? data?.user : null;
 
 	const handleSignOut = async () => {
 		try {

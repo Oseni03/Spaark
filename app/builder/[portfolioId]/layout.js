@@ -62,15 +62,14 @@ function BuilderLayoutContent({ children }) {
 	const [wheelPanning, setWheelPanning] = useState(true);
 	const [scale, setScale] = useState(0.8);
 	const transformRef = useRef(null);
-	const {
-		data: { subscription },
-	} = useSession();
+	const { data, isPending } = useSession();
 	const [showBanner, setShowBanner] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
 	);
 	const saved = useSelector((state) => state.portfolios.saved);
+	const subscription = !isPending ? data?.subscription : null;
 
 	useEffect(() => {
 		const fetchPortfolio = async () => {

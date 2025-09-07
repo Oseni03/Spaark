@@ -19,10 +19,8 @@ export const Header1 = () => {
 	const [isOpen, setOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 
-	const {
-		data: { user },
-		isPending: loading,
-	} = useSession();
+	const { data, isPending } = useSession();
+	const user = !isPending ? data?.user : null;
 
 	const navItems = useMemo(
 		() => [
@@ -99,7 +97,7 @@ export const Header1 = () => {
 				<div className="flex items-center gap-4">
 					<ModeToggle />
 					<div className="border-r hidden md:inline"></div>
-					{loading ? (
+					{isPending ? (
 						<div className="w-8 h-8 rounded-full bg-secondary animate-pulse" />
 					) : user ? (
 						<>

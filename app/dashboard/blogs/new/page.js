@@ -13,9 +13,8 @@ import { useSession } from "@/lib/auth-client";
 export default function NewBlogPost() {
 	const router = useRouter();
 	const portfolios = useSelector((state) => state.portfolios.items);
-	const {
-		data: { user },
-	} = useSession();
+	const { data, isPending } = useSession();
+	const user = !isPending ? data?.user : null;
 
 	logger.info("Initializing NewBlogPost component", {
 		portfoliosCount: portfolios?.length,

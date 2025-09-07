@@ -19,10 +19,9 @@ const profileSchema = z.object({
 });
 
 export function ProfileUpdate({ className, setError, ...props }) {
-	const {
-		data: { user },
-	} = useSession();
+	const { data, isPending } = useSession();
 	const [isUpdating, setIsUpdating] = useState(false);
+	const user = !isPending ? data?.user : null;
 
 	const {
 		register,

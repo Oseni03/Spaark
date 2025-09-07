@@ -44,9 +44,8 @@ const links = [
 
 export function DashboardSidebar() {
 	const pathname = usePathname();
-	const {
-		data: { user },
-	} = useSession();
+	const { data, isPending } = useSession();
+	const user = !isPending ? data?.user : null;
 
 	return (
 		<Sidebar>
@@ -85,8 +84,12 @@ export function DashboardSidebar() {
 			<SidebarFooter>
 				<div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
 					<div className="flex gap-2">
-						<UserDropdown />
-						<p>{user.name}</p>
+						{!isPending && (
+							<>
+								<UserDropdown />
+								<p>{user?.name}</p>
+							</>
+						)}
 					</div>
 				</div>
 			</SidebarFooter>

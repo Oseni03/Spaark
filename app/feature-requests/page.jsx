@@ -18,9 +18,8 @@ import { useSession } from "@/lib/auth-client";
 export default function FeatureRequestsPage() {
 	const [features, setFeatures] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const {
-		data: { user },
-	} = useSession();
+	const { data } = useSession();
+	const user = data?.user;
 
 	useEffect(() => {
 		fetchFeatures();

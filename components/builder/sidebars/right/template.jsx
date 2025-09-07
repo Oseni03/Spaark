@@ -45,9 +45,8 @@ const templateTheme = {
 export function TemplateSection() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
-	const {
-		data: { user },
-	} = useSession();
+	const { data } = useSession();
+	const user = data?.user;
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
