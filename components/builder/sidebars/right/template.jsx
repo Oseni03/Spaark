@@ -19,10 +19,10 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAuth } from "@/context/auth-context";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
-import { checkPortfolioLiveAuth } from "@/services/subscription";
 import { siteConfig } from "@/config/site";
+import { canMakePortfolioLive } from "@/lib/subscription-utils";
+import { useSession } from "@/lib/auth-client";
 
 const templateTheme = {
 	default: {
@@ -45,7 +45,9 @@ const templateTheme = {
 export function TemplateSection() {
 	const { portfolioId } = useParams();
 	const dispatch = useDispatch();
-	const { user } = useAuth();
+	const {
+		data: { user },
+	} = useSession();
 
 	const portfolio = useSelector((state) =>
 		state.portfolios.items.find((item) => item.id === portfolioId)
@@ -86,22 +88,13 @@ export function TemplateSection() {
 
 		// If trying to make portfolio live, check authorization
 		if (!portfolio.isLive) {
-			const liveAuthCheck = await checkPortfolioLiveAuth(user.id);
+			if (!canMakePortfolioLive(user.id)) {
+				logger.warn("Portfolio live status blocked");
 
-			if (!liveAuthCheck.allowed) {
-				logger.warn("Portfolio live status blocked", {
-					portfolioId,
-					reason: liveAuthCheck.reason,
-					details: liveAuthCheck.details,
+				toast.error("Portfolio limit reached.", {
+					description: "Please upgrade your plan.",
+					action: { onClick: handleManageSubscription },
 				});
-
-				toast.error(
-					liveAuthCheck.reason || "Portfolio limit reached.",
-					{
-						description: "Please upgrade your plan.",
-						action: { onClick: handleManageSubscription },
-					}
-				);
 				return;
 			}
 		}

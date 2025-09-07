@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { blogSchema } from "@/schema/sections/blog";
 import { slugify } from "@/utils/text";
-import { checkBlogArticleCreationAuth } from "./subscription";
+import { canWriteArticle } from "@/lib/subscription-utils";
 
 const select = {
 	id: true,
@@ -127,10 +127,10 @@ export async function updateBlog({ blogId, portfolioId, data }) {
 		const { status } = blogData;
 
 		if (status === "published") {
-			const authCheck = await checkBlogArticleCreationAuth(userId);
-
-			if (!authCheck.allowed) {
-				throw new Error(authCheck.reason);
+			if (!canWriteArticle(userId)) {
+				throw new Error(
+					"Can't create an article!. Kindly upgrade your plan"
+				);
 			}
 		}
 

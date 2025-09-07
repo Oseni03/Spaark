@@ -4,7 +4,7 @@ import { getBlogsByAuthor, getBlogsByPortfolio } from "@/services/blog";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
-import { checkBlogArticleCreationAuth } from "@/services/subscription";
+import { canWriteArticle } from "@/lib/subscription-utils";
 
 const getCorsHeaders = (origin) => {
 	const allowedOrigins = [
@@ -170,20 +170,13 @@ export async function POST(request) {
 
 		// Check subscription authorization for publishing articles
 		if (status === "published") {
-			const authCheck = await checkBlogArticleCreationAuth(userId);
-
-			if (!authCheck.allowed) {
-				logger.warn("Blog article creation blocked", {
-					userId,
-					portfolioId,
-					reason: authCheck.reason,
-					details: authCheck.details,
-				});
+			if (!canWriteArticle(userId)) {
+				logger.warn("Blog article creation blocked");
 
 				return NextResponse.json(
 					{
-						error: authCheck.reason,
-						details: authCheck.details,
+						error: "Can't create a blog article!",
+						details: "Can't create a blog article!",
 						upgradeRequired: true,
 					},
 					{ status: 403 }

@@ -7,11 +7,15 @@ import { toast } from "sonner";
 import { logger } from "@/lib/utils";
 import { getPortfolioById } from "@/services/portfolio";
 import { createBlog } from "@/services/blog";
-import { checkBlogEnableAuth } from "@/services/subscription";
+import { canWriteArticle } from "@/lib/subscription-utils";
+import { useSession } from "@/lib/auth-client";
 
 export default function NewBlogPost() {
 	const router = useRouter();
 	const portfolios = useSelector((state) => state.portfolios.items);
+	const {
+		data: { user },
+	} = useSession();
 
 	logger.info("Initializing NewBlogPost component", {
 		portfoliosCount: portfolios?.length,
@@ -40,11 +44,8 @@ export default function NewBlogPost() {
 				throw new Error(portfolio.error || "Portfolio not found");
 			}
 
-			const { allowed, reason } = checkBlogEnableAuth();
-			if (!allowed) {
-				throw new Error(
-					reason || "Blog feature not available in current plan!"
-				);
+			if (!canWriteArticle(user.id)) {
+				throw new Error("Blog feature not available in current plan!");
 			}
 
 			await createBlog({

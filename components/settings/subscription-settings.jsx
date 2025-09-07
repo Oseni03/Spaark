@@ -30,7 +30,6 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import {
-	getSubscriptionData,
 	getPlanTypeByProductId,
 	SUBSCRIPTION_PLANS,
 } from "@/utils/subscription-plans";

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { withErrorHandling } from "./shared";
 import { defaultBasics } from "@/schema/sections/basics";
 import { logger, transformPortfolio } from "@/lib/utils";
-import { checkPortfolioLiveAuth } from "./subscription";
+import { canMakePortfolioLive } from "@/lib/subscription-utils";
 
 const portfolioSelect = {
 	id: true,
@@ -117,11 +117,8 @@ export async function updatePortfolio(id, data) {
 			typeof portfolioData.isLive !== "undefined" &&
 			portfolioData.isLive === true
 		) {
-			const liveAuthCheck = await checkPortfolioLiveAuth(userId);
-			if (!liveAuthCheck.allowed) {
-				throw new Error(
-					liveAuthCheck.reason || "Portfolio live limit reached"
-				);
+			if (!canMakePortfolioLive(userId)) {
+				throw new Error("Portfolio live limit reached");
 			}
 		}
 
@@ -391,11 +388,8 @@ export async function updatePortfolioWithSections(id, data) {
 			typeof portfolioData.isLive !== "undefined" &&
 			portfolioData.isLive === true
 		) {
-			const liveAuthCheck = await checkPortfolioLiveAuth(userId);
-			if (!liveAuthCheck.allowed) {
-				throw new Error(
-					liveAuthCheck.reason || "Portfolio live limit reached"
-				);
+			if (!canMakePortfolioLive(userId)) {
+				throw new Error("Portfolio live limit reached");
 			}
 		}
 

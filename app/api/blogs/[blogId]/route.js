@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/utils";
-import { checkBlogArticleCreationAuth } from "@/services/subscription";
 import { getUserIdFromSession } from "@/lib/auth-utils";
 import { getBlog } from "@/services/blog";
+import { canWriteArticle } from "@/lib/subscription-utils";
 
 export async function GET(request, { params }) {
 	try {
@@ -69,20 +69,13 @@ export async function PATCH(request, { params }) {
 		// Check authorization for publishing articles
 		if (status !== undefined && status !== currentBlog.status) {
 			if (status === "published") {
-				const authCheck = await checkBlogArticleCreationAuth(userId);
-
-				if (!authCheck.allowed) {
-					logger.warn("Blog article publishing blocked", {
-						userId,
-						blogId,
-						reason: authCheck.reason,
-						details: authCheck.details,
-					});
+				if (!canWriteArticle(userId)) {
+					logger.warn("Blog article publishing blocked");
 
 					return NextResponse.json(
 						{
-							error: authCheck.reason,
-							details: authCheck.details,
+							error: "Can't publish a blog article",
+							details: "Can't publish a blog article",
 							upgradeRequired: true,
 						},
 						{ status: 403 }
