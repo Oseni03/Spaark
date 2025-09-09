@@ -965,6 +965,7 @@ export default function VioletVista({
 																		),
 																		`rounded-full border border-border hover:border-primary hover:text-primary`
 																	)}
+																	target="_blank"
 																>
 																	{getSocialIcon(
 																		social
@@ -996,6 +997,7 @@ export default function VioletVista({
 																	),
 																	`rounded-full border border-border hover:border-primary hover:text-primary`
 																)}
+																target="_blank"
 															>
 																<Mail className="h-4 w-4" />
 																<span className="sr-only">
@@ -1142,6 +1144,7 @@ export default function VioletVista({
 												}),
 												`rounded-full bg-background hover:bg-primary/20 text-muted-foreground`
 											)}
+											target="_blank"
 										>
 											{getSocialIcon(social)}
 											<span className="sr-only">

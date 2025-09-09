@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { updatePortfolio } from "@/redux/features/portfolioSlice";
+import { useDispatch } from "react-redux";
 
 const formSchema = z.object({
 	domain: z
@@ -38,6 +39,7 @@ const formSchema = z.object({
 });
 
 export const DomainForm = ({ className, portfolio, ...props }) => {
+	const dispatch = useDispatch();
 	const [isLoading, setIsLoading] = useState(false);
 
 	const form = useForm({

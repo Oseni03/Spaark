@@ -103,6 +103,7 @@ export const BlogCard = ({ blog }) => {
 
 	const onPublish = async () => {
 		try {
+			const loadingToast = toast.loading("Duplicating blog post...");
 			const result = await updateBlog({
 				blogId: blog.id,
 				portfolioId: blog.portfolioId,
@@ -116,13 +117,20 @@ export const BlogCard = ({ blog }) => {
 				throw new Error(result.error);
 			}
 
+			toast.dismiss(loadingToast);
 			toast.success(
-				`Blog post ${blog.status === "draft" ? "published" : "unpublished"} successfully`
+				`Blog post ${
+					blog.status === "draft" ? "published" : "unpublished"
+				} successfully`
 			);
+			router.refresh();
 		} catch (error) {
+			toast.dismiss(loadingToast);
 			toast.error(
 				error.message ||
-					`Failed to ${blog.status === "draft" ? "publish" : "unpublish"} the blog post`
+					`Failed to ${
+						blog.status === "draft" ? "publish" : "unpublish"
+					} the blog post`
 			);
 		}
 	};

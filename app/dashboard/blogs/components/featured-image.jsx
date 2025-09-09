@@ -117,7 +117,11 @@ export const FeaturedImage = ({ image, setImage }) => {
 								onDrop={handleDrop}
 							/>
 							<div
-								className={`${isDragging ? "border-blue-500 bg-blue-50" : ""} 
+								className={`${
+									isDragging
+										? "border-blue-500 bg-blue-50"
+										: ""
+								} 
 						absolute z-[3] flex h-full w-full flex-col items-center justify-center rounded-md px-10 transition-all`}
 							>
 								<Camera className="w-12 h-12 text-gray-400 mb-4" />
@@ -162,11 +166,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 			>
 				<div className="absolute top-4 right-4 flex gap-2">
 					<label className="cursor-pointer">
-						<Button
-							variant="secondary"
-							size="sm"
-							className="bg-white hover:bg-gray-100"
-						>
+						<Button variant="secondary" size="sm">
 							<Upload className="w-4 h-4 mr-2" />
 							Change
 						</Button>
@@ -177,12 +177,7 @@ export const FeaturedImage = ({ image, setImage }) => {
 							onChange={handleFileSelect}
 						/>
 					</label>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="bg-white hover:bg-gray-100"
-						onClick={removeImage}
-					>
+					<Button variant="secondary" size="sm" onClick={removeImage}>
 						<X className="w-4 h-4" />
 					</Button>
 				</div>

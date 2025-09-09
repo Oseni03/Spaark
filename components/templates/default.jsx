@@ -172,7 +172,9 @@ export default function DefaultTemplate({
 									delay={BLUR_FADE_DELAY}
 									className="text-2xl md:text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
 									yOffset={8}
-									text={`Hi, I'm ${basics?.name?.split(" ")[0]} 👋`}
+									text={`Hi, I'm ${
+										basics?.name?.split(" ")[0]
+									} 👋`}
 								/>
 								<BlurFadeText
 									className="text-sm md:text-xl"
@@ -819,6 +821,7 @@ export default function DefaultTemplate({
 																		href={getSocialLink(
 																			social
 																		)}
+																		target="_blank"
 																		className={cn(
 																			buttonVariants(
 																				{
@@ -859,6 +862,7 @@ export default function DefaultTemplate({
 																		),
 																		`rounded-full border border-border hover:border-primary hover:text-primary`
 																	)}
+																	target="_blank"
 																>
 																	<Mail className="h-4 w-4" />
 																	<span className="sr-only">

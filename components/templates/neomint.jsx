@@ -173,6 +173,7 @@ export default function Neomint({
 											}),
 											"rounded-full border border-border"
 										)}
+										target="_blank"
 									>
 										{getSocialIcon(social)}
 										<span className="sr-only">
@@ -193,6 +194,7 @@ export default function Neomint({
 											}),
 											"rounded-full border border-border"
 										)}
+										target="_blank"
 									>
 										<Mail className="h-5 w-5" />
 										<span className="sr-only">Email</span>
@@ -300,6 +302,7 @@ export default function Neomint({
 												}),
 												`rounded-full border border-border hover:border-primary hover:text-primary`
 											)}
+											target="_blank"
 										>
 											{getSocialIcon(social)}
 											<span className="sr-only">
@@ -320,6 +323,7 @@ export default function Neomint({
 												}),
 												`rounded-full border border-border hover:border-primary hover:text-primary`
 											)}
+											target="_blank"
 										>
 											<Mail className="h-5 w-5" />
 											<span className="sr-only">
@@ -490,6 +494,7 @@ export default function Neomint({
 																}),
 																"group/btn"
 															)}
+															target="_blank"
 														>
 															<GithubLogo className="mr-2 h-4 w-4" />
 															Code
@@ -506,6 +511,7 @@ export default function Neomint({
 																	size: "sm",
 																})
 															)}
+															target="_blank"
 														>
 															<ExternalLink className="mr-2 h-4 w-4" />
 															Demo
@@ -1098,6 +1104,7 @@ export default function Neomint({
 																		),
 																		`rounded-full border border-border hover:border-primary hover:text-primary`
 																	)}
+																	target="_blank"
 																>
 																	{getSocialIcon(
 																		social
@@ -1128,6 +1135,7 @@ export default function Neomint({
 																	),
 																	`rounded-full border border-border hover:border-primary hover:text-primary`
 																)}
+																target="_blank"
 															>
 																<Mail className="h-4 w-4" />
 																<span className="sr-only">
@@ -1273,6 +1281,7 @@ export default function Neomint({
 											}),
 											`rounded-full border border-border hover:border-primary hover:text-primary`
 										)}
+										target="_blank"
 									>
 										{getSocialIcon(social)}
 									</Link>
@@ -1287,6 +1296,7 @@ export default function Neomint({
 											}),
 											`rounded-full border border-border hover:border-primary hover:text-primary`
 										)}
+										target="_blank"
 									>
 										<Mail className="h-5 w-5" />
 									</Link>

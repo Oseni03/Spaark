@@ -21,9 +21,12 @@ export function BlogSettings() {
 
 	const toggleBlogFeature = async () => {
 		if (!portfolio) return;
+		const loadingToast = toast.loading("Updating blog settings...");
 
+		// If enabling the blog, check if the user can enable it based on their plan
 		if (portfolio.blogEnabled) {
 			if (!canEnableBlog(user.id)) {
+				toast.dismiss(loadingToast);
 				toast.error("Blog feature not available in current plan");
 				return;
 			}
@@ -34,6 +37,13 @@ export function BlogSettings() {
 					data: { blogEnabled: !portfolio.blogEnabled },
 				})
 			);
+			toast.dismiss(loadingToast);
+			toast.success("Blog feature enabled");
+		} else {
+			toast.dismiss(loadingToast);
+			toast.info("Blog feature not enabled for your current plan", {
+				description: "Upgrade to a higher plan to enable this feature.",
+			});
 		}
 	};
 
