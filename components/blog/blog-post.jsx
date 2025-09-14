@@ -36,15 +36,20 @@ export const BlogPost = ({
 						</time>
 						<span>· {"5"} min read</span>
 					</div>
-					<div className="flex items-center gap-2">
-						<Avatar className="h-8 w-8">
-							<AvatarImage src={author.image} alt={author.name} />
-							<AvatarFallback>
-								{getInitials(author.name)}
-							</AvatarFallback>
-						</Avatar>
-						<span className="font-semibold">{author.name}</span>
-					</div>
+					{author && (
+						<div className="flex items-center gap-2">
+							<Avatar className="h-8 w-8">
+								<AvatarImage
+									src={author.image}
+									alt={author.name}
+								/>
+								<AvatarFallback>
+									{getInitials(author.name)}
+								</AvatarFallback>
+							</Avatar>
+							<span className="font-semibold">{author.name}</span>
+						</div>
+					)}
 				</div>
 			</div>
 

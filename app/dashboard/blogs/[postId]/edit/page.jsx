@@ -13,21 +13,40 @@ export default function Page() {
 	const router = useRouter();
 	const { postId } = useParams();
 	const [blogLoading, setBlogLoading] = useState(false);
-	const portfolios = useSelector((state) => state.portfolios.items);
 	const [blog, setBlog] = useState(null);
+	const [hasError, setHasError] = useState(false);
+	const portfolios = useSelector((state) => state.portfolios.items);
 
 	useEffect(() => {
+		// Don't fetch if no postId
+		if (!postId) {
+			setHasError(true);
+			return;
+		}
 		const fetchPost = async () => {
 			try {
 				setBlogLoading(true);
+				setHasError(false);
+
+				logger.info("Fetching blog post with ID: ", postId);
+
 				const response = await fetch(`/api/blogs/${postId}`);
+
+				if (response.status === 404) {
+					setHasError(true);
+					return;
+				}
+
 				if (!response.ok) {
-					throw new Error("Failed to fetch blog post");
+					throw new Error(`HTTP error! status: ${response.status}`);
 				}
 				const post = await response.json();
+				logger.info("Fetched blog post: ", post);
 				setBlog(post);
 				logger.info("Got blog post from API");
 			} catch (error) {
+				logger.error("Error fetching blog post:", error);
+				setHasError(true);
 				toast.error("Blog post not found!");
 			} finally {
 				setBlogLoading(false);
@@ -61,12 +80,14 @@ export default function Page() {
 		}
 	};
 
-	if (blogLoading) {
+	// Show loading state
+	if (blogLoading || !blog) {
 		return <BlogPostSkeleton />;
 	}
 
-	if (!blog && !blogLoading) {
-		return notFound();
+	// Show 404 if there was an error or no blog found
+	if (hasError || (!blog && !blogLoading)) {
+		notFound();
 	}
 
 	return (

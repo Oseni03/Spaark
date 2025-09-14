@@ -157,7 +157,7 @@ export default function Page() {
 				title={blog.title}
 				date={blog.publishedAt || blog.updatedAt}
 				author={{
-					name: portfolio?.basics?.name || "Anonymous",
+					name: portfolio?.basics?.name,
 					image: portfolio?.basics?.picture,
 				}}
 				featuredImage={blog.featuredImage}
