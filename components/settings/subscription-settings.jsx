@@ -91,13 +91,18 @@ export function SubscriptionSettings() {
 	const handleReactivateSubscription = async () => {
 		try {
 			setReactivating(true);
-			const result = await createCheckoutSession({
+			const { success, data, error } = await createCheckoutSession({
 				userId: user.id,
 				email: user.email,
 				priceId: subscription.productId,
 			});
-			if (result.data?.checkoutSession?.url) {
-				window.location.href = result.data.checkoutSession.url;
+
+			if (error || !success) {
+				throw new Error(error || "Failed to create checkout session");
+			}
+
+			if (data?.checkoutSession?.url) {
+				window.location.href = data.checkoutSession.url;
 			}
 		} catch (error) {
 			toast.error(
@@ -112,15 +117,19 @@ export function SubscriptionSettings() {
 	const handleUpgradePlan = async (plan) => {
 		try {
 			setCreatingCheckout(true);
-			const result = await createCheckoutSession({
+			const { success, data, error } = await createCheckoutSession({
 				userId: user.id,
 				email: user.email,
 				priceId: plan.priceId, // In a real app, you'd have separate price IDs
 			});
 
+			if (error || !success) {
+				throw new Error(error || "Failed to create checkout session");
+			}
+
 			// Redirect to checkout
-			if (result.data?.checkoutSession?.url) {
-				window.location.href = result.data.checkoutSession.url;
+			if (data?.checkoutSession?.url) {
+				window.location.href = data.checkoutSession.url;
 			}
 		} catch (error) {
 			toast.error(
