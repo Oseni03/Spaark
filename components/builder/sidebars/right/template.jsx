@@ -190,7 +190,7 @@ export function TemplateSection() {
 						</div>
 						<TooltipProvider>
 							<Tooltip>
-								<TooltipTrigger>
+								<TooltipTrigger asChild>
 									<Switch
 										checked={portfolio?.isLive}
 										onCheckedChange={toggleLiveStatus}

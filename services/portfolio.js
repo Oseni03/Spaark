@@ -82,6 +82,19 @@ export async function createPortfolio(data) {
 	});
 }
 
+export async function getPortfolioSlug(customDomain) {
+	try {
+		const portfolio = await prisma.portfolio.findFirst({
+			where: { isLive: true, customDomain },
+			select: { slug: true },
+		});
+		return portfolio.slug || null;
+	} catch (error) {
+		logger.error("Error fetching portfolio slug:", error);
+		return null;
+	}
+}
+
 // Helper function to filter valid basics fields
 const getValidBasicsUpdateFields = (basics) => {
 	const validFields = [

@@ -27,15 +27,19 @@ export default async function PortfolioLayout({ params, children }) {
 		logger.info("Portfolio slug: ", portfolioSlug);
 
 		// Fetch portfolio by slug
-		const portfolioResult = await getPortfolioBySlug(portfolioSlug);
-		logger.info("Portfolio result: ", portfolioResult);
+		const {
+			data: portfolio,
+			success,
+			error,
+		} = await getPortfolioBySlug(portfolioSlug);
 
-		if (!portfolioResult.success || !portfolioResult.data) {
+		if (!success || !portfolio || error) {
+			logger.error(
+				`Error fetching portfolio for slug ${portfolioSlug}: `,
+				error
+			);
 			return NotFound();
 		}
-
-		// Transform the portfolio data
-		const portfolio = portfolioResult.data;
 
 		// Extract portfolio details for meta tags
 		const name = portfolio.basics?.name || portfolioSlug;

@@ -43,7 +43,7 @@ export async function middleware(request) {
 	const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
 	const isProduction = process.env.NODE_ENV === "production";
 
-	let domain = isProduction
+	const domain = isProduction
 		? hostname.replace(`.${rootDomain}`, "")
 		: hostname
 				.split(":")[0]
@@ -70,11 +70,16 @@ export async function middleware(request) {
 
 	if (isCustomDomain) {
 		// Rewrite to a special catch-all route, passing the custom domain as a query param
-		const subdomain = isProduction
-			? hostname.replace(`.${rootDomain}`, "")
-			: hostname.replace(".localhost:3000", "");
-		const rewrittenUrl = new URL(`/${subdomain}${pathname}`, request.url);
-		rewrittenUrl.searchParams.set("domain", subdomain);
+		const portfolioSlug = await getPortfolioSlug(hostname);
+
+		if (!portfolioSlug) {
+			// Return 404 or redirect to main domain?
+			return new NextResponse("Domain not found", { status: 404 });
+		}
+		const rewrittenUrl = new URL(
+			`/${portfolioSlug}${pathname}`,
+			request.url
+		);
 		return NextResponse.rewrite(rewrittenUrl);
 	}
 
