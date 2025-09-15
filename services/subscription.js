@@ -148,11 +148,11 @@ export async function createFreeSubscription(userId) {
 	});
 }
 
-export async function createCheckoutSession({ userId, email, priceId }) {
+export async function createCheckoutSession({ userId, email, products }) {
 	try {
-		if (!userId || !email || !priceId) {
+		if (!userId || !email || !products.length > 0) {
 			throw new Error(
-				"User ID, user email and Price ID are required",
+				"User ID, user email and products are required",
 				400,
 				"MISSING_PARAMS"
 			);
@@ -160,7 +160,7 @@ export async function createCheckoutSession({ userId, email, priceId }) {
 
 		const checkoutSession = await polarClient.checkouts.create({
 			customerExternalId: userId,
-			products: [priceId],
+			products,
 			customerEmail: email,
 			successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=billing&success=true`,
 		});

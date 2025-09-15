@@ -97,6 +97,7 @@
 		"redux-thunk": "^3.1.0",
 		"resend": "^4.0.1",
 		"sonner": "^1.7.0",
+		"strip-ansi": "^7.1.2",
 		"styled-components": "^6.1.14",
 		"svix": "^1.42.0",
 		"tailwind-merge": "^2.6.0",

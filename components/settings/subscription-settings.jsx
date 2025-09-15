@@ -59,7 +59,6 @@ export function SubscriptionSettings() {
 	const [isCreatingCheckout, setCreatingCheckout] = useState(false);
 
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
-	const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 	const [selectedPlan, setSelectedPlan] = useState(null);
 
 	const user = !isPending ? data?.user : null;
@@ -94,7 +93,7 @@ export function SubscriptionSettings() {
 			const { success, data, error } = await createCheckoutSession({
 				userId: user.id,
 				email: user.email,
-				priceId: subscription.productId,
+				products: [subscription.productId],
 			});
 
 			if (error || !success) {
@@ -114,13 +113,17 @@ export function SubscriptionSettings() {
 		}
 	};
 
-	const handleUpgradePlan = async (plan) => {
+	const handleUpgradePlan = async () => {
 		try {
 			setCreatingCheckout(true);
 			const { success, data, error } = await createCheckoutSession({
 				userId: user.id,
 				email: user.email,
-				priceId: plan.priceId, // In a real app, you'd have separate price IDs
+				products: [
+					SUBSCRIPTION_PLANS.FREE.monthly.priceId,
+					SUBSCRIPTION_PLANS.BASIC.monthly.priceId,
+					SUBSCRIPTION_PLANS.PRO.monthly.priceId,
+				],
 			});
 
 			if (error || !success) {
@@ -242,9 +245,7 @@ export function SubscriptionSettings() {
 									</Button>
 								)}
 
-								<Button
-									onClick={() => setShowUpgradeDialog(true)}
-								>
+								<Button onClick={handleUpgradePlan}>
 									Change Plan
 								</Button>
 							</div>
@@ -258,9 +259,7 @@ export function SubscriptionSettings() {
 								<p className="text-muted-foreground mb-4">
 									You&rsquo;re currently on the free plan.
 								</p>
-								<Button
-									onClick={() => setShowUpgradeDialog(true)}
-								>
+								<Button onClick={handleUpgradePlan}>
 									Upgrade Now
 								</Button>
 							</div>
@@ -394,128 +393,6 @@ export function SubscriptionSettings() {
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 							)}
 							Cancel Subscription
-						</Button>
-					</div>
-				</DialogContent>
-			</Dialog>
-
-			{/* Upgrade Dialog */}
-			<Dialog
-				open={showUpgradeDialog}
-				onOpenChange={setShowUpgradeDialog}
-			>
-				<DialogContent className="max-w-4xl">
-					<DialogHeader>
-						<DialogTitle>Choose Your Plan</DialogTitle>
-						<DialogDescription>
-							Select the plan that best fits your needs. You can
-							change or cancel anytime.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 py-4">
-						{plans.map((planType) => {
-							const plan =
-								SUBSCRIPTION_PLANS[planType]["monthly"];
-							const Icon = planIcons[planType];
-							const isCurrentPlan =
-								subscription?.productId === plan.priceId ||
-								false;
-
-							return (
-								<Card
-									key={planType}
-									className={`relative ${selectedPlan?.slug === plan.slug ? "border-primary ring-2 ring-primary/20" : ""} ${isCurrentPlan ? "border-muted-foreground" : ""}`}
-								>
-									{isCurrentPlan && (
-										<Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
-											Current Plan
-										</Badge>
-									)}
-
-									<CardHeader className="text-center pb-2">
-										{Icon && (
-											<div className="mx-auto p-2 rounded-lg bg-primary/10 w-fit">
-												<Icon className="h-6 w-6 text-primary" />
-											</div>
-										)}
-										<CardTitle className="text-lg">
-											{plan.name}
-										</CardTitle>
-										<div className="text-2xl font-bold">
-											${plan.price}
-											<span className="text-sm font-normal text-muted-foreground">
-												/{plan.interval}
-											</span>
-										</div>
-									</CardHeader>
-
-									<CardContent className="space-y-3">
-										<ul className="space-y-2 text-sm">
-											{plan.features.map(
-												(feature, index) => (
-													<li
-														key={index}
-														className="flex items-center space-x-2"
-													>
-														<Check className="h-4 w-4 text-primary flex-shrink-0" />
-														<span>{feature}</span>
-													</li>
-												)
-											)}
-										</ul>
-
-										{!isCurrentPlan && (
-											<Button
-												className="w-full"
-												variant={
-													selectedPlan?.slug ===
-													plan.slug
-														? "default"
-														: "outline"
-												}
-												onClick={() => {
-													setSelectedPlan(plan);
-													if (plan.slug === "free") {
-														// Handle downgrade to free
-														setShowCancelDialog(
-															true
-														);
-														setShowUpgradeDialog(
-															false
-														);
-													} else {
-														handleUpgradePlan(plan);
-													}
-												}}
-												disabled={isCreatingCheckout}
-											>
-												{isCreatingCheckout &&
-													selectedPlan?.slug ===
-														plan.slug && (
-														<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-													)}
-												{plan.slug === "free"
-													? "Downgrade"
-													: selectedPlan?.slug ===
-														  plan.slug
-														? "Selected"
-														: "Select Plan"}
-											</Button>
-										)}
-									</CardContent>
-								</Card>
-							);
-						})}
-					</div>
-					<div className="flex justify-end space-x-2">
-						<Button
-							variant="outline"
-							onClick={() => {
-								setShowUpgradeDialog(false);
-								setSelectedPlan(null);
-							}}
-						>
-							Cancel
 						</Button>
 					</div>
 				</DialogContent>
