@@ -11,6 +11,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { ProfileUpdate } from "../forms/profile-update";
+import { EmailUpdate } from "../forms/email-update";
 
 export function ProfileSettings() {
 	const [error, setError] = useState(null);
@@ -56,6 +57,8 @@ export function ProfileSettings() {
 							</p>
 						</div>
 					</div> */}
+
+					<EmailUpdate setError={setError} />
 
 					<ProfileUpdate setError={setError} />
 				</CardContent>
