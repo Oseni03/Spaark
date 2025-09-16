@@ -5,6 +5,6 @@
 			"use": "@vercel/next"
 		}
 	],
-	"buildCommand": "prisma generate && next build",
-	"installCommand": "npm install"
+	"buildCommand": "prisma generate && yarn install && yarn build",
+	"installCommand": "yarn install"
 }
