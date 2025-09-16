@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
+import { getPortfolioSlug } from "./services/portfolio";
 
 const isProtectedRoute = (pathname) => {
 	return pathname.startsWith("/builder") || pathname.startsWith("/dashboard");
