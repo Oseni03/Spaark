@@ -22,76 +22,50 @@ export async function getUserPublishedArticlesCount(userId) {
 
 export async function getSubscriptionDetails(userId) {
 	try {
-		const userSubscription = await prisma.subscription.findFirst({
-			where: {
-				userId,
-				status: "active" /* or your active status */,
-			},
+		// Fetch the user's subscription (one-to-one, so use findUnique)
+		let userSubscription = await prisma.subscription.findUnique({
+			where: { userId },
 		});
 
+		// If no subscription exists, create a free one
 		if (!userSubscription) {
-			const plan = SUBSCRIPTION_PLANS.FREE.monthly;
-			const now = new Date();
-			const oneMonthLater = new Date(now);
-			oneMonthLater.setMonth(now.getMonth() + 1);
-			return {
-				id: "free-subscription",
-				productId: plan.priceId || "free-product-id",
-				status: "active",
-				amount: 0,
-				currency: "usd",
-				recurringInterval: plan.interval,
-				currentPeriodStart: now,
-				currentPeriodEnd: oneMonthLater,
-				cancelAtPeriodEnd: false,
-				canceledAt: null,
-				organizationId: null,
-				blogEnabled: plan.blogEnabled,
-				blogLimit: plan.blogLimit || null,
-				portfolioLimit: plan.portfolioLimit,
-			};
+			await createFreeSubscription(userId);
+			userSubscription = await prisma.subscription.findUnique({
+				where: { userId },
+			});
+			// If still null (unlikely), log and throw
+			if (!userSubscription) {
+				logger.error("Failed to create free subscription for user", {
+					userId,
+				});
+				throw new Error("Unable to create free subscription");
+			}
 		}
 
+		// Return subscription details, mapping to desired output
 		return {
 			id: userSubscription.id,
-			productId: userSubscription.productId,
+			productId: userSubscription.productId ?? "free-product-id",
 			status: userSubscription.status,
-			amount: userSubscription.amount,
-			currency: userSubscription.currency,
-			recurringInterval: userSubscription.recurringInterval,
-			currentPeriodStart: userSubscription.currentPeriodStart,
-			currentPeriodEnd: userSubscription.currentPeriodEnd,
+			amount: userSubscription.amount ?? 0,
+			currency: userSubscription.currency ?? "usd",
+			recurringInterval: userSubscription.recurringInterval ?? "monthly",
+			currentPeriodStart:
+				userSubscription.currentPeriodStart ?? new Date(),
+			currentPeriodEnd:
+				userSubscription.currentPeriodEnd ??
+				new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
 			cancelAtPeriodEnd: userSubscription.cancelAtPeriodEnd,
 			canceledAt: userSubscription.canceledAt,
-			organizationId: null,
+			isFree: userSubscription.isFree,
 			blogEnabled: userSubscription.blogEnabled,
-			blogLimit: userSubscription.blogLimit,
+			blogLimit: userSubscription.blogLimit ?? null,
 			portfolioLimit: userSubscription.portfolioLimit,
+			organizationId: null, // Kept for compatibility; remove if unused
 		};
 	} catch (error) {
-		console.error("Error fetching subscription details:", error);
-		const plan = SUBSCRIPTION_PLANS.FREE.monthly;
-		const now = new Date();
-		const oneMonthLater = new Date(now);
-		oneMonthLater.setMonth(now.getMonth() + 1);
-		return {
-			id: "free-subscription",
-			productId: plan.priceId || "free-product-id",
-			status: "active",
-			amount: 0,
-			currency: "usd",
-			recurringInterval: plan.interval,
-			currentPeriodStart: now,
-			currentPeriodEnd: oneMonthLater,
-			cancelAtPeriodEnd: false,
-			canceledAt: null,
-			organizationId: null,
-			blogEnabled: plan.blogEnabled,
-			blogLimit: plan.blogLimit || null,
-			portfolioLimit: plan.portfolioLimit,
-			error: "Failed to load subscription details",
-			errorType: "GENERAL",
-		};
+		logger.error("Error fetching subscription details", { userId, error });
+		throw new Error("Failed to load subscription details"); // Let caller handle
 	}
 }
 
@@ -233,24 +207,23 @@ export async function processSubscriptionEvent(tx, eventType, data, userId) {
 		userId,
 	});
 
-	// STEP 1: Handle existing subscription (simplified: at most one)
+	// Handle existing subscription for create/active
 	if (
 		eventType === "subscription.created" ||
 		eventType === "subscription.active"
 	) {
-		await handleExistingSubscription(tx, data.id, userId); // Now handles single existing
+		await handleExistingSubscription(tx, data.id, userId);
 	}
 
-	// STEP 2: Build data (added isFree: false for paid)
+	// Build data with plan-specific fields
 	const subscriptionData = buildSubscriptionData(data, userId);
-	subscriptionData.isFree = false;
 	subscriptionData.lastEventType = eventType;
 	subscriptionData.lastEventAt = new Date();
 
-	// STEP 3: Upsert (DB unique enforces one-to-one)
+	// Upsert subscription
 	await upsertSubscription(tx, data.id, subscriptionData, userId);
 
-	// STEP 4: Side effects (unchanged, but async if possible)
+	// Handle side effects
 	await handleEventSideEffects(eventType, data, userId);
 
 	logger.info(`✅ Processed ${eventType} for ${data.id}`);
@@ -281,12 +254,21 @@ async function handleExistingSubscription(tx, newSubscriptionId, userId) {
 
 // Build data (unchanged, but with safe defaults)
 function buildSubscriptionData(data, userId) {
+	// Lookup plan based on product_id (default to FREE if missing/invalid)
+	const planKey =
+		data.product_id && SUBSCRIPTION_PLANS[data.product_id.split("-")[0]]
+			? data.product_id.split("-")[0]
+			: "FREE";
+	const plan =
+		SUBSCRIPTION_PLANS[planKey]?.monthly || SUBSCRIPTION_PLANS.FREE.monthly;
+
 	return {
 		createdAt: safeParseDate(data.created_at) || new Date(),
 		updatedAt: safeParseDate(data.modified_at) || new Date(),
 		amount: data.amount ?? 0,
-		currency: data.currency ?? "USD",
-		recurringInterval: data.recurring_interval || "monthly",
+		currency: data.currency ?? "usd",
+		recurringInterval:
+			data.recurring_interval || plan.interval || "monthly",
 		status: data.status,
 		currentPeriodStart: safeParseDate(data.current_period_start),
 		currentPeriodEnd: safeParseDate(data.current_period_end),
@@ -296,7 +278,7 @@ function buildSubscriptionData(data, userId) {
 		endsAt: safeParseDate(data.ends_at),
 		endedAt: safeParseDate(data.ended_at),
 		customerId: data.customer_id,
-		productId: data.product_id,
+		productId: data.product_id ?? plan.priceId ?? "free-product-id",
 		discountId: data.discount_id ?? null,
 		customerCancellationReason: data.customer_cancellation_reason ?? null,
 		customerCancellationComment: data.customer_cancellation_comment ?? null,
@@ -305,6 +287,12 @@ function buildSubscriptionData(data, userId) {
 			? JSON.stringify(data.custom_field_data)
 			: null,
 		userId: userId,
+		isFree: data.product_id ? false : true, // Free if no product_id
+		portfolioLimit: plan.portfolioLimit ?? 1,
+		blogEnabled: plan.blogEnabled ?? false,
+		blogLimit: plan.blogLimit ?? null,
+		customPortfolioLimit: null, // Not in plan; kept for flexibility
+		customArticleLimit: null, // Not in plan; kept for flexibility
 	};
 }
 
