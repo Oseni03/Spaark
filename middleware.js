@@ -90,4 +90,5 @@ export async function middleware(request) {
 
 export const config = {
 	matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+	runtime: "nodejs", // Add this to switch to Node.js runtime
 };
