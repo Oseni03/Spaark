@@ -10,7 +10,10 @@ export default async function sitemap() {
 	const portfolios = await getAllPortfolios();
 	const blogPosts = (await client.fetch(postSlugsQuery)) || [];
 
-	const portfolioSitemapEntries = portfolios?.data?.map((portfolio) => ({
+	// ensure we always have an array
+	const portfolioList = portfolios?.data || [];
+
+	const portfolioSitemapEntries = portfolioList.map((portfolio) => ({
 		url: portfolio.customDomain
 			? portfolio.customDomain
 			: `https://${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`,
@@ -19,21 +22,21 @@ export default async function sitemap() {
 		priority: 0.9,
 	}));
 
-	// Fetch and process blog entries for each portfolio
+	// Fetch and process blog entries for each portfolio (use empty array when no portfolios)
 	const blogsSitemapEntries = await Promise.all(
-		portfolios.data?.map(async (portfolio) => {
+		portfolioList.map(async (portfolio) => {
 			const blogs = await getBlogPosts(portfolio.id);
-			return blogs.data?.map((blog) => ({
+			return (blogs.data || []).map((blog) => ({
 				url: portfolio.customDomain
 					? `${portfolio.customDomain}/blog/post/${blog.slug}`
 					: `https://${portfolio.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/blog/post/${blog.slug}`,
 				lastModified: new Date(
-					blog.updatedAt || new Date()
+					blog.updatedAt || new Date(),
 				).toISOString(),
 				changeFrequency: "daily",
 				priority: 0.9,
 			}));
-		})
+		}),
 	);
 
 	// Flatten the array of arrays
